@@ -5,7 +5,7 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X
 } from 'lucide-react';
 import { cn } from './lib/utils';
 
@@ -40,6 +40,9 @@ const INVENTARIO = [
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
+  const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
@@ -63,10 +66,10 @@ export default function App() {
            </button>
         </div>
         <nav className="p-4 space-y-1">
-          <NavItem icon={<LayoutDashboard />} label="Dashboard" active isOpen={sidebarOpen} />
-          <NavItem icon={<Package />} label="Estoque" isOpen={sidebarOpen} />
-          <NavItem icon={<Box />} label="Kits & Produtos" isOpen={sidebarOpen} />
-          <NavItem icon={<FileText />} label="Relatórios" isOpen={sidebarOpen} />
+          <NavItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === 'dashboard'} isOpen={sidebarOpen} onClick={() => setActiveTab('dashboard')} />
+          <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
+          <NavItem icon={<Box />} label="Kits & Produtos" active={activeTab === 'kits'} isOpen={sidebarOpen} onClick={() => setActiveTab('kits')} />
+          <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
         </nav>
         
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white">
@@ -122,17 +125,19 @@ export default function App() {
         {/* DASHBOARD CONTENT */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+          {activeTab === 'dashboard' && (
+            <div className="animate-in fade-in duration-300">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Visão Geral do Estoque</h1>
               <p className="text-sm text-gray-500 mt-1">Acompanhe as movimentações e o saldo atual.</p>
             </div>
             <div className="flex space-x-3 w-full md:w-auto">
-               <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
+               <button onClick={() => setIsSaidaModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
                  <ArrowUpFromLine className="w-4 h-4 text-red-500" />
                  <span>Registrar Saída</span>
                </button>
-               <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
+               <button onClick={() => setIsEntradaModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
                  <ArrowDownToLine className="w-4 h-4" />
                  <span>Registrar Entrada</span>
                </button>
@@ -292,8 +297,96 @@ export default function App() {
               </table>
             </div>
           </div>
+            </div>
+          )}
+
+          {activeTab === 'estoque' && (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
+               <Package className="w-16 h-16 mb-4 text-gray-300" />
+               <h2 className="text-xl font-semibold text-gray-700">Módulo de Estoque</h2>
+               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Aqui você poderá gerenciar as movimentações, dar baixas manuais e fazer auditorias.</p>
+            </div>
+          )}
+          {activeTab === 'kits' && (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
+               <Box className="w-16 h-16 mb-4 text-gray-300" />
+               <h2 className="text-xl font-semibold text-gray-700">Composição de Kits e Produtos</h2>
+               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Cadastre a estrutura analítica dos kits, variantes de dimensões e crie novos produtos.</p>
+            </div>
+          )}
+          {activeTab === 'relatorios' && (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
+               <FileText className="w-16 h-16 mb-4 text-gray-300" />
+               <h2 className="text-xl font-semibold text-gray-700">Relatórios Gerenciais</h2>
+               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Gere resumos em PDF e planilhas sobre o consumo, previsões de compra e valor em estoque.</p>
+            </div>
+          )}
           
         </div>
+
+        {/* MODALS */}
+        <Modal isOpen={isEntradaModalOpen} onClose={() => setIsEntradaModalOpen(false)} title="Registrar Entrada">
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Entrada registrada com sucesso!"); setIsEntradaModalOpen(false); }}>
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Produto / Kit</label>
+               <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10">
+                 <option>Kit Porta Interna Pinho 80x210</option>
+                 <option>Porta Lisa Jequitibá 80x210</option>
+                 <option>Aduela Eucalipto 15cm</option>
+               </select>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                   <input type="number" min="1" defaultValue="1" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                   <input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+                </div>
+             </div>
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor / Nota Fiscal</label>
+               <input type="text" placeholder="Nome do fornecedor ou nº NF" required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+             </div>
+             <div className="pt-4 flex justify-end space-x-3">
+               <button type="button" onClick={() => setIsEntradaModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+               <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-brand-green hover:bg-brand-green-dark rounded-lg transition-colors">Confirmar Entrada</button>
+             </div>
+          </form>
+        </Modal>
+
+        <Modal isOpen={isSaidaModalOpen} onClose={() => setIsSaidaModalOpen(false)} title="Registrar Saída">
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Saída registrada com sucesso!"); setIsSaidaModalOpen(false); }}>
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Produto / Kit</label>
+               <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10">
+                 <option>Kit Porta Interna Pinho 80x210</option>
+                 <option>Porta Lisa Jequitibá 80x210</option>
+                 <option>Aduela Eucalipto 15cm</option>
+               </select>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                   <input type="number" min="1" defaultValue="1" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+                </div>
+                <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                   <input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+                </div>
+             </div>
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">Destino / Ordem de Serviço</label>
+               <input type="text" placeholder="Nome do cliente ou nº OS" required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+             </div>
+             <div className="pt-4 flex justify-end space-x-3">
+               <button type="button" onClick={() => setIsSaidaModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+               <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">Confirmar Saída</button>
+             </div>
+          </form>
+        </Modal>
+
       </main>
     </div>
   );
@@ -301,10 +394,30 @@ export default function App() {
 
 // --- SUBCOMPONENTS ---
 
-function NavItem({ icon, label, isOpen, active, className }: { icon: React.ReactNode, label: string, isOpen: boolean, active?: boolean, className?: string }) {
+function Modal({ isOpen, onClose, title, children }: { isOpen: boolean, onClose: () => void, title: string, children: React.ReactNode }) {
+  if (!isOpen) return null;
   return (
-    <a href="#" className={cn(
-      "flex items-center px-3 py-2.5 rounded-lg transition-colors overflow-hidden group",
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+       <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose}></div>
+       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+          <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+             <h3 className="font-semibold text-lg text-gray-800">{title}</h3>
+             <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors focus:outline-none">
+               <X className="w-5 h-5"/>
+             </button>
+          </div>
+          <div className="p-6">
+             {children}
+          </div>
+       </div>
+    </div>
+  )
+}
+
+function NavItem({ icon, label, isOpen, active, className, onClick }: { icon: React.ReactNode, label: string, isOpen: boolean, active?: boolean, className?: string, onClick?: () => void }) {
+  return (
+    <button onClick={(e) => { e.preventDefault(); onClick?.(); }} className={cn(
+      "w-full text-left flex items-center px-3 py-2.5 rounded-lg transition-colors overflow-hidden group",
       active 
         ? "bg-brand-green/10 text-brand-green" 
         : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
@@ -317,7 +430,7 @@ function NavItem({ icon, label, isOpen, active, className }: { icon: React.React
         {React.cloneElement(icon as React.ReactElement, { className: 'w-5 h-5' })}
       </div>
       {isOpen && <span className="ml-3 font-medium text-sm whitespace-nowrap">{label}</span>}
-    </a>
+    </button>
   )
 }
 
