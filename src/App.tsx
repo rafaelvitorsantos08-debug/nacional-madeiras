@@ -1,0 +1,348 @@
+import React, { useState } from 'react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from 'recharts';
+import { 
+  Search, Bell, Menu, 
+  Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight
+} from 'lucide-react';
+import { cn } from './lib/utils';
+
+// --- MOCK DATA ---
+const CHART_DATA = [
+  { name: 'Jan', entradas: 400, saidas: 240 },
+  { name: 'Fev', entradas: 300, saidas: 139 },
+  { name: 'Mar', entradas: 800, saidas: 980 },
+  { name: 'Abr', entradas: 650, saidas: 390 },
+  { name: 'Mai', entradas: 780, saidas: 640 },
+];
+
+const ULTIMAS_ENTRADAS = [
+  { id: 1, item: 'Kit Porta Interna Pinho', data: '12/05/2026', qtd: 50, fornecedor: 'Madeireira ABC' },
+  { id: 2, item: 'Kit Porta Lisa Jequitibá', data: '11/05/2026', qtd: 120, fornecedor: 'Sul Madeiras' },
+  { id: 3, item: 'Aduela Eucalipto 15cm', data: '10/05/2026', qtd: 200, fornecedor: 'Madeireira XYZ' },
+];
+
+const ULTIMAS_SAIDAS = [
+  { id: 1, item: 'Kit Porta Externa Angelim', data: '12/05/2026', qtd: 15, destino: 'Obra Central' },
+  { id: 2, item: 'Kit Porta Interna Pinho', data: '10/05/2026', qtd: 30, destino: 'Revenda XPTO' },
+  { id: 3, item: 'Caixa de Dobradiça', data: '09/05/2026', qtd: 250, destino: 'Loja Varejo 2' },
+];
+
+const INVENTARIO = [
+  { id: '1001', desc: 'Kit Porta Interna Média', dimensoes: '80x210', material: 'Pinho', espessura: '35', estoque: 450, status: 'OK' },
+  { id: '1002', desc: 'Kit Porta Estreita', dimensoes: '70x210', material: 'MDF / Primer', espessura: '35', estoque: 12, status: 'Crítico' },
+  { id: '1003', desc: 'Kit Porta Larga', dimensoes: '90x210', material: 'Angelim', espessura: '40', estoque: 50, status: 'Baixo' },
+  { id: '1004', desc: 'Porta Lisa', dimensoes: '80x210', material: 'Jequitibá', espessura: '35', estoque: 280, status: 'OK' },
+  { id: '1005', desc: 'Porta Pivotante', dimensoes: '120x210', material: 'Itaúba', espessura: '45', estoque: 5, status: 'Crítico' },
+];
+
+export default function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
+      
+      {/* SIDEBAR */}
+      <aside className={cn(
+        "bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0 z-20",
+        sidebarOpen ? "w-64" : "w-20"
+      )}>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+           {sidebarOpen ? (
+              <div className="flex flex-col">
+                <span className="font-bold text-brand-green text-sm leading-tight uppercase">Nacional Madeiras</span>
+                <span className="font-bold text-gray-500 text-xs tracking-widest uppercase">Kit Porta</span>
+              </div>
+           ) : (
+             <div className="w-10 h-10 bg-brand-green text-white rounded font-bold flex items-center justify-center text-xl">NM</div>
+           )}
+           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-600 focus:outline-none hidden md:block">
+             <Menu className="w-5 h-5" />
+           </button>
+        </div>
+        <nav className="p-4 space-y-1">
+          <NavItem icon={<LayoutDashboard />} label="Dashboard" active isOpen={sidebarOpen} />
+          <NavItem icon={<Package />} label="Estoque" isOpen={sidebarOpen} />
+          <NavItem icon={<Box />} label="Kits & Produtos" isOpen={sidebarOpen} />
+          <NavItem icon={<FileText />} label="Relatórios" isOpen={sidebarOpen} />
+        </nav>
+        
+        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white">
+           <NavItem icon={<Settings />} label="Configurações" isOpen={sidebarOpen} />
+           <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        {/* HEADER */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
+          <div className="flex md:hidden items-center">
+             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mr-4 text-gray-500">
+               <Menu className="w-6 h-6" />
+             </button>
+             <div className="flex flex-col">
+                <span className="font-bold text-brand-green text-sm leading-tight uppercase">Nacional Madeiras</span>
+              </div>
+          </div>
+
+          <div className="hidden md:flex items-center flex-1 max-w-md">
+            <div className="relative w-full">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <Search className="w-4 h-4 text-gray-400" />
+              </span>
+              <input 
+                type="text" 
+                placeholder="Buscar produtos, datas ou códigos..."
+                className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg text-sm focus:border-brand-green focus:bg-white focus:ring-2 focus:ring-brand-green/20 transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+            </button>
+            <div className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green font-semibold border border-brand-green/20">
+                RV
+              </div>
+              <div className="hidden md:block text-sm text-left">
+                <p className="font-medium text-gray-700 leading-none">Rafael Vitor</p>
+                <p className="text-xs text-gray-500 mt-1">Administrador</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* DASHBOARD CONTENT */}
+        <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Visão Geral do Estoque</h1>
+              <p className="text-sm text-gray-500 mt-1">Acompanhe as movimentações e o saldo atual.</p>
+            </div>
+            <div className="flex space-x-3 w-full md:w-auto">
+               <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
+                 <ArrowUpFromLine className="w-4 h-4 text-red-500" />
+                 <span>Registrar Saída</span>
+               </button>
+               <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
+                 <ArrowDownToLine className="w-4 h-4" />
+                 <span>Registrar Entrada</span>
+               </button>
+            </div>
+          </div>
+
+          {/* KPI CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <KpiCard 
+              title="Total de Itens em Estoque" 
+              value="5.420" 
+              icon={<Package className="text-blue-500" />} 
+              bgColor="bg-blue-50"
+            />
+            <KpiCard 
+              title="Entradas do Mês" 
+              value="+780" 
+              subtitle="kits"
+              icon={<ArrowDownToLine className="text-brand-green" />} 
+              bgColor="bg-green-50"
+              trend="up"
+            />
+            <KpiCard 
+              title="Saídas do Mês" 
+              value="-640" 
+              subtitle="kits"
+              icon={<ArrowUpFromLine className="text-red-500" />} 
+              bgColor="bg-red-50"
+              trend="down"
+            />
+            <KpiCard 
+              title="Alertas de Baixo Estoque" 
+              value="12" 
+              subtitle="itens"
+              icon={<AlertTriangle className="text-yellow-600" />} 
+              bgColor="bg-yellow-50"
+              trend="neutral"
+              alert
+            />
+          </div>
+
+          {/* MAIN CHARTS & LISTS */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* CHART */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+              <h2 className="text-md font-semibold text-gray-800 mb-6">Tendência de Movimentação</h2>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={CHART_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
+                    <Tooltip 
+                      cursor={{fill: '#F3F4F6'}}
+                      contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                    />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
+                    <Bar dataKey="entradas" name="Entradas" fill="var(--color-brand-green)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="saidas" name="Saídas" fill="#9CA3AF" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* LOGS */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+               <div className="border-b border-gray-100">
+                  <div className="flex">
+                    <button className="flex-1 py-3 text-sm font-medium text-brand-green border-b-2 border-brand-green uppercase tracking-wide">Últimas Entradas</button>
+                    <button className="flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 uppercase tracking-wide">Últimas Saídas</button>
+                  </div>
+               </div>
+               <div className="flex-1 overflow-auto p-2">
+                 <ul className="divide-y divide-gray-50">
+                    {ULTIMAS_ENTRADAS.map((log) => (
+                      <li key={log.id} className="p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer group">
+                        <div className="flex justify-between items-start mb-1">
+                           <span className="font-medium text-sm text-gray-800 line-clamp-1 pr-2">{log.item}</span>
+                           <span className="text-xs font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full whitespace-nowrap">+{log.qtd}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-gray-500">
+                           <span className="flex items-center"><Box className="w-3 h-3 mr-1"/> {log.fornecedor}</span>
+                           <span>{log.data}</span>
+                        </div>
+                      </li>
+                    ))}
+                 </ul>
+               </div>
+               <div className="p-3 border-t border-gray-100 text-center">
+                 <a href="#" className="text-sm font-medium text-brand-green hover:underline">Ver todo o histórico</a>
+               </div>
+            </div>
+          </div>
+
+          {/* INVENTORY TABLE */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+               <div>
+                  <h2 className="text-md font-semibold text-gray-800">Inventário de Kits e Detalhes de Dimensões</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Visão detalhada do estoque por especificação técnica</p>
+               </div>
+               <button className="text-gray-400 hover:text-gray-600"><Settings className="w-5 h-5"/></button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm whitespace-nowrap">
+                <thead>
+                  <tr className="bg-gray-50/80 text-gray-500 border-b border-gray-200">
+                    <th className="px-6 py-3 font-medium rounded-tl-lg">Item</th>
+                    <th className="px-6 py-3 font-medium">Dimensões (LxH cm)</th>
+                    <th className="px-6 py-3 font-medium">Material</th>
+                    <th className="px-6 py-3 font-medium text-center">Espessura</th>
+                    <th className="px-6 py-3 font-medium text-right">Estoque Atual</th>
+                    <th className="px-6 py-3 font-medium text-center">Status</th>
+                    <th className="px-6 py-3 font-medium rounded-tr-lg w-10"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {INVENTARIO.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-3">
+                           <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                              {/* Placeholder for real image */}
+                              <Box className="w-5 h-5 text-gray-400" />
+                           </div>
+                           <div>
+                             <p className="font-medium text-gray-800">{item.desc}</p>
+                             <p className="text-xs text-gray-400">cód: {item.id}</p>
+                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-gray-600 bg-gray-50/30">{item.dimensoes}</td>
+                      <td className="px-6 py-4 text-gray-600">{item.material}</td>
+                      <td className="px-6 py-4 text-center text-gray-600">{item.espessura}mm</td>
+                      <td className="px-6 py-4 text-right font-medium text-gray-900">{item.estoque.toLocaleString()}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={cn(
+                          "inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border",
+                          item.status === 'OK' && "bg-green-50 text-brand-green border-green-200",
+                          item.status === 'Baixo' && "bg-yellow-50 text-yellow-700 border-yellow-200",
+                          item.status === 'Crítico' && "bg-red-50 text-red-700 border-red-200"
+                        )}>
+                          {item.status === 'OK' && <span className="w-1.5 h-1.5 rounded-full bg-brand-green mr-1.5"></span>}
+                          {item.status === 'Baixo' && <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 mr-1.5"></span>}
+                          {item.status === 'Crítico' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>}
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                         <button className="text-gray-400 hover:text-brand-green opacity-0 group-hover:opacity-100 transition-opacity">
+                           <ChevronRight className="w-5 h-5" />
+                         </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// --- SUBCOMPONENTS ---
+
+function NavItem({ icon, label, isOpen, active, className }: { icon: React.ReactNode, label: string, isOpen: boolean, active?: boolean, className?: string }) {
+  return (
+    <a href="#" className={cn(
+      "flex items-center px-3 py-2.5 rounded-lg transition-colors overflow-hidden group",
+      active 
+        ? "bg-brand-green/10 text-brand-green" 
+        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+      className
+    )}>
+      <div className={cn(
+        "flex-shrink-0 w-6 h-6 flex items-center justify-center",
+        active ? "text-brand-green" : "text-gray-500 group-hover:text-gray-700"
+      )}>
+        {React.cloneElement(icon as React.ReactElement, { className: 'w-5 h-5' })}
+      </div>
+      {isOpen && <span className="ml-3 font-medium text-sm whitespace-nowrap">{label}</span>}
+    </a>
+  )
+}
+
+function KpiCard({ title, value, subtitle, icon, bgColor, trend, alert }: any) {
+  return (
+    <div className={cn(
+      "bg-white p-5 rounded-xl border transition-all",
+      alert ? "border-yellow-300 shadow-sm shadow-yellow-100" : "border-gray-200 shadow-sm"
+    )}>
+      <div className="flex justify-between items-start">
+         <div className={cn("p-2 rounded-lg", bgColor)}>
+           {icon}
+         </div>
+         {trend === 'up' && <span className="flex items-center text-xs font-semibold text-brand-green bg-green-50 px-2 py-0.5 rounded-full"><ArrowUpFromLine className="w-3 h-3 mr-1 opacity-50"/> +12%</span>}
+         {trend === 'down' && <span className="flex items-center text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full"><ArrowDownToLine className="w-3 h-3 mr-1 opacity-50"/> -5%</span>}
+         {trend === 'neutral' && <span className="flex items-center text-xs font-semibold text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-full">Atenção</span>}
+      </div>
+      <div className="mt-4">
+        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+        <div className="flex items-baseline mt-1 space-x-1">
+          <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+          {subtitle && <span className="text-sm font-medium text-gray-500">{subtitle}</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
