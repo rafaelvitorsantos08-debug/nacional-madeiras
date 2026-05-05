@@ -45,11 +45,13 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
+      setStoredValue(prev => {
+        const valueToStore = value instanceof Function ? value(prev) : value;
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+        return valueToStore;
+      });
     } catch (error) {
       console.error(error);
     }
@@ -184,7 +186,7 @@ export function EstoqueModule() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.dimensao}</td>
-                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
                   <td className="px-6 py-4 text-center">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
@@ -203,7 +205,7 @@ export function EstoqueModule() {
                   </td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.largura} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.comprimento} mm</td>
-                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
                   <td className="px-6 py-4 text-center">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
@@ -223,7 +225,7 @@ export function EstoqueModule() {
                   <td className="px-6 py-4 text-center text-gray-600">{item.face} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.aba} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.espessura} mm</td>
-                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
                   <td className="px-6 py-4 text-center">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
@@ -250,8 +252,9 @@ export function EstoqueModule() {
           item={editingItem}
           type={activeSubTab}
           onSave={(newItem) => {
+            const estoqueNum = Number(newItem.estoque || 0);
             const getStatus = (estoque: number) => estoque > 50 ? 'OK' : (estoque > 20 ? 'Atenção' : 'Crítico');
-            const saveItem = { ...newItem, status: getStatus(Number(newItem.estoque)) };
+            const saveItem = { ...newItem, estoque: estoqueNum, status: getStatus(estoqueNum) };
 
             if (editingItem) {
               if (activeSubTab === 'portas') setPortas(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
