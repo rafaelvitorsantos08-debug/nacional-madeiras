@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X
 } from 'lucide-react';
 import { cn } from './lib/utils';
+import { EstoqueModule } from './components/EstoqueModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -301,11 +302,7 @@ export default function App() {
           )}
 
           {activeTab === 'estoque' && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
-               <Package className="w-16 h-16 mb-4 text-gray-300" />
-               <h2 className="text-xl font-semibold text-gray-700">Módulo de Estoque</h2>
-               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Aqui você poderá gerenciar as movimentações, dar baixas manuais e fazer auditorias.</p>
-            </div>
+            <EstoqueModule />
           )}
           {activeTab === 'kits' && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
