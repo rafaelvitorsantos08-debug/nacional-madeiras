@@ -46,115 +46,203 @@ export function ControleOperacaoModule() {
 
 // --- SUBMODULES ---
 
-function ControleSaidas() {
-  // Mock data to match "MATERIAIS ENVIADOS" Excel
-  // Dates from 01/05/2026 to 13/05/2026
-  const data = Array.from({length: 13}, (_, i) => {
-    const day = i + 1;
-    const date = new Date(2026, 4, day); // month 4 = May
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    let entrega1 = '';
-    let entrega2 = '';
-    let kits1 = 0, alizares1 = 0;
-    let kits2 = 0, alizares2 = 0;
-
-    if (!isWeekend) {
-      if (day === 4) { entrega1 = 'TEGRA CLARIS'; alizares1 = 452; entrega2 = 'TEGRA GAE'; kits2 = 22; alizares2 = 22; }
-      if (day === 5) { entrega1 = 'TEGRA CLARIS'; kits1 = 116; entrega2 = 'ISCOURI DOMUM'; kits2 = 5; alizares2 = 5; }
-      if (day === 6) { entrega1 = 'TEGRA CLARIS'; kits1 = 111; }
-    } else {
-      entrega1 = date.getDay() === 6 ? 'SABADO' : 'DOMINGO';
-      entrega2 = entrega1;
-    }
-
-    return {
-      date: date.toLocaleDateString('pt-BR'),
-      ds: DIAS_SEMANA[date.getDay()],
-      isWeekend,
-      entrega1, kits1, alizares1,
-      entrega2, kits2, alizares2
+function useLocalStorage<T>(key: string, initialValue: T) {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === "undefined") return initialValue;
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
     }
   });
 
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      setStoredValue(prev => {
+        const valueToStore = value instanceof Function ? value(prev) : value;
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+        return valueToStore;
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue] as const;
+}
+
+const MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+function ControleSaidas() {
+  const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
+  const [selecionadoMes, setSelecionadoMes] = useState(new Date().getMonth()); // 0-indexed
+  
+  // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
+  const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
+
+  const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const daysCount = getDaysInMonth(selecionadoAno, selecionadoMes);
+  const rows = Array.from({ length: daysCount }, (_, i) => {
+    const day = i + 1;
+    const date = new Date(selecionadoAno, selecionadoMes, day);
+    const dateStrKey = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStrDisplay = `${String(day).padStart(2, '0')}/${String(selecionadoMes + 1).padStart(2, '0')}/${selecionadoAno}`;
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    
+    return {
+      day,
+      dateStrKey,
+      dateStrDisplay,
+      ds: DIAS_SEMANA[date.getDay()],
+      isWeekend,
+      isSabado: date.getDay() === 6,
+      isDomingo: date.getDay() === 0,
+    };
+  });
+
+  const handleInputChange = (dateStrKey: string, field: string, value: string) => {
+    setMonthlyData(prev => ({
+      ...prev,
+      [dateStrKey]: {
+        ...(prev[dateStrKey] || {}),
+        [field]: value
+      }
+    }));
+  };
+
+  const renderInput = (row: any, field: string, className: string = "") => {
+    const val = monthlyData[row.dateStrKey]?.[field] || '';
+    if (row.isWeekend) return null; // weekends handled separately in JSX
+    
+    return (
+      <input
+        type="text"
+        value={val}
+        onChange={(e) => handleInputChange(row.dateStrKey, field, e.target.value)}
+        className={cn(
+          "w-full h-full min-h-[28px] px-1 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
+          className
+        )}
+      />
+    );
+  };
+
   return (
     <div className="flex-1 flex flex-col max-h-full">
-      <div className="p-4 border-b border-gray-200 bg-gray-50 lg:flex items-center justify-between">
-        <h2 className="font-semibold text-gray-700 flex items-center">
-          <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
-        </h2>
-        <div className="mt-3 lg:mt-0 flex gap-2">
-           <button className="flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50">
-             <Download className="w-4 h-4 mr-1"/> Exportar
-           </button>
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+           <h2 className="font-semibold text-gray-800 flex items-center text-lg">
+             <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
+           </h2>
+           <div className="flex items-center gap-2">
+             <select 
+               value={selecionadoAno} 
+               onChange={(e) => setSelecionadoAno(Number(e.target.value))}
+               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none"
+             >
+               {anos.map(a => <option key={a} value={a}>{a}</option>)}
+             </select>
+             <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+               <Download className="w-4 h-4 mr-2 text-gray-500"/> Exportar
+             </button>
+           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1">
+          {MESES.map((mes, idx) => (
+             <button
+               key={mes}
+               onClick={() => setSelecionadoMes(idx)}
+               className={cn(
+                 "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                 selecionadoMes === idx 
+                  ? "bg-brand-green text-white shadow-sm" 
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+               )}
+             >
+               {mes}
+             </button>
+          ))}
         </div>
       </div>
-      <div className="flex-1 overflow-auto">
-        <table className="w-full text-center text-xs whitespace-nowrap border-collapse">
-          <thead>
-            <tr>
-              <th rowSpan={2} colSpan={2} className="p-2 border border-blue-400 bg-blue-400 text-white font-bold text-sm">TOTAL</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">KITS</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">ALIZARES</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">FOLHAS</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">ADUELAS</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">RODAPÉS</th>
-              <th className="p-2 border border-blue-400 bg-blue-300 text-blue-900 font-bold">PAINÉIS</th>
-              <th colSpan={7} className="border-none bg-white"></th>
-            </tr>
-            <tr>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">254</th>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">479</th>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">0</th>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">0</th>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">0</th>
-              <th className="p-2 border border-blue-400 bg-blue-100 font-semibold">0</th>
-              <th colSpan={7} className="border-none bg-white"></th>
-            </tr>
-            <tr className="bg-gray-100 text-gray-700">
-              <th className="p-2 border border-gray-300 w-12">D/S</th>
-              <th className="p-2 border border-gray-300 w-24">DATA</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white min-w-[150px]">ENTREGA 1</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">KITS</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">ALIZARES</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">FOLHAS</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">ADUELAS</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">RODAPÉS</th>
-              <th className="p-2 border border-gray-300 bg-orange-400 text-white">PAINÉIS</th>
-              <th className="p-2 border border-gray-300 bg-green-500 text-white min-w-[150px]">ENTREGA 2</th>
-              <th className="p-2 border border-gray-300 bg-green-500 text-white">KITS</th>
-              <th className="p-2 border border-gray-300 bg-green-500 text-white">ALIZARES</th>
-              <th className="p-2 border border-gray-300 bg-green-500 text-white">FOLHAS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, i) => (
-              <tr key={i} className="hover:opacity-90">
-                <td className="p-2 border border-gray-300 bg-gray-500 text-white font-medium">{row.ds}</td>
-                <td className="p-2 border border-gray-300 bg-white">{row.date}</td>
-                {row.isWeekend ? (
-                  <>
-                    <td colSpan={7} className="p-2 border border-gray-300 bg-red-600 text-white font-bold tracking-wider">{row.entrega1}</td>
-                    <td colSpan={4} className="p-2 border border-gray-300 bg-red-600 text-white font-bold tracking-wider">{row.entrega2}</td>
-                  </>
-                ) : (
-                  <>
-                    <td className="p-2 border border-gray-300 bg-orange-200 font-medium">{row.entrega1}</td>
-                    <td className="p-2 border border-gray-300 bg-orange-100">{row.kits1 || ''}</td>
-                    <td className="p-2 border border-gray-300 bg-orange-100">{row.alizares1 || ''}</td>
-                    <td className="p-2 border border-gray-300 bg-orange-100"></td>
-                    <td className="p-2 border border-gray-300 bg-orange-100"></td>
-                    <td className="p-2 border border-gray-300 bg-orange-100"></td>
-                    <td className="p-2 border border-gray-300 bg-orange-100"></td>
-                    <td className="p-2 border border-gray-300 bg-green-200 font-medium">{row.entrega2}</td>
-                    <td className="p-2 border border-gray-300 bg-green-100">{row.kits2 || ''}</td>
-                    <td className="p-2 border border-gray-300 bg-green-100">{row.alizares2 || ''}</td>
-                    <td className="p-2 border border-gray-300 bg-green-100"></td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      <div className="flex-1 overflow-auto bg-gray-50 p-4">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 border-b-2 border-gray-300">
+                  <th className="p-2 border-r border-gray-300 w-12 font-bold">D/S</th>
+                  <th className="p-2 border-r border-gray-300 w-24 font-bold">DATA</th>
+                  {/* ENTREGA 1 */}
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white min-w-[150px] font-bold">ENTREGA 1</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">KITS</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">ALIZARES</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">FOLHAS</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">ADUELAS</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">RODAPÉS</th>
+                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">PAINÉIS</th>
+                  {/* ENTREGA 2 */}
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white min-w-[150px] font-bold">ENTREGA 2</th>
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">KITS</th>
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ALIZARES</th>
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">FOLHAS</th>
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
+                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
+                  <th className="p-2 border-gray-300 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.dateStrKey} className="border-b border-gray-200">
+                    <td className="p-1.5 border-r border-gray-300 bg-gray-600 text-white font-medium">{row.ds}</td>
+                    <td className="p-1.5 border-r border-gray-300 bg-white font-medium text-gray-700">{row.dateStrDisplay}</td>
+                    {row.isWeekend ? (
+                      <>
+                        <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
+                           {row.isSabado ? 'SABADO' : 'DOMINGO'}
+                        </td>
+                        <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
+                           {row.isSabado ? 'SABADO' : 'DOMINGO'}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_kits')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_alizares')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_folhas')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_aduelas')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_rodapes')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_paineis')}</td>
+                        
+                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_kits')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_alizares')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_folhas')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_aduelas')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_rodapes')}</td>
+                        <td className="p-0 border-transparent bg-green-50">{renderInput(row, 'e2_paineis')}</td>
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   )
