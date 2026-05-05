@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule } from './components/EstoqueModule';
+import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -69,7 +70,7 @@ export default function App() {
         <nav className="p-4 space-y-1">
           <NavItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === 'dashboard'} isOpen={sidebarOpen} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
-          <NavItem icon={<Box />} label="Kits & Produtos" active={activeTab === 'kits'} isOpen={sidebarOpen} onClick={() => setActiveTab('kits')} />
+          <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
           
           <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
@@ -303,12 +304,8 @@ export default function App() {
           {activeTab === 'estoque' && (
             <EstoqueModule />
           )}
-          {activeTab === 'kits' && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
-               <Box className="w-16 h-16 mb-4 text-gray-300" />
-               <h2 className="text-xl font-semibold text-gray-700">Composição de Kits e Produtos</h2>
-               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Cadastre a estrutura analítica dos kits, variantes de dimensões e crie novos produtos.</p>
-            </div>
+          {activeTab === 'controle_operacao' && (
+            <ControleOperacaoModule />
           )}
           {activeTab === 'relatorios' && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
