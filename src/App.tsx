@@ -71,12 +71,11 @@ export default function App() {
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
           <NavItem icon={<Box />} label="Kits & Produtos" active={activeTab === 'kits'} isOpen={sidebarOpen} onClick={() => setActiveTab('kits')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
+          
+          <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
+          <NavItem icon={<Settings />} label="Configurações" isOpen={sidebarOpen} />
+          <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
         </nav>
-        
-        <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white">
-           <NavItem icon={<Settings />} label="Configurações" isOpen={sidebarOpen} />
-           <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
-        </div>
       </aside>
 
       {/* MAIN CONTENT */}
