@@ -6,6 +6,7 @@ const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza 
 const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '700x2100', '720x2100', '800x2100', '820x2100', '900x2100', '920x2100', '1000x2100'];
 const LARGURAS_ADUELA = ['90', '100', '110', '120', '130', '140', '150', '160', '170', '180', '190', '200', '210'];
 const COMPRIMENTOS_ADUELA = ['2110', '2120'];
+const FACE_ALIZAR = ['30', '40', '50', '60', '70', '80', '100'];
 const ABA_ALIZAR = ['40', '50', '60', '70', '80'];
 const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 
@@ -25,9 +26,9 @@ const INITIAL_ADUELAS = [
 ];
 
 const INITIAL_ALIZARES = [
-  { id: 'AL-01', face: '50', aba: '60', espessura: '15', estoque: 450, status: 'OK' },
-  { id: 'AL-02', face: '50', aba: '40', espessura: '10', estoque: 85, status: 'Atenção' },
-  { id: 'AL-03', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },
+  { id: 'AL-01', cor: 'Branco Pinhal', face: '50', aba: '60', espessura: '15', estoque: 450, status: 'OK' },
+  { id: 'AL-02', cor: 'Freijó Médio', face: '50', aba: '40', espessura: '10', estoque: 85, status: 'Atenção' },
+  { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },
 ];
 
 function useLocalStorage<T>(key: string, initialValue: T) {
@@ -160,6 +161,7 @@ export function EstoqueModule() {
                 )}
                 {activeSubTab === 'alizares' && (
                   <>
+                    <th className="px-6 py-3 font-medium">Cor</th>
                     <th className="px-6 py-3 font-medium text-center">Face</th>
                     <th className="px-6 py-3 font-medium text-center">Aba</th>
                     <th className="px-6 py-3 font-medium text-center">Espessura</th>
@@ -212,7 +214,13 @@ export function EstoqueModule() {
               {activeSubTab === 'alizares' && alizares.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
-                   <td className="px-6 py-4 text-center text-gray-600">{item.face} mm</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-2">
+                       <ColorIndicator color={item.cor} />
+                       <span className="font-medium text-gray-700">{item.cor}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center text-gray-600">{item.face} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.aba} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.espessura} mm</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
@@ -295,7 +303,7 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
           <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Campos Específicos por Tipo */}
-            {(type === 'portas' || type === 'aduelas') && (
+            {(type === 'portas' || type === 'aduelas' || type === 'alizares') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
                 <select name="cor" value={formData.cor || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
@@ -338,7 +346,10 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
-                    <input type="text" name="face" defaultValue="50" readOnly className="w-full p-2 border border-gray-200 bg-gray-50 rounded-lg outline-none h-10 text-gray-500" />
+                    <select name="face" value={formData.face || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {FACE_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Aba</label>
