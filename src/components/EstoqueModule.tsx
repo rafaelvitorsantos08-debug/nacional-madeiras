@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, MoreHorizontal, Settings } from 'lucide-react';
+import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite'];
@@ -10,7 +10,7 @@ const ABA_ALIZAR = ['40', '50', '60', '70', '80'];
 const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 
 // Mockup data
-const MOCK_PORTAS = [
+const INITIAL_PORTAS = [
   { id: 'FP-01', cor: 'Branco Pinhal', dimensao: '800x2100', estoque: 145, status: 'OK' },
   { id: 'FP-02', cor: 'Freijó Médio', dimensao: '700x2100', estoque: 12, status: 'Crítico' },
   { id: 'FP-03', cor: 'Preto', dimensao: '620x2100', estoque: 45, status: 'Atenção' },
@@ -18,13 +18,13 @@ const MOCK_PORTAS = [
   { id: 'FP-05', cor: 'Branco Max', dimensao: '820x2100', estoque: 15, status: 'Atenção' },
 ];
 
-const MOCK_ADUELAS = [
+const INITIAL_ADUELAS = [
   { id: 'AD-01', cor: 'Branco Pinhal', largura: '120', comprimento: '2110', estoque: 210, status: 'OK' },
   { id: 'AD-02', cor: 'Freijó Médio', largura: '140', comprimento: '2110', estoque: 5, status: 'Crítico' },
   { id: 'AD-03', cor: 'Preto', largura: '150', comprimento: '2120', estoque: 60, status: 'OK' },
 ];
 
-const MOCK_ALIZARES = [
+const INITIAL_ALIZARES = [
   { id: 'AL-01', face: '50', aba: '60', espessura: '15', estoque: 450, status: 'OK' },
   { id: 'AL-02', face: '50', aba: '40', espessura: '10', estoque: 85, status: 'Atenção' },
   { id: 'AL-03', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },
@@ -32,6 +32,33 @@ const MOCK_ALIZARES = [
 
 export function EstoqueModule() {
   const [activeSubTab, setActiveSubTab] = useState<'portas' | 'aduelas' | 'alizares'>('portas');
+  
+  const [portas, setPortas] = useState(INITIAL_PORTAS);
+  const [aduelas, setAduelas] = useState(INITIAL_ADUELAS);
+  const [alizares, setAlizares] = useState(INITIAL_ALIZARES);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null); // null means adding a new item
+
+  const handleDelete = (id: string) => {
+    if (confirm('Tem certeza que deseja apagar este registro?')) {
+      if (activeSubTab === 'portas') setPortas(prev => prev.filter(item => item.id !== id));
+      if (activeSubTab === 'aduelas') setAduelas(prev => prev.filter(item => item.id !== id));
+      if (activeSubTab === 'alizares') setAlizares(prev => prev.filter(item => item.id !== id));
+    }
+  };
+
+  const handleEdit = (item: any) => {
+    setEditingItem(item);
+    setIsModalOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditingItem(null);
+    setIsModalOpen(true);
+  };
+
+  const currentList: any[] = activeSubTab === 'portas' ? portas : (activeSubTab === 'aduelas' ? aduelas : alizares);
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -78,7 +105,7 @@ export function EstoqueModule() {
             </button>
           </div>
           
-          <button className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
+          <button onClick={handleCreate} className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
             <Plus className="w-4 h-4" />
             <span>Novo Registro</span>
           </button>
@@ -118,7 +145,7 @@ export function EstoqueModule() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {activeSubTab === 'portas' && MOCK_PORTAS.map((item) => (
+              {activeSubTab === 'portas' && portas.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -130,11 +157,13 @@ export function EstoqueModule() {
                   <td className="px-6 py-4 text-center text-gray-600">{item.dimensao}</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center"><TableActions /></td>
+                  <td className="px-6 py-4 text-center">
+                    <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
+                  </td>
                 </tr>
               ))}
 
-              {activeSubTab === 'aduelas' && MOCK_ADUELAS.map((item) => (
+              {activeSubTab === 'aduelas' && aduelas.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -147,11 +176,13 @@ export function EstoqueModule() {
                   <td className="px-6 py-4 text-center text-gray-600">{item.comprimento} mm</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center"><TableActions /></td>
+                  <td className="px-6 py-4 text-center">
+                    <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
+                  </td>
                 </tr>
               ))}
 
-              {activeSubTab === 'alizares' && MOCK_ALIZARES.map((item) => (
+              {activeSubTab === 'alizares' && alizares.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                    <td className="px-6 py-4 text-center text-gray-600">{item.face} mm</td>
@@ -159,18 +190,161 @@ export function EstoqueModule() {
                   <td className="px-6 py-4 text-center text-gray-600">{item.espessura} mm</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{item.estoque.toLocaleString()}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center"><TableActions /></td>
+                  <td className="px-6 py-4 text-center">
+                    <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
+                  </td>
                 </tr>
               ))}
+              
+              {currentList.length === 0 && (
+                 <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                       Nenhum registro encontrado.
+                    </td>
+                 </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {isModalOpen && (
+        <RegistryModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          item={editingItem}
+          type={activeSubTab}
+          onSave={(newItem) => {
+            const getStatus = (estoque: number) => estoque > 50 ? 'OK' : (estoque > 20 ? 'Atenção' : 'Crítico');
+            const saveItem = { ...newItem, status: getStatus(Number(newItem.estoque)) };
+
+            if (editingItem) {
+              if (activeSubTab === 'portas') setPortas(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'aduelas') setAduelas(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'alizares') setAlizares(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
+            } else {
+              saveItem.id = `${activeSubTab.substring(0, 2).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+              if (activeSubTab === 'portas') setPortas(prev => [...prev, saveItem]);
+              if (activeSubTab === 'aduelas') setAduelas(prev => [...prev, saveItem]);
+              if (activeSubTab === 'alizares') setAlizares(prev => [...prev, saveItem]);
+            }
+            setIsModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
 
 // Helpers
+
+function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
+  if (!isOpen) return null;
+
+  const [formData, setFormData] = useState<any>(item || { estoque: 0 });
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 className="font-semibold text-lg text-gray-800">
+            {item ? 'Editar Registro' : 'Novo Registro'}
+          </h3>
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors focus:outline-none">
+            <X className="w-5 h-5"/>
+          </button>
+        </div>
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            
+            {/* Campos Específicos por Tipo */}
+            {(type === 'portas' || type === 'aduelas') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
+                <select name="cor" value={formData.cor || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                  <option value="" disabled>Selecione uma cor...</option>
+                  {CORES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            )}
+
+            {type === 'portas' && (
+               <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dimensão</label>
+                  <select name="dimensao" value={formData.dimensao || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                    <option value="" disabled>Selecione...</option>
+                    {DIMENSOES_PORTA.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+               </div>
+            )}
+
+            {type === 'aduelas' && (
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Largura</label>
+                    <select name="largura" value={formData.largura || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {LARGURAS_ADUELA.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento</label>
+                    <select name="comprimento" value={formData.comprimento || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {COMPRIMENTOS_ADUELA.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+               </div>
+            )}
+
+            {type === 'alizares' && (
+               <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
+                    <input type="text" name="face" defaultValue="50" readOnly className="w-full p-2 border border-gray-200 bg-gray-50 rounded-lg outline-none h-10 text-gray-500" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Aba</label>
+                    <select name="aba" value={formData.aba || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {ABA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Espessura</label>
+                    <select name="espessura" value={formData.espessura || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {ESPESSURA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+               </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
+              <input type="number" name="estoque" value={formData.estoque} onChange={handleChange} min="0" required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+            </div>
+
+            <div className="pt-4 flex justify-end space-x-3">
+              <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-brand-green hover:bg-brand-green-dark rounded-lg transition-colors">Salvar Registro</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SubTabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
@@ -215,18 +389,16 @@ function ColorIndicator({ color }: { color: string }) {
   return <div className={cn("w-4 h-4 rounded-full shadow-inner", colorMap[color] || 'bg-gray-300')} />;
 }
 
-function TableActions() {
+function TableActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
   return (
     <div className="flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      <button className="p-1 rounded-md text-brand-green hover:bg-green-50" title="Entrada">
-        <ArrowDownToLine className="w-4 h-4" />
+      <button onClick={onEdit} className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50" title="Editar">
+        <Edit2 className="w-4 h-4" />
       </button>
-      <button className="p-1 rounded-md text-red-600 hover:bg-red-50" title="Saída">
-        <ArrowUpFromLine className="w-4 h-4" />
-      </button>
-      <button className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100" title="Mais Opções">
-        <MoreHorizontal className="w-4 h-4" />
+      <button onClick={onDelete} className="p-1.5 rounded-md text-red-600 hover:bg-red-50" title="Apagar">
+        <Trash2 className="w-4 h-4" />
       </button>
     </div>
   )
 }
+
