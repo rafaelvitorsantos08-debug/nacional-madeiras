@@ -87,7 +87,7 @@ function ControleSaidas() {
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
 
-  const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+  const anos = Array.from({ length: 50 }, (_, i) => 2026 + i);
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
@@ -252,7 +252,7 @@ function OperacaoProducao() {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(new Date().getMonth()); // 0-indexed
   
-  const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+  const anos = Array.from({ length: 50 }, (_, i) => 2026 + i);
 
   // Storage
   const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
@@ -265,7 +265,9 @@ function OperacaoProducao() {
       return {
         dateStrKey,
         dateStr: date.toLocaleDateString('pt-BR'),
-        isWeekend: date.getDay() === 0 || date.getDay() === 6
+        isWeekend: date.getDay() === 0 || date.getDay() === 6,
+        isSabado: date.getDay() === 6,
+        isDomingo: date.getDay() === 0
       }
     });
   };
@@ -303,11 +305,16 @@ function OperacaoProducao() {
     const chunkSize = 7;
     const columns = [];
     for (let i = 0; i < days.length; i += chunkSize) {
-      columns.push(days.slice(i, i + chunkSize));
+      const chunk = days.slice(i, i + chunkSize);
+      while (chunk.length < 7) {
+        chunk.push(null);
+      }
+      columns.push(chunk);
     }
 
     // calculate total
     const totalMes = days.reduce((acc, day) => {
+       if (!day) return acc;
        const qty = parseInt(operacaoData[day.dateStrKey]?.quantidade || '0', 10);
        return acc + (isNaN(qty) ? 0 : qty);
     }, 0);
@@ -334,28 +341,42 @@ function OperacaoProducao() {
                 </tr>
               </thead>
               <tbody>
-                {col.map((day: any, i: number) => (
-                  <tr key={i}>
-                    <td className={cn(
-                      "p-1.5 border border-gray-300 font-medium",
-                      day.isWeekend ? "bg-red-600 text-white" : "bg-green-100"
-                    )}>
-                      {day.dateStr}
-                    </td>
-                    <td className={cn(
-                      "p-0 border border-gray-300",
-                      day.isWeekend ? "bg-red-600" : "bg-green-200"
-                    )}>
-                      {renderInput(day, 'efetivo', '')}
-                    </td>
-                    <td className={cn(
-                      "p-0 border border-gray-300",
-                      day.isWeekend ? "bg-red-600" : "bg-[#DDEBF7]" // Light blue for inputs
-                    )}>
-                      {renderInput(day, 'quantidade', '')}
-                    </td>
-                  </tr>
-                ))}
+                {col.map((day: any, i: number) => {
+                  if (!day) {
+                    return (
+                      <tr key={i}>
+                        <td className="p-1.5 border border-transparent bg-transparent"></td>
+                        <td className="p-0 border border-transparent bg-transparent"></td>
+                        <td className="p-0 border border-transparent bg-transparent"></td>
+                      </tr>
+                    );
+                  }
+                  
+                  return (
+                    <tr key={i}>
+                      <td className={cn(
+                        "p-1.5 border border-gray-300 font-medium",
+                        day.isWeekend ? "bg-red-600 text-white" : "bg-green-100"
+                      )}>
+                        {day.dateStr}
+                      </td>
+                      {day.isWeekend ? (
+                        <td colSpan={2} className="p-1.5 border border-gray-300 bg-red-600 text-white font-bold tracking-wider uppercase">
+                          {day.isSabado ? 'SABADO' : 'DOMINGO'}
+                        </td>
+                      ) : (
+                        <>
+                          <td className="p-0 border border-gray-300 bg-green-200">
+                            {renderInput(day, 'efetivo', '')}
+                          </td>
+                          <td className="p-0 border border-gray-300 bg-[#DDEBF7]">
+                            {renderInput(day, 'quantidade', '')}
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           ))}
