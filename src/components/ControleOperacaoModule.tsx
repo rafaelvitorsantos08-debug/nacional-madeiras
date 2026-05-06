@@ -257,6 +257,33 @@ function ControleSaidas() {
       </div>
 
       <div className="flex-1 overflow-auto bg-gray-50 p-4">
+        <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Kits</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_kits') + sumCol('e2_kits') || 0}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Alizares</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_alizares') + sumCol('e2_alizares') || 0}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Folhas</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_folhas') + sumCol('e2_folhas') || 0}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Aduelas</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_aduelas') + sumCol('e2_aduelas') || 0}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Rodapés</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_rodapes') + sumCol('e2_rodapes') || 0}</span>
+          </div>
+          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Painéis</span>
+            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_paineis') + sumCol('e2_paineis') || 0}</span>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]">
@@ -280,24 +307,6 @@ function ControleSaidas() {
                   <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
                   <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
                   <th className="p-2 border-gray-300 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
-                </tr>
-                <tr className="bg-blue-600 text-white font-bold border-b-2 border-gray-400">
-                  <th colSpan={2} className="p-2 text-right border-r border-blue-500 uppercase">TOTAL:</th>
-                  <th className="p-2 border-r border-blue-500"></th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_kits') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_alizares') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_folhas') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_aduelas') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_rodapes') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e1_paineis') || ''}</th>
-                  
-                  <th className="p-2 border-r border-blue-500"></th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e2_kits') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e2_alizares') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e2_folhas') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e2_aduelas') || ''}</th>
-                  <th className="p-2 border-r border-blue-500">{sumCol('e2_rodapes') || ''}</th>
-                  <th className="p-2 border-transparent">{sumCol('e2_paineis') || ''}</th>
                 </tr>
               </thead>
               <tbody>
