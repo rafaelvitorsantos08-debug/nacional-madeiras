@@ -249,19 +249,54 @@ function ControleSaidas() {
 }
 
 function OperacaoProducao() {
+  const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
+  const [selecionadoMes, setSelecionadoMes] = useState(new Date().getMonth()); // 0-indexed
+  
+  const anos = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i);
+
+  // Storage
+  const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
+
   const getDaysArray = (year: number, month: number) => {
     const numDays = new Date(year, month + 1, 0).getDate();
     return Array.from({length: numDays}, (_, i) => {
       const date = new Date(year, month, i + 1);
+      const dateStrKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
       return {
+        dateStrKey,
         dateStr: date.toLocaleDateString('pt-BR'),
         isWeekend: date.getDay() === 0 || date.getDay() === 6
       }
     });
   };
 
-  const daysJunho = getDaysArray(2026, 5); // 5 = june
-  const daysAgosto = getDaysArray(2026, 7); // 7 = august
+  const daysThisMonth = getDaysArray(selecionadoAno, selecionadoMes);
+
+  const handleInputChange = (dateStrKey: string, field: string, value: string) => {
+    setOperacaoData(prev => ({
+      ...prev,
+      [dateStrKey]: {
+        ...(prev[dateStrKey] || {}),
+        [field]: value
+      }
+    }));
+  };
+
+  const renderInput = (day: any, field: string, className: string = "") => {
+    const val = operacaoData[day.dateStrKey]?.[field] || '';
+    if (day.isWeekend) return null;
+    return (
+      <input
+        type="text"
+        value={val}
+        onChange={(e) => handleInputChange(day.dateStrKey, field, e.target.value)}
+        className={cn(
+          "w-full h-full min-h-[29px] bg-transparent text-center border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
+          className
+        )}
+      />
+    );
+  };
 
   const renderMonthSection = (days: any[], title: string) => {
     // Break days into chunks of 7 to form columns similar to excel
@@ -271,14 +306,20 @@ function OperacaoProducao() {
       columns.push(days.slice(i, i + chunkSize));
     }
 
+    // calculate total
+    const totalMes = days.reduce((acc, day) => {
+       const qty = parseInt(operacaoData[day.dateStrKey]?.quantidade || '0', 10);
+       return acc + (isNaN(qty) ? 0 : qty);
+    }, 0);
+
     return (
       <div className="mb-8">
         <div className="flex">
-          <div className="bg-blue-600 text-white font-bold p-2 px-4 shadow-sm w-[350px]">
+          <div className="bg-blue-600 text-white font-bold p-2 px-4 shadow-sm w-[350px] uppercase">
             {title}
           </div>
           <div className="bg-blue-600 text-white font-bold p-2 px-4 text-center ml-1 flex-1 shadow-sm">
-            0
+            {totalMes}
           </div>
         </div>
         
@@ -302,13 +343,17 @@ function OperacaoProducao() {
                       {day.dateStr}
                     </td>
                     <td className={cn(
-                      "p-1.5 border border-gray-300",
+                      "p-0 border border-gray-300",
                       day.isWeekend ? "bg-red-600" : "bg-green-200"
-                    )}></td>
+                    )}>
+                      {renderInput(day, 'efetivo', '')}
+                    </td>
                     <td className={cn(
-                      "p-1.5 border border-gray-300",
+                      "p-0 border border-gray-300",
                       day.isWeekend ? "bg-red-600" : "bg-[#DDEBF7]" // Light blue for inputs
-                    )}></td>
+                    )}>
+                      {renderInput(day, 'quantidade', '')}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -321,14 +366,42 @@ function OperacaoProducao() {
 
   return (
     <div className="flex-1 flex flex-col max-h-full">
-      <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-        <h2 className="font-semibold text-gray-700 flex items-center">
-          <Target className="w-5 h-5 mr-2 text-brand-green" /> Total de Kits Montados (Operação)
-        </h2>
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+           <h2 className="font-semibold text-gray-800 flex items-center text-lg">
+             <Target className="w-5 h-5 mr-2 text-brand-green" /> Total de Kits Montados (Operação)
+           </h2>
+           <div className="flex items-center gap-2">
+             <select 
+               value={selecionadoAno} 
+               onChange={(e) => setSelecionadoAno(Number(e.target.value))}
+               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none"
+             >
+               {anos.map(a => <option key={a} value={a}>{a}</option>)}
+             </select>
+           </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1">
+          {MESES.map((mes, idx) => (
+             <button
+               key={mes}
+               onClick={() => setSelecionadoMes(idx)}
+               className={cn(
+                 "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                 selecionadoMes === idx 
+                  ? "bg-brand-green text-white shadow-sm" 
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+               )}
+             >
+               {mes}
+             </button>
+          ))}
+        </div>
       </div>
+
       <div className="flex-1 overflow-auto p-4 bg-gray-50">
-        {renderMonthSection(daysJunho, 'TOTAL EM JUNHO:')}
-        {renderMonthSection(daysAgosto, 'TOTAL EM AGOSTO:')}
+        {renderMonthSection(daysThisMonth, `TOTAL EM ${MESES[selecionadoMes]}:`)}
       </div>
     </div>
   )
