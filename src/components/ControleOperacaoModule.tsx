@@ -152,6 +152,14 @@ function ControleSaidas() {
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
 
+  const sumCol = (field: string) => {
+    return rows.reduce((acc, row) => {
+      if (row.isWeekend) return acc;
+      const val = parseInt(monthlyData[row.dateStrKey]?.[field] || '0', 10);
+      return acc + (isNaN(val) ? 0 : val);
+    }, 0);
+  };
+
   const anos = Array.from({ length: 50 }, (_, i) => 2026 + i);
 
   const getDaysInMonth = (year: number, month: number) => {
@@ -252,8 +260,8 @@ function ControleSaidas() {
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 border-b-2 border-gray-300">
+              <thead className="sticky top-0 z-10 bg-white shadow-sm shadow-gray-300">
+                <tr className="bg-gray-100 text-gray-700 border-b border-gray-300">
                   <th className="p-2 border-r border-gray-300 w-12 font-bold">D/S</th>
                   <th className="p-2 border-r border-gray-300 w-24 font-bold">DATA</th>
                   {/* ENTREGA 1 */}
@@ -272,6 +280,24 @@ function ControleSaidas() {
                   <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
                   <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
                   <th className="p-2 border-gray-300 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
+                </tr>
+                <tr className="bg-blue-600 text-white font-bold border-b-2 border-gray-400">
+                  <th colSpan={2} className="p-2 text-right border-r border-blue-500 uppercase">TOTAL:</th>
+                  <th className="p-2 border-r border-blue-500"></th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_kits') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_alizares') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_folhas') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_aduelas') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_rodapes') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e1_paineis') || ''}</th>
+                  
+                  <th className="p-2 border-r border-blue-500"></th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e2_kits') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e2_alizares') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e2_folhas') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e2_aduelas') || ''}</th>
+                  <th className="p-2 border-r border-blue-500">{sumCol('e2_rodapes') || ''}</th>
+                  <th className="p-2 border-transparent">{sumCol('e2_paineis') || ''}</th>
                 </tr>
               </thead>
               <tbody>
@@ -326,6 +352,7 @@ function OperacaoProducao() {
 
   // Storage
   const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
+  const [efetivoTotal, setEfetivoTotal] = useLocalStorage<Record<string, string>>('nm_operacao_efetivo_total', {});
 
   const getDaysArray = (year: number, month: number) => {
     const numDays = new Date(year, month + 1, 0).getDate();
@@ -412,7 +439,17 @@ function OperacaoProducao() {
               <thead>
                 <tr className="bg-black text-white">
                   <th className="p-1.5 border border-gray-400">DATA</th>
-                  <th className="p-1.5 border border-gray-400">EFETIVO TOTAL: 15</th>
+                  <th className="p-1.5 border border-gray-400">
+                    <div className="flex items-center justify-center whitespace-nowrap">
+                      EFETIVO TOTAL:
+                      <input 
+                        type="text" 
+                        value={efetivoTotal[`${selecionadoAno}-${selecionadoMes}`] || '15'}
+                        onChange={(e) => setEfetivoTotal(prev => ({ ...prev, [`${selecionadoAno}-${selecionadoMes}`]: e.target.value }))}
+                        className="ml-1 w-10 bg-transparent border-b border-gray-500 text-center text-white outline-none focus:border-white"
+                      />
+                    </div>
+                  </th>
                   <th className="p-1.5 border border-gray-400">QUANTIDADE</th>
                 </tr>
               </thead>
