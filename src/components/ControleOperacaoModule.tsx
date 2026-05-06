@@ -561,31 +561,25 @@ function OperacaoProducao() {
 }
 
 function EntradaObras() {
-  const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v2', {});
-  
+  const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v4', {});
+  const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
+
   const adicionarObra = () => {
+    const nome = window.prompt('Digite o nome da nova obra:');
+    if (!nome) return;
     const id = Date.now().toString();
     setObras(prev => ({
       ...prev,
       [id]: {
          id,
-         nome: '',
-         folhas: '',
-         aduelas: '',
-         alizares: '',
+         nome,
+         itens: [
+           { id: Date.now().toString() + '_1', descricao: '', folhas: '', aduelas: '', alizares: '' }
+         ],
          data: new Date().toISOString()
       }
     }));
-  };
-
-  const handleChange = (id: string, field: string, value: string) => {
-    setObras(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value
-      }
-    }));
+    setSelectedObraId(id);
   };
 
   const deletarObra = (id: string) => {
@@ -595,105 +589,224 @@ function EntradaObras() {
       delete novas[id];
       return novas;
     });
+    if (selectedObraId === id) setSelectedObraId(null);
+  };
+
+  const adicionarItem = (obraId: string) => {
+    setObras(prev => {
+      const obra = prev[obraId];
+      return {
+        ...prev,
+        [obraId]: {
+          ...obra,
+          itens: [...(obra.itens || []), { id: Date.now().toString(), descricao: '', folhas: '', aduelas: '', alizares: '' }]
+        }
+      }
+    });
+  };
+
+  const deletarItem = (obraId: string, itemId: string) => {
+    setObras(prev => {
+      const obra = prev[obraId];
+      return {
+        ...prev,
+        [obraId]: {
+          ...obra,
+          itens: (obra.itens || []).filter((i: any) => i.id !== itemId)
+        }
+      }
+    });
+  };
+
+  const handleChangeItem = (obraId: string, itemId: string, field: string, value: string) => {
+    setObras(prev => {
+      const obra = prev[obraId];
+      const itens = (obra.itens || []).map((item: any) => 
+        item.id === itemId ? { ...item, [field]: value } : item
+      );
+      return {
+        ...prev,
+        [obraId]: {
+          ...obra,
+          itens
+        }
+      }
+    });
   };
 
   const obrasList = Object.values(obras).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  
+  React.useEffect(() => {
+    if (!selectedObraId && obrasList.length > 0) {
+      setSelectedObraId(obrasList[0].id);
+    }
+  }, [obrasList.length, selectedObraId]);
 
-  const totalFolhas = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.folhas) || 0), 0);
-  const totalAduelas = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.aduelas) || 0), 0);
-  const totalAlizares = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.alizares) || 0), 0);
+  const activeObra = selectedObraId ? obras[selectedObraId] : null;
 
   return (
-    <div className="flex-1 flex flex-col max-h-full">
-      <div className="p-4 border-b border-gray-200 bg-white">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-           <h2 className="font-semibold text-gray-800 flex items-center text-lg">
-             <Home className="w-5 h-5 mr-2 text-brand-green" /> Entrada de Obras
-           </h2>
-           <button 
-             onClick={adicionarObra}
-             className="flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-           >
-             <Plus className="w-4 h-4 mr-2"/> Nova Obra
-           </button>
+    <div className="flex-1 flex max-h-[800px] overflow-hidden rounded-bl-xl rounded-br-xl">
+      <div className="w-64 border-r border-gray-200 bg-white flex flex-col h-full">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-700 uppercase tracking-wider text-xs">Obras</h3>
+          <button 
+            onClick={adicionarObra}
+            className="p-1.5 text-white bg-brand-green rounded-md hover:bg-green-700 transition-colors shadow-sm"
+            title="Nova Obra"
+          >
+            <Plus className="w-4 h-4"/>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {obrasList.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500 text-center">Nenhuma obra cadastrada.</div>
+          ) : (
+            obrasList.map((obra: any) => (
+              <div 
+                key={obra.id} 
+                onClick={() => setSelectedObraId(obra.id)}
+                className={cn(
+                  "p-3 border-b border-gray-100 cursor-pointer flex justify-between items-center group transition-colors",
+                  selectedObraId === obra.id 
+                    ? "bg-green-50 border-l-4 border-l-brand-green" 
+                    : "hover:bg-gray-50 border-l-4 border-l-transparent"
+                )}
+              >
+                <div className="flex flex-col overflow-hidden pr-2">
+                  <span className="font-medium text-sm text-gray-800 truncate">{obra.nome}</span>
+                  <span className="text-xs text-gray-500 mt-1">
+                    {(obra.itens || []).length} itens
+                  </span>
+                </div>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); deletarObra(obra.id); }}
+                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  title="Excluir obra"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50 p-4">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <table className="w-full text-center text-sm border-collapse min-w-[800px]">
-            <thead className="bg-gray-100 text-gray-700 border-b border-gray-300">
-              <tr>
-                <th className="p-3 border-r border-gray-300 font-bold text-left w-1/3">NOME DA OBRA</th>
-                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
-                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-amber-50 text-amber-800">ADUELAS</th>
-                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-purple-50 text-purple-800">ALIZARES</th>
-                <th className="p-3 font-bold w-16">AÇÕES</th>
-              </tr>
-              {obrasList.length > 0 && (
-                <tr className="bg-gray-200/80 font-bold sticky top-[45px] shadow-sm z-10 text-gray-800">
-                  <td className="p-2 text-right border-r border-gray-300 uppercase">TOTAL:</td>
-                  <td className="p-2 border-r border-gray-300 bg-blue-100/50">{totalFolhas || ''}</td>
-                  <td className="p-2 border-r border-gray-300 bg-amber-100/50">{totalAduelas || ''}</td>
-                  <td className="p-2 border-r border-gray-300 bg-purple-100/50">{totalAlizares || ''}</td>
-                  <td className="p-2 bg-gray-100"></td>
-                </tr>
-              )}
-            </thead>
-            <tbody>
-              {obrasList.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">Nenhuma obra cadastrada. Clique em "Nova Obra" para adicionar.</td>
-                </tr>
-              ) : obrasList.map((obra: any, index: number) => (
-                <tr key={obra.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td className="p-0 border-r border-gray-300">
-                    <input 
-                      type="text" 
-                      value={obra.nome || ''} 
-                      onChange={(e) => handleChange(obra.id, 'nome', e.target.value)}
-                      placeholder="Identificação da obra..."
-                      className="w-full h-full p-3 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green text-left font-medium text-gray-800"
-                    />
-                  </td>
-                  <td className="p-0 border-r border-gray-300 bg-blue-50/50">
-                    <input 
-                      type="text" 
-                      value={obra.folhas || ''} 
-                      onChange={(e) => handleChange(obra.id, 'folhas', e.target.value)}
-                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
-                    />
-                  </td>
-                  <td className="p-0 border-r border-gray-300 bg-amber-50/50">
-                    <input 
-                      type="text" 
-                      value={obra.aduelas || ''} 
-                      onChange={(e) => handleChange(obra.id, 'aduelas', e.target.value)}
-                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
-                    />
-                  </td>
-                  <td className="p-0 border-r border-gray-300 bg-purple-50/50">
-                    <input 
-                      type="text" 
-                      value={obra.alizares || ''} 
-                      onChange={(e) => handleChange(obra.id, 'alizares', e.target.value)}
-                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
-                    />
-                  </td>
-                  <td className="p-2 text-center">
-                    <button 
-                      onClick={() => deletarObra(obra.id)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                      title="Excluir obra"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="flex-1 flex flex-col bg-gray-50 h-full overflow-hidden">
+        {activeObra ? (
+          <>
+            <div className="p-4 bg-white border-b border-gray-200 flex justify-between items-center shadow-sm z-10 shrink-0">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                <Home className="w-5 h-5 mr-2 text-brand-green" /> 
+                {activeObra.nome}
+              </h2>
+              <button 
+                onClick={() => adicionarItem(activeObra.id)}
+                className="flex items-center px-4 py-2 text-sm font-medium text-brand-green bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+              >
+                <Plus className="w-4 h-4 mr-2"/> Adicionar Linha
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-auto p-4">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden min-w-[800px]">
+                <table className="w-full text-center text-sm border-collapse">
+                  <thead className="bg-gray-100 text-gray-700 border-b border-gray-300">
+                    <tr>
+                      <th className="p-3 border-r border-gray-300 font-bold text-left w-1/3">ESPECIFICAÇÃO / DESCRIÇÃO</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-amber-50 text-amber-800">ADUELAS</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-purple-50 text-purple-800">ALIZARES</th>
+                      <th className="p-3 font-bold w-16">AÇÕES</th>
+                    </tr>
+                    <tr className="bg-gray-200/80 font-bold text-gray-800 border-b border-gray-300 shadow-sm">
+                      <td className="p-2 text-right border-r border-gray-300 uppercase">TOTAL DA OBRA:</td>
+                      <td className="p-2 border-r border-gray-300 bg-blue-100/50 text-blue-900 text-lg">
+                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.folhas) || 0), 0) || 0}
+                      </td>
+                      <td className="p-2 border-r border-gray-300 bg-amber-100/50 text-amber-900 text-lg">
+                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.aduelas) || 0), 0) || 0}
+                      </td>
+                      <td className="p-2 border-r border-gray-300 bg-purple-100/50 text-purple-900 text-lg">
+                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.alizares) || 0), 0) || 0}
+                      </td>
+                      <td className="p-2 bg-gray-100"></td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(activeObra.itens || []).length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-gray-500">Nenhuma especificação adicionada a esta obra.</td>
+                      </tr>
+                    ) : (
+                      (activeObra.itens || []).map((item: any) => (
+                        <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                          <td className="p-0 border-r border-gray-300">
+                            <input 
+                              type="text" 
+                              value={item.descricao || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'descricao', e.target.value)}
+                              placeholder="Ex: Porta do Banheiro Social"
+                              className="w-full h-full min-h-[44px] p-3 pl-4 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green text-left font-medium text-gray-800"
+                            />
+                          </td>
+                          <td className="p-0 border-r border-gray-300 bg-blue-50/30">
+                            <input 
+                              type="text" 
+                              value={item.folhas || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'folhas', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold"
+                            />
+                          </td>
+                          <td className="p-0 border-r border-gray-300 bg-amber-50/30">
+                            <input 
+                              type="text" 
+                              value={item.aduelas || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
+                            />
+                          </td>
+                          <td className="p-0 border-r border-gray-300 bg-purple-50/30">
+                            <input 
+                              type="text" 
+                              value={item.alizares || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
+                            />
+                          </td>
+                          <td className="p-2 text-center">
+                            <button 
+                              onClick={() => deletarItem(activeObra.id, item.id)}
+                              className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                              title="Remover linha"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-gray-500 p-8">
+            <div className="text-center">
+              <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                <Target className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-700 mb-2">Entrada de Obras</h3>
+              <p className="max-w-md text-gray-500">Selecione uma obra no menu lateral para visualizar e editar suas especificações (Folhas, Aduelas, Alizares), ou crie uma nova obra clicando no botão + Nova Obra.</p>
+              <button 
+                onClick={adicionarObra}
+                className="mt-6 px-6 py-2.5 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                + Criar Nova Obra
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
