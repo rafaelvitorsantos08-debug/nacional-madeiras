@@ -54,6 +54,8 @@ export default function App() {
     totalEntradaObras: 0,
   });
 
+  const [chartData, setChartData] = useState(CHART_DATA);
+
   useEffect(() => {
     try {
       const getLs = (key: string, init: any) => {
@@ -93,6 +95,8 @@ export default function App() {
       Object.values(obras).forEach((o: any) => {
         const itens = o.itens || [];
         itens.forEach((i: any) => {
+          // As per user request: ENTRADA DE OBRA X SAIDA SOMENTE DE KITS
+          // Kits means folhas
           countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
         });
       });
@@ -104,6 +108,43 @@ export default function App() {
         totalOperacaoKits: countOp,
         totalEntradaObras: countObras
       });
+
+      // CALCULATE CHART DATA: Entrada de Obras (Folhas/Kits) vs Saídas de Kits per Month
+      const mesesAbbr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const currentYear = new Date().getFullYear();
+      
+      const newChartData = mesesAbbr.map(mes => ({ name: mes, entradas: 0, saidas: 0 }));
+
+      // Entradas (Folhas em Obras)
+      Object.values(obras).forEach((o: any) => {
+         if (!o.data) return;
+         const d = new Date(o.data);
+         if (d.getFullYear() === currentYear) {
+           let folhasTotal = 0;
+           (o.itens || []).forEach((i: any) => {
+             folhasTotal += (parseInt(i.folhas) || 0);
+           });
+           newChartData[d.getMonth()].entradas += folhasTotal;
+         }
+      });
+
+      // Saídas (Kits Enviados)
+      Object.keys(saidas).forEach(dateStr => { // DD/MM/YYYY
+         const parts = dateStr.split('/');
+         if (parts.length === 3) {
+            const m = parseInt(parts[1]) - 1;
+            const y = parseInt(parts[2]);
+            if (y === currentYear && m >= 0 && m < 12) {
+               const row = saidas[dateStr];
+               const total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+               newChartData[m].saidas += total;
+            }
+         }
+      });
+
+      // Filter down to months up to current month to avoid weird empty bars in the future
+      const currentMonth = new Date().getMonth();
+      setChartData(newChartData.slice(0, currentMonth + 1));
 
     } catch (e) {
       console.error(e);
@@ -252,7 +293,7 @@ export default function App() {
               <h2 className="text-md font-semibold text-gray-800 mb-6">Tendência de Movimentação</h2>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={CHART_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
@@ -261,8 +302,8 @@ export default function App() {
                       contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
                     />
                     <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
-                    <Bar dataKey="entradas" name="Entradas" fill="var(--color-brand-green)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                    <Bar dataKey="saidas" name="Saídas" fill="#9CA3AF" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="entradas" name="Entrada de Obra (Kits)" fill="var(--color-brand-green)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    <Bar dataKey="saidas" name="Saída (Kits)" fill="#9CA3AF" radius={[4, 4, 0, 0]} maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
