@@ -80,6 +80,71 @@ const MESES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
+const handleTableKeyDown = (
+  e: React.KeyboardEvent<HTMLInputElement>,
+  rowIdx: number,
+  colIdx: number,
+  moduleName: string,
+  maxRow: number,
+  maxCol: number
+) => {
+  const target = e.currentTarget;
+  const isAtStart = target.selectionStart === 0;
+  const isAtEnd = target.selectionEnd === target.value.length;
+
+  let nextRow = rowIdx;
+  let nextCol = colIdx;
+
+  if (e.key === 'Enter' || e.key === 'ArrowDown') {
+    nextRow++;
+    e.preventDefault();
+  } else if (e.key === 'ArrowUp') {
+    nextRow--;
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight' && isAtEnd) {
+    nextCol++;
+    e.preventDefault();
+  } else if (e.key === 'ArrowLeft' && isAtStart) {
+    nextCol--;
+    e.preventDefault();
+  } else {
+    return;
+  }
+
+  let attempts = 0;
+  while (attempts < 40) {
+    const nextInput = document.querySelector(`input[data-module="${moduleName}"][data-row="${nextRow}"][data-col="${nextCol}"]`) as HTMLInputElement | null;
+    if (nextInput) {
+      nextInput.focus();
+      setTimeout(() => nextInput.select(), 10);
+      break;
+    }
+    
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      nextRow++;
+      if (nextRow > maxRow) break;
+    } else if (e.key === 'ArrowUp') {
+      nextRow--;
+      if (nextRow < 1) break;
+    } else if (e.key === 'ArrowRight') {
+      nextCol++;
+      if (nextCol > maxCol) {
+        nextCol = 0;
+        nextRow++;
+      }
+      if (nextRow > maxRow) break;
+    } else if (e.key === 'ArrowLeft') {
+      nextCol--;
+      if (nextCol < 0) {
+        nextCol = maxCol;
+        nextRow--;
+      }
+      if (nextRow < 1) break;
+    }
+    attempts++;
+  }
+};
+
 function ControleSaidas() {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(new Date().getMonth()); // 0-indexed
@@ -122,7 +187,7 @@ function ControleSaidas() {
     }));
   };
 
-  const renderInput = (row: any, field: string, className: string = "") => {
+  const renderInput = (row: any, field: string, colIdx: number, className: string = "") => {
     const val = monthlyData[row.dateStrKey]?.[field] || '';
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
@@ -130,7 +195,12 @@ function ControleSaidas() {
       <input
         type="text"
         value={val}
+        data-module="saidas"
+        data-row={row.day}
+        data-col={colIdx}
         onChange={(e) => handleInputChange(row.dateStrKey, field, e.target.value)}
+        onKeyDown={(e) => handleTableKeyDown(e, row.day, colIdx, 'saidas', daysCount, 13)}
+        style={{ fieldSizing: 'content', minWidth: '100%' } as any}
         className={cn(
           "w-full h-full min-h-[28px] px-1 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
           className
@@ -220,21 +290,21 @@ function ControleSaidas() {
                       </>
                     ) : (
                       <>
-                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 'text-left font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_kits')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_alizares')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_folhas')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_aduelas')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_rodapes')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_paineis')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 0, 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_kits', 1)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_alizares', 2)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_folhas', 3)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_aduelas', 4)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_rodapes', 5)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_paineis', 6)}</td>
                         
-                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 'text-left font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_kits')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_alizares')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_folhas')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_aduelas')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_rodapes')}</td>
-                        <td className="p-0 border-transparent bg-green-50">{renderInput(row, 'e2_paineis')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 7, 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_kits', 8)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_alizares', 9)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_folhas', 10)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_aduelas', 11)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_rodapes', 12)}</td>
+                        <td className="p-0 border-transparent bg-green-50">{renderInput(row, 'e2_paineis', 13)}</td>
                       </>
                     )}
                   </tr>
@@ -264,6 +334,7 @@ function OperacaoProducao() {
       const dateStrKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`;
       return {
         dateStrKey,
+        dayNum: i + 1,
         dateStr: date.toLocaleDateString('pt-BR'),
         isWeekend: date.getDay() === 0 || date.getDay() === 6,
         isSabado: date.getDay() === 6,
@@ -284,14 +355,19 @@ function OperacaoProducao() {
     }));
   };
 
-  const renderInput = (day: any, field: string, className: string = "") => {
+  const renderInput = (day: any, field: string, colIdx: number, className: string = "") => {
     const val = operacaoData[day.dateStrKey]?.[field] || '';
     if (day.isWeekend) return null;
     return (
       <input
         type="text"
         value={val}
+        data-module="operacao"
+        data-row={day.dayNum}
+        data-col={colIdx}
         onChange={(e) => handleInputChange(day.dateStrKey, field, e.target.value)}
+        onKeyDown={(e) => handleTableKeyDown(e, day.dayNum, colIdx, 'operacao', daysThisMonth.length, 1)}
+        style={{ fieldSizing: 'content', minWidth: '100%' } as any}
         className={cn(
           "w-full h-full min-h-[29px] bg-transparent text-center border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
           className
@@ -367,10 +443,10 @@ function OperacaoProducao() {
                       ) : (
                         <>
                           <td className="p-0 border border-gray-300 bg-green-200">
-                            {renderInput(day, 'efetivo', '')}
+                            {renderInput(day, 'efetivo', 0, '')}
                           </td>
                           <td className="p-0 border border-gray-300 bg-[#DDEBF7]">
-                            {renderInput(day, 'quantidade', '')}
+                            {renderInput(day, 'quantidade', 1, '')}
                           </td>
                         </>
                       )}
