@@ -11,7 +11,7 @@ const ABA_ALIZAR = ['40', '50', '60', '70', '80'];
 const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 
 // Mockup data
-const INITIAL_PORTAS = [
+export const INITIAL_PORTAS = [
   { id: 'FP-01', cor: 'Branco Pinhal', dimensao: '800x2100', estoque: 145, status: 'OK' },
   { id: 'FP-02', cor: 'Freijó Médio', dimensao: '700x2100', estoque: 12, status: 'Crítico' },
   { id: 'FP-03', cor: 'Preto', dimensao: '620x2100', estoque: 45, status: 'Atenção' },
@@ -19,13 +19,13 @@ const INITIAL_PORTAS = [
   { id: 'FP-05', cor: 'Branco Max', dimensao: '820x2100', estoque: 15, status: 'Atenção' },
 ];
 
-const INITIAL_ADUELAS = [
+export const INITIAL_ADUELAS = [
   { id: 'AD-01', cor: 'Branco Pinhal', largura: '120', comprimento: '2110', estoque: 210, status: 'OK' },
   { id: 'AD-02', cor: 'Freijó Médio', largura: '140', comprimento: '2110', estoque: 5, status: 'Crítico' },
   { id: 'AD-03', cor: 'Preto', largura: '150', comprimento: '2120', estoque: 60, status: 'OK' },
 ];
 
-const INITIAL_ALIZARES = [
+export const INITIAL_ALIZARES = [
   { id: 'AL-01', cor: 'Branco Pinhal', face: '50', aba: '60', espessura: '15', estoque: 450, status: 'OK' },
   { id: 'AL-02', cor: 'Freijó Médio', face: '50', aba: '40', espessura: '10', estoque: 85, status: 'Atenção' },
   { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },

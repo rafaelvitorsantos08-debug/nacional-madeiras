@@ -634,7 +634,7 @@ function EntradaObras() {
     });
   };
 
-  const obrasList = Object.values(obras).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  const obrasList: any[] = Object.values(obras).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime());
   
   React.useEffect(() => {
     if (!selectedObraId && obrasList.length > 0) {

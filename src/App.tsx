@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { EstoqueModule } from './components/EstoqueModule';
+import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES } from './components/EstoqueModule';
 import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 
 // --- MOCK DATA ---
@@ -45,6 +45,71 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
+
+  const [dashboardStats, setDashboardStats] = useState({
+    totalEstoque: 0,
+    alertaBaixoEstoque: 0,
+    totalControleSaidasKits: 0,
+    totalOperacaoKits: 0,
+    totalEntradaObras: 0,
+  });
+
+  useEffect(() => {
+    try {
+      const getLs = (key: string, init: any) => {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : init;
+      };
+
+      const portas = getLs('nm_portas', INITIAL_PORTAS);
+      const aduelas = getLs('nm_aduelas', INITIAL_ADUELAS);
+      const alizares = getLs('nm_alizares', INITIAL_ALIZARES);
+
+      let totalEst = 0;
+      let alertas = 0;
+      
+      [...portas, ...aduelas, ...alizares].forEach((item: any) => {
+         const qty = typeof item.estoque === 'number' ? item.estoque : parseInt(item.estoque) || 0;
+         totalEst += qty;
+         if (item.status === 'Crítico') alertas++;
+      });
+
+      const saidas = getLs('nm_controle_saidas', {});
+      let countSaidas = 0;
+      Object.keys(saidas).forEach(data => {
+        const row = saidas[data];
+        countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+      });
+
+      const operacao = getLs('nm_operacao_producao', {});
+      let countOp = 0;
+      Object.keys(operacao).forEach(data => {
+        const row = operacao[data];
+        countOp += (parseInt(row.kits_montados) || 0);
+      });
+
+      const obras = getLs('nm_entrada_obras_v4', {});
+      let countObras = 0;
+      Object.values(obras).forEach((o: any) => {
+        const itens = o.itens || [];
+        itens.forEach((i: any) => {
+          countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+        });
+      });
+
+      setDashboardStats({
+        totalEstoque: totalEst,
+        alertaBaixoEstoque: alertas,
+        totalControleSaidasKits: countSaidas,
+        totalOperacaoKits: countOp,
+        totalEntradaObras: countObras
+      });
+
+    } catch (e) {
+      console.error(e);
+    }
+  }, [activeTab]); // re-calculate when switching tabs
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
@@ -148,34 +213,34 @@ export default function App() {
           {/* KPI CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <KpiCard 
-              title="Total de Itens em Estoque" 
-              value="5.420" 
+              title="Total em Estoque" 
+              value={dashboardStats.totalEstoque.toLocaleString('pt-BR')} 
               icon={<Package className="text-blue-500" />} 
+              subtitle="peças"
               bgColor="bg-blue-50"
             />
             <KpiCard 
-              title="Entradas do Mês" 
-              value="+780" 
-              subtitle="kits"
-              icon={<ArrowDownToLine className="text-brand-green" />} 
+              title="Kits em Obras" 
+              value={dashboardStats.totalEntradaObras.toLocaleString('pt-BR')} 
+              subtitle="peças"
+              icon={<Home className="text-brand-green" />} 
               bgColor="bg-green-50"
               trend="up"
             />
             <KpiCard 
-              title="Saídas do Mês" 
-              value="-640" 
-              subtitle="kits"
-              icon={<ArrowUpFromLine className="text-red-500" />} 
-              bgColor="bg-red-50"
-              trend="down"
+              title="Controle x Operação" 
+              value={dashboardStats.totalControleSaidasKits.toLocaleString('pt-BR')} 
+              subtitle="kits saídos"
+              icon={<HardHat className="text-amber-500" />} 
+              bgColor="bg-amber-50"
+              trend="neutral"
             />
             <KpiCard 
               title="Alertas de Baixo Estoque" 
-              value="12" 
-              subtitle="itens"
-              icon={<AlertTriangle className="text-yellow-600" />} 
-              bgColor="bg-yellow-50"
-              trend="neutral"
+              value={dashboardStats.alertaBaixoEstoque} 
+              subtitle="itens críticos"
+              icon={<AlertTriangle className="text-red-500" />} 
+              bgColor="bg-red-50"
               alert
             />
           </div>
