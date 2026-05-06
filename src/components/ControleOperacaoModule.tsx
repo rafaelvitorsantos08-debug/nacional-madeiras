@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { cn } from '../lib/utils';
-import { Package, Truck, Target, Plus, Download } from 'lucide-react';
+import { Package, Truck, Target, Plus, Download, Home, Trash2 } from 'lucide-react';
 
 const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 export function ControleOperacaoModule() {
-  const [activeTab, setActiveTab] = useState<'saidas' | 'operacao'>('saidas');
+  const [activeTab, setActiveTab] = useState<'saidas' | 'operacao' | 'entradas'>('saidas');
 
   return (
     <div className="animate-in fade-in duration-300 h-full flex flex-col">
@@ -33,12 +33,22 @@ export function ControleOperacaoModule() {
           >
             Operação da Produção
           </button>
+          <button 
+            onClick={() => setActiveTab('entradas')}
+            className={cn(
+              "px-4 py-2 text-sm font-medium rounded-md transition-colors",
+              activeTab === 'entradas' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+            )}
+          >
+            Entrada de Obras
+          </button>
         </div>
       </div>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {activeTab === 'saidas' && <ControleSaidas />}
         {activeTab === 'operacao' && <OperacaoProducao />}
+        {activeTab === 'entradas' && <EntradaObras />}
       </div>
     </div>
   );
@@ -548,4 +558,143 @@ function OperacaoProducao() {
       </div>
     </div>
   )
+}
+
+function EntradaObras() {
+  const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v2', {});
+  
+  const adicionarObra = () => {
+    const id = Date.now().toString();
+    setObras(prev => ({
+      ...prev,
+      [id]: {
+         id,
+         nome: '',
+         folhas: '',
+         aduelas: '',
+         alizares: '',
+         data: new Date().toISOString()
+      }
+    }));
+  };
+
+  const handleChange = (id: string, field: string, value: string) => {
+    setObras(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value
+      }
+    }));
+  };
+
+  const deletarObra = (id: string) => {
+    if(!window.confirm('Tem certeza que deseja excluir esta obra?')) return;
+    setObras(prev => {
+      const novas = { ...prev };
+      delete novas[id];
+      return novas;
+    });
+  };
+
+  const obrasList = Object.values(obras).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime());
+
+  const totalFolhas = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.folhas) || 0), 0);
+  const totalAduelas = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.aduelas) || 0), 0);
+  const totalAlizares = obrasList.reduce((acc: number, o: any) => acc + (parseInt(o.alizares) || 0), 0);
+
+  return (
+    <div className="flex-1 flex flex-col max-h-full">
+      <div className="p-4 border-b border-gray-200 bg-white">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+           <h2 className="font-semibold text-gray-800 flex items-center text-lg">
+             <Home className="w-5 h-5 mr-2 text-brand-green" /> Entrada de Obras
+           </h2>
+           <button 
+             onClick={adicionarObra}
+             className="flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+           >
+             <Plus className="w-4 h-4 mr-2"/> Nova Obra
+           </button>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto bg-gray-50 p-4">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+          <table className="w-full text-center text-sm border-collapse min-w-[800px]">
+            <thead className="bg-gray-100 text-gray-700 border-b border-gray-300">
+              <tr>
+                <th className="p-3 border-r border-gray-300 font-bold text-left w-1/3">NOME DA OBRA</th>
+                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
+                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-amber-50 text-amber-800">ADUELAS</th>
+                <th className="p-3 border-r border-gray-300 font-bold w-1/6 bg-purple-50 text-purple-800">ALIZARES</th>
+                <th className="p-3 font-bold w-16">AÇÕES</th>
+              </tr>
+              {obrasList.length > 0 && (
+                <tr className="bg-gray-200/80 font-bold sticky top-[45px] shadow-sm z-10 text-gray-800">
+                  <td className="p-2 text-right border-r border-gray-300 uppercase">TOTAL:</td>
+                  <td className="p-2 border-r border-gray-300 bg-blue-100/50">{totalFolhas || ''}</td>
+                  <td className="p-2 border-r border-gray-300 bg-amber-100/50">{totalAduelas || ''}</td>
+                  <td className="p-2 border-r border-gray-300 bg-purple-100/50">{totalAlizares || ''}</td>
+                  <td className="p-2 bg-gray-100"></td>
+                </tr>
+              )}
+            </thead>
+            <tbody>
+              {obrasList.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">Nenhuma obra cadastrada. Clique em "Nova Obra" para adicionar.</td>
+                </tr>
+              ) : obrasList.map((obra: any, index: number) => (
+                <tr key={obra.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td className="p-0 border-r border-gray-300">
+                    <input 
+                      type="text" 
+                      value={obra.nome || ''} 
+                      onChange={(e) => handleChange(obra.id, 'nome', e.target.value)}
+                      placeholder="Identificação da obra..."
+                      className="w-full h-full p-3 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green text-left font-medium text-gray-800"
+                    />
+                  </td>
+                  <td className="p-0 border-r border-gray-300 bg-blue-50/50">
+                    <input 
+                      type="text" 
+                      value={obra.folhas || ''} 
+                      onChange={(e) => handleChange(obra.id, 'folhas', e.target.value)}
+                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
+                    />
+                  </td>
+                  <td className="p-0 border-r border-gray-300 bg-amber-50/50">
+                    <input 
+                      type="text" 
+                      value={obra.aduelas || ''} 
+                      onChange={(e) => handleChange(obra.id, 'aduelas', e.target.value)}
+                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
+                    />
+                  </td>
+                  <td className="p-0 border-r border-gray-300 bg-purple-50/50">
+                    <input 
+                      type="text" 
+                      value={obra.alizares || ''} 
+                      onChange={(e) => handleChange(obra.id, 'alizares', e.target.value)}
+                      className="w-full h-full p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green font-semibold"
+                    />
+                  </td>
+                  <td className="p-2 text-center">
+                    <button 
+                      onClick={() => deletarObra(obra.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                      title="Excluir obra"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
