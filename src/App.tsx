@@ -45,6 +45,23 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
+  
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('nm_dark_mode');
+      if (saved) return saved === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('nm_dark_mode', isDarkMode.toString());
+  }, [isDarkMode]);
 
   const [dashboardStats, setDashboardStats] = useState({
     totalEstoque: 0,
@@ -197,7 +214,7 @@ export default function App() {
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
           
           <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
-          <NavItem icon={<Settings />} label="Configurações" isOpen={sidebarOpen} />
+          <NavItem icon={<Settings />} label="Configurações" active={activeTab === 'configuracoes'} isOpen={sidebarOpen} onClick={() => setActiveTab('configuracoes')} />
           <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
         </nav>
       </aside>
@@ -437,6 +454,46 @@ export default function App() {
                <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Gere resumos em PDF e planilhas sobre o consumo, previsões de compra e valor em estoque.</p>
             </div>
           )}
+
+          {activeTab === 'configuracoes' && (
+            <div className="animate-in fade-in duration-300 max-w-4xl mx-auto">
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
+                <p className="text-sm text-gray-500 mt-1">Gerencie preferências e configurações do sistema.</p>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                 <div className="p-6 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-800">Aparência</h2>
+                    <p className="text-sm text-gray-500 mt-1">Personalize como a interface é exibida no seu dispositivo.</p>
+                 </div>
+                 
+                 <div className="p-6">
+                    <div className="flex items-center justify-between">
+                       <div>
+                          <h3 className="text-md font-medium text-gray-800">Modo de Tela Escura</h3>
+                          <p className="text-sm text-gray-500 mt-1">Habilita um contraste mais escuro para o sistema, ideal para ambientes de baixa luminosidade.</p>
+                       </div>
+                       <button
+                         onClick={() => setIsDarkMode(!isDarkMode)}
+                         className={cn(
+                           "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                           isDarkMode ? "bg-brand-green" : "bg-gray-200"
+                         )}
+                       >
+                         <span
+                           className={cn(
+                             "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                             isDarkMode ? "translate-x-5" : "translate-x-0"
+                           )}
+                         />
+                       </button>
+                    </div>
+                 </div>
+              </div>
+            </div>
+          )}
+          
           
         </div>
 

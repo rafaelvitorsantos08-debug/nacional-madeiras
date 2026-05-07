@@ -9,5 +9,82 @@
 }
 
 body {
-  @apply bg-gray-50 text-gray-800 antialiased font-sans;
+  @apply bg-gray-50 text-gray-800 antialiased font-sans transition-colors duration-200;
+}
+
+/* Dark Mode Overrides for existing generic classes */
+html.dark body {
+  @apply !bg-gray-950 !text-gray-100;
+}
+
+html.dark .bg-white {
+  @apply !bg-gray-900;
+}
+
+html.dark .bg-gray-50 {
+  @apply !bg-gray-950;
+}
+
+html.dark .text-gray-900, 
+html.dark .text-gray-800 {
+  @apply !text-white;
+}
+
+html.dark .text-gray-700 {
+  @apply !text-gray-200;
+}
+
+html.dark .text-gray-600 {
+  @apply !text-gray-300;
+}
+
+html.dark .text-gray-500 {
+  @apply !text-gray-400;
+}
+
+html.dark .border-gray-100, 
+html.dark .border-gray-200, 
+html.dark .border-gray-300 {
+  @apply !border-gray-800;
+}
+
+/* Fixes for table headers and active elements in dark mode */
+html.dark .bg-gray-100 {
+  @apply !bg-gray-800;
+}
+
+html.dark .hover\:bg-gray-50:hover {
+  @apply hover:!bg-gray-800;
+}
+
+html.dark .bg-brand-green {
+  @apply !bg-green-600;
+}
+
+html.dark .bg-orange-50 {
+  @apply !bg-orange-950/40 !text-orange-200;
+}
+
+html.dark .bg-orange-100 {
+  @apply !bg-orange-900/40 !text-orange-200;
+}
+
+html.dark .bg-green-50 {
+  @apply !bg-green-950/40 !text-green-200;
+}
+
+html.dark .bg-green-100 {
+  @apply !bg-green-900/40 !text-green-200;
+}
+
+html.dark .bg-green-200 {
+  @apply !bg-green-800/40 !text-green-200;
+}
+
+html.dark .bg-\[\#DDEBF7\] {
+  @apply !bg-blue-950/40 !text-blue-200;
+}
+
+html.dark input {
+  @apply !text-white;
 }
