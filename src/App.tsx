@@ -432,7 +432,7 @@ export default function App() {
                  </ul>
                </div>
                <div className="p-3 border-t border-gray-100 text-center">
-                 <button onClick={() => setActiveTab(activeLogTab === 'entradas' ? 'entrada_obras' : 'controle_operacao')} className="text-sm font-medium text-brand-green hover:underline">Ir para a página de registros</button>
+                 <button onClick={() => { setActiveTab('controle_operacao'); window.dispatchEvent(new CustomEvent('change_controle_tab', { detail: activeLogTab === 'entradas' ? 'entradas' : 'saidas' })) }} className="text-sm font-medium text-brand-green hover:underline">Ir para a página de registros</button>
                </div>
             </div>
           </div>

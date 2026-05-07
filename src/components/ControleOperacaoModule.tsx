@@ -7,6 +7,14 @@ const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 export function ControleOperacaoModule() {
   const [activeTab, setActiveTab] = useState<'saidas' | 'operacao' | 'entradas'>('saidas');
 
+  useEffect(() => {
+    const handleTabChange = (e: CustomEvent) => {
+      setActiveTab(e.detail);
+    };
+    window.addEventListener('change_controle_tab', handleTabChange as EventListener);
+    return () => window.removeEventListener('change_controle_tab', handleTabChange as EventListener);
+  }, []);
+
   return (
     <div className="animate-in fade-in duration-300 h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
