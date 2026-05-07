@@ -157,7 +157,7 @@ const handleTableKeyDown = (
 
 function ControleSaidas() {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(0); // Set default to January (index 0) since the image data is for January
+  const [selecionadoMes, setSelecionadoMes] = useState(1); // Set default to February (index 1) since the image data is for February
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
@@ -225,6 +225,40 @@ function ControleSaidas() {
       }));
       localStorage.setItem('nm_merged_jan_2026', 'true');
     }
+
+    const hasMergedFeb = localStorage.getItem('nm_merged_feb_2026');
+    if (!hasMergedFeb) {
+      const FEBRUARY_DATA = {
+        "2026-02-02": { "e1_desc": "PIMO TAMAN", "e1_kits": "40" },
+        "2026-02-03": { "e1_desc": "TEGRA CLARIS", "e1_kits": "16" },
+        "2026-02-04": { "e1_desc": "TECTO (SÓ FOLHA DE PORTA)", "e1_folhas": "1", "e2_desc": "ONLY BY LIVING", "e2_kits": "53" },
+        "2026-02-05": { "e1_desc": "SENPRO OBA URCA", "e1_kits": "7" },
+        "2026-02-06": { "e1_desc": "PQ OLIMPICO CONCHA ACUSTICA", "e1_kits": "43", "e2_desc": "PQ OLIMPICO CONCHA ACUSTICA", "e2_kits": "70" },
+        "2026-02-09": { "e1_desc": "SIG ICONO 1502 FOLHA DE PORTA", "e1_folhas": "11" },
+        "2026-02-10": { "e1_desc": "BALASSIANO VISTA IPANEMA", "e1_kits": "119", "e2_desc": "BALASSIANO VISTA IPANEMA", "e2_kits": "113" },
+        "2026-02-11": { "e1_desc": "BALASSIANO VISTA IPANEMA", "e1_kits": "72", "e2_desc": "TECTO ENGENHARIA", "e2_kits": "1" },
+        "2026-02-12": { "e1_desc": "TEGRA GAEA", "e1_kits": "18", "e2_desc": "SOUL TIJUCA", "e2_kits": "3" },
+        "2026-02-13": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-14": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-15": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-16": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-17": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-18": { "e1_desc": "CARNAVAL", "e2_desc": "CARNAVAL" },
+        "2026-02-19": { "e1_desc": "PORTUS LM10", "e1_kits": "84" },
+        "2026-02-20": { "e1_desc": "ONLY BY LIVING", "e1_kits": "22" },
+        "2026-02-23": { "e1_desc": "SIG IPA (SÓ FOLHA DE PORTA)", "e1_folhas": "1" },
+        "2026-02-24": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "155" },
+        "2026-02-25": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "144" },
+        "2026-02-26": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "32" }
+      };
+
+      setMonthlyData(prev => ({
+        ...prev,
+        ...FEBRUARY_DATA
+      }));
+      localStorage.setItem('nm_merged_feb_2026', 'true');
+    }
+
   }, []);
 
   const sumCol = (field: string) => {
