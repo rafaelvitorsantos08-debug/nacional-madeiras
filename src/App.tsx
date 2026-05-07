@@ -82,10 +82,10 @@ export default function App() {
       const currentYearStats = new Date().getFullYear();
 
       Object.keys(saidas).forEach(dateStr => {
-        const parts = dateStr.split('/');
+        const parts = dateStr.split('-');
         if (parts.length === 3) {
           const m = parseInt(parts[1]) - 1;
-          const y = parseInt(parts[2]);
+          const y = parseInt(parts[0]);
           if (m === currentMonthIndex && y === currentYearStats) {
             const row = saidas[dateStr];
             countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
@@ -95,9 +95,16 @@ export default function App() {
 
       const operacao = getLs('nm_operacao_producao', {});
       let countOp = 0;
-      Object.keys(operacao).forEach(data => {
-        const row = operacao[data];
-        countOp += (parseInt(row.kits_montados) || 0);
+      Object.keys(operacao).forEach(dateStr => {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const m = parseInt(parts[1]) - 1;
+          const y = parseInt(parts[0]);
+          if (m === currentMonthIndex && y === currentYearStats) {
+            const row = operacao[dateStr];
+            countOp += (parseInt(row.kits_montados) || 0);
+          }
+        }
       });
 
       const obras = getLs('nm_entrada_obras_v4', {});
@@ -139,11 +146,11 @@ export default function App() {
       });
 
       // Saídas (Kits Enviados)
-      Object.keys(saidas).forEach(dateStr => { // DD/MM/YYYY
-         const parts = dateStr.split('/');
+      Object.keys(saidas).forEach(dateStr => { // YYYY-MM-DD
+         const parts = dateStr.split('-');
          if (parts.length === 3) {
             const m = parseInt(parts[1]) - 1;
-            const y = parseInt(parts[2]);
+            const y = parseInt(parts[0]);
             if (y === currentYear && m >= 0 && m < 12) {
                const row = saidas[dateStr];
                const total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
@@ -272,16 +279,16 @@ export default function App() {
             />
             <KpiCard 
               title="Kits em Obras" 
-              value={dashboardStats.totalEntradaObras.toLocaleString('pt-BR')} 
-              subtitle="peças"
+              value={dashboardStats.totalControleSaidasKits.toLocaleString('pt-BR')} 
+              subtitle="kits no mês atual"
               icon={<Home className="text-brand-green" />} 
               bgColor="bg-green-50"
               trend="up"
             />
             <KpiCard 
-              title="Controle x Operação" 
-              value={dashboardStats.totalControleSaidasKits.toLocaleString('pt-BR')} 
-              subtitle="kits no mês atual"
+              title="Produção" 
+              value={dashboardStats.totalOperacaoKits.toLocaleString('pt-BR')} 
+              subtitle="kits montados"
               icon={<HardHat className="text-amber-500" />} 
               bgColor="bg-amber-50"
               trend="neutral"
