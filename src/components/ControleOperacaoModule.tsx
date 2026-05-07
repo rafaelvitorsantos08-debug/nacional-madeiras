@@ -4,16 +4,12 @@ import { Package, Truck, Target, Plus, Download, Home, Trash2 } from 'lucide-rea
 
 const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
-export function ControleOperacaoModule() {
-  const [activeTab, setActiveTab] = useState<'saidas' | 'operacao' | 'entradas'>('saidas');
+export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth }: { initialTab?: 'saidas' | 'operacao' | 'entradas', initialMonth?: number }) {
+  const [activeTab, setActiveTab] = useState<'saidas' | 'operacao' | 'entradas'>(initialTab);
 
   useEffect(() => {
-    const handleTabChange = (e: CustomEvent) => {
-      setActiveTab(e.detail);
-    };
-    window.addEventListener('change_controle_tab', handleTabChange as EventListener);
-    return () => window.removeEventListener('change_controle_tab', handleTabChange as EventListener);
-  }, []);
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   return (
     <div className="animate-in fade-in duration-300 h-full flex flex-col">
@@ -54,8 +50,8 @@ export function ControleOperacaoModule() {
       </div>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        {activeTab === 'saidas' && <ControleSaidas />}
-        {activeTab === 'operacao' && <OperacaoProducao />}
+        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} />}
+        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} />}
         {activeTab === 'entradas' && <EntradaObras />}
       </div>
     </div>
@@ -163,9 +159,9 @@ const handleTableKeyDown = (
   }
 };
 
-function ControleSaidas() {
+function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(2); // Set default to March (index 2) since the image data is for March
+  const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
@@ -504,9 +500,9 @@ function ControleSaidas() {
   )
 }
 
-function OperacaoProducao() {
+function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(new Date().getMonth()); // 0-indexed
+  const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // 0-indexed
   
   const anos = Array.from({ length: 50 }, (_, i) => 2026 + i);
 

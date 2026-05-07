@@ -43,6 +43,8 @@ const INVENTARIO = [
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeControleTab, setActiveControleTab] = useState<'entradas' | 'saidas' | 'operacao'>('saidas');
+  const [activeControleMonth, setActiveControleMonth] = useState(new Date().getMonth());
   const [activeLogTab, setActiveLogTab] = useState<'entradas' | 'saidas'>('entradas');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
@@ -432,7 +434,17 @@ export default function App() {
                  </ul>
                </div>
                <div className="p-3 border-t border-gray-100 text-center">
-                 <button onClick={() => { setActiveTab('controle_operacao'); window.dispatchEvent(new CustomEvent('change_controle_tab', { detail: activeLogTab === 'entradas' ? 'entradas' : 'saidas' })) }} className="text-sm font-medium text-brand-green hover:underline">Ir para a página de registros</button>
+                 <button onClick={() => { 
+                   setActiveControleTab(activeLogTab === 'entradas' ? 'entradas' : 'saidas'); 
+                   const topItem = recentLogs[activeLogTab]?.[0];
+                   if (topItem) {
+                     // Get UTC month from timestamp (since we construct YYYY-MM-DDT...Z for some)
+                     // or just Date parsing. Actually topItem.data is "DD/MM/YYYY".
+                     const parts = topItem.data.split('/');
+                     if(parts.length === 3) setActiveControleMonth(parseInt(parts[1], 10) - 1);
+                   }
+                   setActiveTab('controle_operacao'); 
+                 }} className="text-sm font-medium text-brand-green hover:underline">Ir para a página de registros</button>
                </div>
             </div>
           </div>
@@ -509,7 +521,7 @@ export default function App() {
             <EstoqueModule />
           )}
           {activeTab === 'controle_operacao' && (
-            <ControleOperacaoModule />
+            <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} />
           )}
           {activeTab === 'relatorios' && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
