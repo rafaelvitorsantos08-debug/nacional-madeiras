@@ -157,7 +157,7 @@ const handleTableKeyDown = (
 
 function ControleSaidas() {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(3); // Set default to April (index 3) since we are showing April data
+  const [selecionadoMes, setSelecionadoMes] = useState(0); // Set default to January (index 0) since the image data is for January
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
@@ -193,6 +193,37 @@ function ControleSaidas() {
         ...APRIL_DATA
       }));
       localStorage.setItem('nm_merged_april_2026', 'true');
+    }
+
+    const hasMergedJan = localStorage.getItem('nm_merged_jan_2026');
+    if (!hasMergedJan) {
+      const JANUARY_DATA = {
+        "2026-01-05": { "e1_desc": "ONLY BY LIVE", "e1_kits": "48" },
+        "2026-01-06": { "e1_desc": "ISCOURI SOUL TIJUCA", "e1_kits": "23" },
+        "2026-01-07": { "e1_desc": "PIMMO TAMAN", "e1_kits": "130" },
+        "2026-01-08": { "e1_desc": "CYANO", "e1_kits": "3" },
+        "2026-01-09": { "e1_desc": "ATMOSFERA APTO 806 (PIER ARQUITETURA)", "e1_kits": "1" },
+        "2026-01-12": { "e1_desc": "LUGAMA", "e1_kits": "20" },
+        "2026-01-13": { "e1_desc": "ONLY BY LIVE", "e1_kits": "85" },
+        "2026-01-14": { "e1_desc": "ONLY BY LIVE", "e1_kits": "113" },
+        "2026-01-15": { "e1_desc": "ONLY BY LIVE", "e1_kits": "115" },
+        "2026-01-16": { "e1_desc": "ONLY BY LIVE", "e1_kits": "53" },
+        "2026-01-19": { "e1_desc": "PORTUS BC 396", "e1_kits": "12" },
+        "2026-01-20": { "e1_desc": "SENPRO OBA URCA", "e1_kits": "10" },
+        "2026-01-21": { "e1_desc": "SENPRO OBA URCA", "e1_kits": "8" },
+        "2026-01-23": { "e1_desc": "QUEIROZ GALVAO VILAGE PRIME", "e1_kits": "9" },
+        "2026-01-26": { "e1_desc": "ONLY BY LIVE", "e1_kits": "91", "e2_desc": "CASENGE", "e2_kits": "2" },
+        "2026-01-27": { "e1_desc": "ONLY BY LIVE", "e1_kits": "124" },
+        "2026-01-28": { "e1_desc": "PIMMO TAMAN", "e1_kits": "113" },
+        "2026-01-29": { "e1_desc": "PIMMO TAMAN", "e1_kits": "48" },
+        "2026-01-30": { "e1_desc": "ONLY BY LIVE", "e1_kits": "73", "e2_desc": "MOZACK ESSENCIA APTO 701", "e2_kits": "1" }
+      };
+      
+      setMonthlyData(prev => ({
+        ...prev,
+        ...JANUARY_DATA
+      }));
+      localStorage.setItem('nm_merged_jan_2026', 'true');
     }
   }, []);
 
