@@ -353,7 +353,7 @@ function ControleSaidas() {
         onKeyDown={(e) => handleTableKeyDown(e, row.day, colIdx, 'saidas', daysCount, 13)}
         style={{ fieldSizing: 'content', minWidth: '100%' } as any}
         className={cn(
-          "w-full h-full min-h-[28px] px-1 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
+          "w-full h-full min-h-[28px] px-1 bg-transparent text-center border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
           className
         )}
       />
@@ -468,7 +468,7 @@ function ControleSaidas() {
                       </>
                     ) : (
                       <>
-                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 0, 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 0, 'text-center font-medium text-gray-800')}</td>
                         <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_kits', 1)}</td>
                         <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_alizares', 2)}</td>
                         <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_folhas', 3)}</td>
@@ -476,7 +476,7 @@ function ControleSaidas() {
                         <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_rodapes', 5)}</td>
                         <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_paineis', 6)}</td>
                         
-                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 7, 'text-left font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 7, 'text-center font-medium text-gray-800')}</td>
                         <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_kits', 8)}</td>
                         <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_alizares', 9)}</td>
                         <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_folhas', 10)}</td>
@@ -548,7 +548,7 @@ function OperacaoProducao() {
         onKeyDown={(e) => handleTableKeyDown(e, day.dayNum, colIdx, 'operacao', daysThisMonth.length, 1)}
         style={{ fieldSizing: 'content', minWidth: '100%' } as any}
         className={cn(
-          "w-full h-full min-h-[29px] bg-transparent text-center border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500",
+          "w-full h-full min-h-[29px] bg-transparent text-center border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
           className
         )}
       />
