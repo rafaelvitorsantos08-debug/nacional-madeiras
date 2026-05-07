@@ -102,7 +102,7 @@ export default function App() {
           const y = parseInt(parts[0]);
           if (m === currentMonthIndex && y === currentYearStats) {
             const row = operacao[dateStr];
-            countOp += (parseInt(row.kits_montados) || 0);
+            countOp += (parseInt(row.quantidade) || 0);
           }
         }
       });
