@@ -403,8 +403,8 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-gray-50 p-4">
-        <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
+        <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0">
           <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
             <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Kits</span>
             <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_kits') + sumCol('e2_kits') || 0}</span>
@@ -431,8 +431,8 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm flex-1 flex flex-col min-h-0">
+          <div className="overflow-auto flex-1">
             <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]">
               <thead className="sticky top-0 z-10 bg-white shadow-sm shadow-gray-300">
                 <tr className="bg-gray-100 text-gray-700 border-b border-gray-300">
@@ -579,8 +579,8 @@ function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
     }, 0);
 
     return (
-      <div className="mb-8">
-        <div className="flex">
+      <div className="flex-1 flex flex-col min-h-0 mb-4">
+        <div className="flex shrink-0">
           <div className="bg-blue-600 text-white font-bold p-2 px-4 shadow-sm w-[350px] uppercase">
             {title}
           </div>
@@ -589,7 +589,7 @@ function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
           </div>
         </div>
         
-        <div className="flex gap-1 mt-1 overflow-x-auto pb-4">
+        <div className="flex gap-1 mt-1 overflow-auto pb-4 flex-1">
           {columns.map((col, idx) => (
             <table key={idx} className="text-center text-xs whitespace-nowrap min-w-[200px] border-collapse flex-none">
               <thead>
@@ -690,7 +690,7 @@ function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 bg-gray-50">
+      <div className="flex-1 flex flex-col p-4 bg-gray-50 min-h-0">
         {renderMonthSection(daysThisMonth, `TOTAL EM ${MESES[selecionadoMes]}:`)}
       </div>
     </div>
@@ -844,10 +844,11 @@ function EntradaObras() {
               </button>
             </div>
             
-            <div className="flex-1 overflow-auto p-4">
-              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden min-w-[800px]">
-                <table className="w-full text-center text-sm border-collapse">
-                  <thead className="bg-gray-100 text-gray-700 border-b border-gray-300">
+            <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+                <div className="flex-1 overflow-auto">
+                  <table className="w-full text-center text-sm border-collapse min-w-[800px]">
+                    <thead className="bg-gray-100 text-gray-700 border-b border-gray-300 sticky top-0 z-10 shadow-sm shadow-gray-200">
                     <tr>
                       <th className="p-3 border-r border-gray-300 font-bold text-left w-1/3">ESPECIFICAÇÃO / DESCRIÇÃO</th>
                       <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
@@ -924,6 +925,7 @@ function EntradaObras() {
                     )}
                   </tbody>
                 </table>
+               </div>
               </div>
             </div>
           </>
