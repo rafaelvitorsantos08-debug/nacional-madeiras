@@ -879,7 +879,7 @@ function EntradaObras() {
                               value={item.descricao || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'descricao', e.target.value)}
                               placeholder="Ex: Porta do Banheiro Social"
-                              className="w-full h-full min-h-[44px] p-3 pl-4 bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-brand-green text-left font-medium text-gray-800"
+                              className="w-full h-full min-h-[44px] p-3 pl-4 bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green text-center font-medium text-gray-800"
                             />
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-blue-50/30">
@@ -887,7 +887,7 @@ function EntradaObras() {
                               type="text" 
                               value={item.folhas || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'folhas', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold"
                             />
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-amber-50/30">
@@ -895,7 +895,7 @@ function EntradaObras() {
                               type="text" 
                               value={item.aduelas || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
                             />
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-purple-50/30">
@@ -903,7 +903,7 @@ function EntradaObras() {
                               type="text" 
                               value={item.alizares || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:bg-white focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
                             />
                           </td>
                           <td className="p-2 text-center">

@@ -127,7 +127,7 @@ export function EstoqueModule() {
               <input
                 type="text"
                 placeholder="Buscar por código ou especificação..."
-                className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-green focus:bg-white focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
               />
             </div>
             <button className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 flex-shrink-0">

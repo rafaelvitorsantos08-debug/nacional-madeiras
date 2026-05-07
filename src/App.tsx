@@ -43,6 +43,7 @@ const INVENTARIO = [
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeLogTab, setActiveLogTab] = useState<'entradas' | 'saidas'>('entradas');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   
@@ -72,6 +73,7 @@ export default function App() {
   });
 
   const [chartData, setChartData] = useState(CHART_DATA);
+  const [recentLogs, setRecentLogs] = useState<{entradas: any[], saidas: any[]}>({entradas: [], saidas: []});
 
   useEffect(() => {
     try {
@@ -179,6 +181,58 @@ export default function App() {
       // Filter down to months up to current month to avoid weird empty bars in the future
       const currentMonth = new Date().getMonth();
       setChartData(newChartData.slice(0, currentMonth + 1));
+
+      // Calculate recent logs
+      const eLogs: any[] = [];
+      const sLogs: any[] = [];
+
+      Object.values(obras).forEach((o: any) => {
+        let itemsCount = 0;
+        (o.itens || []).forEach((i: any) => {
+          itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+        });
+        if (itemsCount > 0 && o.data) {
+          eLogs.push({
+            id: o.id,
+            timestamp: new Date(o.data).getTime(),
+            item: `Materiais Recebidos`,
+            data: new Date(o.data).toLocaleDateString('pt-BR'),
+            qtd: itemsCount,
+            fornecedor: o.nome
+          })
+        }
+      });
+
+      Object.keys(saidas).forEach(dateStr => {
+        const row = saidas[dateStr];
+        let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0);
+        if (total > 0) {
+           sLogs.push({
+             id: dateStr + '-1',
+             timestamp: new Date(dateStr + 'T12:00:00Z').getTime(), // dummy time mid-day
+             item: 'Materiais Enviados',
+             data: dateStr.split('-').reverse().join('/'),
+             qtd: total,
+             fornecedor: row.e1_desc || 'Obra'
+           })
+        }
+        let total2 = (parseInt(row.e2_kits) || 0) + (parseInt(row.e2_alizares) || 0) + (parseInt(row.e2_folhas) || 0);
+        if (total2 > 0) {
+           sLogs.push({
+             id: dateStr + '-2',
+             timestamp: new Date(dateStr + 'T12:00:00Z').getTime(),
+             item: 'Materiais Enviados',
+             data: dateStr.split('-').reverse().join('/'),
+             qtd: total2,
+             fornecedor: row.e2_desc || 'Obra'
+           })
+        }
+      });
+
+      setRecentLogs({
+        entradas: eLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
+        saidas: sLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
+      });
 
     } catch (e) {
       console.error(e);
@@ -347,28 +401,38 @@ export default function App() {
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
                <div className="border-b border-gray-100">
                   <div className="flex">
-                    <button className="flex-1 py-3 text-sm font-medium text-brand-green border-b-2 border-brand-green uppercase tracking-wide">Últimas Entradas</button>
-                    <button className="flex-1 py-3 text-sm font-medium text-gray-400 hover:text-gray-600 uppercase tracking-wide">Últimas Saídas</button>
+                    <button 
+                      onClick={() => setActiveLogTab('entradas')}
+                      className={cn("flex-1 py-3 text-sm font-medium uppercase tracking-wide transition-colors outline-none", activeLogTab === 'entradas' ? "text-brand-green border-b-2 border-brand-green" : "text-gray-400 hover:text-gray-600")}
+                    >Últimas Entradas</button>
+                    <button 
+                      onClick={() => setActiveLogTab('saidas')}
+                      className={cn("flex-1 py-3 text-sm font-medium uppercase tracking-wide transition-colors outline-none", activeLogTab === 'saidas' ? "text-brand-green border-b-2 border-brand-green" : "text-gray-400 hover:text-gray-600")}
+                    >Últimas Saídas</button>
                   </div>
                </div>
                <div className="flex-1 overflow-auto p-2">
                  <ul className="divide-y divide-gray-50">
-                    {ULTIMAS_ENTRADAS.map((log) => (
+                    {recentLogs[activeLogTab].length === 0 ? (
+                      <li className="p-4 text-center text-gray-400 text-sm">Nenhum registro encontrado.</li>
+                    ) : recentLogs[activeLogTab].map((log) => (
                       <li key={log.id} className="p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer group">
                         <div className="flex justify-between items-start mb-1">
                            <span className="font-medium text-sm text-gray-800 line-clamp-1 pr-2">{log.item}</span>
-                           <span className="text-xs font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full whitespace-nowrap">+{log.qtd}</span>
+                           <span className={cn("text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap", activeLogTab === 'entradas' ? "text-brand-green bg-brand-green/10" : "text-amber-600 bg-amber-50")}>
+                             {activeLogTab === 'entradas' ? '+' : '-'}{log.qtd}
+                           </span>
                         </div>
                         <div className="flex justify-between items-center text-xs text-gray-500">
                            <span className="flex items-center"><Box className="w-3 h-3 mr-1"/> {log.fornecedor}</span>
                            <span>{log.data}</span>
                         </div>
-                      </li>
+                       </li>
                     ))}
                  </ul>
                </div>
                <div className="p-3 border-t border-gray-100 text-center">
-                 <a href="#" className="text-sm font-medium text-brand-green hover:underline">Ver todo o histórico</a>
+                 <button onClick={() => setActiveTab(activeLogTab === 'entradas' ? 'entrada_obras' : 'controle_operacao')} className="text-sm font-medium text-brand-green hover:underline">Ir para a página de registros</button>
                </div>
             </div>
           </div>
