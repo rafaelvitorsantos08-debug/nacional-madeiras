@@ -78,9 +78,19 @@ export default function App() {
 
       const saidas = getLs('nm_controle_saidas', {});
       let countSaidas = 0;
-      Object.keys(saidas).forEach(data => {
-        const row = saidas[data];
-        countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+      const currentMonthIndex = new Date().getMonth();
+      const currentYearStats = new Date().getFullYear();
+
+      Object.keys(saidas).forEach(dateStr => {
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          const m = parseInt(parts[1]) - 1;
+          const y = parseInt(parts[2]);
+          if (m === currentMonthIndex && y === currentYearStats) {
+            const row = saidas[dateStr];
+            countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+          }
+        }
       });
 
       const operacao = getLs('nm_operacao_producao', {});
@@ -271,7 +281,7 @@ export default function App() {
             <KpiCard 
               title="Controle x Operação" 
               value={dashboardStats.totalControleSaidasKits.toLocaleString('pt-BR')} 
-              subtitle="kits saídos"
+              subtitle="kits no mês atual"
               icon={<HardHat className="text-amber-500" />} 
               bgColor="bg-amber-50"
               trend="neutral"
