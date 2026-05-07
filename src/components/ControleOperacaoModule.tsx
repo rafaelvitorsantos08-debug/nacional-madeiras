@@ -157,7 +157,7 @@ const handleTableKeyDown = (
 
 function ControleSaidas() {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(1); // Set default to February (index 1) since the image data is for February
+  const [selecionadoMes, setSelecionadoMes] = useState(2); // Set default to March (index 2) since the image data is for March
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
@@ -257,6 +257,40 @@ function ControleSaidas() {
         ...FEBRUARY_DATA
       }));
       localStorage.setItem('nm_merged_feb_2026', 'true');
+    }
+
+    const hasMergedMar = localStorage.getItem('nm_merged_mar_2026');
+    if (!hasMergedMar) {
+      const MARCH_DATA = {
+        "2026-03-02": { "e1_desc": "JARDIM LIRIO", "e1_kits": "23" },
+        "2026-03-03": { "e1_desc": "PORTUS BC396", "e1_kits": "83" },
+        "2026-03-04": { "e1_desc": "NURRA SIX KITS DE CORRER", "e1_kits": "4" },
+        "2026-03-05": { "e1_desc": "BALASSIANO VISTA IPANEMA", "e1_kits": "18" },
+        "2026-03-06": { "e1_desc": "PIMO TAMAN + ALIZARES", "e1_kits": "92" },
+        "2026-03-09": { "e1_desc": "BALASSIANO VISTA IPANEMA + ALIZARES", "e1_kits": "18" },
+        "2026-03-10": { "e1_desc": "JOAO FORTES PALMS + ALIZARES", "e1_kits": "10", "e2_desc": "PATRIMAR GRAND QUARTIER BL 2", "e2_kits": "140" },
+        "2026-03-11": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 2", "e1_kits": "132" },
+        "2026-03-12": { "e1_desc": "PATRIMAR GRAND QUARTIER+ALIZARES BL 2", "e1_kits": "44", "e1_alizares": "316" },
+        "2026-03-13": { "e1_desc": "TERRAMARINE", "e1_kits": "6" },
+        "2026-03-16": { "e1_desc": "PIMMO TAMAN", "e1_kits": "13", "e2_desc": "HSI ROCONTEC", "e2_kits": "50" },
+        "2026-03-17": { "e1_desc": "SENPRO OBA", "e1_paineis": "20" },
+        "2026-03-18": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 4", "e1_kits": "132", "e2_desc": "CALPER", "e2_kits": "2" },
+        "2026-03-19": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 4", "e1_kits": "140", "e2_desc": "PERPETTUM RG 33", "e2_kits": "1" },
+        "2026-03-20": { "e1_desc": "PATRIMAR GRAND QUARTIER + ALIZARES BL 4", "e1_kits": "44", "e1_alizares": "316", "e2_desc": "TERRAMARINE VENEZIANA", "e2_kits": "2" },
+        "2026-03-23": { "e1_desc": "CONCHA ACUSTICA", "e1_kits": "10", "e2_desc": "PIMMO TAMAN", "e2_kits": "24" },
+        "2026-03-24": { "e1_desc": "SENPRO OBA", "e1_kits": "12", "e1_alizares": "13", "e1_aduelas": "1", "e2_desc": "PATRIMAR GRAND QUARTIER BL 3", "e2_kits": "162" },
+        "2026-03-25": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "159", "e2_desc": "ONLY BY LIVE", "e2_kits": "1", "e2_alizares": "1", "e2_aduelas": "6" },
+        "2026-03-26": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "32", "e1_alizares": "353", "e2_desc": "SENPRO OBA URCA", "e2_paineis": "31" },
+        "2026-03-27": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 2", "e1_kits": "81", "e2_desc": "SAFIRA ENGENHARIA MARIA AMÁLIA", "e2_kits": "1" },
+        "2026-03-30": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 2", "e1_kits": "85", "e2_desc": "PALMS", "e2_kits": "8", "e2_aduelas": "15" },
+        "2026-03-31": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 2", "e1_kits": "149", "e2_desc": "PATRIMAR GRAND QUARTIER BL 2", "e2_kits": "16", "e2_alizares": "331" }
+      };
+
+      setMonthlyData(prev => ({
+        ...prev,
+        ...MARCH_DATA
+      }));
+      localStorage.setItem('nm_merged_mar_2026', 'true');
     }
 
   }, []);
