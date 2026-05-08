@@ -31,7 +31,7 @@ export const INITIAL_ALIZARES = [
   { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },
 ];
 
-function useLocalStorage<T>(key: string, initialValue: T) {
+export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
     try {

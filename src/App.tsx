@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES } from './components/EstoqueModule';
+import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
 import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 
 // --- MOCK DATA ---
@@ -32,13 +32,7 @@ const ULTIMAS_SAIDAS = [
   { id: 3, item: 'Caixa de Dobradiça', data: '09/05/2026', qtd: 250, destino: 'Loja Varejo 2' },
 ];
 
-const INVENTARIO = [
-  { id: '1001', desc: 'Kit Porta Interna Média', dimensoes: '80x210', material: 'Pinho', espessura: '35', estoque: 450, status: 'OK' },
-  { id: '1002', desc: 'Kit Porta Estreita', dimensoes: '70x210', material: 'MDF / Primer', espessura: '35', estoque: 12, status: 'Crítico' },
-  { id: '1003', desc: 'Kit Porta Larga', dimensoes: '90x210', material: 'Angelim', espessura: '40', estoque: 50, status: 'Baixo' },
-  { id: '1004', desc: 'Porta Lisa', dimensoes: '80x210', material: 'Jequitibá', espessura: '35', estoque: 280, status: 'OK' },
-  { id: '1005', desc: 'Porta Pivotante', dimensoes: '120x210', material: 'Itaúba', espessura: '45', estoque: 5, status: 'Crítico' },
-];
+
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -55,6 +49,46 @@ export default function App() {
       if (saved) return saved === 'true';
     }
     return false;
+  });
+
+  const [portas] = useLocalStorage('nm_portas', INITIAL_PORTAS);
+  const [aduelas] = useLocalStorage('nm_aduelas', INITIAL_ADUELAS);
+  const [alizares] = useLocalStorage('nm_alizares', INITIAL_ALIZARES);
+
+  const inventoryReal = [
+    ...portas.map((p: any) => ({
+      id: p.id,
+      item: 'Folha de Porta',
+      dimensoes: p.dimensao,
+      material: p.cor,
+      espessura: '-',
+      estoque: p.estoque,
+      status: p.status,
+    })),
+    ...aduelas.map((a: any) => ({
+      id: a.id,
+      item: 'Aduela',
+      dimensoes: `${a.largura}x${a.comprimento}`,
+      material: a.cor,
+      espessura: '-',
+      estoque: a.estoque,
+      status: a.status,
+    })),
+    ...alizares.map((a: any) => ({
+      id: a.id,
+      item: `Alizar (F:${a.face} A:${a.aba})`,
+      dimensoes: '-',
+      material: a.cor,
+      espessura: a.espessura,
+      estoque: a.estoque,
+      status: a.status,
+    })),
+  ].sort((a, b) => {
+     // Optional: Sort by critical/low stock first, then by ID. Or just keep order.
+     const statusPriority: Record<string, number> = { 'Crítico': 1, 'Baixo': 2, 'Atenção': 3, 'OK': 4 };
+     const statA = statusPriority[a.status] || 99;
+     const statB = statusPriority[b.status] || 99;
+     return statA - statB;
   });
 
   useEffect(() => {
@@ -472,7 +506,7 @@ export default function App() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {INVENTARIO.map((item) => (
+                  {inventoryReal.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-3">
@@ -481,24 +515,28 @@ export default function App() {
                               <Box className="w-5 h-5 text-gray-400" />
                            </div>
                            <div>
-                             <p className="font-medium text-gray-800">{item.desc}</p>
+                             <p className="font-medium text-gray-800">{item.item}</p>
                              <p className="text-xs text-gray-400">cód: {item.id}</p>
                            </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-gray-600 bg-gray-50/30">{item.dimensoes}</td>
                       <td className="px-6 py-4 text-gray-600">{item.material}</td>
-                      <td className="px-6 py-4 text-center text-gray-600">{item.espessura}mm</td>
+                      <td className="px-6 py-4 text-center text-gray-600">
+                        {item.espessura !== '-' ? `${item.espessura}mm` : item.espessura}
+                      </td>
                       <td className="px-6 py-4 text-right font-medium text-gray-900">{item.estoque.toLocaleString()}</td>
                       <td className="px-6 py-4 text-center">
                         <span className={cn(
                           "inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border",
                           item.status === 'OK' && "bg-green-50 text-brand-green border-green-200",
                           item.status === 'Baixo' && "bg-yellow-50 text-yellow-700 border-yellow-200",
+                          item.status === 'Atenção' && "bg-orange-50 text-orange-700 border-orange-200",
                           item.status === 'Crítico' && "bg-red-50 text-red-700 border-red-200"
                         )}>
                           {item.status === 'OK' && <span className="w-1.5 h-1.5 rounded-full bg-brand-green mr-1.5"></span>}
                           {item.status === 'Baixo' && <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 mr-1.5"></span>}
+                          {item.status === 'Atenção' && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5"></span>}
                           {item.status === 'Crítico' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>}
                           {item.status}
                         </span>
