@@ -286,9 +286,25 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
   if (!isOpen) return null;
 
   const [formData, setFormData] = useState<any>(item || { estoque: 0 });
+  const [isCustomDim, setIsCustomDim] = useState<boolean>(() => {
+    if (item && type === 'portas' && item.dimensao) {
+      return !DIMENSOES_PORTA.includes(item.dimensao);
+    }
+    return false;
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDimensaoSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === 'Outra') {
+      setIsCustomDim(true);
+      setFormData({ ...formData, dimensao: '' });
+    } else {
+      setIsCustomDim(false);
+      setFormData({ ...formData, dimensao: e.target.value });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -340,10 +356,14 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Dimensão</label>
-                    <select name="dimensao" value={formData.dimensao || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                    <select value={isCustomDim ? 'Outra' : (formData.dimensao || '')} onChange={handleDimensaoSelectChange} required={!isCustomDim} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
                       <option value="" disabled>Selecione...</option>
                       {DIMENSOES_PORTA.map(d => <option key={d} value={d}>{d}</option>)}
+                      <option value="Outra">Outra (Personalizada)</option>
                     </select>
+                    {isCustomDim && (
+                      <input type="text" name="dimensao" value={formData.dimensao || ''} onChange={handleChange} required placeholder="Ex: 850x2100" className="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
+                    )}
                   </div>
                </div>
             )}
