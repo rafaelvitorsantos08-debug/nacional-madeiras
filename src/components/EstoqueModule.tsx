@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite'];
+const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite', 'Primer'];
 const ENCHIMENTOS_PORTA = ['Colmeia', 'Semi Solida', 'Bondor'];
 const MODELOS_PORTA = ['Com Bit', 'Lisa'];
 const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '700x2100', '720x2100', '700x2070', '720x2070', '800x2100', '820x2100', '800x2070', '820x2070', '900x2100', '920x2100', '900x2070', '920x2070', '1000x2100'];
