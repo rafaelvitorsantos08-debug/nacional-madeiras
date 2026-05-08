@@ -39,7 +39,7 @@ html.dark .text-gray-600 {
 }
 
 html.dark .text-gray-500 {
-  @apply !text-gray-400;
+  @apply !text-gray-300;
 }
 
 html.dark .border-gray-100, 
@@ -48,12 +48,31 @@ html.dark .border-gray-300 {
   @apply !border-gray-800;
 }
 
+html.dark .text-blue-900, html.dark .text-blue-800 {
+  @apply !text-blue-200;
+}
+
+html.dark .text-amber-900, html.dark .text-amber-800 {
+  @apply !text-amber-200;
+}
+
+html.dark .text-purple-900, html.dark .text-purple-800 {
+  @apply !text-purple-200;
+}
+
 /* Fixes for table headers and active elements in dark mode */
 html.dark .bg-gray-100 {
   @apply !bg-gray-800;
 }
 
-html.dark .hover\:bg-gray-50:hover {
+html.dark .bg-gray-50\/50,
+html.dark .bg-gray-50\/80,
+html.dark .bg-gray-50\/30 {
+  @apply !bg-gray-900;
+}
+
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-50\/50:hover {
   @apply hover:!bg-gray-800;
 }
 
@@ -79,6 +98,25 @@ html.dark .bg-green-100 {
 
 html.dark .bg-green-200 {
   @apply !bg-green-800/40 !text-green-200;
+}
+
+html.dark .bg-gray-200\/80 {
+  @apply !bg-gray-800;
+}
+
+html.dark .bg-blue-100\/50,
+html.dark .bg-blue-50\/30 {
+  @apply !bg-blue-900/40 !text-blue-200;
+}
+
+html.dark .bg-amber-100\/50,
+html.dark .bg-amber-50\/30 {
+  @apply !bg-amber-900/40 !text-amber-200;
+}
+
+html.dark .bg-purple-100\/50,
+html.dark .bg-purple-50\/30 {
+  @apply !bg-purple-900/40 !text-purple-200;
 }
 
 html.dark .bg-\[\#DDEBF7\] {
