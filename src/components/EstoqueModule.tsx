@@ -5,7 +5,7 @@ import { cn } from '../lib/utils';
 const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite'];
 const ENCHIMENTOS_PORTA = ['Colmeia', 'Semi Solida', 'Bondor'];
 const MODELOS_PORTA = ['Com Bit', 'Lisa'];
-const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '700x2100', '720x2100', '700x2070', '720x2070', '800x2100', '820x2100', '800x2070', '820x2070', '900x2100', '920x2100', '1000x2100'];
+const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '700x2100', '720x2100', '700x2070', '720x2070', '800x2100', '820x2100', '800x2070', '820x2070', '900x2100', '920x2100', '900x2070', '920x2070', '1000x2100'];
 const LARGURAS_ADUELA = ['90', '100', '110', '120', '130', '140', '150', '160', '170', '180', '190', '200', '210'];
 const COMPRIMENTOS_ADUELA = ['2110', '2120'];
 const FACE_ALIZAR = ['30', '40', '50', '60', '70', '80', '100'];
