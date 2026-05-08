@@ -3,6 +3,7 @@ import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, 
 import { cn } from '../lib/utils';
 
 const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite'];
+const ENCHIMENTOS_PORTA = ['Colmeia', 'Semi Solida', 'Bondor'];
 const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '700x2100', '720x2100', '800x2100', '820x2100', '900x2100', '920x2100', '1000x2100'];
 const LARGURAS_ADUELA = ['90', '100', '110', '120', '130', '140', '150', '160', '170', '180', '190', '200', '210'];
 const COMPRIMENTOS_ADUELA = ['2110', '2120'];
@@ -12,11 +13,11 @@ const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 
 // Mockup data
 export const INITIAL_PORTAS = [
-  { id: 'FP-01', cor: 'Branco Pinhal', dimensao: '800x2100', estoque: 145, status: 'OK' },
-  { id: 'FP-02', cor: 'Freijó Médio', dimensao: '700x2100', estoque: 12, status: 'Crítico' },
-  { id: 'FP-03', cor: 'Preto', dimensao: '620x2100', estoque: 45, status: 'Atenção' },
-  { id: 'FP-04', cor: 'Cinza Grafite', dimensao: '900x2100', estoque: 98, status: 'OK' },
-  { id: 'FP-05', cor: 'Branco Max', dimensao: '820x2100', estoque: 15, status: 'Atenção' },
+  { id: 'FP-01', cor: 'Branco Pinhal', dimensao: '800x2100', enchimento: 'Colmeia', estoque: 145, status: 'OK' },
+  { id: 'FP-02', cor: 'Freijó Médio', dimensao: '700x2100', enchimento: 'Semi Solida', estoque: 12, status: 'Crítico' },
+  { id: 'FP-03', cor: 'Preto', dimensao: '620x2100', enchimento: 'Bondor', estoque: 45, status: 'Atenção' },
+  { id: 'FP-04', cor: 'Cinza Grafite', dimensao: '900x2100', enchimento: 'Colmeia', estoque: 98, status: 'OK' },
+  { id: 'FP-05', cor: 'Branco Max', dimensao: '820x2100', enchimento: 'Semi Solida', estoque: 15, status: 'Atenção' },
 ];
 
 export const INITIAL_ADUELAS = [
@@ -103,7 +104,7 @@ export function EstoqueModule() {
           <SubTabButton
             active={activeSubTab === 'portas'}
             onClick={() => setActiveSubTab('portas')}
-            label="Folhas de Porta Lisas"
+            label="Folhas de Portas"
           />
           <SubTabButton
             active={activeSubTab === 'aduelas'}
@@ -151,6 +152,7 @@ export function EstoqueModule() {
                 {activeSubTab === 'portas' && (
                   <>
                     <th className="px-6 py-3 font-medium">Cor</th>
+                    <th className="px-6 py-3 font-medium text-center">Enchimento</th>
                     <th className="px-6 py-3 font-medium text-center">Dimensões</th>
                   </>
                 )}
@@ -185,6 +187,7 @@ export function EstoqueModule() {
                        <span className="font-medium text-gray-700">{item.cor}</span>
                     </div>
                   </td>
+                  <td className="px-6 py-4 text-center text-gray-600">{item.enchimento || '-'}</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.dimensao}</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
@@ -317,12 +320,21 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
             )}
 
             {type === 'portas' && (
-               <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dimensão</label>
-                  <select name="dimensao" value={formData.dimensao || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
-                    <option value="" disabled>Selecione...</option>
-                    {DIMENSOES_PORTA.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Enchimento</label>
+                    <select name="enchimento" value={formData.enchimento || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {ENCHIMENTOS_PORTA.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dimensão</label>
+                    <select name="dimensao" value={formData.dimensao || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {DIMENSOES_PORTA.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
                </div>
             )}
 
