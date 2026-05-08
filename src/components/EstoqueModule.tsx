@@ -64,7 +64,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 }
 
 export function EstoqueModule() {
-  const [activeSubTab, setActiveSubTab] = useState<'portas' | 'aduelas' | 'alizares'>('portas');
+  const [activeSubTab, setActiveSubTab] = useLocalStorage<'portas' | 'aduelas' | 'alizares'>('nm_active_sub_tab', 'portas');
   
   const [portas, setPortas] = useLocalStorage('nm_portas', INITIAL_PORTAS);
   const [aduelas, setAduelas] = useLocalStorage('nm_aduelas', INITIAL_ADUELAS);

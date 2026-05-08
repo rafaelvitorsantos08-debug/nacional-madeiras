@@ -36,10 +36,10 @@ const ULTIMAS_SAIDAS = [
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [activeControleTab, setActiveControleTab] = useState<'entradas' | 'saidas' | 'operacao'>('saidas');
+  const [activeTab, setActiveTab] = useLocalStorage('nm_active_tab', 'dashboard');
+  const [activeControleTab, setActiveControleTab] = useLocalStorage<'entradas' | 'saidas' | 'operacao'>('nm_active_controle_tab', 'saidas');
   const [activeControleMonth, setActiveControleMonth] = useState(new Date().getMonth());
-  const [activeLogTab, setActiveLogTab] = useState<'entradas' | 'saidas'>('entradas');
+  const [activeLogTab, setActiveLogTab] = useLocalStorage<'entradas' | 'saidas'>('nm_active_log_tab', 'entradas');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   
