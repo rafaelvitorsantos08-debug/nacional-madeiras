@@ -58,7 +58,7 @@ export default function App() {
   const inventoryReal = [
     ...portas.map((p: any) => ({
       id: p.id,
-      item: 'Folha de Porta',
+      item: `Folha de Porta ${p.modelo || ''}`.trim(),
       dimensoes: p.dimensao,
       material: p.cor,
       espessura: '-',
