@@ -76,7 +76,7 @@ export default function App() {
     })),
     ...alizares.map((a: any) => ({
       id: a.id,
-      item: `Alizar (F:${a.face} A:${a.aba})`,
+      item: `Alizar (F:${a.face} A:${a.aba} C:${a.comprimento || '-'})`,
       dimensoes: '-',
       material: a.cor,
       espessura: a.espessura,

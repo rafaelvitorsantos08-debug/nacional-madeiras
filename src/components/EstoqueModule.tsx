@@ -11,6 +11,7 @@ const COMPRIMENTOS_ADUELA = ['2110', '2120'];
 const FACE_ALIZAR = ['30', '40', '50', '60', '70', '80', '100'];
 const ABA_ALIZAR = ['08', '40', '50', '60', '70', '80'];
 const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
+const COMPRIMENTOS_ALIZAR = ['1000', '2250', '2700'];
 
 // Mockup data
 export const INITIAL_PORTAS = [
@@ -28,9 +29,9 @@ export const INITIAL_ADUELAS = [
 ];
 
 export const INITIAL_ALIZARES = [
-  { id: 'AL-01', cor: 'Branco Pinhal', face: '50', aba: '60', espessura: '15', estoque: 450, status: 'OK' },
-  { id: 'AL-02', cor: 'Freijó Médio', face: '50', aba: '40', espessura: '10', estoque: 85, status: 'Atenção' },
-  { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', estoque: 12, status: 'Crítico' },
+  { id: 'AL-01', cor: 'Branco Pinhal', face: '50', aba: '60', espessura: '15', comprimento: '2700', estoque: 450, status: 'OK' },
+  { id: 'AL-02', cor: 'Freijó Médio', face: '50', aba: '40', espessura: '10', comprimento: '2250', estoque: 85, status: 'Atenção' },
+  { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', comprimento: '2250', estoque: 12, status: 'Crítico' },
 ];
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
@@ -168,6 +169,7 @@ export function EstoqueModule() {
                 {activeSubTab === 'alizares' && (
                   <>
                     <th className="px-6 py-3 font-medium">Cor</th>
+                    <th className="px-6 py-3 font-medium text-center">Comprimento</th>
                     <th className="px-6 py-3 font-medium text-center">Face</th>
                     <th className="px-6 py-3 font-medium text-center">Aba</th>
                     <th className="px-6 py-3 font-medium text-center">Espessura</th>
@@ -228,6 +230,7 @@ export function EstoqueModule() {
                        <span className="font-medium text-gray-700">{item.cor}</span>
                     </div>
                   </td>
+                  <td className="px-6 py-4 text-center text-gray-600">{item.comprimento} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.face} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.aba} mm</td>
                   <td className="px-6 py-4 text-center text-gray-600">{item.espessura} mm</td>
@@ -388,7 +391,14 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
             )}
 
             {type === 'alizares' && (
-               <div className="grid grid-cols-3 gap-4">
+               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento</label>
+                    <select name="comprimento" value={formData.comprimento || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                      <option value="" disabled>Selecione...</option>
+                      {COMPRIMENTOS_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
                     <select name="face" value={formData.face || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
