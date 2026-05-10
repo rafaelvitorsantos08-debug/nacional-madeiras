@@ -163,9 +163,6 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
   
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<any>(null);
-
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
 
@@ -461,16 +458,7 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr 
-                    key={row.dateStrKey} 
-                    className="border-b border-gray-200 hover:bg-black/5 transition-colors cursor-pointer"
-                    onClick={(e) => {
-                      if ((e.target as HTMLElement).tagName.toLowerCase() !== 'input') {
-                        setSelectedRow(row);
-                        setDrawerOpen(true);
-                      }
-                    }}
-                  >
+                  <tr key={row.dateStrKey} className="border-b border-gray-200">
                     <td className="p-1.5 border-r border-gray-300 bg-gray-600 text-white font-medium">{row.ds}</td>
                     <td className="p-1.5 border-r border-gray-300 bg-white font-medium text-gray-700">{row.dateStrDisplay}</td>
                     {row.isWeekend ? (
@@ -508,64 +496,6 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
           </div>
         </div>
       </div>
-
-      {/* Drawer Side Panel */}
-      {drawerOpen && selectedRow && (
-        <>
-          <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setDrawerOpen(false)} />
-          <div className="fixed top-0 right-0 bottom-0 w-full sm:w-[500px] bg-white z-50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-50">
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                  <Info className="w-6 h-6 mr-2 text-brand-green" />
-                  Detalhes da Data
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">{selectedRow.dateStrDisplay} - {selectedRow.ds.toUpperCase()}</p>
-              </div>
-              <button onClick={() => setDrawerOpen(false)} className="p-2 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 flex-1 overflow-y-auto space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Observações
-                </label>
-                <textarea 
-                  value={monthlyData[selectedRow.dateStrKey]?.observacoes || ''}
-                  onChange={(e) => handleInputChange(selectedRow.dateStrKey, 'observacoes', e.target.value)}
-                  placeholder="Adicione observações para este dia..."
-                  className="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none resize-none shadow-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                  <History className="w-4 h-4 mr-2" />
-                  Histórico / Notas
-                </label>
-                <textarea 
-                  value={monthlyData[selectedRow.dateStrKey]?.notas || ''}
-                  onChange={(e) => handleInputChange(selectedRow.dateStrKey, 'notas', e.target.value)}
-                  placeholder="Adicione notas, problemas encontrados ou histórico de alterações..."
-                  className="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none resize-none shadow-sm flex-1"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <button 
-                onClick={() => setDrawerOpen(false)} 
-                className="w-full bg-brand-green text-white font-medium py-3 rounded-lg hover:bg-brand-green-dark transition-colors shadow-sm"
-              >
-                Concluir
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   )
 }
