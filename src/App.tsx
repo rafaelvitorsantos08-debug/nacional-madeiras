@@ -112,168 +112,167 @@ export default function App() {
   const [recentLogs, setRecentLogs] = useState<{entradas: any[], saidas: any[]}>({entradas: [], saidas: []});
 
   useEffect(() => {
-    try {
-      const getLs = (key: string, init: any) => {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : init;
-      };
+    const calculateStats = () => {
+      try {
+        const getLs = (key: string, init: any) => {
+          const item = window.localStorage.getItem(key);
+          return item ? JSON.parse(item) : init;
+        };
 
-      const portas = getLs('nm_portas', INITIAL_PORTAS);
-      const aduelas = getLs('nm_aduelas', INITIAL_ADUELAS);
-      const alizares = getLs('nm_alizares', INITIAL_ALIZARES);
+        const portasLs = getLs('nm_portas', INITIAL_PORTAS);
+        const aduelasLs = getLs('nm_aduelas', INITIAL_ADUELAS);
+        const alizaresLs = getLs('nm_alizares', INITIAL_ALIZARES);
 
-      let totalEst = 0;
-      let alertas = 0;
-      
-      [...(Array.isArray(portas) ? portas : []), ...(Array.isArray(aduelas) ? aduelas : []), ...(Array.isArray(alizares) ? alizares : [])].forEach((item: any) => {
-         const qty = typeof item.estoque === 'number' ? item.estoque : parseInt(item.estoque) || 0;
-         totalEst += qty;
-         if (item.status === 'Crítico') alertas++;
-      });
-
-      const saidas = getLs('nm_controle_saidas', {});
-      let countSaidas = 0;
-      const currentMonthIndex = new Date().getMonth();
-      const currentYearStats = new Date().getFullYear();
-
-      Object.keys(saidas || {}).forEach(dateStr => {
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          const m = parseInt(parts[1]) - 1;
-          const y = parseInt(parts[0]);
-          if (m === currentMonthIndex && y === currentYearStats) {
-            const row = saidas[dateStr];
-            countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
-          }
-        }
-      });
-
-      const operacao = getLs('nm_operacao_producao', {});
-      let countOp = 0;
-      Object.keys(operacao || {}).forEach(dateStr => {
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          const m = parseInt(parts[1]) - 1;
-          const y = parseInt(parts[0]);
-          if (m === currentMonthIndex && y === currentYearStats) {
-            const row = operacao[dateStr];
-            countOp += (parseInt(row.quantidade) || 0);
-          }
-        }
-      });
-
-      const obras = getLs('nm_entrada_obras_v4', {});
-      let countObras = 0;
-      Object.values(obras || {}).forEach((o: any) => {
-        const itens = o?.itens || [];
-        itens.forEach((i: any) => {
-          // As per user request: ENTRADA DE OBRA X SAIDA SOMENTE DE KITS
-          // Kits means folhas
-          countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+        let totalEst = 0;
+        let alertas = 0;
+        
+        [...(Array.isArray(portasLs) ? portasLs : []), ...(Array.isArray(aduelasLs) ? aduelasLs : []), ...(Array.isArray(alizaresLs) ? alizaresLs : [])].forEach((item: any) => {
+           const qty = typeof item.estoque === 'number' ? item.estoque : parseInt(item.estoque) || 0;
+           totalEst += qty;
+           if (item.status === 'Crítico') alertas++;
         });
-      });
 
-      setDashboardStats({
-        totalEstoque: totalEst,
-        alertaBaixoEstoque: alertas,
-        totalControleSaidasKits: countSaidas,
-        totalOperacaoKits: countOp,
-        totalEntradaObras: countObras
-      });
+        const saidas = getLs('nm_controle_saidas', {});
+        let countSaidas = 0;
+        const currentMonthIndex = new Date().getMonth();
+        const currentYearStats = new Date().getFullYear();
 
-      // CALCULATE CHART DATA: Entrada de Obras (Folhas/Kits) vs Saídas de Kits per Month
-      const mesesAbbr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      const currentYear = new Date().getFullYear();
-      
-      const newChartData = mesesAbbr.map(mes => ({ name: mes, entradas: 0, saidas: 0 }));
-
-      // Entradas (Folhas em Obras)
-      Object.values(obras || {}).forEach((o: any) => {
-         if (!o?.data) return;
-         const d = new Date(o.data);
-         if (d.getFullYear() === currentYear) {
-           let folhasTotal = 0;
-           (o.itens || []).forEach((i: any) => {
-             folhasTotal += (parseInt(i.folhas) || 0);
-           });
-           newChartData[d.getMonth()].entradas += folhasTotal;
-         }
-      });
-
-      // Saídas (Kits Enviados)
-      Object.keys(saidas || {}).forEach(dateStr => { // YYYY-MM-DD
-         const parts = dateStr.split('-');
-         if (parts.length === 3) {
+        Object.keys(saidas || {}).forEach(dateStr => {
+          const parts = dateStr.split('-');
+          if (parts.length === 3) {
             const m = parseInt(parts[1]) - 1;
             const y = parseInt(parts[0]);
-            if (y === currentYear && m >= 0 && m < 12) {
-               const row = saidas[dateStr];
-               const total = (parseInt(row?.e1_kits) || 0) + (parseInt(row?.e2_kits) || 0);
-               newChartData[m].saidas += total;
+            if (m === currentMonthIndex && y === currentYearStats) {
+              const row = saidas[dateStr];
+              countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
             }
-         }
-      });
-
-      // Filter down to months up to current month to avoid weird empty bars in the future
-      const currentMonth = new Date().getMonth();
-      setChartData(newChartData.slice(0, currentMonth + 1));
-
-      // Calculate recent logs
-      const eLogs: any[] = [];
-      const sLogs: any[] = [];
-
-      Object.values(obras || {}).forEach((o: any) => {
-        let itemsCount = 0;
-        (o?.itens || []).forEach((i: any) => {
-          itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+          }
         });
-        if (itemsCount > 0 && o?.data) {
-          eLogs.push({
-            id: o.id,
-            timestamp: new Date(o.data).getTime(),
-            item: `Materiais Recebidos`,
-            data: new Date(o.data).toLocaleDateString('pt-BR'),
-            qtd: itemsCount,
-            fornecedor: o.nome
-          })
-        }
-      });
 
-      Object.keys(saidas || {}).forEach(dateStr => {
-        const row = saidas[dateStr];
-        if (!row) return;
-        let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0);
-        if (total > 0) {
-           sLogs.push({
-             id: dateStr + '-1',
-             timestamp: new Date(dateStr + 'T12:00:00Z').getTime(), // dummy time mid-day
-             item: 'Materiais Enviados',
-             data: dateStr.split('-').reverse().join('/'),
-             qtd: total,
-             fornecedor: row.e1_desc || 'Obra'
-           })
-        }
-        let total2 = (parseInt(row.e2_kits) || 0) + (parseInt(row.e2_alizares) || 0) + (parseInt(row.e2_folhas) || 0);
-        if (total2 > 0) {
-           sLogs.push({
-             id: dateStr + '-2',
-             timestamp: new Date(dateStr + 'T12:00:00Z').getTime(),
-             item: 'Materiais Enviados',
-             data: dateStr.split('-').reverse().join('/'),
-             qtd: total2,
-             fornecedor: row.e2_desc || 'Obra'
-           })
-        }
-      });
+        const operacao = getLs('nm_operacao_producao', {});
+        let countOp = 0;
+        Object.keys(operacao || {}).forEach(dateStr => {
+          const parts = dateStr.split('-');
+          if (parts.length === 3) {
+            const m = parseInt(parts[1]) - 1;
+            const y = parseInt(parts[0]);
+            if (m === currentMonthIndex && y === currentYearStats) {
+              const row = operacao[dateStr];
+              countOp += (parseInt(row.quantidade) || 0);
+            }
+          }
+        });
 
-      setRecentLogs({
-        entradas: eLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
-        saidas: sLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
-      });
+        const obrasObj = getLs('nm_entrada_obras_v4', {});
+        let countObras = 0;
+        Object.values(obrasObj || {}).forEach((o: any) => {
+          const itens = o?.itens || [];
+          itens.forEach((i: any) => {
+            countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+          });
+        });
 
-    } catch (e) {
-      console.error(e);
-    }
+        setDashboardStats({
+          totalEstoque: totalEst,
+          alertaBaixoEstoque: alertas,
+          totalControleSaidasKits: countSaidas,
+          totalOperacaoKits: countOp,
+          totalEntradaObras: countObras
+        });
+
+        const mesesAbbr = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+        const currentYear = new Date().getFullYear();
+        
+        const newChartData = mesesAbbr.map(mes => ({ name: mes, entradas: 0, saidas: 0 }));
+
+        Object.values(obrasObj || {}).forEach((o: any) => {
+           if (!o?.data) return;
+           const d = new Date(o.data);
+           if (d.getFullYear() === currentYear) {
+             let folhasTotal = 0;
+             (o.itens || []).forEach((i: any) => {
+               folhasTotal += (parseInt(i.folhas) || 0);
+             });
+             newChartData[d.getMonth()].entradas += folhasTotal;
+           }
+        });
+
+        Object.keys(saidas || {}).forEach(dateStr => { 
+           const parts = dateStr.split('-');
+           if (parts.length === 3) {
+              const m = parseInt(parts[1]) - 1;
+              const y = parseInt(parts[0]);
+              if (y === currentYear && m >= 0 && m < 12) {
+                 const row = saidas[dateStr];
+                 const total = (parseInt(row?.e1_kits) || 0) + (parseInt(row?.e2_kits) || 0);
+                 newChartData[m].saidas += total;
+              }
+           }
+        });
+
+        const currentMonth = new Date().getMonth();
+        setChartData(newChartData.slice(0, currentMonth + 1));
+
+        const eLogs: any[] = [];
+        const sLogs: any[] = [];
+
+        Object.values(obrasObj || {}).forEach((o: any) => {
+          let itemsCount = 0;
+          (o?.itens || []).forEach((i: any) => {
+            itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+          });
+          if (itemsCount > 0 && o?.data) {
+            eLogs.push({
+              id: o.id,
+              timestamp: new Date(o.data).getTime(),
+              item: `Materiais Recebidos`,
+              data: new Date(o.data).toLocaleDateString('pt-BR'),
+              qtd: itemsCount,
+              fornecedor: o.nome
+            })
+          }
+        });
+
+        Object.keys(saidas || {}).forEach(dateStr => {
+          const row = saidas[dateStr];
+          if (!row) return;
+          let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0);
+          if (total > 0) {
+             sLogs.push({
+               id: dateStr + '-1',
+               timestamp: new Date(dateStr + 'T12:00:00Z').getTime(), 
+               item: 'Materiais Enviados',
+               data: dateStr.split('-').reverse().join('/'),
+               qtd: total,
+               fornecedor: row.e1_desc || 'Obra'
+             })
+          }
+          let total2 = (parseInt(row.e2_kits) || 0) + (parseInt(row.e2_alizares) || 0) + (parseInt(row.e2_folhas) || 0);
+          if (total2 > 0) {
+             sLogs.push({
+               id: dateStr + '-2',
+               timestamp: new Date(dateStr + 'T12:00:00Z').getTime(),
+               item: 'Materiais Enviados',
+               data: dateStr.split('-').reverse().join('/'),
+               qtd: total2,
+               fornecedor: row.e2_desc || 'Obra'
+             })
+          }
+        });
+
+        setRecentLogs({
+          entradas: eLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
+          saidas: sLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
+        });
+
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    
+    calculateStats();
+    window.addEventListener('local-storage-sync', calculateStats);
+    return () => window.removeEventListener('local-storage-sync', calculateStats);
   }, [activeTab]); // re-calculate when switching tabs
 
 

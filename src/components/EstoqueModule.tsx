@@ -34,6 +34,8 @@ export const INITIAL_ALIZARES = [
   { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', comprimento: '2250', estoque: 12, status: 'Crítico' },
 ];
 
+import { supabase } from '../lib/supabase';
+
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
@@ -46,12 +48,34 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     }
   });
 
+  useEffect(() => {
+    async function loadFromSupabase() {
+      if (!supabase) return;
+      try {
+        const { data, error } = await supabase.from('app_state').select('value').eq('id', key).single();
+        if (data && data.value) {
+          setStoredValue(data.value);
+          window.localStorage.setItem(key, JSON.stringify(data.value));
+          window.dispatchEvent(new Event('local-storage-sync'));
+        }
+      } catch (err) {
+        console.error("Error fetching from Supabase:", err);
+      }
+    }
+    loadFromSupabase();
+  }, [key]);
+
   const setValue = (value: T | ((val: T) => T)) => {
     try {
       setStoredValue(prev => {
         const valueToStore = value instanceof Function ? value(prev) : value;
         if (typeof window !== "undefined") {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
+        if (supabase) {
+          supabase.from('app_state').upsert({ id: key, value: valueToStore }).then(({ error }: any) => {
+            if (error) console.error("Error syncing to Supabase:", error);
+          });
         }
         return valueToStore;
       });
