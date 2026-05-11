@@ -67,7 +67,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
       // Setup realtime subscription
       subscription = supabase
-        .channel(`public:app_state:id=eq.${key}`)
+        .channel(`public:app_state:id=eq.${key}_${Math.random().toString(36).substring(7)}`)
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'app_state', filter: `id=eq.${key}` },
