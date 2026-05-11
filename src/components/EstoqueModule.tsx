@@ -436,7 +436,7 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
             )}
 
             {type === 'alizares' && (
-               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+               <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento</label>
                     <select name="comprimento" value={formData.comprimento || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
@@ -444,26 +444,28 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
                       {COMPRIMENTOS_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
-                    <select name="face" value={formData.face || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
-                      <option value="" disabled>Selecione...</option>
-                      {FACE_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Aba</label>
-                    <select name="aba" value={formData.aba || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
-                      <option value="" disabled>Selecione...</option>
-                      {ABA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Espessura</label>
-                    <select name="espessura" value={formData.espessura || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
-                      <option value="" disabled>Selecione...</option>
-                      {ESPESSURA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Face</label>
+                      <select name="face" value={formData.face || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                        <option value="" disabled>Selecione...</option>
+                        {FACE_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Aba</label>
+                      <select name="aba" value={formData.aba || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                        <option value="" disabled>Selecione...</option>
+                        {ABA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Espessura</label>
+                      <select name="espessura" value={formData.espessura || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                        <option value="" disabled>Selecione...</option>
+                        {ESPESSURA_ALIZAR.map(d => <option key={d} value={d}>{d}</option>)}
+                      </select>
+                    </div>
                   </div>
                </div>
             )}
