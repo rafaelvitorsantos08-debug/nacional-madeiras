@@ -287,7 +287,7 @@ export function EstoqueModule() {
                 </tr>
               ))}
               
-              {currentList.length === 0 && (
+              {filteredList.length === 0 && (
                  <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                        Nenhum registro encontrado.
