@@ -758,7 +758,8 @@ function EntradaObras() {
   const handleChangeItem = (obraId: string, itemId: string, field: string, value: string) => {
     setObras(prev => {
       const obra = prev[obraId];
-      const itens = (obra.itens || []).map((item: any) => 
+      if (!obra) return prev;
+      const itens = (Array.isArray(obra.itens) ? obra.itens : []).map((item: any) => 
         item.id === itemId ? { ...item, [field]: value } : item
       );
       return {
@@ -771,7 +772,7 @@ function EntradaObras() {
     });
   };
 
-  const obrasList: any[] = Object.values(obras).sort((a: any, b: any) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  const obrasList: any[] = Object.values(obras || {}).sort((a: any, b: any) => new Date(a?.data || 0).getTime() - new Date(b?.data || 0).getTime());
   
   React.useEffect(() => {
     if (!selectedObraId && obrasList.length > 0) {

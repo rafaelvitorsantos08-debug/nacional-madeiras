@@ -95,7 +95,7 @@ export function EstoqueModule() {
     setIsModalOpen(true);
   };
 
-  const baseList: any[] = activeSubTab === 'portas' ? portas : (activeSubTab === 'aduelas' ? aduelas : alizares);
+  const baseList: any[] = activeSubTab === 'portas' ? (Array.isArray(portas) ? portas : []) : (activeSubTab === 'aduelas' ? (Array.isArray(aduelas) ? aduelas : []) : (Array.isArray(alizares) ? alizares : []));
 
   const filteredList = baseList.filter(item => {
     const searchLower = searchTerm.toLowerCase();
@@ -311,14 +311,14 @@ export function EstoqueModule() {
             const saveItem = { ...newItem, estoque: estoqueNum, status: getStatus(estoqueNum) };
 
             if (editingItem) {
-              if (activeSubTab === 'portas') setPortas(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
-              if (activeSubTab === 'aduelas') setAduelas(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
-              if (activeSubTab === 'alizares') setAlizares(prev => prev.map(i => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'portas') setPortas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'aduelas') setAduelas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'alizares') setAlizares(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
             } else {
               saveItem.id = `${activeSubTab.substring(0, 2).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
-              if (activeSubTab === 'portas') setPortas(prev => [...prev, saveItem]);
-              if (activeSubTab === 'aduelas') setAduelas(prev => [...prev, saveItem]);
-              if (activeSubTab === 'alizares') setAlizares(prev => [...prev, saveItem]);
+              if (activeSubTab === 'portas') setPortas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
+              if (activeSubTab === 'aduelas') setAduelas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
+              if (activeSubTab === 'alizares') setAlizares(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
             }
             setIsModalOpen(false);
           }}

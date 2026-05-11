@@ -56,7 +56,7 @@ export default function App() {
   const [alizares] = useLocalStorage('nm_alizares', INITIAL_ALIZARES);
 
   const inventoryReal = [
-    ...portas.map((p: any) => ({
+    ...(Array.isArray(portas) ? portas : []).map((p: any) => ({
       id: p.id,
       item: `Folha de Porta ${p.modelo || ''}`.trim(),
       dimensoes: p.dimensao,
@@ -65,7 +65,7 @@ export default function App() {
       estoque: p.estoque,
       status: p.status,
     })),
-    ...aduelas.map((a: any) => ({
+    ...(Array.isArray(aduelas) ? aduelas : []).map((a: any) => ({
       id: a.id,
       item: 'Aduela',
       dimensoes: `${a.largura}x${a.comprimento}`,
@@ -74,7 +74,7 @@ export default function App() {
       estoque: a.estoque,
       status: a.status,
     })),
-    ...alizares.map((a: any) => ({
+    ...(Array.isArray(alizares) ? alizares : []).map((a: any) => ({
       id: a.id,
       item: `Alizar (F:${a.face} A:${a.aba} C:${a.comprimento || '-'})`,
       dimensoes: '-',
@@ -125,7 +125,7 @@ export default function App() {
       let totalEst = 0;
       let alertas = 0;
       
-      [...portas, ...aduelas, ...alizares].forEach((item: any) => {
+      [...(Array.isArray(portas) ? portas : []), ...(Array.isArray(aduelas) ? aduelas : []), ...(Array.isArray(alizares) ? alizares : [])].forEach((item: any) => {
          const qty = typeof item.estoque === 'number' ? item.estoque : parseInt(item.estoque) || 0;
          totalEst += qty;
          if (item.status === 'Crítico') alertas++;
@@ -136,7 +136,7 @@ export default function App() {
       const currentMonthIndex = new Date().getMonth();
       const currentYearStats = new Date().getFullYear();
 
-      Object.keys(saidas).forEach(dateStr => {
+      Object.keys(saidas || {}).forEach(dateStr => {
         const parts = dateStr.split('-');
         if (parts.length === 3) {
           const m = parseInt(parts[1]) - 1;
@@ -150,7 +150,7 @@ export default function App() {
 
       const operacao = getLs('nm_operacao_producao', {});
       let countOp = 0;
-      Object.keys(operacao).forEach(dateStr => {
+      Object.keys(operacao || {}).forEach(dateStr => {
         const parts = dateStr.split('-');
         if (parts.length === 3) {
           const m = parseInt(parts[1]) - 1;
@@ -164,8 +164,8 @@ export default function App() {
 
       const obras = getLs('nm_entrada_obras_v4', {});
       let countObras = 0;
-      Object.values(obras).forEach((o: any) => {
-        const itens = o.itens || [];
+      Object.values(obras || {}).forEach((o: any) => {
+        const itens = o?.itens || [];
         itens.forEach((i: any) => {
           // As per user request: ENTRADA DE OBRA X SAIDA SOMENTE DE KITS
           // Kits means folhas
@@ -188,8 +188,8 @@ export default function App() {
       const newChartData = mesesAbbr.map(mes => ({ name: mes, entradas: 0, saidas: 0 }));
 
       // Entradas (Folhas em Obras)
-      Object.values(obras).forEach((o: any) => {
-         if (!o.data) return;
+      Object.values(obras || {}).forEach((o: any) => {
+         if (!o?.data) return;
          const d = new Date(o.data);
          if (d.getFullYear() === currentYear) {
            let folhasTotal = 0;
@@ -201,14 +201,14 @@ export default function App() {
       });
 
       // Saídas (Kits Enviados)
-      Object.keys(saidas).forEach(dateStr => { // YYYY-MM-DD
+      Object.keys(saidas || {}).forEach(dateStr => { // YYYY-MM-DD
          const parts = dateStr.split('-');
          if (parts.length === 3) {
             const m = parseInt(parts[1]) - 1;
             const y = parseInt(parts[0]);
             if (y === currentYear && m >= 0 && m < 12) {
                const row = saidas[dateStr];
-               const total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+               const total = (parseInt(row?.e1_kits) || 0) + (parseInt(row?.e2_kits) || 0);
                newChartData[m].saidas += total;
             }
          }
@@ -222,12 +222,12 @@ export default function App() {
       const eLogs: any[] = [];
       const sLogs: any[] = [];
 
-      Object.values(obras).forEach((o: any) => {
+      Object.values(obras || {}).forEach((o: any) => {
         let itemsCount = 0;
-        (o.itens || []).forEach((i: any) => {
+        (o?.itens || []).forEach((i: any) => {
           itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
         });
-        if (itemsCount > 0 && o.data) {
+        if (itemsCount > 0 && o?.data) {
           eLogs.push({
             id: o.id,
             timestamp: new Date(o.data).getTime(),
@@ -239,8 +239,9 @@ export default function App() {
         }
       });
 
-      Object.keys(saidas).forEach(dateStr => {
+      Object.keys(saidas || {}).forEach(dateStr => {
         const row = saidas[dateStr];
+        if (!row) return;
         let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0);
         if (total > 0) {
            sLogs.push({
