@@ -73,6 +73,10 @@ export function EstoqueModule() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null); // null means adding a new item
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('Todos');
+
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja apagar este registro?')) {
       if (activeSubTab === 'portas') setPortas(prev => prev.filter(item => item.id !== id));
@@ -91,7 +95,17 @@ export function EstoqueModule() {
     setIsModalOpen(true);
   };
 
-  const currentList: any[] = activeSubTab === 'portas' ? portas : (activeSubTab === 'aduelas' ? aduelas : alizares);
+  const baseList: any[] = activeSubTab === 'portas' ? portas : (activeSubTab === 'aduelas' ? aduelas : alizares);
+
+  const filteredList = baseList.filter(item => {
+    const searchLower = searchTerm.toLowerCase();
+    const searchString = Object.values(item).join(' ').toLowerCase();
+    const matchesSearch = searchTerm === '' || searchString.includes(searchLower);
+      
+    const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -122,7 +136,7 @@ export function EstoqueModule() {
 
         {/* TOOLBAR */}
         <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
-          <div className="flex items-center space-x-3 w-full sm:w-auto">
+          <div className="flex items-center space-x-3 w-full sm:w-auto relative">
             <div className="relative flex-1 sm:w-64">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search className="w-4 h-4 text-gray-400" />
@@ -130,12 +144,43 @@ export function EstoqueModule() {
               <input
                 type="text"
                 placeholder="Buscar por código ou especificação..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
               />
             </div>
-            <button className="p-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 flex-shrink-0">
-              <Filter className="w-4 h-4" />
-            </button>
+            
+            <div className="relative">
+              <button 
+                onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                className={`p-2 border rounded-lg hover:bg-gray-50 flex-shrink-0 transition-colors ${statusFilter !== 'Todos' ? 'bg-brand-green/10 border-brand-green text-brand-green' : 'border-gray-200 text-gray-600'}`}
+              >
+                <Filter className="w-4 h-4" />
+              </button>
+              
+              {isFilterMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsFilterMenuOpen(false)}></div>
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden divide-y divide-gray-100">
+                    <div className="p-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      Filtrar por Status
+                    </div>
+                    <div className="p-1">
+                      {['Todos', 'OK', 'Atenção', 'Crítico'].map((status) => (
+                        <button
+                          key={status}
+                          onClick={() => { setStatusFilter(status); setIsFilterMenuOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-sm rounded-lg flex items-center justify-between ${statusFilter === status ? 'bg-brand-green/10 text-brand-green font-medium' : 'text-gray-700 hover:bg-gray-100'}`}
+                        >
+                          {status}
+                          {statusFilter === status && <div className="w-1.5 h-1.5 rounded-full bg-brand-green"></div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           
           <button onClick={handleCreate} className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
@@ -182,7 +227,7 @@ export function EstoqueModule() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {activeSubTab === 'portas' && portas.map((item) => (
+              {activeSubTab === 'portas' && filteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -202,7 +247,7 @@ export function EstoqueModule() {
                 </tr>
               ))}
 
-              {activeSubTab === 'aduelas' && aduelas.map((item) => (
+              {activeSubTab === 'aduelas' && filteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -221,7 +266,7 @@ export function EstoqueModule() {
                 </tr>
               ))}
 
-              {activeSubTab === 'alizares' && alizares.map((item) => (
+              {activeSubTab === 'alizares' && filteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
