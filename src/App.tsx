@@ -38,6 +38,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useLocalStorage('nm_active_tab', 'dashboard');
   const [activeControleTab, setActiveControleTab] = useLocalStorage<'entradas' | 'saidas' | 'operacao'>('nm_active_controle_tab', 'saidas');
+  const [globalSearch, setGlobalSearch] = useState('');
   const [activeControleMonth, setActiveControleMonth] = useState(new Date().getMonth());
   const [activeLogTab, setActiveLogTab] = useLocalStorage<'entradas' | 'saidas'>('nm_active_log_tab', 'entradas');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
@@ -331,6 +332,8 @@ export default function App() {
               <input 
                 type="text" 
                 placeholder="Buscar produtos, datas ou códigos..."
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg text-sm focus:border-brand-green focus:bg-white focus:ring-2 focus:ring-brand-green/20 transition-all"
               />
             </div>
@@ -556,10 +559,10 @@ export default function App() {
           )}
 
           {activeTab === 'estoque' && (
-            <EstoqueModule />
+            <EstoqueModule globalSearch={globalSearch} />
           )}
           {activeTab === 'controle_operacao' && (
-            <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} />
+            <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} globalSearch={globalSearch} />
           )}
           {activeTab === 'relatorios' && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">

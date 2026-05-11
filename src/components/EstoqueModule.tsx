@@ -87,7 +87,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   return [storedValue, setValue] as const;
 }
 
-export function EstoqueModule() {
+export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) {
   const [activeSubTab, setActiveSubTab] = useLocalStorage<'portas' | 'aduelas' | 'alizares'>('nm_active_sub_tab', 'portas');
   
   const [portas, setPortas] = useLocalStorage('nm_portas', INITIAL_PORTAS);
@@ -122,9 +122,10 @@ export function EstoqueModule() {
   const baseList: any[] = activeSubTab === 'portas' ? (Array.isArray(portas) ? portas : []) : (activeSubTab === 'aduelas' ? (Array.isArray(aduelas) ? aduelas : []) : (Array.isArray(alizares) ? alizares : []));
 
   const filteredList = baseList.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
+    const combinedSearchTerm = searchTerm || globalSearch;
+    const searchLower = combinedSearchTerm.toLowerCase();
     const searchString = Object.values(item).join(' ').toLowerCase();
-    const matchesSearch = searchTerm === '' || searchString.includes(searchLower);
+    const matchesSearch = combinedSearchTerm === '' || searchString.includes(searchLower);
       
     const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
     

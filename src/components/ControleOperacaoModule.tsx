@@ -4,7 +4,7 @@ import { Package, Truck, Target, Plus, Download, Home, Trash2, X, FileText, Hist
 
 const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
-export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth }: { initialTab?: 'saidas' | 'operacao' | 'entradas', initialMonth?: number }) {
+export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, globalSearch = '' }: { initialTab?: 'saidas' | 'operacao' | 'entradas', initialMonth?: number, globalSearch?: string }) {
   const [activeTab, setActiveTab] = useState<'saidas' | 'operacao' | 'entradas'>(initialTab);
 
   useEffect(() => {
@@ -50,9 +50,9 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth }: 
       </div>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} />}
-        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} />}
-        {activeTab === 'entradas' && <EntradaObras />}
+        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
+        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
+        {activeTab === 'entradas' && <EntradaObras globalSearch={globalSearch} />}
       </div>
     </div>
   );
@@ -131,7 +131,7 @@ const handleTableKeyDown = (
   }
 };
 
-function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
+function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
   
@@ -318,6 +318,9 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
     const val = monthlyData[row.dateStrKey]?.[field] || '';
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
+    // Highlight if search matches description
+    const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.toLowerCase());
+
     return (
       <input
         type="text"
@@ -330,7 +333,8 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
         style={{ fieldSizing: 'content', minWidth: '100%' } as any}
         className={cn(
           "w-full h-full min-h-[28px] px-1 bg-transparent text-center border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
-          className
+          className,
+          isMatched ? "bg-yellow-200 text-yellow-900 font-bold" : ""
         )}
       />
     );
@@ -472,7 +476,7 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
   )
 }
 
-function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
+function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // 0-indexed
   
@@ -669,7 +673,7 @@ function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
   )
 }
 
-function EntradaObras() {
+function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v4', {});
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
 
@@ -744,7 +748,12 @@ function EntradaObras() {
     });
   };
 
-  const obrasList: any[] = Object.values(obras || {}).sort((a: any, b: any) => new Date(a?.data || 0).getTime() - new Date(b?.data || 0).getTime());
+  const obrasList: any[] = Object.values(obras || {})
+    .filter((obra: any) => {
+       if (!globalSearch) return true;
+       return (obra.nome || '').toLowerCase().includes(globalSearch.toLowerCase());
+    })
+    .sort((a: any, b: any) => new Date(a?.data || 0).getTime() - new Date(b?.data || 0).getTime());
   
   React.useEffect(() => {
     if (!selectedObraId && obrasList.length > 0) {
