@@ -41,8 +41,6 @@ export default function App() {
   const [globalSearch, setGlobalSearch] = useState('');
   const [activeControleMonth, setActiveControleMonth] = useState(new Date().getMonth());
   const [activeLogTab, setActiveLogTab] = useLocalStorage<'entradas' | 'saidas'>('nm_active_log_tab', 'entradas');
-  const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
-  const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
@@ -393,11 +391,11 @@ export default function App() {
                    <span>Instalar App</span>
                  </button>
                )}
-               <button onClick={() => setIsSaidaModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
+               <button onClick={() => { setActiveTab('controle_operacao'); setActiveControleTab('saidas'); }} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
                  <ArrowUpFromLine className="w-4 h-4 text-red-500" />
                  <span>Registrar Saída</span>
                </button>
-               <button onClick={() => setIsEntradaModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
+               <button onClick={() => { setActiveTab('controle_operacao'); setActiveControleTab('entradas'); }} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-brand-green rounded-lg text-white text-sm font-medium hover:bg-brand-green-dark transition-colors shadow-sm shadow-brand-green/30">
                  <ArrowDownToLine className="w-4 h-4" />
                  <span>Registrar Entrada</span>
                </button>
@@ -639,69 +637,6 @@ export default function App() {
           
           
         </div>
-
-        {/* MODALS */}
-        <Modal isOpen={isEntradaModalOpen} onClose={() => setIsEntradaModalOpen(false)} title="Registrar Entrada">
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Entrada registrada com sucesso!"); setIsEntradaModalOpen(false); }}>
-             <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Produto / Kit</label>
-               <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10">
-                 <option>Kit Porta Interna Pinho 80x210</option>
-                 <option>Porta Lisa Jequitibá 80x210</option>
-                 <option>Aduela Eucalipto 15cm</option>
-               </select>
-             </div>
-             <div className="grid grid-cols-2 gap-4">
-                <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-                   <input type="number" min="1" defaultValue="1" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-                </div>
-                <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                   <input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-                </div>
-             </div>
-             <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor / Nota Fiscal</label>
-               <input type="text" placeholder="Nome do fornecedor ou nº NF" required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-             </div>
-             <div className="pt-4 flex justify-end space-x-3">
-               <button type="button" onClick={() => setIsEntradaModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
-               <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-brand-green hover:bg-brand-green-dark rounded-lg transition-colors">Confirmar Entrada</button>
-             </div>
-          </form>
-        </Modal>
-
-        <Modal isOpen={isSaidaModalOpen} onClose={() => setIsSaidaModalOpen(false)} title="Registrar Saída">
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Saída registrada com sucesso!"); setIsSaidaModalOpen(false); }}>
-             <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Produto / Kit</label>
-               <select className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10">
-                 <option>Kit Porta Interna Pinho 80x210</option>
-                 <option>Porta Lisa Jequitibá 80x210</option>
-                 <option>Aduela Eucalipto 15cm</option>
-               </select>
-             </div>
-             <div className="grid grid-cols-2 gap-4">
-                <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-                   <input type="number" min="1" defaultValue="1" className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-                </div>
-                <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                   <input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-                </div>
-             </div>
-             <div>
-               <label className="block text-sm font-medium text-gray-700 mb-1">Destino / Ordem de Serviço</label>
-               <input type="text" placeholder="Nome do cliente ou nº OS" required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
-             </div>
-             <div className="pt-4 flex justify-end space-x-3">
-               <button type="button" onClick={() => setIsSaidaModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Cancelar</button>
-               <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">Confirmar Saída</button>
-             </div>
-          </form>
-        </Modal>
 
       </main>
     </div>

@@ -49,20 +49,48 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   });
 
   useEffect(() => {
+    let subscription: any;
     async function loadFromSupabase() {
       if (!supabase) return;
       try {
         const { data, error } = await supabase.from('app_state').select('value').eq('id', key).single();
         if (data && data.value) {
           setStoredValue(data.value);
-          window.localStorage.setItem(key, JSON.stringify(data.value));
-          window.dispatchEvent(new Event('local-storage-sync'));
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(key, JSON.stringify(data.value));
+            window.dispatchEvent(new Event('local-storage-sync'));
+          }
         }
       } catch (err) {
         console.error("Error fetching from Supabase:", err);
       }
+
+      // Setup realtime subscription
+      subscription = supabase
+        .channel(`public:app_state:id=eq.${key}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'app_state', filter: `id=eq.${key}` },
+          (payload) => {
+            if (payload && payload.new && 'value' in payload.new) {
+              const newValue = payload.new.value;
+              setStoredValue(newValue);
+              if (typeof window !== "undefined") {
+                window.localStorage.setItem(key, JSON.stringify(newValue));
+                window.dispatchEvent(new Event('local-storage-sync'));
+              }
+            }
+          }
+        )
+        .subscribe();
     }
     loadFromSupabase();
+
+    return () => {
+      if (subscription) {
+        supabase?.removeChannel(subscription);
+      }
+    };
   }, [key]);
 
   const setValue = (value: T | ((val: T) => T)) => {
@@ -71,6 +99,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         const valueToStore = value instanceof Function ? value(prev) : value;
         if (typeof window !== "undefined") {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          window.dispatchEvent(new Event('local-storage-sync'));
         }
         if (supabase) {
           supabase.from('app_state').upsert({ id: key, value: valueToStore }).then(({ error }: any) => {
