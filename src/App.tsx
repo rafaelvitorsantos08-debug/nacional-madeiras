@@ -5,7 +5,7 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
@@ -43,6 +43,26 @@ export default function App() {
   const [activeLogTab, setActiveLogTab] = useLocalStorage<'entradas' | 'saidas'>('nm_active_log_tab', 'entradas');
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    }
+  };
   
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -367,6 +387,12 @@ export default function App() {
               <p className="text-sm text-gray-500 mt-1">Acompanhe as movimentações e o saldo atual.</p>
             </div>
             <div className="flex space-x-3 w-full md:w-auto">
+               {deferredPrompt && (
+                 <button onClick={handleInstallClick} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 rounded-lg text-white text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/30">
+                   <Download className="w-4 h-4" />
+                   <span>Instalar App</span>
+                 </button>
+               )}
                <button onClick={() => setIsSaidaModalOpen(true)} className="flex-1 md:flex-none flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm">
                  <ArrowUpFromLine className="w-4 h-4 text-red-500" />
                  <span>Registrar Saída</span>
