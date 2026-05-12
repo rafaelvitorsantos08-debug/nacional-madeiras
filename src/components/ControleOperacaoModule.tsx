@@ -839,15 +839,15 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
             <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-auto">
-                  <table className="w-full text-center text-sm border-collapse min-w-[800px]">
+                  <table className="w-full text-center text-sm border-collapse min-w-[1200px]">
                     <thead className="bg-gray-100 text-gray-700 border-b border-gray-300 sticky top-0 z-10 shadow-sm shadow-gray-200">
                     <tr>
                       <th className="p-3 border-r border-gray-300 font-bold text-center w-[12%]">DIMENSÃO</th>
                       <th className="p-3 border-r border-gray-300 font-bold text-center w-[12%]">COR</th>
-                      <th className="p-3 border-r border-gray-300 font-bold text-center w-[16%]">MODELO</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-amber-50 text-amber-800">ADUELAS</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-purple-50 text-purple-800">ALIZARES</th>
+                      <th className="p-3 border-r border-gray-300 font-bold text-center w-[12%]">MODELO</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[12%] bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[22%] bg-amber-50 text-amber-800">ADUELAS</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[22%] bg-purple-50 text-purple-800">ALIZARES</th>
                       <th className="p-3 font-bold w-12">AÇÕES</th>
                     </tr>
                     <tr className="bg-gray-200/80 font-bold text-gray-800 border-b border-gray-300 shadow-sm">
@@ -872,90 +872,138 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                     ) : (
                       (activeObra.itens || []).map((item: any) => (
                         <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                          <td className="p-0 border-r border-gray-300">
+                          <td className="p-0 border-r border-gray-300 relative group">
                             <select 
                               value={item.dimensao || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dimensao', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
+                              className="w-full h-full min-h-[44px] p-3 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
                               <option value="" className="text-gray-800 bg-white">Selecione...</option>
                               {DIMENSOES_PORTA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
+                            {item.dimensao && (
+                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'dimensao', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </td>
-                          <td className="p-0 border-r border-gray-300">
+                          <td className="p-0 border-r border-gray-300 relative group">
                             <select 
                               value={item.cor || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'cor', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
+                              className="w-full h-full min-h-[44px] p-3 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
                               <option value="" className="text-gray-800 bg-white">Selecione...</option>
                               {CORES.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
+                            {item.cor && (
+                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'cor', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </td>
-                          <td className="p-0 border-r border-gray-300">
+                          <td className="p-0 border-r border-gray-300 relative group">
                             <select 
                               value={item.modelo || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'modelo', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
+                              className="w-full h-full min-h-[44px] p-3 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
                               <option value="" className="text-gray-800 bg-white">Selecione...</option>
                               {MODELOS_PORTA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
+                            {item.modelo && (
+                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'modelo', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </td>
-                          <td className="p-0 border-r border-gray-300 bg-blue-50/30">
+                          <td className="p-0 border-r border-gray-300 bg-blue-50/30 relative group">
                             <input 
                               type="text" 
                               value={item.folhas || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'folhas', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold"
+                              className="w-full h-full min-h-[44px] p-3 pr-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold"
                             />
+                            {item.folhas && (
+                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'folhas', '')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-amber-50/30">
                             <div className="flex h-full min-h-[44px]">
-                              <select 
-                                value={item.medidaAduela || ''} 
-                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAduela', e.target.value)}
-                                className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800"
-                              >
-                                <option value="" className="text-gray-800 bg-white">Medida</option>
-                                {LARGURAS_ADUELA.flatMap(largura => 
-                                  COMPRIMENTOS_ADUELA.map(comprimento => (
-                                    <option key={`${largura}x${comprimento}`} value={`${largura}x${comprimento}`} className="text-gray-800 bg-white">{`${largura}x${comprimento}`}</option>
-                                  ))
+                              <div className="w-[65%] relative group">
+                                <select 
+                                  value={item.medidaAduela || ''} 
+                                  onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAduela', e.target.value)}
+                                  className="w-full p-2 pl-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800 text-xs sm:text-sm"
+                                >
+                                  <option value="" className="text-gray-800 bg-white">Medida</option>
+                                  {LARGURAS_ADUELA.flatMap(largura => 
+                                    COMPRIMENTOS_ADUELA.map(comprimento => (
+                                      <option key={`${largura}x${comprimento}`} value={`${largura}x${comprimento}`} className="text-gray-800 bg-white">{`${largura}x${comprimento}`}</option>
+                                    ))
+                                  )}
+                                </select>
+                                {item.medidaAduela && (
+                                  <button onClick={() => handleChangeItem(activeObra.id, item.id, 'medidaAduela', '')} className="absolute left-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar medida">
+                                    <X className="w-3 h-3" />
+                                  </button>
                                 )}
-                              </select>
-                              <input 
-                                type="text" 
-                                value={item.aduelas || ''} 
-                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
-                                placeholder="Qtd"
-                                className="w-1/2 p-2 text-center bg-transparent border-l border-amber-200 outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
-                              />
+                              </div>
+                              <div className="w-[35%] relative group border-l border-amber-200">
+                                <input 
+                                  type="text" 
+                                  value={item.aduelas || ''} 
+                                  onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
+                                  placeholder="Qtd"
+                                  className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
+                                />
+                                {item.aduelas && (
+                                  <button onClick={() => handleChangeItem(activeObra.id, item.id, 'aduelas', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar quantidade">
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-purple-50/30">
                             <div className="flex h-full min-h-[44px]">
-                              <select 
-                                value={item.medidaAlizar || ''} 
-                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', e.target.value)}
-                                className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800"
-                              >
-                                <option value="" className="text-gray-800 bg-white">Face</option>
-                                {FACE_ALIZAR.flatMap(face => 
-                                  ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
-                                    COMPRIMENTOS_ALIZAR.map(comprimento => (
-                                      <option key={`${face}x${espessura}x${comprimento}`} value={`${face}x${espessura}x${comprimento}`} className="text-gray-800 bg-white">{`${face}x${espessura}x${comprimento}`}</option>
-                                    ))
-                                  )
+                              <div className="w-[65%] relative group">
+                                <select 
+                                  value={item.medidaAlizar || ''} 
+                                  onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', e.target.value)}
+                                  className="w-full p-2 pl-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800 text-xs sm:text-sm"
+                                >
+                                  <option value="" className="text-gray-800 bg-white">Face</option>
+                                  {FACE_ALIZAR.flatMap(face => 
+                                    ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
+                                      COMPRIMENTOS_ALIZAR.map(comprimento => (
+                                        <option key={`${face}x${espessura}x${comprimento}`} value={`${face}x${espessura}x${comprimento}`} className="text-gray-800 bg-white">{`${face}x${espessura}x${comprimento}`}</option>
+                                      ))
+                                    )
+                                  )}
+                                </select>
+                                {item.medidaAlizar && (
+                                  <button onClick={() => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', '')} className="absolute left-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar face">
+                                    <X className="w-3 h-3" />
+                                  </button>
                                 )}
-                              </select>
-                              <input 
-                                type="text" 
-                                value={item.alizares || ''} 
-                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
-                                placeholder="Qtd"
-                                className="w-1/2 p-2 text-center bg-transparent border-l border-purple-200 outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
-                              />
+                              </div>
+                              <div className="w-[35%] relative group border-l border-purple-200">
+                                <input 
+                                  type="text" 
+                                  value={item.alizares || ''} 
+                                  onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
+                                  placeholder="Qtd"
+                                  className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
+                                />
+                                {item.alizares && (
+                                  <button onClick={() => handleChangeItem(activeObra.id, item.id, 'alizares', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar quantidade">
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td className="p-2 text-center">
