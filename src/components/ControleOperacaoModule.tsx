@@ -59,7 +59,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 }
 
 // --- SUBMODULES ---
-import { useLocalStorage } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA } from './EstoqueModule';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -687,7 +687,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
          id,
          nome,
          itens: [
-           { id: Date.now().toString() + '_1', descricao: '', folhas: '', aduelas: '', alizares: '' }
+           { id: Date.now().toString() + '_1', dimensao: '', cor: '', modelo: '', folhas: '', aduelas: '', alizares: '' }
          ],
          data: new Date().toISOString()
       }
@@ -712,7 +712,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
         ...prev,
         [obraId]: {
           ...obra,
-          itens: [...(obra.itens || []), { id: Date.now().toString(), descricao: '', folhas: '', aduelas: '', alizares: '' }]
+          itens: [...(obra.itens || []), { id: Date.now().toString(), dimensao: '', cor: '', modelo: '', folhas: '', aduelas: '', alizares: '' }]
         }
       }
     });
@@ -751,7 +751,15 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const obrasList: any[] = Object.values(obras || {})
     .filter((obra: any) => {
        if (!globalSearch) return true;
-       return (obra.nome || '').toLowerCase().includes(globalSearch.toLowerCase());
+       const searchLower = globalSearch.toLowerCase();
+       const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
+       const inItens = (obra.itens || []).some((i: any) => 
+         (i.descricao || '').toLowerCase().includes(searchLower) ||
+         (i.dimensao || '').toLowerCase().includes(searchLower) ||
+         (i.cor || '').toLowerCase().includes(searchLower) ||
+         (i.modelo || '').toLowerCase().includes(searchLower)
+       );
+       return inNome || inItens;
     })
     .sort((a: any, b: any) => new Date(a?.data || 0).getTime() - new Date(b?.data || 0).getTime());
   
@@ -832,14 +840,16 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                   <table className="w-full text-center text-sm border-collapse min-w-[800px]">
                     <thead className="bg-gray-100 text-gray-700 border-b border-gray-300 sticky top-0 z-10 shadow-sm shadow-gray-200">
                     <tr>
-                      <th className="p-3 border-r border-gray-300 font-bold text-left w-1/3">ESPECIFICAÇÃO / DESCRIÇÃO</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-amber-50 text-amber-800">ADUELAS</th>
-                      <th className="p-3 border-r border-gray-300 font-bold w-1/5 bg-purple-50 text-purple-800">ALIZARES</th>
-                      <th className="p-3 font-bold w-16">AÇÕES</th>
+                      <th className="p-3 border-r border-gray-300 font-bold text-center w-[12%]">DIMENSÃO</th>
+                      <th className="p-3 border-r border-gray-300 font-bold text-center w-[12%]">COR</th>
+                      <th className="p-3 border-r border-gray-300 font-bold text-center w-[16%]">MODELO</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-blue-50 text-blue-800">FOLHAS DE PORTA</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-amber-50 text-amber-800">ADUELAS</th>
+                      <th className="p-3 border-r border-gray-300 font-bold w-[16%] bg-purple-50 text-purple-800">ALIZARES</th>
+                      <th className="p-3 font-bold w-12">AÇÕES</th>
                     </tr>
                     <tr className="bg-gray-200/80 font-bold text-gray-800 border-b border-gray-300 shadow-sm">
-                      <td className="p-2 text-right border-r border-gray-300 uppercase">TOTAL DA OBRA:</td>
+                      <td colSpan={3} className="p-2 text-right border-r border-gray-300 uppercase">TOTAL DA OBRA:</td>
                       <td className="p-2 border-r border-gray-300 bg-blue-100/50 text-blue-900 text-lg">
                         {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.folhas) || 0), 0) || 0}
                       </td>
@@ -855,19 +865,40 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                   <tbody>
                     {(activeObra.itens || []).length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">Nenhuma especificação adicionada a esta obra.</td>
+                        <td colSpan={7} className="p-8 text-center text-gray-500">Nenhuma especificação adicionada a esta obra.</td>
                       </tr>
                     ) : (
                       (activeObra.itens || []).map((item: any) => (
                         <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                           <td className="p-0 border-r border-gray-300">
-                            <input 
-                              type="text" 
-                              value={item.descricao || ''} 
-                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'descricao', e.target.value)}
-                              placeholder="Ex: Porta do Banheiro Social"
-                              className="w-full h-full min-h-[44px] p-3 pl-4 bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green text-center font-medium text-gray-800"
-                            />
+                            <select 
+                              value={item.dimensao || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dimensao', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                            >
+                              <option value="">Selecione...</option>
+                              {DIMENSOES_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
+                            </select>
+                          </td>
+                          <td className="p-0 border-r border-gray-300">
+                            <select 
+                              value={item.cor || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'cor', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                            >
+                              <option value="">Selecione...</option>
+                              {CORES.map(op => <option key={op} value={op}>{op}</option>)}
+                            </select>
+                          </td>
+                          <td className="p-0 border-r border-gray-300">
+                            <select 
+                              value={item.modelo || ''} 
+                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'modelo', e.target.value)}
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                            >
+                              <option value="">Selecione...</option>
+                              {MODELOS_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
+                            </select>
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-blue-50/30">
                             <input 

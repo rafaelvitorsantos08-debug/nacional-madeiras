@@ -476,9 +476,9 @@ export default function App() {
                </div>
                <div className="flex-1 overflow-auto p-2">
                  <ul className="divide-y divide-gray-50">
-                    {recentLogs[activeLogTab].length === 0 ? (
+                    {recentLogs[activeLogTab].filter(log => !globalSearch || (log.item + ' ' + log.fornecedor + ' ' + log.data).toLowerCase().includes(globalSearch.toLowerCase())).length === 0 ? (
                       <li className="p-4 text-center text-gray-400 text-sm">Nenhum registro encontrado.</li>
-                    ) : recentLogs[activeLogTab].map((log) => (
+                    ) : recentLogs[activeLogTab].filter(log => !globalSearch || (log.item + ' ' + log.fornecedor + ' ' + log.data).toLowerCase().includes(globalSearch.toLowerCase())).map((log) => (
                       <li key={log.id} className="p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer group">
                         <div className="flex justify-between items-start mb-1">
                            <span className="font-medium text-sm text-gray-800 line-clamp-1 pr-2">{log.item}</span>
