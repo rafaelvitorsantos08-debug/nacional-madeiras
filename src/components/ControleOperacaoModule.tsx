@@ -59,7 +59,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 }
 
 // --- SUBMODULES ---
-import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR } from './EstoqueModule';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -687,7 +687,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
          id,
          nome,
          itens: [
-           { id: Date.now().toString() + '_1', dimensao: '', cor: '', modelo: '', folhas: '', aduelas: '', alizares: '' }
+           { id: Date.now().toString() + '_1', dimensao: '', cor: '', modelo: '', folhas: '', medidaAduela: '', aduelas: '', medidaAlizar: '', alizares: '' }
          ],
          data: new Date().toISOString()
       }
@@ -712,7 +712,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
         ...prev,
         [obraId]: {
           ...obra,
-          itens: [...(obra.itens || []), { id: Date.now().toString(), dimensao: '', cor: '', modelo: '', folhas: '', aduelas: '', alizares: '' }]
+          itens: [...(obra.itens || []), { id: Date.now().toString(), dimensao: '', cor: '', modelo: '', folhas: '', medidaAduela: '', aduelas: '', medidaAlizar: '', alizares: '' }]
         }
       }
     });
@@ -757,7 +757,9 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
          (i.descricao || '').toLowerCase().includes(searchLower) ||
          (i.dimensao || '').toLowerCase().includes(searchLower) ||
          (i.cor || '').toLowerCase().includes(searchLower) ||
-         (i.modelo || '').toLowerCase().includes(searchLower)
+         (i.modelo || '').toLowerCase().includes(searchLower) ||
+         (i.medidaAduela || '').toLowerCase().includes(searchLower) ||
+         (i.medidaAlizar || '').toLowerCase().includes(searchLower)
        );
        return inNome || inItens;
     })
@@ -909,20 +911,42 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                             />
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-amber-50/30">
-                            <input 
-                              type="text" 
-                              value={item.aduelas || ''} 
-                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
-                            />
+                            <div className="flex h-full min-h-[44px]">
+                              <select 
+                                value={item.medidaAduela || ''} 
+                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAduela', e.target.value)}
+                                className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800"
+                              >
+                                <option value="" className="text-gray-800 bg-white">Medida</option>
+                                {LARGURAS_ADUELA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
+                              </select>
+                              <input 
+                                type="text" 
+                                value={item.aduelas || ''} 
+                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
+                                placeholder="Qtd"
+                                className="w-1/2 p-2 text-center bg-transparent border-l border-amber-200 outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold"
+                              />
+                            </div>
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-purple-50/30">
-                            <input 
-                              type="text" 
-                              value={item.alizares || ''} 
-                              onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
-                            />
+                            <div className="flex h-full min-h-[44px]">
+                              <select 
+                                value={item.medidaAlizar || ''} 
+                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', e.target.value)}
+                                className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800"
+                              >
+                                <option value="" className="text-gray-800 bg-white">Face</option>
+                                {FACE_ALIZAR.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
+                              </select>
+                              <input 
+                                type="text" 
+                                value={item.alizares || ''} 
+                                onChange={(e) => handleChangeItem(activeObra.id, item.id, 'alizares', e.target.value)}
+                                placeholder="Qtd"
+                                className="w-1/2 p-2 text-center bg-transparent border-l border-purple-200 outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold"
+                              />
+                            </div>
                           </td>
                           <td className="p-2 text-center">
                             <button 
