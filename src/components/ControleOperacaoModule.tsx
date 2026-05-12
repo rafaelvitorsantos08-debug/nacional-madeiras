@@ -874,30 +874,30 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                             <select 
                               value={item.dimensao || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dimensao', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
-                              <option value="">Selecione...</option>
-                              {DIMENSOES_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
+                              <option value="" className="text-gray-800 bg-white">Selecione...</option>
+                              {DIMENSOES_PORTA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
                           </td>
                           <td className="p-0 border-r border-gray-300">
                             <select 
                               value={item.cor || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'cor', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
-                              <option value="">Selecione...</option>
-                              {CORES.map(op => <option key={op} value={op}>{op}</option>)}
+                              <option value="" className="text-gray-800 bg-white">Selecione...</option>
+                              {CORES.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
                           </td>
                           <td className="p-0 border-r border-gray-300">
                             <select 
                               value={item.modelo || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'modelo', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 appearance-none"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800"
                             >
-                              <option value="">Selecione...</option>
-                              {MODELOS_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
+                              <option value="" className="text-gray-800 bg-white">Selecione...</option>
+                              {MODELOS_PORTA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
                             </select>
                           </td>
                           <td className="p-0 border-r border-gray-300 bg-blue-50/30">
