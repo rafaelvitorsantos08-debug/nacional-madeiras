@@ -45,8 +45,17 @@ html.dark .text-gray-500 {
 html.dark .border-gray-100, 
 html.dark .border-gray-200, 
 html.dark .border-gray-300 {
-  @apply !border-gray-800;
+  @apply !border-gray-700;
 }
+
+html.dark .border-amber-200 {
+  @apply !border-amber-700/50;
+}
+
+html.dark .border-purple-200 {
+  @apply !border-purple-700/50;
+}
+
 
 html.dark .text-blue-900, html.dark .text-blue-800 {
   @apply !text-blue-200;
@@ -104,16 +113,19 @@ html.dark .bg-gray-200\/80 {
   @apply !bg-gray-800;
 }
 
+html.dark .bg-blue-50,
 html.dark .bg-blue-100\/50,
 html.dark .bg-blue-50\/30 {
   @apply !bg-blue-900/40 !text-blue-200;
 }
 
+html.dark .bg-amber-50,
 html.dark .bg-amber-100\/50,
 html.dark .bg-amber-50\/30 {
   @apply !bg-amber-900/40 !text-amber-200;
 }
 
+html.dark .bg-purple-50,
 html.dark .bg-purple-100\/50,
 html.dark .bg-purple-50\/30 {
   @apply !bg-purple-900/40 !text-purple-200;
