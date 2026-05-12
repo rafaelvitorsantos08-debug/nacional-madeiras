@@ -9,8 +9,8 @@ export const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', 
 export const LARGURAS_ADUELA = ['90', '100', '110', '120', '130', '140', '150', '160', '170', '180', '190', '200', '210'];
 export const COMPRIMENTOS_ADUELA = ['2110', '2120'];
 export const FACE_ALIZAR = ['30', '40', '50', '60', '70', '80', '100'];
-const ABA_ALIZAR = ['08', '40', '50', '60', '70', '80'];
-const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
+export const ABA_ALIZAR = ['08', '40', '50', '60', '70', '80'];
+export const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 export const COMPRIMENTOS_ALIZAR = ['1000', '2250', '2700'];
 
 // Mockup data

@@ -59,7 +59,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 }
 
 // --- SUBMODULES ---
-import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR } from './EstoqueModule';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -942,9 +942,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                               >
                                 <option value="" className="text-gray-800 bg-white">Face</option>
                                 {FACE_ALIZAR.flatMap(face => 
-                                  COMPRIMENTOS_ALIZAR.map(comprimento => (
-                                    <option key={`${face}x${comprimento}`} value={`${face}x${comprimento}`} className="text-gray-800 bg-white">{`${face}x${comprimento}`}</option>
-                                  ))
+                                  ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
+                                    COMPRIMENTOS_ALIZAR.map(comprimento => (
+                                      <option key={`${face}x${espessura}x${comprimento}`} value={`${face}x${espessura}x${comprimento}`} className="text-gray-800 bg-white">{`${face}x${espessura}x${comprimento}`}</option>
+                                    ))
+                                  )
                                 )}
                               </select>
                               <input 
