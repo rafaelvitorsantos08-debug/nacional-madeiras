@@ -1165,36 +1165,36 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-gray-800">
+            <h2 className="text-xl font-bold tracking-tight text-gray-800 dark:text-gray-100">
               Registros de Saída
             </h2>
-            <p className="text-sm text-gray-500 font-medium">
-              Obra: <span className="text-gray-700">{obra.nome}</span> | Espécie: <span className="text-gray-700">{item.dimensao} - {item.cor} {item.enchimento ? `- ${item.enchimento}` : ''} {item.modelo ? `- ${item.modelo}` : ''}</span>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              Obra: <span className="text-gray-700 dark:text-gray-300">{obra.nome}</span> | Espécie: <span className="text-gray-700 dark:text-gray-300">{item.dimensao} - {item.cor} {item.enchimento ? `- ${item.enchimento}` : ''} {item.modelo ? `- ${item.modelo}` : ''}</span>
             </p>
           </div>
-          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors">
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200">
+        <div className="flex-1 overflow-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200 dark:divide-gray-700">
           {/* Esquerda: Cadastro de Saída */}
-          <div className="w-full md:w-[40%] p-5 bg-gray-50/50">
-            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+          <div className="w-full md:w-[40%] p-5 bg-gray-50/50 dark:bg-gray-800/50">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
               <Plus className="w-4 h-4 mr-1 text-brand-green" /> Nova Saída
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data da Saída</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data da Saída</label>
                 <input 
                   type="date" 
                   value={data} 
                   onChange={e => setData(e.target.value)} 
                   required 
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
                 />
               </div>
               <div>
@@ -1202,16 +1202,16 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
                 <select 
                   value={tipo} 
                   onChange={(e: any) => setTipo(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
                 >
-                  <option value="folhas">Folhas de Porta</option>
-                  <option value="aduelas">Aduelas</option>
-                  <option value="alizares">Alizares</option>
+                  <option value="folhas" className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">Folhas de Porta</option>
+                  <option value="aduelas" className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">Aduelas</option>
+                  <option value="alizares" className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100">Alizares</option>
                 </select>
               </div>
               <div className="flex items-center gap-3">
                  <div className="flex-1">
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade</label>
                    <input 
                      type="number" 
                      min="1"
@@ -1219,21 +1219,21 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
                      onChange={e => setQuantidade(e.target.value)} 
                      required 
                      placeholder="0"
-                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none font-semibold text-gray-800"
+                     className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none font-semibold text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800"
                    />
                  </div>
-                 <div className="flex-1 p-2 bg-gray-100 rounded-lg border border-gray-200 text-center flex flex-col justify-center">
-                   <div className="text-[10px] uppercase text-gray-500 font-bold leading-tight">Saldo Atual</div>
-                   <div className={`font-bold text-lg ${saldo(tipo) <= 0 ? 'text-red-500' : 'text-blue-600'}`}>{saldo(tipo)}</div>
+                 <div className="flex-1 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-center flex flex-col justify-center">
+                   <div className="text-[10px] uppercase text-gray-500 dark:text-gray-400 font-bold leading-tight">Saldo Atual</div>
+                   <div className={`font-bold text-lg ${saldo(tipo) <= 0 ? 'text-red-500 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>{saldo(tipo)}</div>
                  </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Observação (Opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observação (Opcional)</label>
                 <textarea 
                   value={observacao} 
                   onChange={e => setObservacao(e.target.value)} 
                   rows={2}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
                   placeholder="Ex: NF 1234, Recebedor Marcos"
                 />
               </div>
@@ -1246,16 +1246,16 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
             </form>
             
             {/* Resumo de Saldos */}
-            <div className="mt-6 border-t border-gray-200 pt-4">
-              <h4 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Resumo de Saldos</h4>
+            <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wider">Resumo de Saldos</h4>
               <div className="space-y-2">
                 {['folhas', 'aduelas', 'alizares'].map(t => (
-                   <div key={t} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-gray-200 shadow-sm">
-                     <span className="capitalize font-medium text-gray-600 flex-1">{t}</span>
+                   <div key={t} className="flex items-center justify-between text-sm bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-700 shadow-sm">
+                     <span className="capitalize font-medium text-gray-600 dark:text-gray-300 flex-1">{t}</span>
                      <div className="flex items-center gap-2 text-xs">
-                        <span className="text-gray-500" title="Entrada">Ent: <b>{getQtdOriginal(t)}</b></span>
-                        <span className="text-red-500" title="Saída">Sai: <b>{totalSaiu(t)}</b></span>
-                        <span className={`w-8 text-right font-bold ${saldo(t) <= 0 ? (getQtdOriginal(t) == 0 ? 'text-gray-400' : 'text-red-600') : 'text-blue-600'}`} title="Saldo">
+                        <span className="text-gray-500 dark:text-gray-400" title="Entrada">Ent: <b>{getQtdOriginal(t)}</b></span>
+                        <span className="text-red-500 dark:text-red-400" title="Saída">Sai: <b>{totalSaiu(t)}</b></span>
+                        <span className={`w-8 text-right font-bold ${saldo(t) <= 0 ? (getQtdOriginal(t) == 0 ? 'text-gray-400 dark:text-gray-600' : 'text-red-600 dark:text-red-400') : 'text-blue-600 dark:text-blue-400'}`} title="Saldo">
                           ={saldo(t)}
                         </span>
                      </div>
@@ -1266,45 +1266,45 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
           </div>
 
           {/* Direita: Tabela de Histórico */}
-          <div className="w-full md:w-[60%] p-5 bg-white flex flex-col">
-            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+          <div className="w-full md:w-[60%] p-5 bg-white dark:bg-gray-900 flex flex-col">
+            <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
               <FileText className="w-4 h-4 mr-1 text-gray-500" /> Histórico de Registros
             </h3>
             
-            <div className="flex-1 border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+            <div className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800">
               {saidas.length > 0 ? (
                 <div className="overflow-auto h-full max-h-[400px]">
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-white border-b border-gray-200 text-gray-500 sticky top-0 z-10 shadow-sm">
+                    <thead className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 sticky top-0 z-10 shadow-sm">
                       <tr>
                         <th className="py-2.5 px-3 font-semibold w-24">Data</th>
                         <th className="py-2.5 px-3 font-semibold">Tipo</th>
                         <th className="py-2.5 px-3 font-semibold text-center w-20">Qtd</th>
-                        <th className="py-2.5 px-3 font-semibold border-l border-gray-200">Observações</th>
+                        <th className="py-2.5 px-3 font-semibold border-l border-gray-200 dark:border-gray-700">Observações</th>
                         <th className="py-2.5 px-3 font-semibold w-10 text-center"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {[...saidas].sort((a,b) => b.data.localeCompare(a.data)).map((s: any) => (
-                        <tr key={s.id} className="hover:bg-gray-100/50 transition-colors bg-white">
-                          <td className="py-2.5 px-3 text-gray-600 font-medium whitespace-nowrap">
+                        <tr key={s.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-gray-900">
+                          <td className="py-2.5 px-3 text-gray-600 dark:text-gray-300 font-medium whitespace-nowrap">
                             {new Date(`${s.data}T12:00:00`).toLocaleDateString('pt-BR')}
                           </td>
                           <td className="py-2.5 px-3">
                             <span className={`capitalize inline-block px-2 py-0.5 rounded text-xs font-medium border
-                              ${s.tipo === 'folhas' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
-                                s.tipo === 'aduelas' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
-                                'bg-purple-50 text-purple-700 border-purple-200'}
+                              ${s.tipo === 'folhas' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50' : 
+                                s.tipo === 'aduelas' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50' : 
+                                'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50'}
                             `}>
                               {s.tipo}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-center text-red-600 font-bold text-base">-{s.quantidade}</td>
-                          <td className="py-2.5 px-3 text-gray-500 text-xs border-l border-gray-100">
-                             {s.observacao || <span className="italic text-gray-300">Sem observação</span>}
+                          <td className="py-2.5 px-3 text-center text-red-600 dark:text-red-400 font-bold text-base">-{s.quantidade}</td>
+                          <td className="py-2.5 px-3 text-gray-500 dark:text-gray-400 text-xs border-l border-gray-100 dark:border-gray-800">
+                             {s.observacao || <span className="italic text-gray-300 dark:text-gray-600">Sem observação</span>}
                           </td>
-                          <td className="py-2 px-2 text-center text-red-600 font-bold">
-                            <button onClick={() => onDeleteSaida(s.id)} className="p-1 hover:bg-red-100 text-gray-400 hover:text-red-500 rounded transition-colors" title="Remover saída">
+                          <td className="py-2 px-2 text-center text-red-600 dark:text-red-400 font-bold">
+                            <button onClick={() => onDeleteSaida(s.id)} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded transition-colors" title="Remover saída">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </td>
@@ -1314,9 +1314,9 @@ function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
                   </table>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400">
-                  <Package className="w-12 h-12 mb-3 text-gray-300" strokeWidth={1} />
-                  <p className="text-base font-medium text-gray-500">Nenhuma saída registrada.</p>
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400 dark:text-gray-500">
+                  <Package className="w-12 h-12 mb-3 text-gray-300 dark:text-gray-600" strokeWidth={1} />
+                  <p className="text-base font-medium text-gray-500 dark:text-gray-400">Nenhuma saída registrada.</p>
                   <p className="text-sm mt-1 max-w-[250px]">Utilize o formulário ao lado para adicionar o primeiro registro de saída.</p>
                 </div>
               )}
