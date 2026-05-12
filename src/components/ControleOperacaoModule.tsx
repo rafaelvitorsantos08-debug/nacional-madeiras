@@ -59,7 +59,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 }
 
 // --- SUBMODULES ---
-import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR } from './EstoqueModule';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -918,7 +918,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800"
                               >
                                 <option value="" className="text-gray-800 bg-white">Medida</option>
-                                {LARGURAS_ADUELA.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
+                                {LARGURAS_ADUELA.flatMap(largura => 
+                                  COMPRIMENTOS_ADUELA.map(comprimento => (
+                                    <option key={`${largura}x${comprimento}`} value={`${largura}x${comprimento}`} className="text-gray-800 bg-white">{`${largura}x${comprimento}`}</option>
+                                  ))
+                                )}
                               </select>
                               <input 
                                 type="text" 
@@ -937,7 +941,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 className="w-1/2 p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800"
                               >
                                 <option value="" className="text-gray-800 bg-white">Face</option>
-                                {FACE_ALIZAR.map(op => <option key={op} value={op} className="text-gray-800 bg-white">{op}</option>)}
+                                {FACE_ALIZAR.flatMap(face => 
+                                  COMPRIMENTOS_ALIZAR.map(comprimento => (
+                                    <option key={`${face}x${comprimento}`} value={`${face}x${comprimento}`} className="text-gray-800 bg-white">{`${face}x${comprimento}`}</option>
+                                  ))
+                                )}
                               </select>
                               <input 
                                 type="text" 
