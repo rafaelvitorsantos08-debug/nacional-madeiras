@@ -676,6 +676,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
 function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v4', {});
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
+  const [selectedItemForSaidas, setSelectedItemForSaidas] = useState<{ obraId: string, itemId: string } | null>(null);
 
   const adicionarObra = () => {
     const nome = window.prompt('Digite o nome da nova obra:');
@@ -940,6 +941,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'folhas', e.target.value)}
                               className="w-full h-full min-h-[44px] p-3 pr-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold text-gray-800 dark:text-blue-100"
                             />
+                            {item.saidas?.filter((s:any) => s.tipo === 'folhas').length > 0 && (
+                              <div className="absolute bottom-0.5 left-1 text-[10px] font-bold text-red-500 pointer-events-none" title="Quantidade que já saiu">
+                                -{item.saidas.filter((s:any) => s.tipo === 'folhas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                              </div>
+                            )}
                             {item.folhas && (
                               <button onClick={() => handleChangeItem(activeObra.id, item.id, 'folhas', '')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
                                 <X className="w-3 h-3" />
@@ -975,6 +981,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   placeholder="Qtd"
                                   className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold text-amber-900 dark:text-amber-100 placeholder-amber-400/50 dark:placeholder-amber-400/30"
                                 />
+                                {item.saidas?.filter((s:any) => s.tipo === 'aduelas').length > 0 && (
+                                  <div className="absolute bottom-0.5 left-1 text-[8px] font-bold text-red-500 pointer-events-none" title="Quantidade que já saiu">
+                                    -{item.saidas.filter((s:any) => s.tipo === 'aduelas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                                  </div>
+                                )}
                                 {item.aduelas && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'aduelas', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar quantidade">
                                     <X className="w-3 h-3" />
@@ -1014,6 +1025,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   placeholder="Qtd"
                                   className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold text-purple-900 dark:text-purple-100 placeholder-purple-400/50 dark:placeholder-purple-400/30"
                                 />
+                                {item.saidas?.filter((s:any) => s.tipo === 'alizares').length > 0 && (
+                                  <div className="absolute bottom-0.5 left-1 text-[8px] font-bold text-red-500 pointer-events-none" title="Quantidade que já saiu">
+                                    -{item.saidas.filter((s:any) => s.tipo === 'alizares').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                                  </div>
+                                )}
                                 {item.alizares && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'alizares', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar quantidade">
                                     <X className="w-3 h-3" />
@@ -1022,7 +1038,14 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                               </div>
                             </div>
                           </td>
-                          <td className="p-2 text-center">
+                          <td className="p-2 text-center flex items-center justify-center gap-1 h-full min-h-[44px]">
+                            <button 
+                              onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id })}
+                              className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                              title="Registrar / Ver Saídas"
+                            >
+                              <History className="w-5 h-5" />
+                            </button>
                             <button 
                               onClick={() => deletarItem(activeObra.id, item.id)}
                               className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
@@ -1057,6 +1080,249 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
             </div>
           </div>
         )}
+      </div>
+
+      {selectedItemForSaidas && (
+        <ModalSaidas 
+          obra={obras[selectedItemForSaidas.obraId]} 
+          item={obras[selectedItemForSaidas.obraId]?.itens?.find((i: any) => i.id === selectedItemForSaidas.itemId)}
+          onClose={() => setSelectedItemForSaidas(null)}
+          onSaveSaida={(saida) => {
+            setObras(prev => {
+              const prevObra = prev[selectedItemForSaidas.obraId];
+              if (!prevObra) return prev;
+              const newItens = prevObra.itens.map((it: any) => {
+                if (it.id === selectedItemForSaidas.itemId) {
+                  return {
+                    ...it,
+                    saidas: [...(it.saidas || []), { ...saida, id: Date.now().toString() }]
+                  };
+                }
+                return it;
+              });
+              return {
+                ...prev,
+                [selectedItemForSaidas.obraId]: { ...prevObra, itens: newItens }
+              };
+            });
+          }}
+          onDeleteSaida={(saidaId) => {
+            setObras(prev => {
+              const prevObra = prev[selectedItemForSaidas.obraId];
+              if (!prevObra) return prev;
+              const newItens = prevObra.itens.map((it: any) => {
+                if (it.id === selectedItemForSaidas.itemId) {
+                  return {
+                    ...it,
+                    saidas: (it.saidas || []).filter((s: any) => s.id !== saidaId)
+                  };
+                }
+                return it;
+              });
+              return {
+                ...prev,
+                [selectedItemForSaidas.obraId]: { ...prevObra, itens: newItens }
+              };
+            });
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ModalSaidas({ obra, item, onClose, onSaveSaida, onDeleteSaida }: any) {
+  const [data, setData] = useState(() => new Date().toISOString().split('T')[0]);
+  const [tipo, setTipo] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
+  const [quantidade, setQuantidade] = useState('');
+  const [observacao, setObservacao] = useState('');
+
+  if (!item || !obra) return null;
+
+  const saidas = item.saidas || [];
+  
+  const getQtdOriginal = (t: string) => parseInt(t === 'folhas' ? item.folhas : t === 'aduelas' ? item.aduelas : item.alizares) || 0;
+  
+  const totalSaiu = (t: string) => saidas.filter((s: any) => s.tipo === t).reduce((acc: number, s: any) => acc + (parseInt(s.quantidade) || 0), 0);
+
+  const saldo = (t: string) => getQtdOriginal(t) - totalSaiu(t);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quantidade || parseInt(quantidade) <= 0) return;
+    
+    // Check if new exiting qty exceeds balance
+    if (parseInt(quantidade) > saldo(tipo)) {
+      if (!window.confirm(`Atenção: A quantidade de saída de ${tipo} é maior que o saldo disponível de ${saldo(tipo)}. Deseja continuar?`)) {
+         return;
+      }
+    }
+
+    onSaveSaida({ data, tipo, quantidade: parseInt(quantidade), observacao });
+    setQuantidade('');
+    setObservacao('');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-gray-800">
+              Registros de Saída
+            </h2>
+            <p className="text-sm text-gray-500 font-medium">
+              Obra: <span className="text-gray-700">{obra.nome}</span> | Espécie: <span className="text-gray-700">{item.dimensao} - {item.cor} {item.enchimento ? `- ${item.enchimento}` : ''} {item.modelo ? `- ${item.modelo}` : ''}</span>
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200">
+          {/* Esquerda: Cadastro de Saída */}
+          <div className="w-full md:w-[40%] p-5 bg-gray-50/50">
+            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+              <Plus className="w-4 h-4 mr-1 text-brand-green" /> Nova Saída
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data da Saída</label>
+                <input 
+                  type="date" 
+                  value={data} 
+                  onChange={e => setData(e.target.value)} 
+                  required 
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Material</label>
+                <select 
+                  value={tipo} 
+                  onChange={(e: any) => setTipo(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                >
+                  <option value="folhas">Folhas de Porta</option>
+                  <option value="aduelas">Aduelas</option>
+                  <option value="alizares">Alizares</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="flex-1">
+                   <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                   <input 
+                     type="number" 
+                     min="1"
+                     value={quantidade} 
+                     onChange={e => setQuantidade(e.target.value)} 
+                     required 
+                     placeholder="0"
+                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none font-semibold text-gray-800"
+                   />
+                 </div>
+                 <div className="flex-1 p-2 bg-gray-100 rounded-lg border border-gray-200 text-center flex flex-col justify-center">
+                   <div className="text-[10px] uppercase text-gray-500 font-bold leading-tight">Saldo Atual</div>
+                   <div className={`font-bold text-lg ${saldo(tipo) <= 0 ? 'text-red-500' : 'text-blue-600'}`}>{saldo(tipo)}</div>
+                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Observação (Opcional)</label>
+                <textarea 
+                  value={observacao} 
+                  onChange={e => setObservacao(e.target.value)} 
+                  rows={2}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none"
+                  placeholder="Ex: NF 1234, Recebedor Marcos"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full py-2.5 bg-brand-green hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <History className="w-4 h-4" /> Registrar Saída
+              </button>
+            </form>
+            
+            {/* Resumo de Saldos */}
+            <div className="mt-6 border-t border-gray-200 pt-4">
+              <h4 className="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Resumo de Saldos</h4>
+              <div className="space-y-2">
+                {['folhas', 'aduelas', 'alizares'].map(t => (
+                   <div key={t} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-gray-200 shadow-sm">
+                     <span className="capitalize font-medium text-gray-600 flex-1">{t}</span>
+                     <div className="flex items-center gap-2 text-xs">
+                        <span className="text-gray-500" title="Entrada">Ent: <b>{getQtdOriginal(t)}</b></span>
+                        <span className="text-red-500" title="Saída">Sai: <b>{totalSaiu(t)}</b></span>
+                        <span className={`w-8 text-right font-bold ${saldo(t) <= 0 ? (getQtdOriginal(t) == 0 ? 'text-gray-400' : 'text-red-600') : 'text-blue-600'}`} title="Saldo">
+                          ={saldo(t)}
+                        </span>
+                     </div>
+                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Direita: Tabela de Histórico */}
+          <div className="w-full md:w-[60%] p-5 bg-white flex flex-col">
+            <h3 className="font-semibold text-gray-700 mb-4 flex items-center">
+              <FileText className="w-4 h-4 mr-1 text-gray-500" /> Histórico de Registros
+            </h3>
+            
+            <div className="flex-1 border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
+              {saidas.length > 0 ? (
+                <div className="overflow-auto h-full max-h-[400px]">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-white border-b border-gray-200 text-gray-500 sticky top-0 z-10 shadow-sm">
+                      <tr>
+                        <th className="py-2.5 px-3 font-semibold w-24">Data</th>
+                        <th className="py-2.5 px-3 font-semibold">Tipo</th>
+                        <th className="py-2.5 px-3 font-semibold text-center w-20">Qtd</th>
+                        <th className="py-2.5 px-3 font-semibold border-l border-gray-200">Observações</th>
+                        <th className="py-2.5 px-3 font-semibold w-10 text-center"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {[...saidas].sort((a,b) => b.data.localeCompare(a.data)).map((s: any) => (
+                        <tr key={s.id} className="hover:bg-gray-100/50 transition-colors bg-white">
+                          <td className="py-2.5 px-3 text-gray-600 font-medium whitespace-nowrap">
+                            {new Date(`${s.data}T12:00:00`).toLocaleDateString('pt-BR')}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <span className={`capitalize inline-block px-2 py-0.5 rounded text-xs font-medium border
+                              ${s.tipo === 'folhas' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                                s.tipo === 'aduelas' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                                'bg-purple-50 text-purple-700 border-purple-200'}
+                            `}>
+                              {s.tipo}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-center text-red-600 font-bold text-base">-{s.quantidade}</td>
+                          <td className="py-2.5 px-3 text-gray-500 text-xs border-l border-gray-100">
+                             {s.observacao || <span className="italic text-gray-300">Sem observação</span>}
+                          </td>
+                          <td className="py-2 px-2 text-center text-red-600 font-bold">
+                            <button onClick={() => onDeleteSaida(s.id)} className="p-1 hover:bg-red-100 text-gray-400 hover:text-red-500 rounded transition-colors" title="Remover saída">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center text-gray-400">
+                  <Package className="w-12 h-12 mb-3 text-gray-300" strokeWidth={1} />
+                  <p className="text-base font-medium text-gray-500">Nenhuma saída registrada.</p>
+                  <p className="text-sm mt-1 max-w-[250px]">Utilize o formulário ao lado para adicionar o primeiro registro de saída.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
