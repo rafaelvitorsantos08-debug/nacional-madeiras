@@ -449,6 +449,9 @@ export default function App() {
               icon={<Home className="text-brand-green" />} 
               bgColor="bg-green-50"
               trend="up"
+              goalTarget={2000}
+              goalLabel="Meta do Mês"
+              goalRemainingLabel="para a meta"
             />
             <KpiCard 
               title="Produção" 
@@ -457,6 +460,9 @@ export default function App() {
               icon={<HardHat className="text-amber-500" />} 
               bgColor="bg-amber-50"
               trend="neutral"
+              goalTarget={2000}
+              goalLabel="Meta"
+              goalRemainingLabel="para a meta"
             />
             <KpiCard 
               title="Alertas de Baixo Estoque" 
@@ -716,27 +722,59 @@ function NavItem({ icon, label, isOpen, active, className, onClick }: { icon: Re
   )
 }
 
-function KpiCard({ title, value, subtitle, icon, bgColor, trend, alert }: any) {
+function KpiCard({ title, value, subtitle, icon, bgColor, trend, alert, goalTarget, goalLabel, goalRemainingLabel }: any) {
+  const numericValue = typeof value === 'string' ? parseFloat(value.replace(/\./g, '').replace(/,/g, '.')) : value;
+  const showGoal = typeof goalTarget === 'number';
+  const progressPercent = showGoal ? Math.min(100, Math.max(0, (numericValue / goalTarget) * 100)) : 0;
+  
   return (
     <div className={cn(
-      "bg-white p-5 rounded-xl border transition-all",
+      "bg-white p-5 rounded-xl border transition-all flex flex-col justify-between h-full",
       alert ? "border-yellow-300 shadow-sm shadow-yellow-100" : "border-gray-200 shadow-sm"
     )}>
-      <div className="flex justify-between items-start">
-         <div className={cn("p-2 rounded-lg", bgColor)}>
-           {icon}
-         </div>
-         {trend === 'up' && <span className="flex items-center text-xs font-semibold text-brand-green bg-green-50 px-2 py-0.5 rounded-full"><ArrowUpFromLine className="w-3 h-3 mr-1 opacity-50"/> +12%</span>}
-         {trend === 'down' && <span className="flex items-center text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full"><ArrowDownToLine className="w-3 h-3 mr-1 opacity-50"/> -5%</span>}
-         {trend === 'neutral' && <span className="flex items-center text-xs font-semibold text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-full">Atenção</span>}
-      </div>
-      <div className="mt-4">
-        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <div className="flex items-baseline mt-1 space-x-1">
-          <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
-          {subtitle && <span className="text-sm font-medium text-gray-500">{subtitle}</span>}
+      <div>
+        <div className="flex justify-between items-start">
+           <div className={cn("p-2 rounded-lg", bgColor)}>
+             {icon}
+           </div>
+           {trend === 'up' && <span className="flex items-center text-xs font-semibold text-brand-green bg-green-50 px-2 py-0.5 rounded-full"><ArrowUpFromLine className="w-3 h-3 mr-1 opacity-50"/> +12%</span>}
+           {trend === 'down' && <span className="flex items-center text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full"><ArrowDownToLine className="w-3 h-3 mr-1 opacity-50"/> -5%</span>}
+           {trend === 'neutral' && <span className="flex items-center text-xs font-semibold text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-full">Atenção</span>}
+        </div>
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+          <div className="flex items-baseline mt-1 space-x-1">
+            <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+            {subtitle && <span className="text-sm font-medium text-gray-500">{subtitle}</span>}
+          </div>
         </div>
       </div>
+      
+      {showGoal && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="flex justify-between text-xs mb-1">
+            <span className="font-medium text-gray-500">{goalLabel || "Meta"}</span>
+            <span className="font-bold text-gray-700">{goalTarget.toLocaleString('pt-BR')}</span>
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-1.5 mb-1.5 overflow-hidden">
+            <div 
+              className={cn(
+                "h-1.5 rounded-full",
+                progressPercent >= 100 ? "bg-brand-green" : "bg-blue-500"
+              )} 
+              style={{ width: `${progressPercent}%` }}
+            ></div>
+          </div>
+          {goalRemainingLabel && numericValue < goalTarget && (
+            <div className="text-[11px] text-gray-500 font-medium">
+              Faltam <span className="font-bold text-gray-700">{(goalTarget - numericValue).toLocaleString('pt-BR')}</span> {goalRemainingLabel}
+            </div>
+          )}
+          {goalRemainingLabel && numericValue >= goalTarget && (
+             <div className="text-[11px] text-brand-green font-bold">Meta atingida!</div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
