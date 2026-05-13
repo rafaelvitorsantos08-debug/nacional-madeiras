@@ -47,6 +47,9 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   const [movementAmount, setMovementAmount] = useState<number | ''>('');
   const [movementDate, setMovementDate] = useState(new Date().toISOString().split('T')[0]);
 
+  const [movementResponsible, setMovementResponsible] = useState('');
+  const [movementDestination, setMovementDestination] = useState('');
+
   // Ensure current obra exists
   useEffect(() => {
     if (selectedObra && !obrasData[selectedObra]) {
@@ -73,6 +76,8 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementType(type);
     setMovementAmount('');
     setMovementDate(new Date().toISOString().split('T')[0]);
+    setMovementResponsible('');
+    setMovementDestination('');
     setIsModalOpen(true);
   };
 
@@ -80,17 +85,19 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     if (!editingItem || !movementAmount) return;
     const amount = Number(movementAmount);
     
+    if (movementType === 'saida' && amount > editingItem.estoque) {
+       alert(`ESTOQUE INSUFICIENTE: Saldo de ${editingItem.estoque} inferior à solicitação de ${amount}.`);
+       return;
+    }
+
+    let newEstoque = editingItem.estoque;
+
     setObrasData((prev: any) => {
       const currentObraItems = prev[selectedObra] || [];
       const updatedItems = currentObraItems.map((i: any) => {
         if (i.id === editingItem.id) {
-          let newEstoque = i.estoque;
-          if (movementType === 'entrada') newEstoque += amount;
-          if (movementType === 'saida') newEstoque = Math.max(0, newEstoque - amount);
-          
-          // Optionally here we could save the history in an array:
-          // const history = i.history || [];
-          // history.push({ type: movementType, amount, date: movementDate });
+          if (movementType === 'entrada') newEstoque = i.estoque + amount;
+          if (movementType === 'saida') newEstoque = Math.max(0, i.estoque - amount);
           
           return { ...i, estoque: newEstoque };
         }
@@ -98,6 +105,12 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       });
       return { ...prev, [selectedObra]: updatedItems };
     });
+    
+    if (movementType === 'saida') {
+        alert(`SAÍDA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${newEstoque}.`);
+    } else {
+        alert(`ENTRADA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${newEstoque}.`);
+    }
     
     setIsModalOpen(false);
   };
@@ -311,6 +324,32 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                     </div>
                   </div>
                 </div>
+                {movementType === 'saida' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Responsável pela Retirada</label>
+                      <input
+                        type="text"
+                        value={movementResponsible}
+                        onChange={(e) => setMovementResponsible(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                        placeholder="Nome completo do colaborador"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Destino/Uso</label>
+                      <input
+                        type="text"
+                        value={movementDestination}
+                        onChange={(e) => setMovementDestination(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                        placeholder="Ex: Instalação das portas do 4º andar"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -323,7 +362,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
               </button>
               <button
                 onClick={handleSaveMovement}
-                disabled={!movementAmount || movementAmount <= 0 || (movementType === 'saida' && movementAmount > editingItem.estoque)}
+                disabled={!movementAmount || movementAmount <= 0 || (movementType === 'saida' && (!movementResponsible || !movementDestination))}
                 className={cn(
                   "px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none flex items-center",
                   movementType === 'entrada' 
