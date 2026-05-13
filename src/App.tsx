@@ -383,6 +383,7 @@ export default function App() {
           
           {/* PRINT ONLY HEADER */}
           <div className="hidden print:flex mb-8 items-center border-b border-gray-300 pb-4">
+             <div className="w-12 h-12 bg-brand-green text-white rounded font-bold flex items-center justify-center text-2xl mr-4 print-exact-color">NM</div>
              <div className="flex flex-col">
                <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
                <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>

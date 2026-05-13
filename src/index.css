@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-brand-green: #488E4B;
-  --color-brand-green-light: #5AA15E;
-  --color-brand-green-dark: #356D38;
+  --color-brand-green: #488e4b;
+  --color-brand-green-light: #5aa15e;
+  --color-brand-green-dark: #356d38;
 }
 
 body {
@@ -13,11 +13,51 @@ body {
 }
 
 @media print {
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
   body {
     @apply bg-white text-black;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .print\:hidden {
     display: none !important;
+  }
+
+  /* Make sure everything prints, remove scrollbars and fixed heights */
+  * {
+    overflow: visible !important;
+  }
+
+  .max-h-\[800px\] {
+    max-height: none !important;
+  }
+
+  .text-gray-500,
+  .text-gray-600 {
+    color: #4b5563 !important; /* Slightly darker */
+  }
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900 {
+    color: #000000 !important; /* Pure black */
+  }
+
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  td,
+  th {
+    white-space: normal !important; /* ALLOW TABLE TO WRAP INSTEAD OF SCROLLING/CROPPING */
+    word-break: break-word !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
   }
 }
 
@@ -34,7 +74,7 @@ html.dark .bg-gray-50 {
   @apply !bg-gray-950;
 }
 
-html.dark .text-gray-900, 
+html.dark .text-gray-900,
 html.dark .text-gray-800 {
   @apply !text-white;
 }
@@ -51,8 +91,8 @@ html.dark .text-gray-500 {
   @apply !text-gray-300;
 }
 
-html.dark .border-gray-100, 
-html.dark .border-gray-200, 
+html.dark .border-gray-100,
+html.dark .border-gray-200,
 html.dark .border-gray-300 {
   @apply !border-gray-700;
 }
@@ -65,16 +105,18 @@ html.dark .border-purple-200 {
   @apply !border-purple-700/50;
 }
 
-
-html.dark .text-blue-900, html.dark .text-blue-800 {
+html.dark .text-blue-900,
+html.dark .text-blue-800 {
   @apply !text-blue-200;
 }
 
-html.dark .text-amber-900, html.dark .text-amber-800 {
+html.dark .text-amber-900,
+html.dark .text-amber-800 {
   @apply !text-amber-200;
 }
 
-html.dark .text-purple-900, html.dark .text-purple-800 {
+html.dark .text-purple-900,
+html.dark .text-purple-800 {
   @apply !text-purple-200;
 }
 
