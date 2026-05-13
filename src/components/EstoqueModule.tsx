@@ -200,7 +200,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
         </div>
 
         {/* TOOLBAR */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 print:hidden">
           <div className="flex items-center space-x-3 w-full sm:w-auto relative">
             <div className="relative flex-1 sm:w-64">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3">

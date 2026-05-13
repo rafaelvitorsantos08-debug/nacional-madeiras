@@ -361,17 +361,17 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
              <select 
                value={selecionadoAno} 
                onChange={(e) => setSelecionadoAno(Number(e.target.value))}
-               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none"
+               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none print:hidden"
              >
                {anos.map(a => <option key={a} value={a}>{a}</option>)}
              </select>
-             <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+             <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm print:hidden">
                <Download className="w-4 h-4 mr-2 text-gray-500"/> Exportar
              </button>
            </div>
         </div>
 
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 print:hidden">
           {MESES.map((mes, idx) => (
              <button
                key={mes}
@@ -386,6 +386,9 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
                {mes}
              </button>
           ))}
+        </div>
+        <div className="hidden print:block text-xl font-bold text-gray-800 mt-2">
+          {MESES[selecionadoMes]} {selecionadoAno}
         </div>
       </div>
 
@@ -651,14 +654,14 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
              <select 
                value={selecionadoAno} 
                onChange={(e) => setSelecionadoAno(Number(e.target.value))}
-               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none"
+               className="p-2 border border-gray-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-green/20 outline-none print:hidden"
              >
                {anos.map(a => <option key={a} value={a}>{a}</option>)}
              </select>
            </div>
         </div>
 
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 print:hidden">
           {MESES.map((mes, idx) => (
              <button
                key={mes}
@@ -673,6 +676,9 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
                {mes}
              </button>
           ))}
+        </div>
+        <div className="hidden print:block text-xl font-bold text-gray-800 mt-2">
+          {MESES[selecionadoMes]} {selecionadoAno}
         </div>
       </div>
 
@@ -798,7 +804,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
           <h3 className="font-semibold text-gray-700 uppercase tracking-wider text-xs">Obras</h3>
           <button 
             onClick={adicionarObra}
-            className="p-1.5 text-white bg-brand-green rounded-md hover:bg-green-700 transition-colors shadow-sm"
+            className="p-1.5 text-white bg-brand-green rounded-md hover:bg-green-700 transition-colors shadow-sm print:hidden"
             title="Nova Obra"
           >
             <Plus className="w-4 h-4"/>
@@ -848,7 +854,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
               </h2>
               <button 
                 onClick={() => adicionarItem(activeObra.id)}
-                className="flex items-center px-4 py-2 text-sm font-medium text-brand-green bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm"
+                className="flex items-center px-4 py-2 text-sm font-medium text-brand-green bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors shadow-sm print:hidden"
               >
                 <Plus className="w-4 h-4 mr-2"/> Adicionar Linha
               </button>
@@ -867,7 +873,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                       <th className="p-3 border-r border-gray-300 dark:border-gray-600 font-bold w-[10%] bg-blue-50 dark:bg-blue-900/60 text-blue-800 dark:text-blue-100">FOLHAS DE PORTA</th>
                       <th className="p-3 border-r border-gray-300 dark:border-gray-600 font-bold w-[22%] bg-amber-50 dark:bg-amber-900/60 text-amber-800 dark:text-amber-100">ADUELAS</th>
                       <th className="p-3 border-r border-gray-300 dark:border-gray-600 font-bold w-[24%] bg-purple-50 dark:bg-purple-900/60 text-purple-800 dark:text-purple-100">ALIZARES</th>
-                      <th className="p-3 font-bold w-12 dark:border-gray-600">AÇÕES</th>
+                      <th className="p-3 font-bold w-12 dark:border-gray-600 print:hidden">AÇÕES</th>
                     </tr>
                     <tr className="bg-gray-200/80 dark:bg-gray-800 font-bold text-gray-800 dark:text-white border-b border-gray-300 dark:border-gray-600 shadow-sm">
                       <td colSpan={4} className="p-2 text-right border-r border-gray-300 dark:border-gray-600 uppercase">TOTAL DA OBRA:</td>
@@ -883,7 +889,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                         <span className="font-bold">{totalAlizaresEntrada}</span>
                         {totalSaidaAlizares > 0 && <span className="absolute bottom-1 right-2 text-xs font-bold text-red-600 dark:text-red-400">-{totalSaidaAlizares}</span>}
                       </td>
-                      <td className="p-2 bg-gray-100"></td>
+                      <td className="p-2 bg-gray-100 dark:bg-gray-800/80 print:hidden"></td>
                     </tr>
                   </thead>
                   <tbody>
@@ -1058,7 +1064,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                               </div>
                             </div>
                           </td>
-                          <td className="p-2 text-center flex items-center justify-center gap-1 h-full min-h-[44px]">
+                          <td className="p-2 text-center flex items-center justify-center gap-1 h-full min-h-[44px] print:hidden">
                             <button 
                               onClick={() => deletarItem(activeObra.id, item.id)}
                               className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
@@ -1150,7 +1156,7 @@ function ModalSaidas({ obra, item, defaultTipo, onClose, onSaveSaida, onDeleteSa
 
         <div className="flex-1 overflow-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200 dark:divide-gray-700">
           {/* Esquerda: Cadastro de Saída */}
-          <div className="w-full md:w-[40%] p-5 bg-gray-50/50 dark:bg-gray-800/50">
+          <div className="w-full md:w-[40%] p-5 bg-gray-50/50 dark:bg-gray-800/50 print:hidden">
             <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
               <Plus className="w-4 h-4 mr-1 text-brand-green" /> Nova Saída
             </h3>
@@ -1412,7 +1418,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'folhas' })}
-                                    className="w-full py-2 px-3 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 font-bold rounded shadow-sm border border-blue-200 dark:border-blue-800/50 transition-colors text-xs flex items-center justify-center gap-1.5"
+                                    className="w-full py-2 px-3 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 font-bold rounded shadow-sm border border-blue-200 dark:border-blue-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
                                   >
                                     <History className="w-3.5 h-3.5" /> Registrar Saídas
                                   </button>
@@ -1437,7 +1443,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'aduelas' })}
-                                    className="w-full py-2 px-3 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-700 dark:text-amber-300 font-bold rounded shadow-sm border border-amber-200 dark:border-amber-800/50 transition-colors text-xs flex items-center justify-center gap-1.5"
+                                    className="w-full py-2 px-3 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-700 dark:text-amber-300 font-bold rounded shadow-sm border border-amber-200 dark:border-amber-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
                                   >
                                     <History className="w-3.5 h-3.5" /> Registrar Saídas
                                   </button>
@@ -1462,7 +1468,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'alizares' })}
-                                    className="w-full py-2 px-3 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800/60 text-purple-700 dark:text-purple-300 font-bold rounded shadow-sm border border-purple-200 dark:border-purple-800/50 transition-colors text-xs flex items-center justify-center gap-1.5"
+                                    className="w-full py-2 px-3 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800/60 text-purple-700 dark:text-purple-300 font-bold rounded shadow-sm border border-purple-200 dark:border-purple-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
                                   >
                                     <History className="w-3.5 h-3.5" /> Registrar Saídas
                                   </button>

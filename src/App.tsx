@@ -5,7 +5,7 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
@@ -300,7 +300,7 @@ export default function App() {
       
       {/* SIDEBAR */}
       <aside className={cn(
-        "bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0 z-20",
+        "bg-white border-r border-gray-200 transition-all duration-300 flex-shrink-0 z-20 print:hidden",
         sidebarOpen ? "w-64" : "w-20"
       )}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
@@ -332,7 +332,7 @@ export default function App() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         {/* HEADER */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10 print:hidden">
           <div className="flex md:hidden items-center">
              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="mr-4 text-gray-500">
                <Menu className="w-6 h-6" />
@@ -358,6 +358,10 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <button onClick={() => window.print()} className="flex items-center space-x-2 text-gray-500 hover:text-brand-green hover:bg-green-50 px-3 py-2 rounded-lg transition-colors font-medium">
+              <Printer className="w-5 h-5" />
+              <span className="hidden md:inline-block">Imprimir</span>
+            </button>
             <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
@@ -377,6 +381,14 @@ export default function App() {
         {/* DASHBOARD CONTENT */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           
+          {/* PRINT ONLY HEADER */}
+          <div className="hidden print:flex mb-8 items-center border-b border-gray-300 pb-4">
+             <div className="flex flex-col">
+               <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
+               <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>
+             </div>
+          </div>
+
           {activeTab === 'dashboard' && (
             <div className="animate-in fade-in duration-300">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
