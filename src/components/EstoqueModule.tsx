@@ -255,8 +255,8 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
         </div>
 
         {/* DATA TABLE */}
-        <div className="overflow-x-auto min-h-[400px]">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+        <div className="overflow-x-auto print:overflow-visible min-h-[400px] print:min-h-0">
+          <table className="w-full text-left text-sm whitespace-nowrap print:whitespace-normal">
             <thead>
               <tr className="bg-gray-50/80 text-gray-500 border-b border-gray-200">
                 <th className="px-6 py-3 font-medium">Código</th>

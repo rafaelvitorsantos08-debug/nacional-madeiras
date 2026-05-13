@@ -117,6 +117,24 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
     localStorage.setItem('nm_dark_mode', isDarkMode.toString());
+
+    // Fix for printing in dark mode: momentarily switch to light mode
+    const handleBeforePrint = () => {
+      document.documentElement.classList.remove('dark');
+    };
+    const handleAfterPrint = () => {
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+      }
+    };
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
   }, [isDarkMode]);
 
   const [dashboardStats, setDashboardStats] = useState({

@@ -1371,7 +1371,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
             </div>
             
             <div className="flex-1 overflow-auto p-4 w-full">
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto w-full">
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto print:overflow-visible w-full">
                 <table className="w-full text-center text-sm border-collapse min-w-[1000px]">
                   <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
                     <tr>

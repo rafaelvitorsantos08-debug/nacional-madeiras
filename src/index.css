@@ -61,6 +61,7 @@ body {
   }
 }
 
+@media screen {
 /* Dark Mode Overrides for existing generic classes */
 html.dark body {
   @apply !bg-gray-950 !text-gray-100;
@@ -188,4 +189,5 @@ html.dark .bg-\[\#DDEBF7\] {
 
 html.dark input {
   @apply !text-white;
+}
 }
