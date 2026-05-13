@@ -33,25 +33,26 @@ function getStatusBadge(estoque: number) {
 }
 
 export function FerragensModule({ globalSearch }: { globalSearch: string }) {
-  const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v2', []);
+  const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v4', []);
   const [selectedObra, setSelectedObra] = useState<string>(obrasList[0] || '');
   
   // Keep selectedObra valid if list changes
   useEffect(() => {
     if (!selectedObra && obrasList.length > 0) {
       setSelectedObra(obrasList[0]);
+    } else if (selectedObra && !obrasList.includes(selectedObra)) {
+      setSelectedObra(obrasList[0] || '');
     }
   }, [obrasList, selectedObra]);
 
-  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v2', () => {
+  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v4', () => {
     return {};
   });
 
-  const [movementsHistory, setMovementsHistory] = useLocalStorage<Movement[]>('nm_ferragens_history_v2', []);
+  const [movementsHistory, setMovementsHistory] = useLocalStorage<Movement[]>('nm_ferragens_history_v4', []);
 
   const [newObraName, setNewObraName] = useState('');
   const [isAddingObra, setIsAddingObra] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -83,6 +84,18 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setSelectedObra(name);
     setNewObraName('');
     setIsAddingObra(false);
+  };
+
+  const handleDeleteObra = () => {
+    if (!selectedObra) return;
+    if (window.confirm(`Tem certeza que deseja excluir a obra ${selectedObra}? Todos os estoques associados a ela serão perdidos.`)) {
+      setObrasList(prev => prev.filter(o => o !== selectedObra));
+      setObrasData(prev => {
+        const newData = { ...prev };
+        delete newData[selectedObra];
+        return newData;
+      });
+    }
   };
 
   const handleMovement = (item: any, type: 'entrada' | 'saida') => {
@@ -220,18 +233,18 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                 </select>
               </div>
               <button
+                onClick={handleDeleteObra}
+                title="Excluir Obra"
+                className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 hover:border-red-200 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              <button
                 onClick={() => setIsAddingObra(true)}
                 className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-brand-green shadow-sm transition-colors"
               >
                 <Plus className="w-4 h-4 mr-1.5" />
                 Nova Obra
-              </button>
-              <button
-                onClick={() => setIsHistoryOpen(true)}
-                className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 text-indigo-600 shadow-sm transition-colors"
-              >
-                <History className="w-4 h-4 mr-1.5" />
-                Ver Lançamentos
               </button>
             </div>
           )}
@@ -446,109 +459,90 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
         </div>
       )}
 
-      {/* HISTORY MODAL */}
-      {isHistoryOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200 flex flex-col">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-xl bg-white shadow-sm shadow-indigo-100 text-indigo-600">
-                  <History className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 tracking-tight">Histórico de Lançamentos</h2>
-                  <p className="text-sm text-gray-500">Acompanhe as entradas e saídas de todas as obras.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsHistoryOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {/* INLINE HISTORY (Always visible) */}
+      <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-xl bg-white shadow-sm shadow-indigo-100 text-indigo-600">
+              <History className="w-5 h-5" />
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-0">
-              {movementsHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <History className="w-12 h-12 text-gray-200 mb-4" />
-                  <p className="text-gray-500">Nenhum lançamento registrado até o momento.</p>
-                </div>
-              ) : (
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 sticky top-0 shadow-sm z-10">
-                      <th className="px-6 py-3 font-medium">Data</th>
-                      <th className="px-6 py-3 font-medium">Obra</th>
-                      <th className="px-6 py-3 font-medium">Modelo</th>
-                      <th className="px-6 py-3 font-medium">Tipo</th>
-                      <th className="px-6 py-3 font-medium text-right">Qtde</th>
-                      <th className="px-6 py-3 font-medium">Responsável / Destino</th>
-                      <th className="px-6 py-3 font-medium text-center">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {movementsHistory.map(mov => (
-                      <tr key={mov.id} className="hover:bg-gray-50/50">
-                        <td className="px-6 py-3 text-gray-600">
-                          {new Date(mov.date).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td className="px-6 py-3 font-medium text-gray-800">
-                          {mov.obraId}
-                        </td>
-                        <td className="px-6 py-3 text-gray-600">
-                          {mov.itemModelo} <span className="text-gray-400 text-xs ml-1">({mov.itemId})</span>
-                        </td>
-                        <td className="px-6 py-3">
-                          {mov.type === 'entrada' ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
-                              Entrada
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">
-                              Saída
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-3 text-right font-bold text-gray-900">
-                          {mov.amount}
-                        </td>
-                        <td className="px-6 py-3 text-gray-500 text-xs truncate max-w-[200px]" title={mov.type === 'saida' ? `${mov.responsible || ''} - ${mov.destination || ''}` : '-'}>
-                          {mov.type === 'saida' && (
-                             <div className="flex flex-col">
-                               <span className="font-semibold text-gray-700">{mov.responsible || 'NT'}</span>
-                               <span>{mov.destination || 'N/A'}</span>
-                             </div>
-                          )}
-                          {mov.type === 'entrada' && '-'}
-                        </td>
-                        <td className="px-6 py-3 text-center">
-                          <button
-                            onClick={() => handleDeleteMovement(mov)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                            title="Desfazer Lançamento (reverte estoque)"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-            
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end">
-              <button
-                onClick={() => setIsHistoryOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Fechar
-              </button>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">Histórico de Lançamentos</h2>
+              <p className="text-sm text-gray-500">Acompanhe as entradas e saídas de todas as obras.</p>
             </div>
           </div>
         </div>
-      )}
+        
+        <div className="flex-1 overflow-y-auto p-0 max-h-[500px]">
+          {movementsHistory.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <History className="w-12 h-12 text-gray-200 mb-4" />
+              <p className="text-gray-500">Nenhum lançamento registrado até o momento.</p>
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 sticky top-0 shadow-sm z-10">
+                  <th className="px-6 py-3 font-medium">Data</th>
+                  <th className="px-6 py-3 font-medium">Obra</th>
+                  <th className="px-6 py-3 font-medium">Modelo</th>
+                  <th className="px-6 py-3 font-medium">Tipo</th>
+                  <th className="px-6 py-3 font-medium text-right">Qtde</th>
+                  <th className="px-6 py-3 font-medium">Responsável / Destino</th>
+                  <th className="px-6 py-3 font-medium text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {movementsHistory.map(mov => (
+                  <tr key={mov.id} className="hover:bg-gray-50/50">
+                    <td className="px-6 py-3 text-gray-600">
+                      {new Date(mov.date).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-3 font-medium text-gray-800">
+                      {mov.obraId}
+                    </td>
+                    <td className="px-6 py-3 text-gray-600">
+                      {mov.itemModelo} <span className="text-gray-400 text-xs ml-1">({mov.itemId})</span>
+                    </td>
+                    <td className="px-6 py-3">
+                      {mov.type === 'entrada' ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                          Entrada
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">
+                          Saída
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-3 text-right font-bold text-gray-900">
+                      {mov.amount}
+                    </td>
+                    <td className="px-6 py-3 text-gray-500 text-xs truncate max-w-[200px]" title={mov.type === 'saida' ? `${mov.responsible || ''} - ${mov.destination || ''}` : '-'}>
+                      {mov.type === 'saida' && (
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-gray-700">{mov.responsible || 'NT'}</span>
+                            <span>{mov.destination || 'N/A'}</span>
+                          </div>
+                      )}
+                      {mov.type === 'entrada' && '-'}
+                    </td>
+                    <td className="px-6 py-3 text-center">
+                      <button
+                        onClick={() => handleDeleteMovement(mov)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                        title="Desfazer Lançamento (reverte estoque)"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
