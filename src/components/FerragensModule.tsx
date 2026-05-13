@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Filter, Plus, Pencil, Trash2, Shield, Settings2, PackagePlus, PackageMinus, History } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, PackagePlus, PackageMinus, MapPin, Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLocalStorage } from './EstoqueModule';
 
@@ -21,18 +21,58 @@ function getStatusBadge(estoque: number) {
 }
 
 export function FerragensModule({ globalSearch }: { globalSearch: string }) {
-  const [items, setItems] = useLocalStorage('nm_ferragens', INITIAL_FERRAGENS);
+  const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v1', [
+    'CYRELA LA ISLA',
+    'TEGRA GAEA',
+    'EDIFICIO ISCOURI SIGNATURE'
+  ]);
+  const [selectedObra, setSelectedObra] = useState<string>(obrasList[0]);
+  
+  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v1', () => {
+    const initial: Record<string, any[]> = {};
+    ['CYRELA LA ISLA', 'TEGRA GAEA', 'EDIFICIO ISCOURI SIGNATURE'].forEach(obra => {
+      initial[obra] = INITIAL_FERRAGENS.map(i => ({ ...i }));
+    });
+    return initial;
+  });
+
+  const [newObraName, setNewObraName] = useState('');
+  const [isAddingObra, setIsAddingObra] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [movementType, setMovementType] = useState<'entrada' | 'saida'>('entrada');
   const [movementAmount, setMovementAmount] = useState<number | ''>('');
+  const [movementDate, setMovementDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Ensure current obra exists
+  useEffect(() => {
+    if (selectedObra && !obrasData[selectedObra]) {
+      setObrasData((prev: any) => ({
+        ...prev,
+        [selectedObra]: INITIAL_FERRAGENS.map(i => ({ ...i }))
+      }));
+    }
+  }, [selectedObra, obrasData, setObrasData]);
+
+  const handleCreateObra = () => {
+    if (!newObraName.trim()) return;
+    const name = newObraName.trim().toUpperCase();
+    if (!obrasList.includes(name)) {
+      setObrasList(prev => [...prev, name]);
+    }
+    setSelectedObra(name);
+    setNewObraName('');
+    setIsAddingObra(false);
+  };
 
   const handleMovement = (item: any, type: 'entrada' | 'saida') => {
     setEditingItem(item);
     setMovementType(type);
     setMovementAmount('');
+    setMovementDate(new Date().toISOString().split('T')[0]);
     setIsModalOpen(true);
   };
 
@@ -40,20 +80,30 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     if (!editingItem || !movementAmount) return;
     const amount = Number(movementAmount);
     
-    setItems((prev: any) => prev.map((i: any) => {
-      if (i.id === editingItem.id) {
-        let newEstoque = i.estoque;
-        if (movementType === 'entrada') newEstoque += amount;
-        if (movementType === 'saida') newEstoque = Math.max(0, newEstoque - amount);
-        return { ...i, estoque: newEstoque };
-      }
-      return i;
-    }));
+    setObrasData((prev: any) => {
+      const currentObraItems = prev[selectedObra] || [];
+      const updatedItems = currentObraItems.map((i: any) => {
+        if (i.id === editingItem.id) {
+          let newEstoque = i.estoque;
+          if (movementType === 'entrada') newEstoque += amount;
+          if (movementType === 'saida') newEstoque = Math.max(0, newEstoque - amount);
+          
+          // Optionally here we could save the history in an array:
+          // const history = i.history || [];
+          // history.push({ type: movementType, amount, date: movementDate });
+          
+          return { ...i, estoque: newEstoque };
+        }
+        return i;
+      });
+      return { ...prev, [selectedObra]: updatedItems };
+    });
     
     setIsModalOpen(false);
   };
 
-  const filteredList = items.filter((item: any) => {
+  const currentItems = obrasData[selectedObra] || [];
+  const filteredList = currentItems.filter((item: any) => {
     const combinedSearchTerm = searchTerm || globalSearch;
     const searchLower = combinedSearchTerm.toLowerCase();
     const searchString = Object.values(item).join(' ').toLowerCase();
@@ -62,10 +112,61 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
 
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Recebimento de Ferragens</h1>
-          <p className="text-sm text-gray-500 mt-1">Gerencie a entrada e saída de ferragens e dobradiças.</p>
+          <p className="text-sm text-gray-500 mt-1">Gerencie a entrada e saída de ferragens e dobradiças separadas por obra.</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          {isAddingObra ? (
+            <div className="flex items-center space-x-2 bg-white px-2 py-1.5 rounded-xl border border-brand-green/30 shadow-sm animate-in fade-in zoom-in-95 duration-200">
+              <input 
+                type="text" 
+                placeholder="Nome da Obra..."
+                value={newObraName}
+                onChange={(e) => setNewObraName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateObra()}
+                autoFocus
+                className="px-3 py-1.5 text-sm bg-transparent border-none focus:ring-0 w-48 text-gray-700 outline-none"
+              />
+              <button 
+                onClick={handleCreateObra}
+                className="p-1.5 bg-brand-green text-white rounded-lg hover:bg-green-700 transition"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => { setIsAddingObra(false); setNewObraName(''); }}
+                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <MapPin className="w-4 h-4 text-brand-green" />
+                </div>
+                <select
+                  value={selectedObra}
+                  onChange={(e) => setSelectedObra(e.target.value)}
+                  className="pl-9 pr-8 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 focus:border-brand-green focus:ring-1 focus:ring-brand-green appearance-none shadow-sm cursor-pointer hover:border-gray-300 transition-colors"
+                >
+                  {obrasList.map(obra => (
+                    <option key={obra} value={obra}>{obra}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => setIsAddingObra(true)}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-brand-green shadow-sm transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Nova Obra
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -181,17 +282,34 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
             
             <div className="p-6">
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Quantidade</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={movementAmount}
-                    onChange={(e) => setMovementAmount(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
-                    placeholder="0"
-                    autoFocus
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Quantidade</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={movementAmount}
+                      onChange={(e) => setMovementAmount(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                      placeholder="0"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Data do Registro</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="date"
+                        value={movementDate}
+                        onChange={(e) => setMovementDate(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all text-gray-700"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
