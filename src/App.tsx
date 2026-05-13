@@ -5,11 +5,12 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
 import { ControleOperacaoModule } from './components/ControleOperacaoModule';
+import { FerragensModule } from './components/FerragensModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -337,6 +338,7 @@ export default function App() {
         <nav className="p-4 space-y-1">
           <NavItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === 'dashboard'} isOpen={sidebarOpen} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
+          <NavItem icon={<Wrench />} label="Ferragens" active={activeTab === 'ferragens'} isOpen={sidebarOpen} onClick={() => setActiveTab('ferragens')} />
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
           
@@ -618,6 +620,9 @@ export default function App() {
 
           {activeTab === 'estoque' && (
             <EstoqueModule globalSearch={globalSearch} />
+          )}
+          {activeTab === 'ferragens' && (
+            <FerragensModule globalSearch={globalSearch} />
           )}
           {activeTab === 'controle_operacao' && (
             <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} globalSearch={globalSearch} />
