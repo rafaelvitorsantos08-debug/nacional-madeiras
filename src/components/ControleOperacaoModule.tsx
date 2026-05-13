@@ -783,6 +783,14 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
 
   const activeObra = selectedObraId ? obras[selectedObraId] : null;
 
+  const totalFolhasEntrada = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.folhas) || 0), 0) || 0;
+  const totalAduelasEntrada = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.aduelas) || 0), 0) || 0;
+  const totalAlizaresEntrada = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.alizares) || 0), 0) || 0;
+
+  const totalSaidaFolhas = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (item.saidas?.filter((s:any) => s.tipo === 'folhas').reduce((sAcc:number, s:any) => sAcc + (parseInt(s.quantidade)||0), 0) || 0), 0);
+  const totalSaidaAduelas = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (item.saidas?.filter((s:any) => s.tipo === 'aduelas').reduce((sAcc:number, s:any) => sAcc + (parseInt(s.quantidade)||0), 0) || 0), 0);
+  const totalSaidaAlizares = (activeObra?.itens || []).reduce((acc: number, item: any) => acc + (item.saidas?.filter((s:any) => s.tipo === 'alizares').reduce((sAcc:number, s:any) => sAcc + (parseInt(s.quantidade)||0), 0) || 0), 0);
+
   return (
     <div className="flex-1 flex max-h-[800px] overflow-hidden rounded-bl-xl rounded-br-xl">
       <div className="w-64 border-r border-gray-200 bg-white flex flex-col h-full">
@@ -863,14 +871,17 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                     </tr>
                     <tr className="bg-gray-200/80 dark:bg-gray-800 font-bold text-gray-800 dark:text-white border-b border-gray-300 dark:border-gray-600 shadow-sm">
                       <td colSpan={4} className="p-2 text-right border-r border-gray-300 dark:border-gray-600 uppercase">TOTAL DA OBRA:</td>
-                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-blue-100/50 dark:bg-blue-900/80 text-blue-900 dark:text-blue-100 text-lg">
-                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.folhas) || 0), 0) || 0}
+                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-blue-100/50 dark:bg-blue-900/80 text-blue-900 dark:text-blue-100 text-lg relative">
+                        <span className="font-bold">{totalFolhasEntrada}</span>
+                        {totalSaidaFolhas > 0 && <span className="absolute bottom-1 right-2 text-xs font-bold text-red-600 dark:text-red-400">-{totalSaidaFolhas}</span>}
                       </td>
-                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-amber-100/50 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100 text-lg">
-                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.aduelas) || 0), 0) || 0}
+                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-amber-100/50 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100 text-lg relative">
+                        <span className="font-bold">{totalAduelasEntrada}</span>
+                        {totalSaidaAduelas > 0 && <span className="absolute bottom-1 right-2 text-xs font-bold text-red-600 dark:text-red-400">-{totalSaidaAduelas}</span>}
                       </td>
-                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-purple-100/50 dark:bg-purple-900/80 text-purple-900 dark:text-purple-100 text-lg">
-                        {(activeObra.itens || []).reduce((acc: number, item: any) => acc + (parseInt(item.alizares) || 0), 0) || 0}
+                      <td className="p-2 border-r border-gray-300 dark:border-gray-600 bg-purple-100/50 dark:bg-purple-900/80 text-purple-900 dark:text-purple-100 text-lg relative">
+                        <span className="font-bold">{totalAlizaresEntrada}</span>
+                        {totalSaidaAlizares > 0 && <span className="absolute bottom-1 right-2 text-xs font-bold text-red-600 dark:text-red-400">-{totalSaidaAlizares}</span>}
                       </td>
                       <td className="p-2 bg-gray-100"></td>
                     </tr>
@@ -950,6 +961,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'folhas', e.target.value)}
                               className="w-full h-full min-h-[44px] p-3 pr-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-semibold text-gray-800 dark:text-blue-100"
                             />
+                            {item.saidas?.filter((s:any) => s.tipo === 'folhas').length > 0 && (
+                               <div className="absolute bottom-0.5 left-1 text-[10px] font-bold text-red-600 pointer-events-none" title="Quantidade que já saiu">
+                                 -{item.saidas.filter((s:any) => s.tipo === 'folhas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                               </div>
+                            )}
                             {item.folhas && (
                               <button onClick={() => handleChangeItem(activeObra.id, item.id, 'folhas', '')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
                                 <X className="w-3 h-3" />
@@ -985,6 +1001,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   placeholder="Qtd"
                                   className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold text-amber-900 dark:text-amber-100 placeholder-amber-400/50 dark:placeholder-amber-400/30"
                                 />
+                                {item.saidas?.filter((s:any) => s.tipo === 'aduelas').length > 0 && (
+                                   <div className="absolute bottom-0.5 left-1 text-[8px] font-bold text-red-600 pointer-events-none" title="Quantidade que já saiu">
+                                     -{item.saidas.filter((s:any) => s.tipo === 'aduelas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                                   </div>
+                                )}
                                 {item.aduelas && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'aduelas', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar quantidade">
                                     <X className="w-3 h-3" />
@@ -1024,6 +1045,11 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   placeholder="Qtd"
                                   className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-semibold text-purple-900 dark:text-purple-100 placeholder-purple-400/50 dark:placeholder-purple-400/30"
                                 />
+                                {item.saidas?.filter((s:any) => s.tipo === 'alizares').length > 0 && (
+                                   <div className="absolute bottom-0.5 left-1 text-[8px] font-bold text-red-600 pointer-events-none" title="Quantidade que já saiu">
+                                     -{item.saidas.filter((s:any) => s.tipo === 'alizares').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
+                                   </div>
+                                )}
                                 {item.alizares && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'alizares', '')} className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar quantidade">
                                     <X className="w-3 h-3" />
