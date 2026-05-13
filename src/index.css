@@ -30,30 +30,46 @@ body {
   * {
     overflow: visible !important;
   }
+  
+  html, body, #root, main, aside, section {
+    background-color: #ffffff !important;
+  }
+  
+  /* Strip all dark mode and light gray backgrounds to prevent printed halftones */
+  .dark\:bg-gray-950, .dark\:bg-gray-900, .dark\:bg-gray-800, .dark\:bg-gray-700,
+  .bg-gray-50, .bg-gray-100, .bg-gray-50\/80, .bg-gray-50\/50, .bg-gray-200 {
+    background-color: #ffffff !important;
+  }
+
+  /* Restore specific backgrounds needed for layout/badges */
+  .bg-brand-green { background-color: var(--color-brand-green) !important; color: #fff !important; }
+  .bg-blue-50 { background-color: #eff6ff !important; }
+  .bg-amber-50 { background-color: #fffbeb !important; }
+  .bg-green-50 { background-color: #f0fdf4 !important; }
+  .bg-purple-50 { background-color: #faf5ff !important; }
+  .text-white { color: #ffffff !important; }
 
   .max-h-\[800px\] {
     max-height: none !important;
   }
 
+  /* Make text colors significantly more vivid/darker */
+  .text-gray-400,
   .text-gray-500,
   .text-gray-600 {
-    color: #4b5563 !important; /* Slightly darker */
+    color: #1f2937 !important; /* Much darker gray */
+    font-weight: 600 !important;
   }
   .text-gray-700,
   .text-gray-800,
   .text-gray-900 {
     color: #000000 !important; /* Pure black */
-  }
-
-  table {
-    width: 100% !important;
-    max-width: 100% !important;
+    font-weight: 700 !important; /* Bolder */
   }
 
   td,
   th {
-    white-space: normal !important; /* ALLOW TABLE TO WRAP INSTEAD OF SCROLLING/CROPPING */
-    word-break: break-word !important;
+    white-space: nowrap !important;
   }
 
   tr {

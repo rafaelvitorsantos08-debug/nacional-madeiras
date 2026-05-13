@@ -288,7 +288,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
 
                 <th className="px-6 py-3 font-medium text-right">Estoque</th>
                 <th className="px-6 py-3 font-medium text-center">Status</th>
-                <th className="px-6 py-3 font-medium text-center">Ações</th>
+                <th className="px-6 py-3 font-medium text-center print:hidden">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -306,7 +306,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                   <td className="px-6 py-4 text-center text-gray-600">{item.dimensao}</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center print:hidden">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
                   </td>
                 </tr>
@@ -325,7 +325,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                   <td className="px-6 py-4 text-center text-gray-600">{item.comprimento} mm</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center print:hidden">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
                   </td>
                 </tr>
@@ -346,7 +346,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                   <td className="px-6 py-4 text-center text-gray-600">{item.espessura} mm</td>
                   <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
                   <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-4 text-center print:hidden">
                     <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
                   </td>
                 </tr>
