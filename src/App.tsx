@@ -734,7 +734,7 @@ function KpiCard({ title, value, subtitle, icon, bgColor, trend, alert, goalTarg
            <div className={cn("p-2 rounded-lg", bgColor)}>
              {icon}
            </div>
-           {trend === 'up' && <span className="flex items-center text-xs font-semibold text-brand-green bg-green-50 px-2 py-0.5 rounded-full"><ArrowUpFromLine className="w-3 h-3 mr-1 opacity-50"/> +12%</span>}
+           {trend === 'up' && <span className="flex items-center text-xs font-semibold text-brand-green bg-green-50 px-2 py-0.5 rounded-full"><ArrowUpFromLine className="w-3 h-3 mr-1 opacity-50"/> {showGoal ? `${Math.round(progressPercent)}%` : '+12%'}</span>}
            {trend === 'down' && <span className="flex items-center text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full"><ArrowDownToLine className="w-3 h-3 mr-1 opacity-50"/> -5%</span>}
            {trend === 'neutral' && <span className="flex items-center text-xs font-semibold text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded-full">Atenção</span>}
         </div>
