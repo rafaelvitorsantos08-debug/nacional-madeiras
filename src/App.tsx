@@ -460,9 +460,6 @@ export default function App() {
               icon={<HardHat className="text-amber-500" />} 
               bgColor="bg-amber-50"
               trend="neutral"
-              goalTarget={2000}
-              goalLabel="Meta"
-              goalRemainingLabel="para a meta"
             />
             <KpiCard 
               title="Alertas de Baixo Estoque" 
