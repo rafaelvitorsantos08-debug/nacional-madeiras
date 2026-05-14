@@ -33,7 +33,7 @@ function getStatusBadge(estoque: number) {
 }
 
 export function FerragensModule({ globalSearch }: { globalSearch: string }) {
-  const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v4', []);
+  const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v5', []);
   const [selectedObra, setSelectedObra] = useState<string>(obrasList[0] || '');
   
   // Keep selectedObra valid if list changes
@@ -45,11 +45,11 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     }
   }, [obrasList, selectedObra]);
 
-  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v4', () => {
+  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v5', () => {
     return {};
   });
 
-  const [movementsHistory, setMovementsHistory] = useLocalStorage<Movement[]>('nm_ferragens_history_v4', []);
+  const [movementsHistory, setMovementsHistory] = useLocalStorage<Movement[]>('nm_ferragens_history_v5', []);
 
   const [newObraName, setNewObraName] = useState('');
   const [isAddingObra, setIsAddingObra] = useState(false);
@@ -70,7 +70,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     if (selectedObra && !obrasData[selectedObra]) {
       setObrasData((prev: any) => ({
         ...prev,
-        [selectedObra]: INITIAL_FERRAGENS.map(i => ({ ...i }))
+        [selectedObra]: INITIAL_FERRAGENS.map(i => ({ ...i, estoque: 0 }))
       }));
     }
   }, [selectedObra, obrasData, setObrasData]);
@@ -84,18 +84,6 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setSelectedObra(name);
     setNewObraName('');
     setIsAddingObra(false);
-  };
-
-  const handleDeleteObra = () => {
-    if (!selectedObra) return;
-    if (window.confirm(`Tem certeza que deseja excluir a obra ${selectedObra}? Todos os estoques associados a ela serão perdidos.`)) {
-      setObrasList(prev => prev.filter(o => o !== selectedObra));
-      setObrasData(prev => {
-        const newData = { ...prev };
-        delete newData[selectedObra];
-        return newData;
-      });
-    }
   };
 
   const handleMovement = (item: any, type: 'entrada' | 'saida') => {
@@ -232,13 +220,6 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                   ))}
                 </select>
               </div>
-              <button
-                onClick={handleDeleteObra}
-                title="Excluir Obra"
-                className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 hover:border-red-200 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
               <button
                 onClick={() => setIsAddingObra(true)}
                 className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-brand-green shadow-sm transition-colors"
