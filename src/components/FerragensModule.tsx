@@ -56,6 +56,11 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
 
   const [searchTerm, setSearchTerm] = useState('');
   
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemId, setNewItemId] = useState('');
+  const [newItemCategoria, setNewItemCategoria] = useState<'Ferragem' | 'Dobradiça'>('Ferragem');
+  const [newItemModelo, setNewItemModelo] = useState('');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [movementType, setMovementType] = useState<'entrada' | 'saida'>('entrada');
@@ -96,6 +101,42 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementResponsible('');
     setMovementDestination('');
     setIsModalOpen(true);
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este modelo? Todo o estoque dele nesta obra será perdido.')) {
+      setObrasData((prev: any) => {
+        const currentObraItems = prev[selectedObra] || [];
+        const updatedItems = currentObraItems.filter((i: any) => i.id !== itemId);
+        return { ...prev, [selectedObra]: updatedItems };
+      });
+    }
+  };
+
+  const handleCreateItem = () => {
+    if (!newItemId || !newItemModelo) return;
+    
+    setObrasData((prev: any) => {
+      const currentObraItems = prev[selectedObra] || [];
+      if (currentObraItems.find((i: any) => i.id === newItemId)) {
+        alert('Já existe um item com este código nesta obra.');
+        return prev;
+      }
+      
+      const newItem = {
+        id: newItemId.toUpperCase(),
+        categoria: newItemCategoria,
+        modelo: newItemModelo,
+        estoque: 0,
+      };
+      
+      return { ...prev, [selectedObra]: [...currentObraItems, newItem] };
+    });
+    
+    setIsAddingItem(false);
+    setNewItemId('');
+    setNewItemModelo('');
+    setNewItemCategoria('Ferragem');
   };
 
   const handleSaveMovement = () => {
@@ -278,6 +319,13 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                   className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
                 />
               </div>
+              <button
+                onClick={() => setIsAddingItem(true)}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-brand-green shadow-sm transition-colors"
+              >
+                <Plus className="w-4 h-4 mr-1.5" />
+                Novo Modelo
+              </button>
             </div>
           </div>
 
@@ -329,6 +377,13 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                          >
                            <PackageMinus className="w-4 h-4" />
                          </button>
+                         <button
+                           onClick={() => handleDeleteItem(item.id)}
+                           title="Excluir Modelo"
+                           className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-2"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </button>
                       </div>
                     </td>
                   </tr>
@@ -343,6 +398,83 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ADD ITEM MODAL */}
+      {isAddingItem && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-xl bg-white shadow-sm shadow-blue-100 text-brand-green">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 tracking-tight">Novo Modelo</h2>
+                  <p className="text-sm text-gray-500">Adicione uma nova ferragem para esta obra.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAddingItem(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Código</label>
+                  <input
+                    type="text"
+                    value={newItemId}
+                    onChange={(e) => setNewItemId(e.target.value.toUpperCase())}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all uppercase"
+                    placeholder="Ex: FER-10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Categoria</label>
+                  <select
+                    value={newItemCategoria}
+                    onChange={(e) => setNewItemCategoria(e.target.value as 'Ferragem' | 'Dobradiça')}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                  >
+                    <option value="Ferragem">Ferragem</option>
+                    <option value="Dobradiça">Dobradiça</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Modelo / Especificação</label>
+                  <input
+                    type="text"
+                    value={newItemModelo}
+                    onChange={(e) => setNewItemModelo(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
+                    placeholder="Ex: Fechadura Digital"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-3">
+              <button
+                onClick={() => setIsAddingItem(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 bg-gray-100 rounded-lg transition-colors border border-transparent"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateItem}
+                disabled={!newItemId || !newItemModelo}
+                className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none flex items-center bg-brand-green hover:bg-green-700 focus:ring-brand-green disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Adicionar
+              </button>
+            </div>
           </div>
         </div>
       )}
