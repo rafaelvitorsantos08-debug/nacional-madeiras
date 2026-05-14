@@ -162,10 +162,17 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
   const baseList: any[] = activeSubTab === 'portas' ? (Array.isArray(portas) ? portas : []) : (activeSubTab === 'aduelas' ? (Array.isArray(aduelas) ? aduelas : []) : (Array.isArray(alizares) ? alizares : []));
 
   const filteredList = baseList.filter(item => {
-    const combinedSearchTerm = searchTerm || globalSearch;
-    const searchLower = combinedSearchTerm.toLowerCase();
-    const searchString = Object.values(item).join(' ').toLowerCase();
-    const matchesSearch = combinedSearchTerm === '' || searchString.includes(searchLower);
+    const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
+    const searchTerms = combinedSearchTerm.toLowerCase().split(' ').filter(t => t.length > 0);
+    
+    const searchableFields = ['id', 'cor', 'modelo', 'enchimento', 'dimensao', 'largura', 'comprimento', 'face', 'aba', 'espessura'];
+    const searchString = searchableFields
+      .map(key => item[key])
+      .filter(val => val !== undefined && val !== null)
+      .join(' ')
+      .toLowerCase();
+
+    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => searchString.includes(term));
       
     const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
     

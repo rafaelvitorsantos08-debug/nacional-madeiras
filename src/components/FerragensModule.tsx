@@ -239,10 +239,17 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
 
   const currentItems = obrasData[selectedObra] || [];
   const filteredList = currentItems.filter((item: any) => {
-    const combinedSearchTerm = searchTerm || globalSearch;
-    const searchLower = combinedSearchTerm.toLowerCase();
-    const searchString = Object.values(item).join(' ').toLowerCase();
-    return combinedSearchTerm === '' || searchString.includes(searchLower);
+    const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
+    const searchTerms = combinedSearchTerm.toLowerCase().split(' ').filter(t => t.length > 0);
+    
+    const searchableFields = ['id', 'categoria', 'modelo'];
+    const searchString = searchableFields
+      .map(key => item[key])
+      .filter(val => val !== undefined && val !== null)
+      .join(' ')
+      .toLowerCase();
+      
+    return searchTerms.length === 0 || searchTerms.every(term => searchString.includes(term));
   });
 
   const currentObraHistory = movementsHistory.filter(m => m.obraId === selectedObra);
