@@ -65,6 +65,8 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   const [movementResponsible, setMovementResponsible] = useState('');
   const [movementDestination, setMovementDestination] = useState('');
 
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'entrada' | 'saida'>('all');
+
   // Ensure current obra exists
   useEffect(() => {
     if (selectedObra && !obrasData[selectedObra]) {
@@ -164,6 +166,18 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementsHistory(prev => prev.filter(m => m.id !== movement.id));
   };
 
+  const [isPrintingHistory, setIsPrintingHistory] = useState(false);
+
+  const handlePrintHistory = (type: 'entrada' | 'saida') => {
+    setHistoryFilter(type);
+    setIsPrintingHistory(true);
+    setTimeout(() => {
+      window.print();
+      setIsPrintingHistory(false);
+      setHistoryFilter('all');
+    }, 150);
+  };
+
   const currentItems = obrasData[selectedObra] || [];
   const filteredList = currentItems.filter((item: any) => {
     const combinedSearchTerm = searchTerm || globalSearch;
@@ -172,9 +186,12 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     return combinedSearchTerm === '' || searchString.includes(searchLower);
   });
 
+  const currentObraHistory = movementsHistory.filter(m => m.obraId === selectedObra);
+  const visibleHistory = historyFilter === 'all' ? currentObraHistory : currentObraHistory.filter(m => m.type === historyFilter);
+
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+      <div className={cn("mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0", isPrintingHistory && "print:hidden")}>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Recebimento de Ferragens</h1>
           <p className="text-sm text-gray-500 mt-1">Gerencie a entrada e saída de ferragens e dobradiças separadas por obra.</p>
@@ -245,7 +262,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
            </button>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        <div className={cn("bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col", isPrintingHistory && "print:hidden")}>
           {/* TOOLBAR */}
           <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0 print:hidden">
             <div className="flex items-center space-x-3 w-full sm:w-auto relative">
@@ -441,40 +458,56 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       )}
 
       {/* INLINE HISTORY (Always visible) */}
-      <div className="mt-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      <div className={cn("mt-8 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col", isPrintingHistory && "print:m-0 print:border-none print:shadow-none")}>
+        <div className="p-6 border-b border-gray-100 flex flex-col xl:flex-row justify-between items-start xl:items-center bg-gray-50/50 print:hidden space-y-4 xl:space-y-0">
           <div className="flex items-center space-x-3">
             <div className="p-2 rounded-xl bg-white shadow-sm shadow-indigo-100 text-indigo-600">
               <History className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 tracking-tight">Histórico de Lançamentos</h2>
-              <p className="text-sm text-gray-500">Acompanhe as entradas e saídas de todas as obras.</p>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">Histórico da Obra</h2>
+              <p className="text-sm text-gray-500">Acompanhe as entradas e saídas da obra selecionada.</p>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex p-1 bg-gray-200/50 rounded-lg">
+              <button onClick={() => setHistoryFilter('all')} className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors", historyFilter === 'all' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Todas</button>
+              <button onClick={() => setHistoryFilter('entrada')} className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors", historyFilter === 'entrada' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Entradas</button>
+              <button onClick={() => setHistoryFilter('saida')} className={cn("px-3 py-1.5 text-sm font-medium rounded-md transition-colors", historyFilter === 'saida' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Saídas</button>
+            </div>
+            <div className="hidden sm:block h-6 border-r border-gray-300 mx-1"></div>
+            <button onClick={() => handlePrintHistory('entrada')} className="px-3 py-2 text-sm font-semibold text-brand-green bg-green-50 rounded-xl hover:bg-green-100 transition-colors shadow-sm border border-brand-green/20">Imprimir Entradas</button>
+            <button onClick={() => handlePrintHistory('saida')} className="px-3 py-2 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors shadow-sm border border-red-600/20">Imprimir Saídas</button>
+          </div>
+        </div>
+
+        {/* Print-only Header */}
+        <div className="hidden print:block mb-8 p-6 pb-0">
+           <h2 className="text-2xl font-bold mb-2">Relatório de Lançamentos - {selectedObra}</h2>
+           <p className="text-gray-500">Tipo: {historyFilter === 'entrada' ? 'Entradas' : historyFilter === 'saida' ? 'Saídas' : 'Todos'} | Data: {new Date().toLocaleDateString('pt-BR')}</p>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-0 max-h-[500px]">
-          {movementsHistory.length === 0 ? (
+        <div className={cn("flex-1 overflow-y-auto p-0 max-h-[500px]", isPrintingHistory && "print:max-h-none print:overflow-visible")}>
+          {visibleHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <History className="w-12 h-12 text-gray-200 mb-4" />
               <p className="text-gray-500">Nenhum lançamento registrado até o momento.</p>
             </div>
           ) : (
-            <table className="w-full text-left text-sm whitespace-nowrap">
+            <table className="w-full text-left text-sm whitespace-nowrap print:whitespace-normal">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 sticky top-0 shadow-sm z-10">
+                <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 sticky top-0 shadow-sm z-10 print:static print:shadow-none">
                   <th className="px-6 py-3 font-medium">Data</th>
                   <th className="px-6 py-3 font-medium">Obra</th>
                   <th className="px-6 py-3 font-medium">Modelo</th>
                   <th className="px-6 py-3 font-medium">Tipo</th>
                   <th className="px-6 py-3 font-medium text-right">Qtde</th>
                   <th className="px-6 py-3 font-medium">Responsável / Destino</th>
-                  <th className="px-6 py-3 font-medium text-center">Ações</th>
+                  <th className="px-6 py-3 font-medium text-center print:hidden">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {movementsHistory.map(mov => (
+                {visibleHistory.map(mov => (
                   <tr key={mov.id} className="hover:bg-gray-50/50">
                     <td className="px-6 py-3 text-gray-600">
                       {new Date(mov.date).toLocaleDateString('pt-BR')}
@@ -499,7 +532,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                     <td className="px-6 py-3 text-right font-bold text-gray-900">
                       {mov.amount}
                     </td>
-                    <td className="px-6 py-3 text-gray-500 text-xs truncate max-w-[200px]" title={mov.type === 'saida' ? `${mov.responsible || ''} - ${mov.destination || ''}` : '-'}>
+                    <td className="px-6 py-3 text-gray-500 text-xs truncate max-w-[200px] print:max-w-none print:whitespace-normal" title={mov.type === 'saida' ? `${mov.responsible || ''} - ${mov.destination || ''}` : '-'}>
                       {mov.type === 'saida' && (
                           <div className="flex flex-col">
                             <span className="font-semibold text-gray-700">{mov.responsible || 'NT'}</span>
@@ -508,7 +541,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                       )}
                       {mov.type === 'entrada' && '-'}
                     </td>
-                    <td className="px-6 py-3 text-center">
+                    <td className="px-6 py-3 text-center print:hidden">
                       <button
                         onClick={() => handleDeleteMovement(mov)}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
