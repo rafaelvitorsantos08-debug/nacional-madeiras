@@ -113,6 +113,19 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     }
   };
 
+  const handleDeleteObra = () => {
+    if (!selectedObra) return;
+    if (window.confirm(`Tem certeza que deseja excluir a obra ${selectedObra}? Todos os estoques e histórico associados a ela serão perdidos.`)) {
+      setObrasList(prev => prev.filter(o => o !== selectedObra));
+      setObrasData(prev => {
+        const newData = { ...prev };
+        delete newData[selectedObra];
+        return newData;
+      });
+      setMovementsHistory(prev => prev.filter(m => m.obraId !== selectedObra));
+    }
+  };
+
   const handleCreateItem = () => {
     if (!newItemId || !newItemModelo) return;
     
@@ -219,6 +232,11 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     }, 150);
   };
 
+  const handleUpdateHistoryDate = (id: string, newDate: string) => {
+    if (!newDate) return;
+    setMovementsHistory(prev => prev.map(m => m.id === id ? { ...m, date: newDate } : m));
+  };
+
   const currentItems = obrasData[selectedObra] || [];
   const filteredList = currentItems.filter((item: any) => {
     const combinedSearchTerm = searchTerm || globalSearch;
@@ -278,6 +296,13 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                   ))}
                 </select>
               </div>
+              <button
+                onClick={handleDeleteObra}
+                title="Excluir Obra Selecionada"
+                className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl border border-gray-200 hover:border-red-200 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => setIsAddingObra(true)}
                 className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-brand-green shadow-sm transition-colors"
@@ -642,7 +667,15 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                 {visibleHistory.map(mov => (
                   <tr key={mov.id} className="hover:bg-gray-50/50">
                     <td className="px-6 py-3 text-gray-600">
-                      {new Date(mov.date).toLocaleDateString('pt-BR')}
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="date"
+                          value={mov.date}
+                          onChange={(e) => handleUpdateHistoryDate(mov.id, e.target.value)}
+                          className="px-2 py-1 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-brand-green focus:bg-white outline-none rounded-md transition-all cursor-pointer text-sm"
+                          title="Clique para alterar a data"
+                        />
+                      </div>
                     </td>
                     <td className="px-6 py-3 font-medium text-gray-800">
                       {mov.obraId}
