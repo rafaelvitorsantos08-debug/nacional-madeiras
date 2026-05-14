@@ -8,6 +8,22 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
 
-export const loginWithGoogle = () => signInWithPopup(auth, provider);
+export const loginWithGoogle = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error: any) {
+    console.error("Login failed:", error);
+    if (error.code === 'auth/popup-closed-by-user') {
+      alert("O login foi cancelado. Por favor, tente novamente.");
+    } else if (error.code === 'auth/unauthorized-domain') {
+      alert("Este domínio não está autorizado no Firebase. Por favor, acesse o Firebase Console e adicione a URL ao 'Authorized domains' em Authentication.");
+    } else {
+      alert(`Falha no login: ${error.message}`);
+    }
+  }
+};
 export const logout = () => signOut(auth);
