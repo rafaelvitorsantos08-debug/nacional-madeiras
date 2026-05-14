@@ -34,7 +34,8 @@ export const INITIAL_ALIZARES = [
   { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', comprimento: '2250', estoque: 12, status: 'Crítico' },
 ];
 
-import { supabase } from '../lib/supabase';
+import { auth, db } from '../lib/firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -67,9 +68,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     };
     
     const handleNativeStorage = (e: StorageEvent) => {
-      if (e.key === key) {
-        handleStorageChange();
-      }
+      if (e.key === key) handleStorageChange();
     };
 
     window.addEventListener('local-storage-sync', handleStorageChange);
@@ -81,26 +80,34 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   }, [key]);
 
   useEffect(() => {
-    let active = true;
-    async function loadFromSupabase() {
-      if (!supabase) return;
-      try {
-        const { data, error } = await supabase.from('app_state').select('value').eq('id', key).single();
-        if (data && data.value && active) {
-          setStoredValue(data.value);
+    let unsubscribe = () => {};
+    // Load from Firebase
+    const loadFromFirebase = () => {
+      if (!auth.currentUser) return;
+      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
+      unsubscribe = onSnapshot(userDoc, (docSnap) => {
+        if (docSnap.exists() && docSnap.data()[key] !== undefined) {
+          const val = docSnap.data()[key];
+          setStoredValue(val);
           if (typeof window !== "undefined") {
-            window.localStorage.setItem(key, JSON.stringify(data.value));
-            window.dispatchEvent(new Event('local-storage-sync'));
+             window.localStorage.setItem(key, JSON.stringify(val));
+             window.dispatchEvent(new Event('local-storage-sync'));
           }
         }
-      } catch (err) {
-        console.error("Error fetching from Supabase:", err);
+      }, (error) => console.error("Firebase sync error:", error));
+    };
+
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        loadFromFirebase();
+      } else {
+        unsubscribe(); // Stop listening if logged out
       }
-    }
-    loadFromSupabase();
+    });
 
     return () => {
-      active = false;
+      unsubscribe();
+      unsubscribeAuth();
     };
   }, [key]);
 
@@ -112,10 +119,11 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
           window.dispatchEvent(new Event('local-storage-sync'));
         }
-        if (supabase) {
-          supabase.from('app_state').upsert({ id: key, value: valueToStore }).then(({ error }: any) => {
-            if (error) console.error("Error syncing to Supabase:", error);
-          });
+        if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+          setDoc(doc(db, 'user_configs', auth.currentUser.uid), {
+             [key]: valueToStore,
+             userId: auth.currentUser.uid
+          }, { merge: true }).catch(err => console.error("Firebase save error:", err));
         }
         return valueToStore;
       });

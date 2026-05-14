@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "Porta": {
+      "title": "Porta",
+      "description": "Porta inventory item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cor": { "type": "string" },
+        "dimensao": { "type": "string" },
+        "enchimento": { "type": "string" },
+        "modelo": { "type": "string" },
+        "estoque": { "type": "number" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "userId", "estoque"]
+    },
+    "Aduela": {
+      "title": "Aduela",
+      "description": "Aduela inventory item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cor": { "type": "string" },
+        "largura": { "type": "string" },
+        "comprimento": { "type": "string" },
+        "estoque": { "type": "number" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "userId", "estoque"]
+    },
+    "Alizar": {
+      "title": "Alizar",
+      "description": "Alizar inventory item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cor": { "type": "string" },
+        "face": { "type": "string" },
+        "aba": { "type": "string" },
+        "espessura": { "type": "string" },
+        "comprimento": { "type": "string" },
+        "estoque": { "type": "number" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "userId", "estoque"]
+    },
+    "ObraControle": {
+      "title": "Obra Controle Operação",
+      "description": "Controle operation for specific Obra",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "itens": { "type": "array" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "nome", "userId"]
+    },
+    "AppConfig": {
+      "title": "App Config",
+      "description": "Global user configs (monthly data, efetivo)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "monthlyData": { "type": "object" },
+        "operacaoData": { "type": "object" },
+        "efetivoTotal": { "type": "object" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "userId"]
+    },
+    "FerragensObra": {
+      "title": "Ferragens Obra",
+      "description": "Ferragens configured for a specific obra",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "obraId": { "type": "string" },
+        "itens": { "type": "array" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "obraId", "userId"]
+    },
+    "FerragensMovement": {
+      "title": "Ferragens Movement",
+      "description": "History of inputs/outputs for ferragens",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "obraId": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemModelo": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string" },
+        "responsible": { "type": "string" },
+        "destination": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "obraId", "itemId", "type", "amount", "date", "userId"]
+    }
+  },
+  "firestore": {
+    "/portas/{itemId}": {
+      "schema": { "$ref": "#/entities/Porta" },
+      "description": "Portas"
+    },
+    "/aduelas/{itemId}": {
+      "schema": { "$ref": "#/entities/Aduela" },
+      "description": "Aduelas"
+    },
+    "/alizares/{itemId}": {
+      "schema": { "$ref": "#/entities/Alizar" },
+      "description": "Alizares"
+    },
+    "/obras_controle/{obraId}": {
+      "schema": { "$ref": "#/entities/ObraControle" },
+      "description": "Obras for Controle de Operação"
+    },
+    "/user_configs/{userId}": {
+      "schema": { "$ref": "#/entities/AppConfig" },
+      "description": "User specific configurations"
+    },
+    "/ferragens_obras/{obraId}": {
+      "schema": { "$ref": "#/entities/FerragensObra" },
+      "description": "Lists items for specific obra in Ferragens"
+    },
+    "/ferragens_history/{movementId}": {
+      "schema": { "$ref": "#/entities/FerragensMovement" },
+      "description": "Movement history for Ferragens"
+    }
+  }
+}

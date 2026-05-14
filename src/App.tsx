@@ -35,7 +35,11 @@ const ULTIMAS_SAIDAS = [
 
 
 
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, loginWithGoogle, logout } from './lib/firebase';
+
 export default function App() {
+  const [user] = useAuthState(auth);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useLocalStorage('nm_active_tab', 'dashboard');
   const [activeControleTab, setActiveControleTab] = useLocalStorage<'entradas' | 'saidas' | 'operacao'>('nm_active_controle_tab', 'saidas');
@@ -344,7 +348,9 @@ export default function App() {
           
           <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
           <NavItem icon={<Settings />} label="Configurações" active={activeTab === 'configuracoes'} isOpen={sidebarOpen} onClick={() => setActiveTab('configuracoes')} />
-          <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
+          {user && (
+            <NavItem icon={<LogOut />} label="Sair" isOpen={sidebarOpen} onClick={logout} className="text-red-500 hover:bg-red-50 hover:text-red-600" />
+          )}
         </nav>
       </aside>
 
@@ -386,15 +392,29 @@ export default function App() {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
             </button>
-            <div className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green font-semibold border border-brand-green/20">
-                RV
+            {user ? (
+              <div className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                {user.photoURL ? (
+                   <img src={user.photoURL} alt="User" className="w-8 h-8 rounded-full border border-gray-200" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green font-semibold border border-brand-green/20">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                <div className="hidden md:block text-sm text-left">
+                  <p className="font-medium text-gray-700 leading-none">{user.displayName || 'Usuário'}</p>
+                  <p className="text-xs text-gray-500 mt-1">Conectado e Sincronizado</p>
+                </div>
               </div>
-              <div className="hidden md:block text-sm text-left">
-                <p className="font-medium text-gray-700 leading-none">Rafael Vitor</p>
-                <p className="text-xs text-gray-500 mt-1">Administrador</p>
-              </div>
-            </div>
+            ) : (
+              <button 
+                onClick={loginWithGoogle}
+                className="px-4 py-2 bg-brand-green hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
+                title="Faça login para sincronizar seus dados na nuvem"
+              >
+                Fazer Login
+              </button>
+            )}
           </div>
         </header>
 

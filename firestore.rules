@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    match /portas/{itemId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(itemId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /aduelas/{itemId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(itemId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /alizares/{itemId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(itemId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /obras_controle/{obraId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(obraId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /user_configs/{userId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId) && userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(userId) && request.resource.data.userId == request.auth.uid && userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid && userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /ferragens_obras/{obraId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(obraId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /ferragens_history/{movementId} {
+      allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isValidId(movementId) && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}
