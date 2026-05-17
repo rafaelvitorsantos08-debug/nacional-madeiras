@@ -37,6 +37,20 @@ const ULTIMAS_SAIDAS = [
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, loginWithGoogle, logout } from './lib/firebase';
+import { forceSyncAllToCloud } from './components/EstoqueModule';
+
+// Create a backup of local storage to prevent data loss when syncing
+if (typeof window !== 'undefined') {
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (key && key.startsWith('nm_') && !key.startsWith('nm_backup_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+       const val = window.localStorage.getItem(key);
+       if (val) {
+         window.localStorage.setItem('nm_backup_' + key, val);
+       }
+    }
+  }
+}
 
 export default function App() {
   const [user] = useAuthState(auth);
@@ -709,6 +723,33 @@ export default function App() {
                     </div>
                  </div>
               </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6">
+                 <div className="p-6 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-800">Sincronização Avançada com a Nuvem</h2>
+                    <p className="text-sm text-gray-500 mt-1">Gerencie a sincronização de dados desta máquina para os servidores.</p>
+                 </div>
+                 
+                 <div className="p-6">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                       <div className="flex-1">
+                          <h3 className="text-md font-medium text-gray-800">Forçar Envio Manual</h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Se os dados em outros dispositivos estiverem diferentes da máquina atual (com informações atrasadas), 
+                            acesse o <b>computador que tem os dados corretos</b> e clique neste botão para forçar estes dados a irem para a nuvem.
+                          </p>
+                       </div>
+                       <button
+                         onClick={forceSyncAllToCloud}
+                         disabled={!user}
+                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors disabled:opacity-50 flex-shrink-0"
+                       >
+                         {user ? "Salvar tudo na Nuvem" : "Faça Login Primeiro"}
+                       </button>
+                    </div>
+                 </div>
+              </div>
+
             </div>
           )}
           

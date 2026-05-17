@@ -46,10 +46,7 @@ service cloud.firestore {
     }
 
     match /user_configs/{userId} {
-      allow read, delete: if isSignedIn() && isOwner(resource.data.userId) && userId == request.auth.uid;
-      allow create: if isSignedIn() && isValidId(userId) && request.resource.data.userId == request.auth.uid && userId == request.auth.uid;
-      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == request.auth.uid && userId == request.auth.uid;
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read, write: if isSignedIn() && userId == request.auth.uid;
     }
 
     match /ferragens_obras/{obraId} {

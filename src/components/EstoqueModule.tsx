@@ -37,6 +37,34 @@ export const INITIAL_ALIZARES = [
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
+export const forceSyncAllToCloud = async () => {
+  if (!auth.currentUser) {
+    alert("Você precisa estar logado para sincronizar.");
+    return;
+  }
+  const keys = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (key && key.startsWith('nm_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+      keys.push(key);
+    }
+  }
+  const dataToSync: Record<string, any> = { userId: auth.currentUser.uid };
+  for (const key of keys) {
+    try {
+      const val = window.localStorage.getItem(key);
+      if (val) dataToSync[key] = JSON.parse(val);
+    } catch(e) {}
+  }
+  try {
+    await setDoc(doc(db, 'user_configs', auth.currentUser.uid), dataToSync, { merge: true });
+    alert("Sincronização concluída! Seus dados desta máquina agora estão na nuvem e aparecerão em seus outros dispositivos.");
+  } catch (e: any) {
+    console.error(e);
+    alert("Erro ao sincronizar: " + e.message);
+  }
+};
+
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
@@ -88,11 +116,16 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       unsubscribe = onSnapshot(userDoc, (docSnap) => {
         if (docSnap.exists() && docSnap.data()[key] !== undefined) {
           const val = docSnap.data()[key];
-          setStoredValue(val);
-          if (typeof window !== "undefined") {
-             window.localStorage.setItem(key, JSON.stringify(val));
-             window.dispatchEvent(new Event('local-storage-sync'));
-          }
+          setStoredValue(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(val)) {
+              return prev;
+            }
+            if (typeof window !== "undefined") {
+               window.localStorage.setItem(key, JSON.stringify(val));
+               window.dispatchEvent(new Event('local-storage-sync'));
+            }
+            return val;
+          });
         } else {
           // Push local state to cloud if it doesn't exist yet
           if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && auth.currentUser) {
