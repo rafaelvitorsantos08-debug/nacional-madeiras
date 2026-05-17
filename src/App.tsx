@@ -36,12 +36,10 @@ const ULTIMAS_SAIDAS = [
 
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, logout } from './lib/firebase';
-import { AuthModal } from './components/AuthModal';
+import { auth, loginWithGoogle, logout } from './lib/firebase';
 
 export default function App() {
   const [user] = useAuthState(auth);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useLocalStorage('nm_active_tab', 'dashboard');
   const [activeControleTab, setActiveControleTab] = useLocalStorage<'entradas' | 'saidas' | 'operacao'>('nm_active_controle_tab', 'saidas');
@@ -410,7 +408,7 @@ export default function App() {
               </div>
             ) : (
               <button 
-                onClick={() => setIsAuthModalOpen(true)}
+                onClick={loginWithGoogle}
                 className="px-4 py-2 bg-brand-green hover:bg-green-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors"
                 title="Faça login para sincronizar seus dados na nuvem"
               >
@@ -419,9 +417,6 @@ export default function App() {
             )}
           </div>
         </header>
-
-        {/* Auth Modal */}
-        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
         {/* DASHBOARD CONTENT */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
@@ -437,7 +432,7 @@ export default function App() {
                   Seus dados estão salvos apenas neste dispositivo. Para acessar de <b>outra máquina ou celular</b> em tempo real:
                 </p>
                 <ol className="list-decimal pl-5 mt-2 text-sm text-blue-800 space-y-1">
-                  <li>Nesta máquina (onde os dados estão certos), clique em <b>Fazer Login</b> e <b>cadastre uma conta</b>. (Seus dados serão enviados para a nuvem mágica).</li>
+                  <li>Nesta máquina (onde os dados estão certos), clique em <b>Fazer Login</b> e entre com a sua conta Google.</li>
                   <li>Na outra máquina, acesse o aplicativo, clique em <b>Fazer Login</b> e entre com a <b>mesma conta</b>. Todos os dados aparecerão como aqui!</li>
                 </ol>
               </div>
