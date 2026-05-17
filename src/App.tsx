@@ -92,6 +92,15 @@ export default function App() {
   const [portas] = useLocalStorage('nm_portas', INITIAL_PORTAS);
   const [aduelas] = useLocalStorage('nm_aduelas', INITIAL_ADUELAS);
   const [alizares] = useLocalStorage('nm_alizares', INITIAL_ALIZARES);
+  
+  // Registering these hooks at the root so Firebase onSnapshot runs in the background and updates the Dashboard live
+  useLocalStorage('nm_controle_saidas', {});
+  useLocalStorage('nm_operacao_producao', {});
+  useLocalStorage('nm_entrada_obras_v4', {});
+  useLocalStorage('nm_operacao_efetivo_total', {});
+  useLocalStorage('nm_ferragens_obras_list_v5', []);
+  useLocalStorage('nm_ferragens_obras_data_v5', {});
+  useLocalStorage('nm_ferragens_history_v5', []);
 
   const inventoryReal = [
     ...(Array.isArray(portas) ? portas : []).map((p: any) => ({
