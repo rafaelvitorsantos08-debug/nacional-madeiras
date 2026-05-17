@@ -65,6 +65,9 @@ export const forceSyncAllToCloud = async () => {
   }
 };
 
+const debounceMap = new Map<string, NodeJS.Timeout>();
+const lastWriteTimeMap = new Map<string, number>();
+
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
@@ -116,6 +119,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       unsubscribe = onSnapshot(userDoc, (docSnap) => {
         if (docSnap.exists() && docSnap.data()[key] !== undefined) {
           const val = docSnap.data()[key];
+          
+          // Se fizemos uma escrita local recente (menos de 2 segundos), evitamos sobrescrever com o snapshot
+          // pois o snapshot pode ser o ego da nuvem voltando fora de ordem
+          const timeSinceLastLocalWrite = Date.now() - (lastWriteTimeMap.get(key) || 0);
+          if (timeSinceLastLocalWrite < 2000) {
+             return; 
+          }
+
           setStoredValue(prev => {
             if (JSON.stringify(prev) === JSON.stringify(val)) {
               return prev;
@@ -160,11 +171,20 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
           window.dispatchEvent(new Event('local-storage-sync'));
         }
+        
+        lastWriteTimeMap.set(key, Date.now());
+
         if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
-          setDoc(doc(db, 'user_configs', auth.currentUser.uid), {
-             [key]: valueToStore,
-             userId: auth.currentUser.uid
-          }, { merge: true }).catch(err => console.error("Firebase save error:", err));
+          if (debounceMap.has(key)) {
+            clearTimeout(debounceMap.get(key)!);
+          }
+          debounceMap.set(key, setTimeout(() => {
+            setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
+               [key]: valueToStore,
+               userId: auth.currentUser!.uid
+            }, { merge: true }).catch(err => console.error("Firebase save error:", err));
+            debounceMap.delete(key);
+          }, 1000));
         }
         return valueToStore;
       });
