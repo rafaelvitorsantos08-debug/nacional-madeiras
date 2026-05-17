@@ -45,9 +45,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     }
   }, [obrasList, selectedObra]);
 
-  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v5', () => {
-    return {};
-  });
+  const [obrasData, setObrasData] = useLocalStorage<Record<string, any[]>>('nm_ferragens_obras_data_v5', {});
 
   const [movementsHistory, setMovementsHistory] = useLocalStorage<Movement[]>('nm_ferragens_history_v5', []);
 

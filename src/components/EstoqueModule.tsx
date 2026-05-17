@@ -93,6 +93,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
              window.localStorage.setItem(key, JSON.stringify(val));
              window.dispatchEvent(new Event('local-storage-sync'));
           }
+        } else {
+          // Push local state to cloud if it doesn't exist yet
+          if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && auth.currentUser) {
+            setDoc(userDoc, {
+               [key]: storedValue,
+               userId: auth.currentUser.uid
+            }, { merge: true }).catch(err => console.error("Firebase initial save error:", err));
+          }
         }
       }, (error) => console.error("Firebase sync error:", error));
     };

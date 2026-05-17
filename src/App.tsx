@@ -426,6 +426,24 @@ export default function App() {
         {/* DASHBOARD CONTENT */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           
+          {!user && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-4 animate-in fade-in">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-900">Sincronização em Tempo Real (Múltiplas Máquinas)</h3>
+                <p className="text-sm text-blue-800 mt-1">
+                  Seus dados estão salvos apenas neste dispositivo. Para acessar de <b>outra máquina ou celular</b> em tempo real:
+                </p>
+                <ol className="list-decimal pl-5 mt-2 text-sm text-blue-800 space-y-1">
+                  <li>Nesta máquina (onde os dados estão certos), clique em <b>Fazer Login</b> e <b>cadastre uma conta</b>. (Seus dados serão enviados para a nuvem mágica).</li>
+                  <li>Na outra máquina, acesse o aplicativo, clique em <b>Fazer Login</b> e entre com a <b>mesma conta</b>. Todos os dados aparecerão como aqui!</li>
+                </ol>
+              </div>
+            </div>
+          )}
+
           {/* PRINT ONLY HEADER */}
           <div className="hidden print:flex mb-8 items-center border-b border-gray-300 pb-4">
              <div className="w-12 h-12 bg-brand-green text-white rounded font-bold flex items-center justify-center text-2xl mr-4 print-exact-color">NM</div>
