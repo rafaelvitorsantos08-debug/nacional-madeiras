@@ -67,8 +67,14 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
 
   const [movementResponsible, setMovementResponsible] = useState('');
   const [movementDestination, setMovementDestination] = useState('');
+  const [movementSubType, setMovementSubType] = useState('');
 
   const [historyFilter, setHistoryFilter] = useState<'all' | 'entrada' | 'saida'>('all');
+
+  const isFerragemWithSubTypes = (modelo: string) => {
+    const m = modelo.toLowerCase();
+    return m.includes('ferragem') && (m.includes('40mm') || m.includes('50mm') || m.includes('55mm'));
+  };
 
   // Ensure current obra exists
   useEffect(() => {
@@ -98,6 +104,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementDate(new Date().toISOString().split('T')[0]);
     setMovementResponsible('');
     setMovementDestination('');
+    setMovementSubType('');
     setIsModalOpen(true);
   };
 
@@ -154,21 +161,50 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     if (!editingItem || !movementAmount) return;
     const amount = Number(movementAmount);
     
-    if (movementType === 'saida' && amount > editingItem.estoque) {
-       alert(`ESTOQUE INSUFICIENTE: Saldo de ${editingItem.estoque} inferior à solicitação de ${amount}.`);
-       return;
+    const requiresSubType = isFerragemWithSubTypes(editingItem.modelo);
+    if (requiresSubType && !movementSubType) {
+      alert('Selecione o tipo de ferragem (Banheiro, Interna, Externa ou Rolete).');
+      return;
+    }
+    
+    if (movementType === 'saida') {
+       const availableGlobal = editingItem.estoque;
+       const availableSub = requiresSubType ? (editingItem.subEstoques?.[movementSubType] || 0) : availableGlobal;
+       
+       if (amount > availableGlobal) {
+          alert(`ESTOQUE INSUFICIENTE: Saldo global de ${availableGlobal} inferior à solicitação de ${amount}.`);
+          return;
+       }
+       if (requiresSubType && amount > availableSub) {
+          alert(`ESTOQUE INSUFICIENTE P/ O TIPO: Saldo de ${movementSubType} é de apenas ${availableSub}.`);
+          return;
+       }
     }
 
-    let newEstoque = editingItem.estoque;
+    let updatedEstoque = editingItem.estoque;
 
     setObrasData((prev: any) => {
       const currentObraItems = prev[selectedObra] || [];
       const updatedItems = currentObraItems.map((i: any) => {
         if (i.id === editingItem.id) {
-          if (movementType === 'entrada') newEstoque = i.estoque + amount;
-          if (movementType === 'saida') newEstoque = Math.max(0, i.estoque - amount);
+          let newEstoque = i.estoque;
+          let newSubEstoques = { ...(i.subEstoques || {}) };
+
+          if (movementType === 'entrada') {
+            newEstoque += amount;
+            if (requiresSubType) {
+               newSubEstoques[movementSubType] = (newSubEstoques[movementSubType] || 0) + amount;
+            }
+          }
+          if (movementType === 'saida') {
+            newEstoque = Math.max(0, newEstoque - amount);
+            if (requiresSubType) {
+               newSubEstoques[movementSubType] = Math.max(0, (newSubEstoques[movementSubType] || 0) - amount);
+            }
+          }
           
-          return { ...i, estoque: newEstoque };
+          updatedEstoque = newEstoque;
+          return { ...i, estoque: newEstoque, subEstoques: newSubEstoques };
         }
         return i;
       });
@@ -179,7 +215,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       id: Math.random().toString(36).substring(2, 11),
       obraId: selectedObra,
       itemId: editingItem.id,
-      itemModelo: editingItem.modelo,
+      itemModelo: requiresSubType ? `${editingItem.modelo} (${movementSubType})` : editingItem.modelo,
       type: movementType,
       amount,
       date: movementDate,
@@ -190,9 +226,9 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementsHistory(prev => [newMovement, ...prev]);
     
     if (movementType === 'saida') {
-        alert(`SAÍDA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${newEstoque}.`);
+        alert(`SAÍDA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${updatedEstoque}.`);
     } else {
-        alert(`ENTRADA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${newEstoque}.`);
+        alert(`ENTRADA REGISTRADA: ${editingItem.id} - ${amount} unidades para ${selectedObra}. Saldo atualizado: ${updatedEstoque}.`);
     }
     
     setIsModalOpen(false);
@@ -385,8 +421,19 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-medium text-gray-800">{item.modelo}</td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-900 text-lg">
-                      {Number(item.estoque).toLocaleString('pt-BR')}
+                    <td className="px-6 py-4 text-right">
+                      <div className="font-bold text-gray-900 text-lg">
+                        {Number(item.estoque).toLocaleString('pt-BR')}
+                      </div>
+                      {item.subEstoques && Object.keys(item.subEstoques).length > 0 && (
+                        <div className="text-[10px] text-gray-500 mt-1 flex flex-col items-end gap-0.5 uppercase tracking-wider font-semibold">
+                          {Object.entries(item.subEstoques).map(([k, v]) => (
+                            <span key={k} className="bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+                              {k}: {v as number}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {getStatusBadge(item.estoque)}
@@ -566,6 +613,24 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                     </div>
                   </div>
                 </div>
+
+                {isFerragemWithSubTypes(editingItem.modelo) && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tipo de Ferragem</label>
+                    <select
+                      value={movementSubType}
+                      onChange={(e) => setMovementSubType(e.target.value)}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all text-gray-700"
+                    >
+                      <option value="">Selecione um tipo...</option>
+                      <option value="Banheiro">Banheiro</option>
+                      <option value="Interna">Interna</option>
+                      <option value="Externa">Externa</option>
+                      <option value="Rolete">Rolete</option>
+                    </select>
+                  </div>
+                )}
+
                 {movementType === 'saida' && (
                   <>
                     <div>
