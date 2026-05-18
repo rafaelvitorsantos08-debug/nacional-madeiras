@@ -465,7 +465,6 @@ export default function App() {
 
           {/* PRINT ONLY HEADER */}
           <div className="hidden print:flex mb-8 items-center border-b border-gray-300 pb-4">
-             <img src="/logo.svg" className="w-12 h-12 mr-4" alt="Logo NM" />
              <div className="flex flex-col">
                <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
                <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>

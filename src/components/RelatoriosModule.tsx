@@ -33,18 +33,18 @@ interface ReportHeader {
 }
 
 export function RelatoriosModule() {
-  const [reportType, setReportType] = useLocalStorage<ReportType>("nm_relatorio_tipo", "portas");
-  const [header, setHeader] = useLocalStorage<ReportHeader>("nm_relatorio_header", {
+  const [reportType, setReportType] = useLocalStorage<ReportType>("nm_active_relatorio_tipo", "portas");
+  const [header, setHeader] = useLocalStorage<ReportHeader>("nm_active_relatorio_header", {
     data: new Date().toISOString().split("T")[0],
     responsavel: "",
     obra: "",
     observacoes: "",
   });
 
-  const [items, setItems] = useLocalStorage<any[]>("nm_relatorio_items", []);
+  const [items, setItems] = useLocalStorage<any[]>("nm_active_relatorio_items", []);
 
   // Current item being added
-  const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_relatorio_current_item", { quantidade: 1 });
+  const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });
 
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
