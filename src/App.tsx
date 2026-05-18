@@ -806,6 +806,35 @@ export default function App() {
 
                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6">
                  <div className="p-6 border-b border-gray-100">
+                   <h2 className="text-lg font-semibold text-gray-800">Aplicativo Desktop/Mobile</h2>
+                   <p className="text-sm text-gray-500 mt-1">Instale o sistema Nacional Madeiras no seu dispositivo para acesso rápido e offline.</p>
+                 </div>
+                 
+                 <div className="p-6">
+                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                     <div className="flex-1">
+                       <h3 className="text-md font-medium text-gray-800">Baixar Aplicativo</h3>
+                       <p className="text-sm text-gray-500 mt-1">Instala o aplicativo no seu celular ou computador.</p>
+                     </div>
+                     <button
+                       onClick={() => {
+                          if (deferredPrompt) {
+                             handleInstallClick();
+                          } else {
+                             alert("O aplicativo já está instalado ou seu navegador atual não suporta a instalação.");
+                          }
+                       }}
+                       className="px-4 py-2 bg-brand-green hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-colors flex-shrink-0 flex items-center space-x-2"
+                     >
+                       <Download className="w-5 h-5 inline-block mr-1" />
+                       Baixar
+                     </button>
+                   </div>
+                 </div>
+               </div>
+
+               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6">
+                 <div className="p-6 border-b border-gray-100">
                    <h2 className="text-lg font-semibold text-gray-800">Transferência e Backup de Dados</h2>
                    <p className="text-sm text-gray-500 mt-1">Exporte seus dados para usar com outra conta (mudança de administrador) ou para segurança.</p>
                  </div>
