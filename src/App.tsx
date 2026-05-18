@@ -342,6 +342,50 @@ export default function App() {
   }, [activeTab]); // re-calculate when switching tabs
 
 
+  const exportToJSON = () => {
+    const data: Record<string, any> = {};
+    for (let i = 0; i < window.localStorage.length; i++) {
+       const key = window.localStorage.key(i);
+       if (key && key.startsWith('nm_')) {
+          try {
+             data[key] = JSON.parse(window.localStorage.getItem(key) || 'null');
+          } catch (e) {
+             data[key] = window.localStorage.getItem(key);
+          }
+       }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nacional_madeiras_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importFromJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const data = JSON.parse(evt.target?.result as string);
+        for (const key of Object.keys(data)) {
+          if (key.startsWith('nm_')) {
+            window.localStorage.setItem(key, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+          }
+        }
+        window.dispatchEvent(new Event('local-storage-sync'));
+        alert('Dados importados com sucesso! Se você estiver logado, clique em "Forçar Envio Manual" para enviar para a nuvem. A página será recarregada.');
+        window.location.reload();
+      } catch (err) {
+        alert('Erro ao importar arquivo. Verifique se o formato é válido.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans">
       
@@ -754,6 +798,44 @@ export default function App() {
                     </div>
                  </div>
               </div>
+
+               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-6">
+                 <div className="p-6 border-b border-gray-100">
+                   <h2 className="text-lg font-semibold text-gray-800">Transferência e Backup de Dados</h2>
+                   <p className="text-sm text-gray-500 mt-1">Exporte seus dados para usar com outra conta (mudança de administrador) ou para segurança.</p>
+                 </div>
+                 
+                 <div className="p-6">
+                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                     <div className="flex-1">
+                       <h3 className="text-md font-medium text-gray-800">Exportar (Fazer Backup)</h3>
+                       <p className="text-sm text-gray-500 mt-1">Baixa um arquivo com todos os seus lançamentos atuais. Para alterar de administrador de forma segura, use isso antes de sair.</p>
+                     </div>
+                     <button
+                       onClick={exportToJSON}
+                       className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors flex-shrink-0"
+                     >
+                       Exportar Dados
+                     </button>
+                   </div>
+                   
+                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-6 pt-6 border-t border-gray-100">
+                     <div className="flex-1">
+                       <h3 className="text-md font-medium text-gray-800">Importar (Restaurar)</h3>
+                       <p className="text-sm text-gray-500 mt-1">Restaura seus lançamentos a partir de um arquivo de backup. Cuidado: isto substituirá os dados atuais! Após restaurar, o sistema enviará para sua conta atual na nuvem.</p>
+                     </div>
+                     <div>
+                       <input type="file" id="importFile" accept=".json" className="hidden" onChange={importFromJSON} />
+                       <label
+                         htmlFor="importFile"
+                         className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium rounded-lg shadow-sm transition-colors cursor-pointer inline-block flex-shrink-0"
+                       >
+                         Importar Arquivo
+                       </label>
+                     </div>
+                   </div>
+                 </div>
+               </div>
 
             </div>
           )}
