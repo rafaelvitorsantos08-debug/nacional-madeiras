@@ -5,13 +5,14 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
 import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 import { FerragensModule } from './components/FerragensModule';
 import { RelatoriosModule } from './components/RelatoriosModule';
+import { CalendarioModule } from './components/CalendarioModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -62,6 +63,11 @@ export default function App() {
   const [activeControleMonth, setActiveControleMonth] = useState(new Date().getMonth());
   const [activeLogTab, setActiveLogTab] = useLocalStorage<'entradas' | 'saidas'>('nm_active_log_tab', 'entradas');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [lembretes, setLembretes] = useLocalStorage<any[]>('nm_lembretes', []);
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${(today.getMonth()+1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  const hasPendingLembretes = lembretes?.some(l => !l.completed && l.date <= todayStr);
 
   useEffect(() => {
     const handler = (e: any) => {
@@ -418,6 +424,7 @@ export default function App() {
           <NavItem icon={<Wrench />} label="Ferragens" active={activeTab === 'ferragens'} isOpen={sidebarOpen} onClick={() => setActiveTab('ferragens')} />
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
+          <NavItem icon={<Calendar />} label="Calendário" active={activeTab === 'calendario'} isOpen={sidebarOpen} onClick={() => setActiveTab('calendario')} />
           
           <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
           <NavItem icon={<Settings />} label="Configurações" active={activeTab === 'configuracoes'} isOpen={sidebarOpen} onClick={() => setActiveTab('configuracoes')} />
@@ -461,9 +468,14 @@ export default function App() {
               <Printer className="w-5 h-5" />
               <span className="hidden md:inline-block">Imprimir</span>
             </button>
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+            <button onClick={() => setActiveTab('calendario')} className="relative p-2 text-gray-400 hover:text-brand-green rounded-full hover:bg-gray-100 transition-colors" title="Ver lembretes">
+              <Bell className={cn("w-5 h-5", hasPendingLembretes ? "text-brand-green fill-brand-green/20" : "")} />
+              {hasPendingLembretes && (
+                <>
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping opacity-75"></span>
+                </>
+              )}
             </button>
             {user ? (
               <div className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
@@ -739,6 +751,9 @@ export default function App() {
           )}
           {activeTab === 'relatorios' && (
             <RelatoriosModule />
+          )}
+          {activeTab === 'calendario' && (
+            <CalendarioModule />
           )}
 
           {activeTab === 'configuracoes' && (
