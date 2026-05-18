@@ -150,7 +150,7 @@ export function RelatoriosModule() {
                     setItems([]); // Clear items on type change
                     setCurrentItem({ quantidade: 1 });
                   }}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="w-full rounded-md border-gray-300 bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
                   <option value="portas">Relatório de Folhas de Porta</option>
                   <option value="aduelas">Relatório de Aduelas</option>

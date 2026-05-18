@@ -520,7 +520,7 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
             {(type === 'portas' || type === 'aduelas' || type === 'alizares') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
-                <select name="cor" value={formData.cor || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                <select name="cor" value={formData.cor || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                   <option value="" disabled>Selecione uma cor...</option>
                   {CORES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
