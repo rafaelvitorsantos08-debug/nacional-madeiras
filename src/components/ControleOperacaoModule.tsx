@@ -923,6 +923,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                             >
                               <option value="" className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">Selecione...</option>
                               {CORES.map(op => <option key={op} value={op} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{op}</option>)}
+                              {item.cor && !CORES.includes(item.cor) && <option value={item.cor} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{item.cor} (Personalizada)</option>}
                             </select>
                             {item.cor && (
                               <button onClick={() => handleChangeItem(activeObra.id, item.id, 'cor', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">

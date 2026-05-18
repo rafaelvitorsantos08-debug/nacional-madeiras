@@ -45,6 +45,7 @@ export function RelatoriosModule() {
 
   // Current item being added
   const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });
+  const [isCustomCor, setIsCustomCor] = useState(false);
 
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
@@ -55,6 +56,16 @@ export function RelatoriosModule() {
   };
 
   const activeColorList = CORES;
+
+  const handleCorSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === "Outra") {
+      setIsCustomCor(true);
+      handleItemChange("cor", "");
+    } else {
+      setIsCustomCor(false);
+      handleItemChange("cor", e.target.value);
+    }
+  };
 
   const handleAddItem = () => {
     if (!currentItem.quantidade || currentItem.quantidade <= 0) {
@@ -232,8 +243,8 @@ export function RelatoriosModule() {
                   Cor / Acabamento
                 </label>
                 <select
-                  value={currentItem.cor || ""}
-                  onChange={(e) => handleItemChange("cor", e.target.value)}
+                  value={isCustomCor ? "Outra" : (currentItem.cor || "")}
+                  onChange={handleCorSelect}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
                 >
                   <option value="">Selecione</option>
@@ -242,7 +253,17 @@ export function RelatoriosModule() {
                       {c}
                     </option>
                   ))}
+                  <option value="Outra">Outra (Personalizada)</option>
                 </select>
+                {isCustomCor && (
+                  <input
+                    type="text"
+                    value={currentItem.cor || ""}
+                    onChange={(e) => handleItemChange("cor", e.target.value)}
+                    placeholder="Especifique a cor"
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2 mt-2"
+                  />
+                )}
               </div>
 
               {reportType === "portas" && (

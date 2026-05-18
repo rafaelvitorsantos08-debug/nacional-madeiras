@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-export const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite', 'Primer'];
+export const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite', 'Primer', 'Nogal Mel', 'Currupixá'];
 export const ENCHIMENTOS_PORTA = ['Colmeia', 'Semi Solida', 'Bondor'];
 export const MODELOS_PORTA = ['Com Bit', 'Lisa'];
 export const DIMENSOES_PORTA = ['600x2100', '620x2100', '600x2070', '620x2070', '70x2110', '70x2120', '80x2110', '700x2100', '720x2100', '700x2070', '720x2070', '800x2100', '820x2100', '800x2070', '820x2070', '900x2100', '920x2100', '900x2070', '920x2070', '1000x2100'];
@@ -481,6 +481,12 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
     }
     return false;
   });
+  const [isCustomCor, setIsCustomCor] = useState<boolean>(() => {
+    if (item && item.cor && !CORES.includes(item.cor)) {
+      return true;
+    }
+    return false;
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -493,6 +499,16 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
     } else {
       setIsCustomDim(false);
       setFormData({ ...formData, dimensao: e.target.value });
+    }
+  };
+
+  const handleCorSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === 'Outra') {
+      setIsCustomCor(true);
+      setFormData({ ...formData, cor: '' });
+    } else {
+      setIsCustomCor(false);
+      setFormData({ ...formData, cor: e.target.value });
     }
   };
 
@@ -520,10 +536,14 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
             {(type === 'portas' || type === 'aduelas' || type === 'alizares') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
-                <select name="cor" value={formData.cor || ''} onChange={handleChange} required className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                <select value={isCustomCor ? 'Outra' : (formData.cor || '')} onChange={handleCorSelectChange} required={!isCustomCor} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                   <option value="" disabled>Selecione uma cor...</option>
                   {CORES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="Outra">Outra (Personalizada)</option>
                 </select>
+                {isCustomCor && (
+                  <input type="text" name="cor" value={formData.cor || ''} onChange={handleChange} required placeholder="Ex: Azul Real" className="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+                )}
               </div>
             )}
 
@@ -666,6 +686,9 @@ function ColorIndicator({ color }: { color: string }) {
     'Branco Max': 'bg-[#FFFFFF] border border-gray-200',
     'Preto': 'bg-[#222222]',
     'Cinza Grafite': 'bg-[#555555]',
+    'Primer': 'bg-[#D3D3D3]',
+    'Nogal Mel': 'bg-[#8B5A2B]',
+    'Currupixá': 'bg-[#D2B48C]',
   };
   return <div className={cn("w-4 h-4 rounded-full shadow-inner", colorMap[color] || 'bg-gray-300')} />;
 }
