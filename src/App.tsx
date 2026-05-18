@@ -376,7 +376,12 @@ export default function App() {
           }
         }
         window.dispatchEvent(new Event('local-storage-sync'));
-        alert('Dados importados com sucesso! Se você estiver logado, clique em "Forçar Envio Manual" para enviar para a nuvem. A página será recarregada.');
+        
+        if (auth.currentUser) {
+           await forceSyncAllToCloud();
+        } else {
+           alert('Dados importados com sucesso!');
+        }
         window.location.reload();
       } catch (err) {
         alert('Erro ao importar arquivo. Verifique se o formato é válido.');
