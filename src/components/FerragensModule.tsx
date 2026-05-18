@@ -72,8 +72,10 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   const [historyFilter, setHistoryFilter] = useState<'all' | 'entrada' | 'saida'>('all');
 
   const isFerragemWithSubTypes = (modelo: string) => {
+    if (!modelo) return false;
     const m = modelo.toLowerCase();
-    return m.includes('ferragem') && (m.includes('40mm') || m.includes('50mm') || m.includes('55mm'));
+    // Check if it's a type of ferragem that needs subtype specification
+    return m.includes('40mm') || m.includes('50mm') || m.includes('55mm');
   };
 
   // Ensure current obra exists
