@@ -357,7 +357,7 @@ export default function App() {
                 <span className="font-bold text-gray-500 text-xs tracking-widest uppercase">Kit Porta</span>
               </div>
            ) : (
-             <div className="w-10 h-10 bg-brand-green text-white rounded font-bold flex items-center justify-center text-xl">NM</div>
+             <img src="/logo.svg" className="w-8 h-8 mx-auto" alt="Logo NM" />
            )}
            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-600 focus:outline-none hidden md:block">
              <Menu className="w-5 h-5" />
@@ -465,7 +465,7 @@ export default function App() {
 
           {/* PRINT ONLY HEADER */}
           <div className="hidden print:flex mb-8 items-center border-b border-gray-300 pb-4">
-             <div className="w-12 h-12 bg-brand-green text-white rounded font-bold flex items-center justify-center text-2xl mr-4 print-exact-color">NM</div>
+             <img src="/logo.svg" className="w-12 h-12 mr-4" alt="Logo NM" />
              <div className="flex flex-col">
                <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
                <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>

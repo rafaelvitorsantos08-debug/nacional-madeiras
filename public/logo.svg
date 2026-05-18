@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <rect width="500" height="500" fill="#ffffff" />
+  <!-- Stars -->
+  <g fill="#4caf50">
+    <path d="M 125,180 l 15,-45 l 15,45 l 45,0 l -35,25 l 15,45 l -40,-30 l -40,30 l 15,-45 l -35,-25 z" />
+    <path d="M 215,160 l 15,-45 l 15,45 l 45,0 l -35,25 l 15,45 l -40,-30 l -40,30 l 15,-45 l -35,-25 z" />
+    <path d="M 305,160 l 15,-45 l 15,45 l 45,0 l -35,25 l 15,45 l -40,-30 l -40,30 l 15,-45 l -35,-25 z" />
+    <path d="M 395,180 l 15,-45 l 15,45 l 45,0 l -35,25 l 15,45 l -40,-30 l -40,30 l 15,-45 l -35,-25 z" />
+    <path d="M 255,140 l 15,-45 l 15,45 l 45,0 l -35,25 l 15,45 l -40,-30 l -40,30 l 15,-45 l -35,-25 z" transform="translate(-40, -20)"/>
+  </g>
+  <!-- Text -->
+  <text x="250" y="320" font-family="Arial, sans-serif" font-weight="bold" font-size="48" fill="#4caf50" text-anchor="middle">NACIONAL MADEIRAS</text>
+  <text x="250" y="380" font-family="Arial, sans-serif" font-weight="bold" font-size="36" fill="#757575" text-anchor="middle">KIT PORTA</text>
+</svg>
