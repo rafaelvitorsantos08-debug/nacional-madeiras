@@ -20,6 +20,7 @@ import {
   ABA_ALIZAR,
   ESPESSURA_ALIZAR,
   COMPRIMENTOS_ALIZAR,
+  useLocalStorage,
 } from "./EstoqueModule";
 
 type ReportType = "portas" | "aduelas" | "alizares";
@@ -32,18 +33,18 @@ interface ReportHeader {
 }
 
 export function RelatoriosModule() {
-  const [reportType, setReportType] = useState<ReportType>("portas");
-  const [header, setHeader] = useState<ReportHeader>({
+  const [reportType, setReportType] = useLocalStorage<ReportType>("nm_relatorio_tipo", "portas");
+  const [header, setHeader] = useLocalStorage<ReportHeader>("nm_relatorio_header", {
     data: new Date().toISOString().split("T")[0],
     responsavel: "",
     obra: "",
     observacoes: "",
   });
 
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useLocalStorage<any[]>("nm_relatorio_items", []);
 
   // Current item being added
-  const [currentItem, setCurrentItem] = useState<any>({ quantidade: 1 });
+  const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_relatorio_current_item", { quantidade: 1 });
 
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
@@ -680,7 +681,7 @@ export function RelatoriosModule() {
                     colSpan={3}
                     className="border border-black p-2 text-right uppercase"
                   >
-                    Total Gral de Peças:
+                    Total Geral de Peças:
                   </td>
                   <td className="border border-black p-2 text-center text-xl">
                     {items.reduce(
