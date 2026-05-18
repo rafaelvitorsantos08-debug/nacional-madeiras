@@ -11,6 +11,7 @@ import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
 import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 import { FerragensModule } from './components/FerragensModule';
+import { RelatoriosModule } from './components/RelatoriosModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -689,11 +690,7 @@ export default function App() {
             <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} globalSearch={globalSearch} />
           )}
           {activeTab === 'relatorios' && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500 animate-in fade-in duration-300 min-h-[400px]">
-               <FileText className="w-16 h-16 mb-4 text-gray-300" />
-               <h2 className="text-xl font-semibold text-gray-700">Relatórios Gerenciais</h2>
-               <p className="mt-2 text-sm text-gray-500">Módulo em desenvolvimento. Gere resumos em PDF e planilhas sobre o consumo, previsões de compra e valor em estoque.</p>
-            </div>
+            <RelatoriosModule />
           )}
 
           {activeTab === 'configuracoes' && (
