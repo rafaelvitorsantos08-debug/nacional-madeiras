@@ -134,17 +134,19 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   };
 
   const handleCreateItem = () => {
-    if (!newItemId || !newItemModelo) return;
+    if (!newItemModelo) return;
     
     setObrasData((prev: any) => {
       const currentObraItems = prev[selectedObra] || [];
-      if (currentObraItems.find((i: any) => i.id === newItemId)) {
+      const actualId = newItemId.trim() !== '' ? newItemId.toUpperCase() : `FER-${Math.floor(Math.random() * 100000)}`;
+
+      if (newItemId.trim() !== '' && currentObraItems.find((i: any) => i.id === actualId)) {
         alert('Já existe um item com este código nesta obra.');
         return prev;
       }
       
       const newItem = {
-        id: newItemId.toUpperCase(),
+        id: actualId,
         categoria: newItemCategoria,
         modelo: newItemModelo,
         estoque: 0,
@@ -506,7 +508,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
             <div className="p-6 space-y-5">
               <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Código</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Código (Opcional)</label>
                   <input
                     type="text"
                     value={newItemId}
@@ -548,7 +550,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
               </button>
               <button
                 onClick={handleCreateItem}
-                disabled={!newItemId || !newItemModelo}
+                disabled={!newItemModelo}
                 className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none flex items-center bg-brand-green hover:bg-green-700 focus:ring-brand-green disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Adicionar
