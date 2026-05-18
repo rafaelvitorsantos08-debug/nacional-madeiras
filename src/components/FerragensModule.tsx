@@ -532,11 +532,29 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Modelo / Especificação</label>
                   <input
                     type="text"
+                    list="especificacoes-list"
                     value={newItemModelo}
                     onChange={(e) => setNewItemModelo(e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
                     placeholder="Ex: Fechadura Digital"
                   />
+                  <datalist id="especificacoes-list">
+                    <option value="Banheiro" />
+                    <option value="Interna" />
+                    <option value="Externa" />
+                  </datalist>
+                  <div className="flex gap-2 mt-2">
+                    {['Banheiro', 'Interna', 'Externa'].map((opt) => (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => setNewItemModelo(opt)}
+                        className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
