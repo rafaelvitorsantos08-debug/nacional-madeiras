@@ -435,7 +435,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       {/* ADD ITEM MODAL */}
       {isAddingItem && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
               <div className="flex items-center space-x-3">
                 <div className="p-2 rounded-xl bg-white shadow-sm shadow-blue-100 text-brand-green">
@@ -512,7 +512,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       {/* MOVEMENT MODAL */}
       {isModalOpen && editingItem && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden ring-1 ring-black/5 animate-in zoom-in-95 duration-200">
             <div className={cn(
               "p-6 border-b border-gray-100 flex justify-between items-start",
               movementType === 'entrada' ? "bg-green-50/50" : "bg-red-50/50"

@@ -946,8 +946,8 @@ function KpiCard({ title, value, subtitle, icon, bgColor, trend, alert, goalTarg
   
   return (
     <div className={cn(
-      "bg-white p-5 rounded-xl border transition-all flex flex-col justify-between h-full",
-      alert ? "border-yellow-300 shadow-sm shadow-yellow-100" : "border-gray-200 shadow-sm"
+      "bg-white dark:bg-gray-900 p-5 rounded-xl border transition-all flex flex-col justify-between h-full",
+      alert ? "border-yellow-300 dark:border-yellow-600 shadow-sm shadow-yellow-100 dark:shadow-none" : "border-gray-200 dark:border-gray-800 shadow-sm"
     )}>
       <div>
         <div className="flex justify-between items-start">

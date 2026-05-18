@@ -1031,10 +1031,12 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 >
                                   <option value="" className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">Face</option>
                                   {FACE_ALIZAR.flatMap(face => 
-                                    ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
-                                      COMPRIMENTOS_ALIZAR.map(comprimento => (
-                                        <option key={`${face}x${espessura}x${comprimento}`} value={`${face}x${espessura}x${comprimento}`} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{`${face}x${espessura}x${comprimento}`}</option>
-                                      ))
+                                    ['40', '50', '60', '70', '80'].flatMap(aba => 
+                                      ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
+                                        COMPRIMENTOS_ALIZAR.map(comprimento => (
+                                          <option key={`${face}x${aba}x${espessura}x${comprimento}`} value={`${face}x${aba}x${espessura}x${comprimento}`} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{`${face}x${aba}x${espessura}x${comprimento}`}</option>
+                                        ))
+                                      )
                                     )
                                   )}
                                 </select>
@@ -1307,6 +1309,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obras, setObras] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v4', {});
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [selectedItemForSaidas, setSelectedItemForSaidas] = useState<{ obraId: string, itemId: string, defaultTipo?: 'folhas' | 'aduelas' | 'alizares' } | null>(null);
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
 
   const obrasList: any[] = Object.values(obras || {})
     .filter((obra: any) => {
@@ -1370,21 +1373,41 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                 <Truck className="w-5 h-5 text-blue-500" /> Expedição: {activeObra.nome}
               </h2>
             </div>
+            <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex space-x-2">
+              <button 
+                onClick={() => setActiveCategoryTab('folhas')}
+                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors", activeCategoryTab === 'folhas' ? "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800")}
+              >
+                Folhas de Porta
+              </button>
+              <button 
+                onClick={() => setActiveCategoryTab('aduelas')}
+                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors", activeCategoryTab === 'aduelas' ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800")}
+              >
+                Aduelas
+              </button>
+              <button 
+                onClick={() => setActiveCategoryTab('alizares')}
+                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors", activeCategoryTab === 'alizares' ? "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200" : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800")}
+              >
+                Alizares
+              </button>
+            </div>
             
             <div className="flex-1 overflow-auto p-4 w-full">
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto print:overflow-visible w-full">
-                <table className="w-full text-center text-sm border-collapse min-w-[1000px]">
+                <table className="w-full text-center text-sm border-collapse min-w-[600px]">
                   <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
                     <tr>
-                      <th className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold w-[25%] text-left pl-4">ESPECIFICAÇÕES</th>
-                      <th className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold bg-blue-50 dark:bg-blue-900/60 text-blue-800 dark:text-blue-100 w-[25%]">FOLHAS DE PORTA</th>
-                      <th className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold bg-amber-50 dark:bg-amber-900/60 text-amber-800 dark:text-amber-100 w-[25%]">ADUELAS</th>
-                      <th className="p-3 font-bold bg-purple-50 dark:bg-purple-900/60 text-purple-800 dark:text-purple-100 w-[25%]">ALIZARES</th>
+                      <th className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold w-[50%] text-left pl-4">ESPECIFICAÇÕES</th>
+                      {activeCategoryTab === 'folhas' && <th className="p-3 font-bold bg-blue-50 dark:bg-blue-900/60 text-blue-800 dark:text-blue-100 w-[50%]">FOLHAS DE PORTA</th>}
+                      {activeCategoryTab === 'aduelas' && <th className="p-3 font-bold bg-amber-50 dark:bg-amber-900/60 text-amber-800 dark:text-amber-100 w-[50%]">ADUELAS</th>}
+                      {activeCategoryTab === 'alizares' && <th className="p-3 font-bold bg-purple-50 dark:bg-purple-900/60 text-purple-800 dark:text-purple-100 w-[50%]">ALIZARES</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {(activeObra.itens || []).length === 0 ? (
-                      <tr><td colSpan={4} className="p-8 text-gray-500">Nenhum item nesta obra.</td></tr>
+                      <tr><td colSpan={2} className="p-8 text-gray-500">Nenhum item nesta obra.</td></tr>
                     ) : (
                       (activeObra.itens || []).map((item: any) => {
                         const totalFolhasSaida = (item.saidas || []).filter((s:any) => s.tipo === 'folhas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
@@ -1405,77 +1428,84 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 {item.modelo && <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">{item.modelo}</span>}
                               </div>
                             </td>
+                            
                             {/* FOLHAS */}
-                            <td className="p-0 border-r border-gray-200 dark:border-gray-700 align-top bg-blue-50/10 dark:bg-blue-900/5">
-                              <div className="p-3 h-full flex flex-col">
-                                <div className="flex justify-between items-center mb-1">
+                            {activeCategoryTab === 'folhas' && (
+                            <td className="p-0 align-top bg-blue-50/10 dark:bg-blue-900/5">
+                              <div className="p-4 h-full flex flex-col">
+                                <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
-                                  <div className="font-bold text-lg text-gray-800 dark:text-gray-200">{reqFolhas}</div>
+                                  <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqFolhas}</div>
                                 </div>
-                                <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
-                                  <div className="font-bold text-base text-red-500 dark:text-red-400">{totalFolhasSaida}</div>
+                                  <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalFolhasSaida}</div>
                                 </div>
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'folhas' })}
-                                    className="w-full py-2 px-3 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 font-bold rounded shadow-sm border border-blue-200 dark:border-blue-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
+                                    className="w-full py-2.5 px-3 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 font-bold rounded shadow-sm border border-blue-200 dark:border-blue-800/50 transition-colors text-sm flex items-center justify-center gap-2 print:hidden"
                                   >
-                                    <History className="w-3.5 h-3.5" /> Registrar Saídas
+                                    <History className="w-4 h-4" /> Registrar Saídas
                                   </button>
                                 </div>
                               </div>
                             </td>
+                            )}
 
                             {/* ADUELAS */}
-                            <td className="p-0 border-r border-gray-200 dark:border-gray-700 align-top bg-amber-50/10 dark:bg-amber-900/5">
-                              <div className="p-3 h-full flex flex-col">
-                                <div className="mb-3 text-center bg-amber-100/50 dark:bg-amber-900/30 py-1 px-2 rounded-md text-xs font-bold text-amber-800 dark:text-amber-200 truncate border border-amber-200/50 dark:border-amber-700/30">
+                            {activeCategoryTab === 'aduelas' && (
+                            <td className="p-0 align-top bg-amber-50/10 dark:bg-amber-900/5">
+                              <div className="p-4 h-full flex flex-col">
+                                <div className="mb-4 text-center bg-amber-100/50 dark:bg-amber-900/30 py-1.5 px-3 rounded-md text-sm font-bold text-amber-800 dark:text-amber-200 truncate border border-amber-200/50 dark:border-amber-700/30">
                                   {item.medidaAduela || 'S/ Medida'}
                                 </div>
-                                <div className="flex justify-between items-center mb-1">
+                                <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
-                                  <div className="font-bold text-lg text-gray-800 dark:text-gray-200">{reqAduelas}</div>
+                                  <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAduelas}</div>
                                 </div>
-                                <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
-                                  <div className="font-bold text-base text-red-500 dark:text-red-400">{totalAduelasSaida}</div>
+                                  <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalAduelasSaida}</div>
                                 </div>
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'aduelas' })}
-                                    className="w-full py-2 px-3 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-700 dark:text-amber-300 font-bold rounded shadow-sm border border-amber-200 dark:border-amber-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
+                                    className="w-full py-2.5 px-3 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-800/60 text-amber-700 dark:text-amber-300 font-bold rounded shadow-sm border border-amber-200 dark:border-amber-800/50 transition-colors text-sm flex items-center justify-center gap-2 print:hidden"
                                   >
-                                    <History className="w-3.5 h-3.5" /> Registrar Saídas
+                                    <History className="w-4 h-4" /> Registrar Saídas
                                   </button>
                                 </div>
                               </div>
                             </td>
+                            )}
 
                             {/* ALIZARES */}
+                            {activeCategoryTab === 'alizares' && (
                             <td className="p-0 align-top bg-purple-50/10 dark:bg-purple-900/5">
-                              <div className="p-3 h-full flex flex-col">
-                                <div className="mb-3 text-center bg-purple-100/50 dark:bg-purple-900/30 py-1 px-2 rounded-md text-xs font-bold text-purple-800 dark:text-purple-200 truncate border border-purple-200/50 dark:border-purple-700/30">
+                              <div className="p-4 h-full flex flex-col">
+                                <div className="mb-4 text-center bg-purple-100/50 dark:bg-purple-900/30 py-1.5 px-3 rounded-md text-sm font-bold text-purple-800 dark:text-purple-200 truncate border border-purple-200/50 dark:border-purple-700/30">
                                   {item.medidaAlizar || 'S/ Face'}
                                 </div>
-                                <div className="flex justify-between items-center mb-1">
+                                <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
-                                  <div className="font-bold text-lg text-gray-800 dark:text-gray-200">{reqAlizares}</div>
+                                  <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAlizares}</div>
                                 </div>
-                                <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
-                                  <div className="font-bold text-base text-red-500 dark:text-red-400">{totalAlizarSaida}</div>
+                                  <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalAlizarSaida}</div>
                                 </div>
                                 <div className="mt-auto">
                                   <button
                                     onClick={() => setSelectedItemForSaidas({ obraId: activeObra.id, itemId: item.id, defaultTipo: 'alizares' })}
-                                    className="w-full py-2 px-3 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800/60 text-purple-700 dark:text-purple-300 font-bold rounded shadow-sm border border-purple-200 dark:border-purple-800/50 transition-colors text-xs flex items-center justify-center gap-1.5 print:hidden"
+                                    className="w-full py-2.5 px-3 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-800/60 text-purple-700 dark:text-purple-300 font-bold rounded shadow-sm border border-purple-200 dark:border-purple-800/50 transition-colors text-sm flex items-center justify-center gap-2 print:hidden"
                                   >
-                                    <History className="w-3.5 h-3.5" /> Registrar Saídas
+                                    <History className="w-4 h-4" /> Registrar Saídas
                                   </button>
                                 </div>
                               </div>
                             </td>
+                            )}
                           </tr>
                         );
                       })
