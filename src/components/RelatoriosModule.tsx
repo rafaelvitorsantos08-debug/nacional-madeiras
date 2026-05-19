@@ -382,15 +382,15 @@ export function RelatoriosModule() {
               </div>
               <div className="md:col-span-2 lg:col-span-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Observações Gerais
+                  Observações Gerais / Causas das Avarias
                 </label>
-                <input
-                  type="text"
+                <textarea
                   placeholder="Anotações adicionais (opcional)"
                   value={header.observacoes}
                   onChange={(e) =>
                     handleHeaderChange("observacoes", e.target.value)
                   }
+                  rows={3}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
@@ -405,27 +405,15 @@ export function RelatoriosModule() {
             {reportType === "avarias" ? (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <div className="flex-1 w-full flex flex-col gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Descrição / Comentário da Avaria</label>
-                      <input 
-                         type="text"
-                         value={currentItem.descricao || ""}
-                         onChange={(e) => handleItemChange("descricao", e.target.value)}
-                         placeholder="Ex: Risco profundo na face inferior da porta"
-                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Possível Causa da Avaria</label>
-                      <input 
-                         type="text"
-                         value={currentItem.causa || ""}
-                         onChange={(e) => handleItemChange("causa", e.target.value)}
-                         placeholder="Ex: Queda durante o transporte"
-                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                      />
-                    </div>
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Descrição / Comentário da Avaria</label>
+                    <input 
+                       type="text"
+                       value={currentItem.descricao || ""}
+                       onChange={(e) => handleItemChange("descricao", e.target.value)}
+                       placeholder="Ex: Risco profundo na face inferior da porta"
+                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
+                    />
                   </div>
                   {!avariaFile && (
                     <>
@@ -459,9 +447,9 @@ export function RelatoriosModule() {
                            alert("Por favor, adicione uma descrição para a avaria.");
                            return;
                        }
-                       setItems([...items, { ...currentItem, id: Date.now(), imagemBase64: dataUrl, quantidade: 1, descricao: currentItem.descricao, causa: currentItem.causa }]);
+                       setItems([...items, { ...currentItem, id: Date.now(), imagemBase64: dataUrl, quantidade: 1, descricao: currentItem.descricao }]);
                        setAvariaFile(null);
-                       setCurrentItem({ quantidade: 1, descricao: "", causa: "" });
+                       setCurrentItem({ quantidade: 1, descricao: "" });
                     }}
                     onCancel={() => setAvariaFile(null)}
                   />
@@ -745,9 +733,6 @@ export function RelatoriosModule() {
                           {reportType === "avarias" && (
                             <div className="flex flex-col gap-1 py-1">
                                <p className="text-gray-800 italic">"{item.descricao}"</p>
-                               {item.causa && (
-                                   <p className="text-gray-600 text-sm font-medium">Causa: <span className="font-normal">{item.causa}</span></p>
-                               )}
                                {item.imagemBase64 && (
                                    <img src={item.imagemBase64} alt="Avaria" className="max-h-32 mt-1 rounded-lg border object-contain self-start" />
                                )}
@@ -867,9 +852,9 @@ export function RelatoriosModule() {
             {header.observacoes && (
               <div className="border border-gray-300 p-3 col-span-2">
                 <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                  Observações
+                  Observações / Causas das Avarias
                 </p>
-                <p className="font-medium">{header.observacoes}</p>
+                <p className="font-medium whitespace-pre-wrap">{header.observacoes}</p>
               </div>
             )}
           </div>
@@ -913,9 +898,6 @@ export function RelatoriosModule() {
                     {reportType === "avarias" && (
                       <div className="flex flex-col items-start gap-1 py-1 max-w-[280px]">
                         <span className="italic text-base whitespace-normal break-words w-full border-l-[3px] border-gray-400 pl-2 text-gray-800">"{item.descricao}"</span>
-                        {item.causa && (
-                            <span className="text-sm font-semibold whitespace-normal break-words w-full text-gray-700 mt-1">Causa: <span className="font-normal">{item.causa}</span></span>
-                        )}
                         {item.imagemBase64 && (
                            <img src={item.imagemBase64} alt="Avaria" className="max-h-[250px] w-auto border border-black mt-2" />
                         )}
