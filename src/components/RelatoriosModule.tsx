@@ -9,7 +9,8 @@ import {
   MapPin,
   ClipboardList,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download
 } from "lucide-react";
 import {
   CORES,
@@ -282,6 +283,52 @@ export function RelatoriosModule() {
     window.print();
   };
 
+  const handleExport = () => {
+    let content = `RELATÓRIO DE ${reportType.toUpperCase()}\n`;
+    content += `Data: ${header.data ? header.data.split("-").reverse().join("/") : ""}\n`;
+    content += `Responsável: ${header.responsavel}\n`;
+    content += `Obra / Destino: ${header.obra}\n`;
+    content += `Observações Gerais: ${header.observacoes || ""}\n\n`;
+
+    if (items.length > 0) {
+      if (reportType === "portas") {
+        content += "Item;Cor;Dimensao;Enchimento;Modelo;Qtd\n";
+        items.forEach((item, idx) => {
+          content += `${idx + 1};${item.cor || ""};${item.dimensao || ""};${item.enchimento || ""};${item.modelo || ""};${item.quantidade}\n`;
+        });
+      } else if (reportType === "aduelas") {
+        content += "Item;Cor;Largura;Comprimento;Qtd\n";
+        items.forEach((item, idx) => {
+          content += `${idx + 1};${item.cor || ""};${item.largura || ""};${item.comprimento || ""};${item.quantidade}\n`;
+        });
+      } else if (reportType === "alizares") {
+        content += "Item;Cor;Face;Aba;Espessura;Comprimento;Qtd\n";
+        items.forEach((item, idx) => {
+          content += `${idx + 1};${item.cor || ""};${item.face || ""};${item.aba || ""};${item.espessura || ""};${item.comprimento || ""};${item.quantidade}\n`;
+        });
+      } else if (reportType === "avarias") {
+        content += "Item;Descricao;Qtd\n";
+        items.forEach((item, idx) => {
+          const rawDesc = (item.descricao || "").replace(/;/g, ",").replace(/\n/g, " ");
+          content += `${idx + 1};${rawDesc};${item.quantidade}\n`;
+        });
+      }
+    } else {
+      content += "Nenhum item adicionado.\n";
+    }
+
+    // Add BOM for Excel UTF-8 encoding support
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+    const blob = new Blob([bom, content], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `relatorio_${reportType}_${header.data}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-gray-50 overflow-hidden relative">
       <div className="p-4 bg-white border-b border-gray-200 print:hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -296,6 +343,13 @@ export function RelatoriosModule() {
         </div>
 
         <div className="flex gap-2">
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 font-medium rounded-lg shadow-sm transition-colors flex items-center"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
+          </button>
           <button
             onClick={handlePrint}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors flex items-center"
@@ -382,7 +436,7 @@ export function RelatoriosModule() {
               </div>
               <div className="md:col-span-2 lg:col-span-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Observações Gerais / Causas das Avarias
+                  Observações Gerais
                 </label>
                 <textarea
                   placeholder="Anotações adicionais (opcional)"
@@ -852,7 +906,7 @@ export function RelatoriosModule() {
             {header.observacoes && (
               <div className="border border-gray-300 p-3 col-span-2">
                 <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                  Observações / Causas das Avarias
+                  Observações Gerais
                 </p>
                 <p className="font-medium whitespace-pre-wrap">{header.observacoes}</p>
               </div>
