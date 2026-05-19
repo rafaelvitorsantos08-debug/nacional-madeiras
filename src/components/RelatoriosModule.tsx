@@ -197,7 +197,7 @@ interface ReportHeader {
 export function RelatoriosModule() {
   const [reportType, setReportType] = useLocalStorage<ReportType>("nm_active_relatorio_tipo", "portas");
   const [header, setHeader] = useLocalStorage<ReportHeader>("nm_active_relatorio_header", {
-    data: new Date().toISOString().split("T")[0],
+    data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0],
     responsavel: "",
     obra: "",
     observacoes: "",
@@ -820,7 +820,7 @@ export function RelatoriosModule() {
               <p className="font-bold">
                 Data:{" "}
                 <span className="font-normal">
-                  {new Date(header.data).toLocaleDateString("pt-BR")}
+                  {header.data ? header.data.split("-").reverse().join("/") : ""}
                 </span>
               </p>
               <p className="font-bold">
@@ -896,11 +896,11 @@ export function RelatoriosModule() {
                       </>
                     )}
                     {reportType === "avarias" && (
-                      <div className="flex items-start gap-4">
+                      <div className="flex flex-col items-start gap-2 max-w-[280px]">
+                        <span className="italic text-base whitespace-normal break-words w-full">"{item.descricao}"</span>
                         {item.imagemBase64 && (
-                           <img src={item.imagemBase64} alt="Avaria" className="w-48 h-auto border border-black" />
+                           <img src={item.imagemBase64} alt="Avaria" className="max-h-[250px] w-auto border border-black" />
                         )}
-                        <span className="italic text-lg">"{item.descricao}"</span>
                       </div>
                     )}
                     {reportType === "aduelas" && (
