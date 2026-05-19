@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Printer,
   FileText,
@@ -8,6 +8,8 @@ import {
   User,
   MapPin,
   ClipboardList,
+  Upload,
+  Image as ImageIcon
 } from "lucide-react";
 import {
   CORES,
@@ -23,7 +25,167 @@ import {
   useLocalStorage,
 } from "./EstoqueModule";
 
-type ReportType = "portas" | "aduelas" | "alizares";
+const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null; onSave: (dataUrl: string) => void; onCancel: () => void }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [color, setColor] = useState("#ef4444"); // default red
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    if (!imageFile) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(imageFile);
+    img.src = objectUrl;
+
+    img.onload = () => {
+      const maxWidth = 800;
+      const maxHeight = 600;
+      let w = img.width;
+      let h = img.height;
+
+      if (w > maxWidth) {
+        h = (h * maxWidth) / w;
+        w = maxWidth;
+      }
+      if (h > maxHeight) {
+        w = (w * maxHeight) / h;
+        h = maxHeight;
+      }
+
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [imageFile]);
+
+  const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = "touches" in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  };
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDrawing(true);
+    const coords = getCoordinates(e);
+    if (!coords) return;
+
+    const ctx = canvasRef.current?.getContext("2d");
+    if (ctx) {
+      ctx.beginPath();
+      ctx.moveTo(coords.x, coords.y);
+    }
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    const coords = getCoordinates(e);
+    if (!coords) return;
+
+    const ctx = canvasRef.current?.getContext("2d");
+    if (ctx) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.lineCap = "round";
+      ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    }
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const handleClear = () => {
+    if (!imageFile) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const img = new window.Image();
+    const objectUrl = URL.createObjectURL(imageFile);
+    img.src = objectUrl;
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objectUrl);
+    };
+  };
+
+  const handleSave = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      onSave(canvas.toDataURL("image/jpeg", 0.8));
+    }
+  };
+
+  return (
+    <div className="bg-white border text-left flex flex-col p-4 rounded-xl shadow-sm mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="font-semibold text-gray-800">Demarcação na Foto</h4>
+        <div className="flex gap-2">
+          {["#ef4444", "#eab308", "#3b82f6", "#22c55e", "#000000"].map((c) => (
+            <button
+              key={c}
+              onClick={() => setColor(c)}
+              className={`w-6 h-6 rounded-full border-2 ${
+                color === c ? "border-indigo-600 scale-110" : "border-gray-200"
+              }`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto bg-gray-50 flex justify-center border rounded-lg cursor-crosshair">
+        <canvas
+          ref={canvasRef}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className="max-w-full h-auto bg-gray-100"
+        />
+      </div>
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          onClick={handleClear}
+          className="px-4 py-2 border text-gray-600 rounded-md hover:bg-gray-100"
+        >
+          Limpar Marcações
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 border text-red-600 rounded-md hover:bg-red-50"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleSave}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium"
+        >
+          Confirmar e Salvar Imagem
+        </button>
+      </div>
+    </div>
+  );
+};
+
+type ReportType = "portas" | "aduelas" | "alizares" | "avarias";
 
 interface ReportHeader {
   data: string;
@@ -46,6 +208,8 @@ export function RelatoriosModule() {
   // Current item being added
   const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });
   const [isCustomCor, setIsCustomCor] = useState(false);
+  const [avariaFile, setAvariaFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
@@ -167,6 +331,7 @@ export function RelatoriosModule() {
                   <option value="portas">Relatório de Folhas de Porta</option>
                   <option value="aduelas">Relatório de Aduelas</option>
                   <option value="alizares">Relatório de Alizares</option>
+                  <option value="avarias">Relatório de Avarias</option>
                 </select>
               </div>
               <div>
@@ -237,8 +402,62 @@ export function RelatoriosModule() {
               Adicionar Itens ({reportType})
             </h3>
 
-            <div className="flex flex-wrap items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <div className="w-full sm:w-auto flex-1 min-w-[150px]">
+            {reportType === "avarias" ? (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Descrição / Comentário da Avaria</label>
+                    <input 
+                       type="text"
+                       value={currentItem.descricao || ""}
+                       onChange={(e) => handleItemChange("descricao", e.target.value)}
+                       placeholder="Ex: Risco profundo na face inferior da porta"
+                       className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
+                    />
+                  </div>
+                  {!avariaFile && (
+                    <>
+                      <input 
+                         type="file" 
+                         accept="image/*" 
+                         className="hidden" 
+                         ref={fileInputRef}
+                         onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setAvariaFile(e.target.files[0]);
+                            }
+                         }}
+                      />
+                      <button 
+                         onClick={() => fileInputRef.current?.click()}
+                         className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition-colors font-medium rounded-md text-sm whitespace-nowrap self-end"
+                      >
+                         <ImageIcon className="w-4 h-4 mr-2" />
+                         Adicionar Foto da Avaria
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {avariaFile && (
+                  <DrawingCanvas 
+                    imageFile={avariaFile}
+                    onSave={(dataUrl) => {
+                       if (!currentItem.descricao) {
+                           alert("Por favor, adicione uma descrição para a avaria.");
+                           return;
+                       }
+                       setItems([...items, { ...currentItem, id: Date.now(), imagemBase64: dataUrl, quantidade: 1, descricao: currentItem.descricao }]);
+                       setAvariaFile(null);
+                       setCurrentItem({ quantidade: 1, descricao: "" });
+                    }}
+                    onCancel={() => setAvariaFile(null)}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="w-full sm:w-auto flex-1 min-w-[150px]">
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   Cor / Acabamento
                 </label>
@@ -473,6 +692,7 @@ export function RelatoriosModule() {
                 </button>
               </div>
             </div>
+            )}
 
             {/* List of items */}
             {items.length > 0 && (
@@ -508,6 +728,14 @@ export function RelatoriosModule() {
                                 {item.dimensao} | {item.enchimento} |{" "}
                                 {item.modelo}
                               </span>
+                            </div>
+                          )}
+                          {reportType === "avarias" && (
+                            <div className="flex flex-col gap-2 py-2">
+                               <p className="text-gray-800 italic">"{item.descricao}"</p>
+                               {item.imagemBase64 && (
+                                   <img src={item.imagemBase64} alt="Avaria" className="max-h-32 rounded-lg border object-contain self-start" />
+                               )}
                             </div>
                           )}
                           {reportType === "aduelas" && (
@@ -546,6 +774,7 @@ export function RelatoriosModule() {
                       </tr>
                     ))}
                   </tbody>
+                  {reportType !== "avarias" && (
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td
@@ -563,6 +792,7 @@ export function RelatoriosModule() {
                       <td></td>
                     </tr>
                   </tfoot>
+                  )}
                 </table>
               </div>
             )}
@@ -635,7 +865,7 @@ export function RelatoriosModule() {
                 <th className="border border-black p-2 w-12 text-center">
                   Item
                 </th>
-                <th className="border border-black p-2">Cor/Acabamento</th>
+                {reportType !== "avarias" && <th className="border border-black p-2">Cor/Acabamento</th>}
                 <th className="border border-black p-2">
                   Detalhes / Especificações
                 </th>
@@ -653,15 +883,25 @@ export function RelatoriosModule() {
                   <td className="border border-black p-2 text-center">
                     {idx + 1}
                   </td>
-                  <td className="border border-black p-2 font-medium">
-                    {item.cor}
-                  </td>
+                  {reportType !== "avarias" && (
+                    <td className="border border-black p-2 font-medium">
+                      {item.cor}
+                    </td>
+                  )}
                   <td className="border border-black p-2">
                     {reportType === "portas" && (
                       <>
                         {item.dimensao} - Enc: {item.enchimento} - Mod:{" "}
                         {item.modelo}
                       </>
+                    )}
+                    {reportType === "avarias" && (
+                      <div className="flex items-start gap-4">
+                        {item.imagemBase64 && (
+                           <img src={item.imagemBase64} alt="Avaria" className="w-48 h-auto border border-black" />
+                        )}
+                        <span className="italic text-lg">"{item.descricao}"</span>
+                      </div>
                     )}
                     {reportType === "aduelas" && (
                       <>
@@ -687,7 +927,7 @@ export function RelatoriosModule() {
               {items.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={reportType === "avarias" ? 4 : 5}
                     className="border border-black p-4 text-center italic text-gray-500"
                   >
                     Nenhum item inserido no relatório.
@@ -695,7 +935,7 @@ export function RelatoriosModule() {
                 </tr>
               )}
             </tbody>
-            {items.length > 0 && (
+            {items.length > 0 && reportType !== "avarias" && (
               <tfoot>
                 <tr className="bg-gray-100 font-bold">
                   <td
