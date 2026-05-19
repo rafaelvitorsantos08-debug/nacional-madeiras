@@ -56,7 +56,7 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [newItemId, setNewItemId] = useState('');
-  const [newItemCategoria, setNewItemCategoria] = useState<'Ferragem' | 'Dobradiça'>('Ferragem');
+  const [newItemCategoria, setNewItemCategoria] = useState<string>('Ferragem');
   const [newItemModelo, setNewItemModelo] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -521,11 +521,16 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Categoria</label>
                   <select
                     value={newItemCategoria}
-                    onChange={(e) => setNewItemCategoria(e.target.value as 'Ferragem' | 'Dobradiça')}
+                    onChange={(e) => setNewItemCategoria(e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none transition-all"
                   >
                     <option value="Ferragem">Ferragem</option>
+                    <option value="Ferragem de 40mm">Ferragem de 40mm</option>
+                    <option value="Ferragem de 55mm">Ferragem de 55mm</option>
                     <option value="Dobradiça">Dobradiça</option>
+                    <option value="Dobradiças de 3/1¹/5">Dobradiças de 3/1¹/5</option>
+                    <option value="Dobradiças de 3/2²/5">Dobradiças de 3/2²/5</option>
+                    <option value="Dobradiças de 3/3²/5">Dobradiças de 3/3²/5</option>
                   </select>
                 </div>
                 <div>
