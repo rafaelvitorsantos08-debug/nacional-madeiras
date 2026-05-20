@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, PackagePlus, PackageMinus, MapPin, Calendar, CheckCircle2, History, Trash2, X } from 'lucide-react';
+import { Search, Plus, PackagePlus, PackageMinus, MapPin, Calendar, CheckCircle2, History, Trash2, X, Edit2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useLocalStorage } from './EstoqueModule';
 
@@ -223,9 +223,10 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
       type: movementType,
       amount,
       date: movementDate,
-      responsible: movementType === 'saida' ? movementResponsible : undefined,
-      destination: movementType === 'saida' ? movementDestination : undefined,
     };
+
+    if (movementType === 'saida' && movementResponsible) newMovement.responsible = movementResponsible;
+    if (movementType === 'saida' && movementDestination) newMovement.destination = movementDestination;
 
     setMovementsHistory(prev => [newMovement, ...prev]);
     
@@ -273,6 +274,34 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   const handleUpdateHistoryDate = (id: string, newDate: string) => {
     if (!newDate) return;
     setMovementsHistory(prev => prev.map(m => m.id === id ? { ...m, date: newDate } : m));
+  };
+
+  const handleEditMovementAmount = (movement: Movement) => {
+    const userInput = window.prompt("Digite a nova quantidade para este lançamento:", movement.amount.toString());
+    if (userInput === null) return;
+    const newAmount = Number(userInput);
+    if (isNaN(newAmount) || newAmount <= 0) {
+      alert("Quantidade inválida.");
+      return;
+    }
+
+    const difference = newAmount - movement.amount;
+
+    setObrasData((prev: any) => {
+      const currentObraItems = prev[movement.obraId] || [];
+      const updatedItems = currentObraItems.map((i: any) => {
+        if (i.id === movement.itemId) {
+          let newEstoque = i.estoque;
+          if (movement.type === 'entrada') newEstoque = newEstoque + difference;
+          if (movement.type === 'saida') newEstoque = Math.max(0, newEstoque - difference);
+          return { ...i, estoque: newEstoque };
+        }
+        return i;
+      });
+      return { ...prev, [movement.obraId]: updatedItems };
+    });
+
+    setMovementsHistory(prev => prev.map(m => m.id === movement.id ? { ...m, amount: newAmount } : m));
   };
 
   const currentItems = obrasData[selectedObra] || [];
@@ -803,7 +832,14 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                       )}
                       {mov.type === 'entrada' && '-'}
                     </td>
-                    <td className="px-6 py-3 text-center print:hidden">
+                    <td className="px-6 py-3 text-center print:hidden flex items-center justify-center space-x-1">
+                      <button
+                        onClick={() => handleEditMovementAmount(mov)}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                        title="Editar Quantidade"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => handleDeleteMovement(mov)}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
