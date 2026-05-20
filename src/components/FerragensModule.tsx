@@ -276,32 +276,25 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
     setMovementsHistory(prev => prev.map(m => m.id === id ? { ...m, date: newDate } : m));
   };
 
-  const handleEditMovementAmount = (movement: Movement) => {
-    const userInput = window.prompt("Digite a nova quantidade para este lançamento:", movement.amount.toString());
+  const handleEditItemAmount = (item: any) => {
+    const userInput = window.prompt(`Digite a nova quantidade para o estoque de ${item.modelo}:`, item.estoque.toString());
     if (userInput === null) return;
     const newAmount = Number(userInput);
-    if (isNaN(newAmount) || newAmount <= 0) {
+    if (isNaN(newAmount) || newAmount < 0) {
       alert("Quantidade inválida.");
       return;
     }
 
-    const difference = newAmount - movement.amount;
-
     setObrasData((prev: any) => {
-      const currentObraItems = prev[movement.obraId] || [];
+      const currentObraItems = prev[selectedObra] || [];
       const updatedItems = currentObraItems.map((i: any) => {
-        if (i.id === movement.itemId) {
-          let newEstoque = i.estoque;
-          if (movement.type === 'entrada') newEstoque = newEstoque + difference;
-          if (movement.type === 'saida') newEstoque = Math.max(0, newEstoque - difference);
-          return { ...i, estoque: newEstoque };
+        if (i.id === item.id) {
+          return { ...i, estoque: newAmount };
         }
         return i;
       });
-      return { ...prev, [movement.obraId]: updatedItems };
+      return { ...prev, [selectedObra]: updatedItems };
     });
-
-    setMovementsHistory(prev => prev.map(m => m.id === movement.id ? { ...m, amount: newAmount } : m));
   };
 
   const currentItems = obrasData[selectedObra] || [];
@@ -486,6 +479,13 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                            className="p-1.5 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors border border-transparent hover:border-red-200"
                          >
                            <PackageMinus className="w-4 h-4" />
+                         </button>
+                         <button
+                           onClick={() => handleEditItemAmount(item)}
+                           title="Editar Estoque"
+                           className="p-1.5 text-blue-500 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors border border-transparent hover:border-blue-200 ml-2"
+                         >
+                           <Edit2 className="w-4 h-4" />
                          </button>
                          <button
                            onClick={() => handleDeleteItem(item.id)}
@@ -833,13 +833,6 @@ export function FerragensModule({ globalSearch }: { globalSearch: string }) {
                       {mov.type === 'entrada' && '-'}
                     </td>
                     <td className="px-6 py-3 text-center print:hidden flex items-center justify-center space-x-1">
-                      <button
-                        onClick={() => handleEditMovementAmount(mov)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                        title="Editar Quantidade"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
                       <button
                         onClick={() => handleDeleteMovement(mov)}
                         className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
