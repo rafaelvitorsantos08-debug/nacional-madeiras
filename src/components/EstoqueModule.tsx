@@ -165,27 +165,36 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        window.dispatchEvent(new Event('local-storage-sync'));
-      }
-      
-      lastWriteTimeMap.set(key, Date.now());
-
-      if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
-        if (debounceMap.has(key)) {
-          clearTimeout(debounceMap.get(key)!);
+      setStoredValue(prev => {
+        const valueToStore = value instanceof Function ? value(prev) : value;
+        
+        // Execute side effects here. In Strict Mode this might run twice, but 
+        // writing to localStorage twice with the same value is harmless.
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          // Only dispatch if it actually changed to avoid infinite listener loops
+          if (JSON.stringify(prev) !== JSON.stringify(valueToStore)) {
+            window.dispatchEvent(new Event('local-storage-sync'));
+          }
         }
-        debounceMap.set(key, setTimeout(() => {
-          setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
-             [key]: valueToStore,
-             userId: auth.currentUser!.uid
-          }, { merge: true }).catch(err => console.error("Firebase save error:", err));
-          debounceMap.delete(key);
-        }, 1000));
-      }
+        
+        lastWriteTimeMap.set(key, Date.now());
+
+        if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+          if (debounceMap.has(key)) {
+            clearTimeout(debounceMap.get(key)!);
+          }
+          debounceMap.set(key, setTimeout(() => {
+            setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
+               [key]: valueToStore,
+               userId: auth.currentUser!.uid
+            }, { merge: true }).catch(err => console.error("Firebase save error:", err));
+            debounceMap.delete(key);
+          }, 1000));
+        }
+
+        return valueToStore;
+      });
     } catch (error) {
       console.error(error);
     }

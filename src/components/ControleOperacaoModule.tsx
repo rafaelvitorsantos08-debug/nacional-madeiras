@@ -1006,8 +1006,13 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   value={item.aduelas || ''} 
                                   onChange={(e) => handleChangeItem(activeObra.id, item.id, 'aduelas', e.target.value)}
                                   placeholder="Qtd"
-                                  className="w-full h-full p-2 pr-6 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold text-amber-900 dark:text-amber-100 placeholder-amber-400/50 dark:placeholder-amber-400/30"
+                                  className="w-full h-full p-2 pr-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-semibold text-amber-900 dark:text-amber-100 placeholder-amber-400/50 dark:placeholder-amber-400/30"
                                 />
+                                {item.aduelas && (
+                                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-[9px] pointer-events-none text-amber-600/70 dark:text-amber-400/70 font-semibold">
+                                     jgs
+                                  </div>
+                                )}
                                 {item.saidas?.filter((s:any) => s.tipo === 'aduelas').length > 0 && (
                                    <div className="absolute bottom-0.5 left-1 text-[8px] font-bold text-red-600 pointer-events-none" title="Quantidade que já saiu">
                                      -{item.saidas.filter((s:any) => s.tipo === 'aduelas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0)}
@@ -1276,7 +1281,9 @@ function ModalSaidas({ obra, item, defaultTipo, onClose, onSaveSaida, onDeleteSa
                               {s.tipo}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-center text-red-600 dark:text-red-400 font-bold text-base">-{s.quantidade}</td>
+                          <td className="py-2.5 px-3 text-center text-red-600 dark:text-red-400 font-bold text-base">
+                            -{s.quantidade} {s.tipo === 'aduelas' && <span className="text-[10px] text-amber-600 dark:text-amber-500 font-semibold ml-0.5 relative -top-0.5">jgs</span>}
+                          </td>
                           <td className="py-2.5 px-3 text-gray-500 dark:text-gray-400 text-xs border-l border-gray-100 dark:border-gray-800">
                              {s.observacao || <span className="italic text-gray-300 dark:text-gray-600">Sem observação</span>}
                           </td>
@@ -1462,11 +1469,11 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
-                                  <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAduelas}</div>
+                                  <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAduelas} <span className="text-xs font-semibold text-amber-500 ml-1">jgs</span></div>
                                 </div>
                                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
-                                  <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalAduelasSaida}</div>
+                                  <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalAduelasSaida} <span className="text-xs font-semibold text-amber-500 ml-1">jgs</span></div>
                                 </div>
                                 <div className="mt-auto">
                                   <button
@@ -1538,7 +1545,7 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                 if (it.id === selectedItemForSaidas.itemId) {
                   return {
                     ...it,
-                    saidas: [...(it.saidas || []), { ...saida, id: Date.now().toString() }]
+                    saidas: [...(it.saidas || []), { ...saida, id: Math.random().toString(36).substring(2, 9) }]
                   };
                 }
                 return it;
