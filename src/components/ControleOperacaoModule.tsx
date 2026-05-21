@@ -497,7 +497,36 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
 
   // Storage
   const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
-  const [efetivoTotal, setEfetivoTotal] = useLocalStorage<Record<string, string>>('nm_operacao_efetivo_total', {});
+  const [modalEfetivoOpen, setModalEfetivoOpen] = useState<any>(null);
+
+  const SETORES_EFETIVO = [
+    'Separação',
+    'Aplicação de Perfil',
+    'Usinagem de Porta',
+    'Embalagem',
+    'CNC',
+    'Marcenaria',
+    'Usinagem de Aduelas',
+    'Montagem',
+    'Entrega'
+  ];
+
+  const getDayEfetivoTotal = (dateStrKey: string) => {
+    const dayData = operacaoData[dateStrKey] || {};
+    let sum = 0;
+    let hasSector = false;
+    SETORES_EFETIVO.forEach(s => {
+      const v = parseInt(dayData[`efetivo_${s}`] || '0');
+      if (!isNaN(v)) {
+        sum += v;
+      }
+      if (dayData[`efetivo_${s}`]) hasSector = true;
+    });
+
+    if (hasSector) return sum;
+    const old = parseInt(dayData.efetivo || '0');
+    return isNaN(old) || old === 0 ? '' : old;
+  };
 
   const getDaysArray = (year: number, month: number) => {
     const numDays = new Date(year, month + 1, 0).getDate();
@@ -584,17 +613,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
               <thead>
                 <tr className="bg-black text-white">
                   <th className="p-1.5 border border-gray-400">DATA</th>
-                  <th className="p-1.5 border border-gray-400">
-                    <div className="flex items-center justify-center whitespace-nowrap">
-                      EFETIVO TOTAL:
-                      <input 
-                        type="text" 
-                        value={efetivoTotal[`${selecionadoAno}-${selecionadoMes}`] || '15'}
-                        onChange={(e) => setEfetivoTotal(prev => ({ ...prev, [`${selecionadoAno}-${selecionadoMes}`]: e.target.value }))}
-                        className="ml-1 w-10 bg-transparent border-b border-gray-500 text-center text-white outline-none focus:border-white"
-                      />
-                    </div>
-                  </th>
+                  <th className="p-1.5 border border-gray-400">EFETIVO TOTAL</th>
                   <th className="p-1.5 border border-gray-400">QUANTIDADE</th>
                 </tr>
               </thead>
@@ -624,8 +643,11 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
                         </td>
                       ) : (
                         <>
-                          <td className="p-0 border border-gray-300 bg-green-200">
-                            {renderInput(day, 'efetivo', 0, '')}
+                          <td 
+                            className="p-1.5 border border-gray-300 bg-green-200 cursor-pointer hover:bg-green-300 transition-colors h-[29px]"
+                            onClick={() => setModalEfetivoOpen(day)}
+                          >
+                            {getDayEfetivoTotal(day.dateStrKey)}
                           </td>
                           <td className="p-0 border border-gray-300 bg-[#DDEBF7]">
                             {renderInput(day, 'quantidade', 1, '')}
@@ -644,7 +666,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
   };
 
   return (
-    <div className="flex-1 flex flex-col max-h-full">
+    <div className="flex-1 flex flex-col max-h-full relative">
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
            <h2 className="font-semibold text-gray-800 flex items-center text-lg">
@@ -685,6 +707,42 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
       <div className="flex-1 flex flex-col p-4 bg-gray-50 min-h-0">
         {renderMonthSection(daysThisMonth, `TOTAL EM ${MESES[selecionadoMes]}:`)}
       </div>
+
+      {modalEfetivoOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm shadow-2xl">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+              <h3 className="font-bold text-gray-800">
+                Efetivo em {modalEfetivoOpen.dateStr}
+              </h3>
+              <button onClick={() => setModalEfetivoOpen(null)} className="text-gray-500 hover:text-red-500 rounded p-1 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 flex-1 overflow-y-auto max-h-[60vh] space-y-3">
+              {SETORES_EFETIVO.map(s => (
+                <div key={s} className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700 w-2/3 line-clamp-1">{s}</label>
+                  <input 
+                    type="number"
+                    min="0"
+                    placeholder="Qtd"
+                    value={operacaoData[modalEfetivoOpen.dateStrKey]?.[`efetivo_${s}`] || ''}
+                    onChange={e => handleInputChange(modalEfetivoOpen.dateStrKey, `efetivo_${s}`, e.target.value)}
+                    className="w-20 p-2 border border-gray-300 rounded-lg text-center text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center shrink-0">
+              <span className="font-bold text-gray-500 uppercase text-xs">Total Diário:</span>
+              <span className="font-bold text-lg text-blue-600 bg-blue-100 px-3 py-1 rounded-lg">
+                {getDayEfetivoTotal(modalEfetivoOpen.dateStrKey) || 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
