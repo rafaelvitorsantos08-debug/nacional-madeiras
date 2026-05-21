@@ -108,16 +108,16 @@ export function CalendarioModule() {
       text: newText,
       completed: false
     };
-    setLembretes([...lembretes, nl]);
+    setLembretes(prev => [...(prev || []), nl]);
     setNewText('');
   };
 
   const removeLembrete = (id: string) => {
-    setLembretes(lembretes.filter(l => l.id !== id));
+    setLembretes(prev => (prev || []).filter(l => l.id !== id));
   };
 
   const toggleLembrete = (id: string) => {
-    setLembretes(lembretes.map(l => l.id === id ? { ...l, completed: !l.completed } : l));
+    setLembretes(prev => (prev || []).map(l => l.id === id ? { ...l, completed: !l.completed } : l));
   };
 
   const selectedLembretes = lembretes.filter(l => l.date === selectedDateStr);

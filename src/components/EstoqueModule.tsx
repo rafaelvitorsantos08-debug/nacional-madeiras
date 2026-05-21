@@ -127,6 +127,17 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
              return; 
           }
 
+          // If we had a dirty write that was interrupted by a page reload, push it and ignore stale cloud data
+          if (typeof window !== "undefined" && window.localStorage.getItem(key + '_dirty') === 'true') {
+            setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
+               [key]: storedValue,
+               userId: auth.currentUser!.uid
+            }, { merge: true }).then(() => {
+               window.localStorage.removeItem(key + '_dirty');
+            }).catch(console.error);
+            return;
+          }
+
           setStoredValue(prev => {
             if (JSON.stringify(prev) === JSON.stringify(val)) {
               return prev;
@@ -181,6 +192,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         lastWriteTimeMap.set(key, Date.now());
 
         if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(key + '_dirty', 'true');
+          }
           if (debounceMap.has(key)) {
             clearTimeout(debounceMap.get(key)!);
           }
@@ -188,7 +202,11 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
             setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
                [key]: valueToStore,
                userId: auth.currentUser!.uid
-            }, { merge: true }).catch(err => console.error("Firebase save error:", err));
+            }, { merge: true }).then(() => {
+               if (typeof window !== "undefined") {
+                 window.localStorage.removeItem(key + '_dirty');
+               }
+            }).catch(err => console.error("Firebase save error:", err));
             debounceMap.delete(key);
           }, 1000));
         }
