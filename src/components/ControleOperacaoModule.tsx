@@ -497,6 +497,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
 
   // Storage
   const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
+  const [efetivoTotalTracker, setEfetivoTotalTracker] = useLocalStorage<Record<string, string>>('nm_operacao_efetivo_total_cols', {});
   const [modalEfetivoOpen, setModalEfetivoOpen] = useState<any>(null);
 
   const SETORES_EFETIVO = [
@@ -613,7 +614,18 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
               <thead>
                 <tr className="bg-black text-white">
                   <th className="p-1.5 border border-gray-400">DATA</th>
-                  <th className="p-1.5 border border-gray-400">EFETIVO TOTAL</th>
+                  <th className="p-1.5 border border-gray-400">
+                    <div className="flex items-center justify-center whitespace-nowrap">
+                      EFETIVO TOTAL:
+                      <input 
+                        type="text" 
+                        value={efetivoTotalTracker[`${selecionadoAno}-${selecionadoMes}-${idx}`] || ''}
+                        onChange={(e) => setEfetivoTotalTracker(prev => ({ ...prev, [`${selecionadoAno}-${selecionadoMes}-${idx}`]: e.target.value }))}
+                        className="ml-1 w-10 bg-transparent border-b border-gray-500 text-center text-white outline-none focus:border-white"
+                        placeholder="--"
+                      />
+                    </div>
+                  </th>
                   <th className="p-1.5 border border-gray-400">QUANTIDADE</th>
                 </tr>
               </thead>
