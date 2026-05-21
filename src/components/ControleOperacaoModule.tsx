@@ -1388,6 +1388,17 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [selectedItemForSaidas, setSelectedItemForSaidas] = useState<{ obraId: string, itemId: string, defaultTipo?: 'folhas' | 'aduelas' | 'alizares' } | null>(null);
   const [activeCategoryTab, setActiveCategoryTab] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
 
+  const handleChangeItem = (obraId: string, itemId: string, field: string, value: string) => {
+    setObras(prev => {
+      const obra = prev[obraId];
+      if (!obra) return prev;
+      const itens = (Array.isArray(obra.itens) ? obra.itens : []).map((item: any) => 
+        item.id === itemId ? { ...item, [field]: value } : item
+      );
+      return { ...prev, [obraId]: { ...obra, itens } };
+    });
+  };
+
   const obrasList: any[] = Object.values(obras || {})
     .filter((obra: any) => {
        if (!globalSearch) return true;
@@ -1514,6 +1525,15 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
                                   <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqFolhas}</div>
                                 </div>
+                                <div className="flex justify-between items-center mb-2">
+                                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Chegada</div>
+                                  <input 
+                                    type="date"
+                                    value={item.dataChegadaFolhas || ''}
+                                    onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dataChegadaFolhas', e.target.value)}
+                                    className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-[130px] outline-none focus:ring-1 focus:ring-blue-500"
+                                  />
+                                </div>
                                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
                                   <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalFolhasSaida}</div>
@@ -1541,6 +1561,15 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
                                   <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAduelas} <span className="text-xs font-semibold text-amber-500 ml-1">jgs</span></div>
                                 </div>
+                                <div className="flex justify-between items-center mb-2">
+                                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Chegada</div>
+                                  <input 
+                                    type="date"
+                                    value={item.dataChegadaAduelas || ''}
+                                    onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dataChegadaAduelas', e.target.value)}
+                                    className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-[130px] outline-none focus:ring-1 focus:ring-amber-500"
+                                  />
+                                </div>
                                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
                                   <div className="font-bold text-lg text-red-500 dark:text-red-400">{totalAduelasSaida} <span className="text-xs font-semibold text-amber-500 ml-1">jgs</span></div>
@@ -1567,6 +1596,15 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                                 <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
                                   <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAlizares}</div>
+                                </div>
+                                <div className="flex justify-between items-center mb-2">
+                                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Chegada</div>
+                                  <input 
+                                    type="date"
+                                    value={item.dataChegadaAlizares || ''}
+                                    onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dataChegadaAlizares', e.target.value)}
+                                    className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-[130px] outline-none focus:ring-1 focus:ring-purple-500"
+                                  />
                                 </div>
                                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Saída</div>
