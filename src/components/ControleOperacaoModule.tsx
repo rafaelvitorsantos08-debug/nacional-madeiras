@@ -350,6 +350,27 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     );
   };
 
+  const handleExport = () => {
+    let csvContent = "D/S,DATA,ENTREGA 1,,,,,,,ENTREGA 2,,,,,,,\n";
+    csvContent += ",,DESCRIÇÃO,KITS,ALIZARES,FOLHAS,ADUELAS,RODAPÉS,PAINÉIS,DESCRIÇÃO,KITS,ALIZARES,FOLHAS,ADUELAS,RODAPÉS,PAINÉIS\n";
+    
+    rows.forEach(row => {
+      const rowData = monthlyData[row.dateStrKey] || {};
+      const val = (f: string) => `"${rowData[f] || ''}"`;
+      
+      csvContent += `${row.ds},${row.dateStrDisplay},${val('e1_desc')},${val('e1_kits')},${val('e1_alizares')},${val('e1_folhas')},${val('e1_aduelas')},${val('e1_rodapes')},${val('e1_paineis')},${val('e2_desc')},${val('e2_kits')},${val('e2_alizares')},${val('e2_folhas')},${val('e2_aduelas')},${val('e2_rodapes')},${val('e2_paineis')}\n`;
+    });
+
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Controle_Saidas_${String(selecionadoMes + 1).padStart(2,'0')}_${selecionadoAno}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex-1 flex flex-col max-h-full">
       <div className="p-4 border-b border-gray-200 bg-white">
@@ -365,7 +386,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
              >
                {anos.map(a => <option key={a} value={a}>{a}</option>)}
              </select>
-             <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm print:hidden">
+             <button onClick={handleExport} className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm print:hidden">
                <Download className="w-4 h-4 mr-2 text-gray-500"/> Exportar
              </button>
            </div>
