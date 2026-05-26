@@ -372,8 +372,8 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   };
 
   return (
-    <div className="flex-1 flex flex-col max-h-full">
-      <div className="p-4 border-b border-gray-200 bg-white">
+    <div className="flex-1 flex flex-col min-h-0">
+      <div className="p-4 border-b border-gray-200 bg-white shadow-sm z-10 shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
            <h2 className="font-semibold text-gray-800 flex items-center text-lg">
              <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
@@ -699,7 +699,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
   };
 
   return (
-    <div className="flex-1 flex flex-col max-h-full relative">
+    <div className="flex-1 flex flex-col min-h-0 relative">
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
            <h2 className="font-semibold text-gray-800 flex items-center text-lg">

@@ -504,7 +504,10 @@ export default function App() {
         </header>
 
         {/* DASHBOARD CONTENT */}
-        <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <div className={cn(
+          "flex-1 p-4 md:p-6 lg:p-8",
+          activeTab === 'controle_operacao' ? "flex flex-col min-h-0 overflow-hidden pb-0 md:pb-0 lg:pb-0 px-0 md:px-0 lg:px-0 pt-0" : "overflow-auto"
+        )}>
           
           {!user && (
             <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-4 animate-in fade-in">
