@@ -257,21 +257,62 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
 
   const filteredList = baseList.filter(item => {
     const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
-    const searchTerms = combinedSearchTerm.toLowerCase().split(' ').filter(t => t.length > 0);
-    
-    const searchableFields = ['id', 'cor', 'modelo', 'enchimento', 'dimensao', 'largura', 'comprimento', 'face', 'aba', 'espessura'];
-    const searchString = searchableFields
-      .map(key => item[key])
-      .filter(val => val !== undefined && val !== null)
-      .join(' ')
-      .toLowerCase();
+    if (!combinedSearchTerm) {
+      return statusFilter === 'Todos' || item.status === statusFilter;
+    }
 
-    const matchesSearch = searchTerms.length === 0 || searchTerms.every(term => searchString.includes(term));
+    const lowerSearch = combinedSearchTerm.toLowerCase();
+    
+    // First, check if there is ANY exact match for ID or Dimensao in the entire list.
+    // We only enforce this EXACT isolation if the user's string *exactly* equals an ID or Dimensao.
+    // This solves the issue of PO-61 also showing PO-611 when the user explicitly typed PO-61.
+    const isExactId = String(item.id || '').toLowerCase() === lowerSearch;
+    const isExactDimensao = String(item.dimensao || '').toLowerCase() === lowerSearch;
+
+    let isMatch = false;
+
+    // Se existe ALGUM item na base inteira que seja um match EXATO com o que o usuario digitou,
+    // entao para esse item nós retornamos true, E nós podemos querer excluir os matches parciais.
+    // Como estamos no filter form, o ideal é o seguinte: se a string bater com o ID, é ela mesma.
+    
+    // Check if the current item is an exact match for the FULL search term
+    if (isExactId || isExactDimensao) {
+      isMatch = true;
+    } else {
+      // Normal substring / multi-term search
+      const searchTerms = lowerSearch.split(' ').filter(t => t.length > 0);
+      const searchableFields = ['id', 'cor', 'modelo', 'enchimento', 'dimensao', 'largura', 'comprimento', 'face', 'aba', 'espessura'];
+      const searchString = searchableFields
+        .map(key => item[key])
+        .filter(val => val !== undefined && val !== null)
+        .join(' ')
+        .toLowerCase();
+
+      isMatch = searchTerms.length === 0 || searchTerms.every(term => searchString.includes(term));
+    }
       
+    // Check if the user typed EXACTLY an id. If so, only show items that EXACTLY match it.
+    // We can do this by checking the baseList for an exact match.
+    // To be fast and not recalculate every iteration, we can do it inside the filter.
     const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    return isMatch && matchesStatus;
   });
+
+  // If there's an exact ID or Dimensao match, filter OUT the partial matches to meet the user's request
+  // "jogue as medidas corretas ou código correto e filtre APENAS o material buscado"
+  const combinedSearchTerm = (searchTerm || globalSearch || "").trim().toLowerCase();
+  const hasExactMatch = combinedSearchTerm && filteredList.some(item => 
+    String(item.id || '').toLowerCase() === combinedSearchTerm || 
+    String(item.dimensao || '').toLowerCase() === combinedSearchTerm
+  );
+  
+  const finalFilteredList = hasExactMatch 
+    ? filteredList.filter(item => 
+        String(item.id || '').toLowerCase() === combinedSearchTerm || 
+        String(item.dimensao || '').toLowerCase() === combinedSearchTerm
+      )
+    : filteredList;
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -393,7 +434,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {activeSubTab === 'portas' && filteredList.map((item) => (
+              {activeSubTab === 'portas' && finalFilteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -413,7 +454,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                 </tr>
               ))}
 
-              {activeSubTab === 'aduelas' && filteredList.map((item) => (
+              {activeSubTab === 'aduelas' && finalFilteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -432,7 +473,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                 </tr>
               ))}
 
-              {activeSubTab === 'alizares' && filteredList.map((item) => (
+              {activeSubTab === 'alizares' && finalFilteredList.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
                   <td className="px-6 py-4">
@@ -453,7 +494,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                 </tr>
               ))}
               
-              {filteredList.length === 0 && (
+              {finalFilteredList.length === 0 && (
                  <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                        Nenhum registro encontrado.
