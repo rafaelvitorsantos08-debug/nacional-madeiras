@@ -257,50 +257,48 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
 
   const filteredList = baseList.filter(item => {
     const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
+    const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
+
     if (!combinedSearchTerm) {
-      return statusFilter === 'Todos' || item.status === statusFilter;
+      return matchesStatus;
     }
 
     const lowerSearch = combinedSearchTerm.toLowerCase();
     
-    // First, check if there is ANY exact match for ID or Dimensao in the entire list.
-    // We only enforce this EXACT isolation if the user's string *exactly* equals an ID or Dimensao.
-    // This solves the issue of PO-61 also showing PO-611 when the user explicitly typed PO-61.
-    const isExactId = String(item.id || '').toLowerCase() === lowerSearch;
-    const isExactDimensao = String(item.dimensao || '').toLowerCase() === lowerSearch;
-
-    let isMatch = false;
-
-    // Se existe ALGUM item na base inteira que seja um match EXATO com o que o usuario digitou,
-    // entao para esse item nós retornamos true, E nós podemos querer excluir os matches parciais.
-    // Como estamos no filter form, o ideal é o seguinte: se a string bater com o ID, é ela mesma.
+    // Strict match strategy for code or dimension
+    // Se o usuário digitou algo completo tipo "PO-61" ou "800x2100", nós exigimos um match perfeito
+    // ou tentamos substrings caso não haja match exato.
     
-    // Check if the current item is an exact match for the FULL search term
+    const itemId = String(item.id || '').toLowerCase();
+    const itemDimensao = String(item.dimensao || '').toLowerCase();
+    
+    const isExactId = itemId === lowerSearch;
+    const isExactDimensao = itemDimensao === lowerSearch;
+
     if (isExactId || isExactDimensao) {
-      isMatch = true;
-    } else {
-      // Normal substring / multi-term search
-      const searchTerms = lowerSearch.split(' ').filter(t => t.length > 0);
-      const searchableFields = ['id', 'cor', 'modelo', 'enchimento', 'dimensao', 'largura', 'comprimento', 'face', 'aba', 'espessura'];
-      const searchString = searchableFields
-        .map(key => item[key])
-        .filter(val => val !== undefined && val !== null)
-        .join(' ')
-        .toLowerCase();
-
-      isMatch = searchTerms.length === 0 || searchTerms.every(term => searchString.includes(term));
+      return matchesStatus;
     }
-      
-    // Check if the user typed EXACTLY an id. If so, only show items that EXACTLY match it.
-    // We can do this by checking the baseList for an exact match.
-    // To be fast and not recalculate every iteration, we can do it inside the filter.
-    const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
+
+    // Caso não seja um match exato (ex: ele digitou "PO-6" e falta o "1"), verificamos startsWith ou includes
+    // Mas se o usuário quiser ser RÍGIDO (ele diz "apenas jogar as medidas corretas ou código correto"), 
+    // ele quer que evitemos matches fantasmas de outras propriedades (como cor, modelo, etc).
+    // Então, pesquisamos SOMENTE nos campos de ID, Dimensão e dimensões parciais (largura/comprimento).
     
-    return isMatch && matchesStatus;
+    const searchTerms = lowerSearch.split(' ').filter(t => t.length > 0);
+    const searchableFields = ['id', 'dimensao', 'largura', 'comprimento', 'aba', 'face', 'espessura'];
+    const searchString = searchableFields
+      .map(key => item[key])
+      .filter(val => val !== undefined && val !== null)
+      .join(' ')
+      .toLowerCase();
+
+    const isPartialMatch = searchTerms.every(term => searchString.includes(term));
+    
+    return isPartialMatch && matchesStatus;
   });
 
-  // If there's an exact ID or Dimensao match, filter OUT the partial matches to meet the user's request
-  // "jogue as medidas corretas ou código correto e filtre APENAS o material buscado"
+  // Se o usuário digitou um id exato ou dimensão exata em algum item, mostramos APENAS os itens que dão match nisso.
+  // Isso resolve "PO-61" mostrando "PO-611".
   const combinedSearchTerm = (searchTerm || globalSearch || "").trim().toLowerCase();
   const hasExactMatch = combinedSearchTerm && filteredList.some(item => 
     String(item.id || '').toLowerCase() === combinedSearchTerm || 
