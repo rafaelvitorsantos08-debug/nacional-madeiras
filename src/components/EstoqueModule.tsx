@@ -258,58 +258,50 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
   const filteredList = baseList.filter(item => {
     const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
     const matchesStatus = statusFilter === 'Todos' || item.status === statusFilter;
-
+    
     if (!combinedSearchTerm) {
       return matchesStatus;
     }
 
-    const lowerSearch = combinedSearchTerm.toLowerCase();
+    const normSearch = combinedSearchTerm.toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
     
-    // Strict match strategy for code or dimension
-    // Se o usuário digitou algo completo tipo "PO-61" ou "800x2100", nós exigimos um match perfeito
-    // ou tentamos substrings caso não haja match exato.
-    
-    const itemId = String(item.id || '').toLowerCase();
-    const itemDimensao = String(item.dimensao || '').toLowerCase();
-    
-    const isExactId = itemId === lowerSearch;
-    const isExactDimensao = itemDimensao === lowerSearch;
+    const normId = String(item.id || '').toLowerCase().replace(/\s+/g, '');
+    const normDimensao = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
+    const normLargura = String(item.largura || '').toLowerCase().replace(/\s+/g, '');
+    const normComprimento = String(item.comprimento || '').toLowerCase().replace(/\s+/g, '');
+    const normLargComp = (normLargura && normComprimento) ? `${normLargura}x${normComprimento}` : '';
 
-    if (isExactId || isExactDimensao) {
-      return matchesStatus;
+    let isMatch = false;
+
+    // Match exato
+    if (normId === normSearch || normDimensao === normSearch || normLargComp === normSearch) {
+      isMatch = true;
+    } 
+    // Match parcial (se o usuário digitar apenas "800x" ou "PO-6")
+    else if (normId.includes(normSearch) || normDimensao.includes(normSearch) || normLargComp.includes(normSearch)) {
+      isMatch = true;
     }
 
-    // Caso não seja um match exato (ex: ele digitou "PO-6" e falta o "1"), verificamos startsWith ou includes
-    // Mas se o usuário quiser ser RÍGIDO (ele diz "apenas jogar as medidas corretas ou código correto"), 
-    // ele quer que evitemos matches fantasmas de outras propriedades (como cor, modelo, etc).
-    // Então, pesquisamos SOMENTE nos campos de ID, Dimensão e dimensões parciais (largura/comprimento).
-    
-    const searchTerms = lowerSearch.split(' ').filter(t => t.length > 0);
-    const searchableFields = ['id', 'dimensao', 'largura', 'comprimento', 'aba', 'face', 'espessura'];
-    const searchString = searchableFields
-      .map(key => item[key])
-      .filter(val => val !== undefined && val !== null)
-      .join(' ')
-      .toLowerCase();
-
-    const isPartialMatch = searchTerms.every(term => searchString.includes(term));
-    
-    return isPartialMatch && matchesStatus;
+    return isMatch && matchesStatus;
   });
 
-  // Se o usuário digitou um id exato ou dimensão exata em algum item, mostramos APENAS os itens que dão match nisso.
-  // Isso resolve "PO-61" mostrando "PO-611".
-  const combinedSearchTerm = (searchTerm || globalSearch || "").trim().toLowerCase();
-  const hasExactMatch = combinedSearchTerm && filteredList.some(item => 
-    String(item.id || '').toLowerCase() === combinedSearchTerm || 
-    String(item.dimensao || '').toLowerCase() === combinedSearchTerm
-  );
+  // If there's an exact match in the filtered results, we isolate just those exact matches
+  // to avoid "PO-61" bringing "PO-611" if the user strictly typed "PO-61".
+  const normCombinedSearchTerm = (searchTerm || globalSearch || "").trim().toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
+  const hasExactMatch = normCombinedSearchTerm && filteredList.some(item => {
+    const id = String(item.id || '').toLowerCase().replace(/\s+/g, '');
+    const dim = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
+    const lxc = (item.largura && item.comprimento) ? `${String(item.largura).trim()}x${String(item.comprimento).trim()}`.toLowerCase() : '';
+    return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm;
+  });
   
   const finalFilteredList = hasExactMatch 
-    ? filteredList.filter(item => 
-        String(item.id || '').toLowerCase() === combinedSearchTerm || 
-        String(item.dimensao || '').toLowerCase() === combinedSearchTerm
-      )
+    ? filteredList.filter(item => {
+        const id = String(item.id || '').toLowerCase().replace(/\s+/g, '');
+        const dim = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
+        const lxc = (item.largura && item.comprimento) ? `${String(item.largura).trim()}x${String(item.comprimento).trim()}`.toLowerCase() : '';
+        return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm;
+      })
     : filteredList;
 
   return (
