@@ -530,7 +530,11 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
     'Marcenaria',
     'Usinagem de Aduelas',
     'Montagem',
-    'Entrega'
+    'Entrega',
+    'Outros Serviços',
+    'Serviços Técnicos',
+    'Pintura',
+    'Almoxarife'
   ];
 
   const getDayEfetivoTotal = (dateStrKey: string) => {
