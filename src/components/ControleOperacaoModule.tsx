@@ -1224,6 +1224,16 @@ function ModalSaidas({ obra, item, defaultTipo, onClose, onSaveSaida, onDeleteSa
 
   const saldo = (t: string) => getQtdOriginal(t) - totalSaiu(t);
 
+  const getEspecieText = () => {
+    if (tipo === 'aduelas') {
+      return `${item.medidaAduela || 'Sem medida definida'} - ${item.cor || 'Sem cor'}`;
+    }
+    if (tipo === 'alizares') {
+      return `${item.medidaAlizar || 'Sem medida definida'} - ${item.cor || 'Sem cor'}`;
+    }
+    return `${item.dimensao || 'Sem dimensão'} - ${item.cor || 'Sem cor'} ${item.enchimento ? `- ${item.enchimento}` : ''} ${item.modelo ? `- ${item.modelo}` : ''}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!quantidade || parseInt(quantidade) <= 0) return;
@@ -1249,7 +1259,7 @@ function ModalSaidas({ obra, item, defaultTipo, onClose, onSaveSaida, onDeleteSa
               Registros de Saída
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              Obra: <span className="text-gray-700 dark:text-gray-300">{obra.nome}</span> | Espécie: <span className="text-gray-700 dark:text-gray-300">{item.dimensao} - {item.cor} {item.enchimento ? `- ${item.enchimento}` : ''} {item.modelo ? `- ${item.modelo}` : ''}</span>
+              Obra: <span className="text-gray-700 dark:text-gray-300">{obra.nome}</span> | Espécie: <span className="text-gray-700 dark:text-gray-300">{getEspecieText()}</span>
             </p>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
