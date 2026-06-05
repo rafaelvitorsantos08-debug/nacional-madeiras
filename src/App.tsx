@@ -5,7 +5,7 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar, ClipboardCheck
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
@@ -13,6 +13,7 @@ import { ControleOperacaoModule } from './components/ControleOperacaoModule';
 import { FerragensModule } from './components/FerragensModule';
 import { RelatoriosModule } from './components/RelatoriosModule';
 import { CalendarioModule } from './components/CalendarioModule';
+import { ConferenciaModule } from './components/ConferenciaModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -423,6 +424,7 @@ export default function App() {
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
           <NavItem icon={<Wrench />} label="Ferragens" active={activeTab === 'ferragens'} isOpen={sidebarOpen} onClick={() => setActiveTab('ferragens')} />
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
+          <NavItem icon={<ClipboardCheck />} label="Conferência e Cadastro" active={activeTab === 'conferencia'} isOpen={sidebarOpen} onClick={() => setActiveTab('conferencia')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
           <NavItem icon={<Calendar />} label="Calendário" active={activeTab === 'calendario'} isOpen={sidebarOpen} onClick={() => setActiveTab('calendario')} />
           
@@ -757,6 +759,9 @@ export default function App() {
           )}
           {activeTab === 'calendario' && (
             <CalendarioModule />
+          )}
+          {activeTab === 'conferencia' && (
+            <ConferenciaModule />
           )}
 
           {activeTab === 'configuracoes' && (
