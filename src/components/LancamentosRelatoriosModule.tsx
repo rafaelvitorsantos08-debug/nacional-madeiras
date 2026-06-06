@@ -71,8 +71,123 @@ const INITIAL_FORM: Omit<KitLancamento, 'id'> = {
   fechaFresta: false,
 };
 
+const INITIAL_KITS: KitLancamento[] = [
+  {
+    id: "mock1", apto: "102", pavimento: "1", coluna: "2", comodo: "BANHEIRO", 
+    folhaLargura: "620", folhaAltura: "2070", tipologia: "PM1F", abertura: "ESQUERDA",
+    aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock2", apto: "104", pavimento: "1", coluna: "4", comodo: "ENTRADA", 
+    folhaLargura: "820", folhaAltura: "2100", tipologia: "PM3", abertura: "ESQUERDA P/FORA",
+    aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock3", apto: "106", pavimento: "1", coluna: "6", comodo: "QUARTO", 
+    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
+    aduelaLargura: "90", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock4", apto: "202", pavimento: "2", coluna: "2", comodo: "ENTRADA", 
+    folhaLargura: "820", folhaAltura: "2100", tipologia: "PM3", abertura: "DIREITA",
+    aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock5", apto: "206", pavimento: "2", coluna: "6", comodo: "COZINHA", 
+    folhaLargura: "820", folhaAltura: "2070", tipologia: "PM3F", abertura: "DIREITA P/FORA",
+    aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock6", apto: "302", pavimento: "3", coluna: "2", comodo: "LIXEIRA", 
+    folhaLargura: "1440", folhaAltura: "2100", tipologia: "PM7", abertura: "ESQUERDA P/FORA",
+    aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock7", apto: "306", pavimento: "3", coluna: "6", comodo: "ELETRICA", 
+    folhaLargura: "1020", folhaAltura: "2100", tipologia: "PM12", abertura: "ESQUERDA P/FORA",
+    aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "2",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock8", apto: "308", pavimento: "3", coluna: "8", comodo: "SUITE 2", 
+    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
+    aduelaLargura: "150", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock9", apto: "309", pavimento: "3", coluna: "9", comodo: "COZINHA", 
+    folhaLargura: "820", folhaAltura: "2070", tipologia: "PM3F", abertura: "ESQUERDA",
+    aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock10", apto: "405", pavimento: "4", coluna: "5", comodo: "BANH. SOCIAL", 
+    folhaLargura: "620", folhaAltura: "2100", tipologia: "PM1", abertura: "DIREITA",
+    aduelaLargura: "110", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock11", apto: "501", pavimento: "5", coluna: "1", comodo: "SUITE", 
+    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
+    aduelaLargura: "110", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock12", apto: "503", pavimento: "5", coluna: "3", comodo: "BANH. SUITE", 
+    folhaLargura: "620", folhaAltura: "2070", tipologia: "PM1F", abertura: "ESQUERDA",
+    aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 70", qtdeFolhasPorKit: "1",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock13", apto: "604", pavimento: "6", coluna: "4", comodo: "QUARTO", 
+    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "ESQUERDA",
+    aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
+    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  },
+  {
+    id: "mock14", apto: "601", pavimento: "6", coluna: "1", comodo: "ESPECIAIS", 
+    folhaLargura: "2000", folhaAltura: "2100", tipologia: "PM18", abertura: "ESQUERDA P/FORA",
+    aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "4",
+    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
+    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+  }
+];
+
 export function LancamentosRelatoriosModule() {
-  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits', []);
+  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v2', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -149,12 +264,16 @@ export function LancamentosRelatoriosModule() {
                 <label className="block text-xs font-medium text-gray-600 mb-1">Cômodo</label>
                 <select name="comodo" value={form.comodo} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white">
                   <option value="BANHEIRO">Banheiro</option>
+                  <option value="BANH. SOCIAL">Banh. Social</option>
+                  <option value="BANH. SUITE">Banh. Suíte</option>
                   <option value="ENTRADA">Entrada</option>
                   <option value="QUARTO">Quarto</option>
                   <option value="COZINHA">Cozinha</option>
+                  <option value="ELETRICA">Elétrica</option>
                   <option value="LIXEIRA">Lixeira</option>
                   <option value="SALA">Sala</option>
                   <option value="SUITE">Suíte</option>
+                  <option value="SUITE 2">Suíte 2</option>
                   <option value="ESPECIAIS">Especiais</option>
                 </select>
               </div>
