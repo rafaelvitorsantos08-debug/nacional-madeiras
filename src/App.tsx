@@ -15,6 +15,8 @@ import { RelatoriosModule } from './components/RelatoriosModule';
 import { CalendarioModule } from './components/CalendarioModule';
 import { ConferenciaModule } from './components/ConferenciaModule';
 
+import { LancamentosRelatoriosModule } from './components/LancamentosRelatoriosModule';
+
 // --- MOCK DATA ---
 const CHART_DATA = [
   { name: 'Jan', entradas: 400, saidas: 240 },
@@ -424,7 +426,7 @@ export default function App() {
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
           <NavItem icon={<Wrench />} label="Ferragens" active={activeTab === 'ferragens'} isOpen={sidebarOpen} onClick={() => setActiveTab('ferragens')} />
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
-          <NavItem icon={<ClipboardCheck />} label="Conferência e Cadastro" active={activeTab === 'conferencia'} isOpen={sidebarOpen} onClick={() => setActiveTab('conferencia')} />
+          <NavItem icon={<ClipboardCheck />} label="Lançamentos" active={activeTab === 'lancamentos'} isOpen={sidebarOpen} onClick={() => setActiveTab('lancamentos')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
           <NavItem icon={<Calendar />} label="Calendário" active={activeTab === 'calendario'} isOpen={sidebarOpen} onClick={() => setActiveTab('calendario')} />
           
@@ -760,8 +762,8 @@ export default function App() {
           {activeTab === 'calendario' && (
             <CalendarioModule />
           )}
-          {activeTab === 'conferencia' && (
-            <ConferenciaModule />
+          {activeTab === 'lancamentos' && (
+            <LancamentosRelatoriosModule />
           )}
 
           {activeTab === 'configuracoes' && (
