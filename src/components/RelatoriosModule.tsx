@@ -308,7 +308,7 @@ export function RelatoriosModule() {
       return;
     }
 
-    let content = `RELATÓRIO DE ${reportType.toUpperCase()}\n`;
+    let content = `RELATÓRIO DE ${reportType.replace("auto_", "").replace(/_/g, " ").toUpperCase()}\n`;
     content += `Data: ${header.data ? header.data.split("-").reverse().join("/") : ""}\n`;
     content += `Responsável: ${header.responsavel}\n`;
     content += `Obra / Destino: ${header.obra}\n`;
@@ -902,7 +902,7 @@ export function RelatoriosModule() {
           <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold uppercase tracking-tight">
-                Relatório de {reportType}
+                Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
               </h1>
               <p className="text-sm mt-1">
                 Documento Gerado Via Sistema - Nacional Madeiras

@@ -69,7 +69,11 @@ function processUsinagem(kits: any[], isPorta: boolean) {
    
    kits.forEach(k => {
       const cat = getCategoriaComodo(k.comodo);
-      const abertura = (k.abertura || 'N/A').toUpperCase();
+      let abertura = (k.abertura || 'N/A').toUpperCase();
+      
+      if (!isPorta) {
+         abertura = abertura.replace(' P/FORA', '').replace(' P/ FORA', '').trim();
+      }
       
       const isDobra = isEspecialDobraOnly(k.folhaLargura, cat);
       
@@ -118,7 +122,7 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
 
          return (
            <div key={cat.categoria} className="border border-gray-400 rounded-lg overflow-hidden break-inside-avoid shadow-sm mb-2">
-             <h3 className="bg-gray-200 px-3 py-1 font-bold text-gray-800 text-sm border-b border-gray-400">Cômodo: {cat.categoria}</h3>
+             <h3 className="bg-gray-200 px-3 py-1 font-bold text-gray-800 text-sm border-b border-gray-400 text-center uppercase">{cat.categoria}</h3>
              <div className="p-2">
                 {cat.dobradicas.length > 0 && (
                    <div className="mb-3 border border-yellow-400 bg-yellow-50 rounded p-2">
