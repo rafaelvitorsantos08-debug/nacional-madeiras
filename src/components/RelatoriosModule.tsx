@@ -25,6 +25,7 @@ import {
   COMPRIMENTOS_ALIZAR,
   useLocalStorage,
 } from "./EstoqueModule";
+import { AutoReportsViewer } from "./AutoReports";
 
 const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null; onSave: (dataUrl: string) => void; onCancel: () => void }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -186,7 +187,24 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   );
 };
 
-type ReportType = "portas" | "aduelas" | "alizares" | "avarias";
+type ReportType = "portas" | "aduelas" | "alizares" | "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares";
+
+export function getCategoriaComodo(comodo: string): string {
+  const c = comodo.toUpperCase();
+  if (['BANHEIRO', 'BANH. SOCIAL', 'BANH. SUITE'].includes(c)) return 'WC';
+  if (['QUARTO', 'COZINHA', 'SUITE', 'SUITE 2'].includes(c)) return 'INTERNA';
+  if (['ENTRADA'].includes(c)) return 'EXTERNA';
+  if (['ELETRICA', 'ESPECIAIS', 'LIXEIRA'].includes(c)) return 'EXTERNA MEIO CILINDRO';
+  return 'OUTROS';
+}
+
+export function isEspecialDobraOnly(folhaLargura: string, categoria: string): boolean {
+  if (categoria !== 'EXTERNA MEIO CILINDRO') return false;
+  const padroes = ["600", "620", "700", "720", "800", "820"];
+  return !padroes.includes(folhaLargura);
+}
+
+const isAutoReport = (type: string) => type.startsWith("auto_");
 
 interface ReportHeader {
   data: string;
@@ -205,6 +223,7 @@ export function RelatoriosModule() {
   });
 
   const [items, setItems] = useLocalStorage<any[]>("nm_active_relatorio_items", []);
+  const [kits] = useLocalStorage<any[]>("nacional_madeiras_kits_v2", []);
 
   // Current item being added
   const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });
@@ -284,6 +303,11 @@ export function RelatoriosModule() {
   };
 
   const handleExport = () => {
+    if (isAutoReport(reportType)) {
+      alert("Para relatórios automáticos divididos por aberturas ou dinâmicos, por favor utilize a opção de Impressão para gerar um PDF.");
+      return;
+    }
+
     let content = `RELATÓRIO DE ${reportType.toUpperCase()}\n`;
     content += `Data: ${header.data ? header.data.split("-").reverse().join("/") : ""}\n`;
     content += `Responsável: ${header.responsavel}\n`;
@@ -382,10 +406,20 @@ export function RelatoriosModule() {
                   }}
                   className="w-full rounded-md border-gray-300 bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="portas">Relatório de Folhas de Porta</option>
-                  <option value="aduelas">Relatório de Aduelas</option>
-                  <option value="alizares">Relatório de Alizares</option>
-                  <option value="avarias">Relatório de Avarias</option>
+                  <optgroup label="Manuais">
+                    <option value="portas">Relatório de Folhas de Porta</option>
+                    <option value="aduelas">Relatório de Aduelas</option>
+                    <option value="alizares">Relatório de Alizares</option>
+                    <option value="avarias">Relatório de Avarias</option>
+                  </optgroup>
+                  <optgroup label="Automáticos (Via Lançamentos)">
+                    <option value="auto_aduelas">Aduelas</option>
+                    <option value="auto_usinagem_aduelas">Usinagem de Aduelas</option>
+                    <option value="auto_portas">Portas</option>
+                    <option value="auto_usinagem_portas">Usinagem de Portas</option>
+                    <option value="auto_vergas">Vergas de Aduelas</option>
+                    <option value="auto_alizares">Alizares</option>
+                  </optgroup>
                 </select>
               </div>
               <div>
@@ -453,10 +487,14 @@ export function RelatoriosModule() {
 
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 text-transform: capitalize">
-              Adicionar Itens ({reportType})
+              {isAutoReport(reportType) ? `Relatório: ${reportType.replace("auto_", "").replace(/_/g, " ")}` : `Adicionar Itens (${reportType})`}
             </h3>
 
-            {reportType === "avarias" ? (
+            {isAutoReport(reportType) && (
+              <AutoReportsViewer kits={kits} reportType={reportType} />
+            )}
+
+            {!isAutoReport(reportType) && reportType === "avarias" ? (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <div className="flex-1 w-full">
@@ -749,7 +787,7 @@ export function RelatoriosModule() {
             )}
 
             {/* List of items */}
-            {items.length > 0 && (
+            {!isAutoReport(reportType) && items.length > 0 && (
               <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -851,7 +889,7 @@ export function RelatoriosModule() {
               </div>
             )}
 
-            {items.length === 0 && (
+            {!isAutoReport(reportType) && items.length === 0 && (
               <div className="text-center py-8 text-gray-400 mt-4 border-2 border-dashed border-gray-200 rounded-lg">
                 <p>Nenhum item adicionado ao relatório ainda.</p>
               </div>
@@ -913,102 +951,72 @@ export function RelatoriosModule() {
             )}
           </div>
 
-          <table className="w-full border-collapse border border-black text-left mb-8">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-black p-2 w-12 text-center">
-                  Item
-                </th>
-                {reportType !== "avarias" && <th className="border border-black p-2">Cor/Acabamento</th>}
-                <th className="border border-black p-2">
-                  Detalhes / Especificações
-                </th>
-                <th className="border border-black p-2 w-24 text-center">
-                  Qtd
-                </th>
-                <th className="border border-black p-2 w-32 text-center">
-                  Conferência
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, idx) => (
-                <tr key={item.id} className="border-b border-black">
-                  <td className="border border-black p-2 text-center">
-                    {idx + 1}
-                  </td>
-                  {reportType !== "avarias" && (
-                    <td className="border border-black p-2 font-medium">
-                      {item.cor}
+          {isAutoReport(reportType) ? (
+            <div className="mb-8 print-auto-report">
+              <AutoReportsViewer kits={kits} reportType={reportType} />
+            </div>
+          ) : (
+            <table className="w-full border-collapse border border-black text-left mb-8">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-black p-2 w-12 text-center">Item</th>
+                  {reportType !== "avarias" && <th className="border border-black p-2">Cor/Acabamento</th>}
+                  <th className="border border-black p-2">Detalhes / Especificações</th>
+                  <th className="border border-black p-2 w-24 text-center">Qtd</th>
+                  <th className="border border-black p-2 w-32 text-center">Conferência</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item, idx) => (
+                  <tr key={item.id} className="border-b border-black">
+                    <td className="border border-black p-2 text-center">{idx + 1}</td>
+                    {reportType !== "avarias" && (
+                      <td className="border border-black p-2 font-medium">{item.cor}</td>
+                    )}
+                    <td className="border border-black p-2">
+                      {reportType === "portas" && (
+                        <>{item.dimensao} - Enc: {item.enchimento} - Mod: {item.modelo}</>
+                      )}
+                      {reportType === "avarias" && (
+                        <div className="flex flex-col items-start gap-1 py-1 max-w-[280px]">
+                          <span className="italic text-base whitespace-normal break-words w-full border-l-[3px] border-gray-400 pl-2 text-gray-800">"{item.descricao}"</span>
+                          {item.imagemBase64 && (
+                             <img src={item.imagemBase64} alt="Avaria" className="max-h-[250px] w-auto border border-black mt-2" />
+                          )}
+                        </div>
+                      )}
+                      {reportType === "aduelas" && (
+                        <>Largura: <b>{item.largura}</b>mm - Comprimento: <b>{item.comprimento}</b>mm</>
+                      )}
+                      {reportType === "alizares" && (
+                        <>Face: <b>{item.face}</b>mm - Aba: <b>{item.aba}</b>mm - Espessura: <b>{item.espessura}</b>mm - Comp: <b>{item.comprimento}</b>mm</>
+                      )}
                     </td>
-                  )}
-                  <td className="border border-black p-2">
-                    {reportType === "portas" && (
-                      <>
-                        {item.dimensao} - Enc: {item.enchimento} - Mod:{" "}
-                        {item.modelo}
-                      </>
-                    )}
-                    {reportType === "avarias" && (
-                      <div className="flex flex-col items-start gap-1 py-1 max-w-[280px]">
-                        <span className="italic text-base whitespace-normal break-words w-full border-l-[3px] border-gray-400 pl-2 text-gray-800">"{item.descricao}"</span>
-                        {item.imagemBase64 && (
-                           <img src={item.imagemBase64} alt="Avaria" className="max-h-[250px] w-auto border border-black mt-2" />
-                        )}
-                      </div>
-                    )}
-                    {reportType === "aduelas" && (
-                      <>
-                        Largura: <b>{item.largura}</b>mm - Comprimento:{" "}
-                        <b>{item.comprimento}</b>mm
-                      </>
-                    )}
-                    {reportType === "alizares" && (
-                      <>
-                        Face: <b>{item.face}</b>mm - Aba: <b>{item.aba}</b>mm -
-                        Espessura: <b>{item.espessura}</b>mm - Comp:{" "}
-                        <b>{item.comprimento}</b>mm
-                      </>
-                    )}
-                  </td>
-                  <td className="border border-black p-2 text-center font-bold text-lg">
-                    {item.quantidade}
-                  </td>
-                  <td className="border border-black p-2"></td>{" "}
-                  {/* Em branco para o usuário dar um 'visto' */}
-                </tr>
-              ))}
-              {items.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={reportType === "avarias" ? 4 : 5}
-                    className="border border-black p-4 text-center italic text-gray-500"
-                  >
-                    Nenhum item inserido no relatório.
-                  </td>
-                </tr>
+                    <td className="border border-black p-2 text-center font-bold text-lg">{item.quantidade}</td>
+                    <td className="border border-black p-2"></td>
+                  </tr>
+                ))}
+                {items.length === 0 && (
+                  <tr>
+                    <td colSpan={reportType === "avarias" ? 4 : 5} className="border border-black p-4 text-center italic text-gray-500">
+                      Nenhum item inserido no relatório.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+              {items.length > 0 && reportType !== "avarias" && (
+                <tfoot>
+                  <tr className="bg-gray-100 font-bold">
+                    <td colSpan={3} className="border border-black p-2 text-right uppercase">Total Geral de Peças:</td>
+                    <td className="border border-black p-2 text-center text-xl">
+                      {items.reduce((sum, item) => sum + (item.quantidade || 0), 0)}
+                    </td>
+                    <td className="border border-black p-2"></td>
+                  </tr>
+                </tfoot>
               )}
-            </tbody>
-            {items.length > 0 && reportType !== "avarias" && (
-              <tfoot>
-                <tr className="bg-gray-100 font-bold">
-                  <td
-                    colSpan={3}
-                    className="border border-black p-2 text-right uppercase"
-                  >
-                    Total Geral de Peças:
-                  </td>
-                  <td className="border border-black p-2 text-center text-xl">
-                    {items.reduce(
-                      (sum, item) => sum + (item.quantidade || 0),
-                      0,
-                    )}
-                  </td>
-                  <td className="border border-black p-2"></td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
+            </table>
+          )}
 
           <div className="mt-24 pt-8 grid grid-cols-2 gap-16">
             <div className="text-center">
