@@ -65,8 +65,7 @@ export const forceSyncAllToCloud = async () => {
   }
 };
 
-const debounceMap = new Map<string, NodeJS.Timeout>();
-const lastWriteTimeMap = new Map<string, number>();
+import { subscribeToSync, pushToFirestore } from '../lib/firestoreSync';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -111,66 +110,27 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   }, [key]);
 
   useEffect(() => {
-    let unsubscribe = () => {};
-    // Load from Firebase
-    const loadFromFirebase = () => {
-      if (!auth.currentUser) return;
-      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-      unsubscribe = onSnapshot(userDoc, (docSnap) => {
-        if (docSnap.exists() && docSnap.data()[key] !== undefined) {
-          const val = docSnap.data()[key];
-          
-          // Se fizemos uma escrita local recente (menos de 2 segundos), evitamos sobrescrever com o snapshot
-          // pois o snapshot pode ser o ego da nuvem voltando fora de ordem
-          const timeSinceLastLocalWrite = Date.now() - (lastWriteTimeMap.get(key) || 0);
-          if (timeSinceLastLocalWrite < 2000) {
-             return; 
-          }
-
-          // If we had a dirty write that was interrupted by a page reload, push it and ignore stale cloud data
-          if (typeof window !== "undefined" && window.localStorage.getItem(key + '_dirty') === 'true') {
-            setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
-               [key]: storedValue,
-               userId: auth.currentUser!.uid
-            }, { merge: true }).then(() => {
-               window.localStorage.removeItem(key + '_dirty');
-            }).catch(console.error);
-            return;
-          }
-
-          setStoredValue(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(val)) {
-              return prev;
-            }
-            if (typeof window !== "undefined") {
-               window.localStorage.setItem(key, JSON.stringify(val));
-               window.dispatchEvent(new Event('local-storage-sync'));
-            }
-            return val;
-          });
-        } else {
-          // Push local state to cloud if it doesn't exist yet
-          if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && auth.currentUser) {
-            setDoc(userDoc, {
-               [key]: storedValue,
-               userId: auth.currentUser.uid
-            }, { merge: true }).catch(err => console.error("Firebase initial save error:", err));
-          }
-        }
-      }, (error) => console.error("Firebase sync error:", error));
-    };
-
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-      if (user) {
-        loadFromFirebase();
-      } else {
-        unsubscribe(); // Stop listening if logged out
+    const unsubscribeSync = subscribeToSync(key, (val) => {
+      if (typeof window !== "undefined" && window.localStorage.getItem(key + '_dirty') === 'true') {
+        pushToFirestore(key, storedValue);
+        window.localStorage.removeItem(key + '_dirty');
+        return;
       }
+
+      setStoredValue(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(val)) {
+          return prev;
+        }
+        if (typeof window !== "undefined") {
+           window.localStorage.setItem(key, JSON.stringify(val));
+           window.dispatchEvent(new Event('local-storage-sync'));
+        }
+        return val;
+      });
     });
 
     return () => {
-      unsubscribe();
-      unsubscribeAuth();
+      unsubscribeSync();
     };
   }, [key]);
 
@@ -179,36 +139,21 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       setStoredValue(prev => {
         const valueToStore = value instanceof Function ? value(prev) : value;
         
-        // Execute side effects here. In Strict Mode this might run twice, but 
-        // writing to localStorage twice with the same value is harmless.
         if (typeof window !== "undefined") {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
-          // Only dispatch if it actually changed to avoid infinite listener loops
           if (JSON.stringify(prev) !== JSON.stringify(valueToStore)) {
             window.dispatchEvent(new Event('local-storage-sync'));
           }
         }
         
-        lastWriteTimeMap.set(key, Date.now());
-
         if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
           if (typeof window !== "undefined") {
             window.localStorage.setItem(key + '_dirty', 'true');
           }
-          if (debounceMap.has(key)) {
-            clearTimeout(debounceMap.get(key)!);
+          pushToFirestore(key, valueToStore);
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem(key + '_dirty');
           }
-          debounceMap.set(key, setTimeout(() => {
-            setDoc(doc(db, 'user_configs', auth.currentUser!.uid), {
-               [key]: valueToStore,
-               userId: auth.currentUser!.uid
-            }, { merge: true }).then(() => {
-               if (typeof window !== "undefined") {
-                 window.localStorage.removeItem(key + '_dirty');
-               }
-            }).catch(err => console.error("Firebase save error:", err));
-            debounceMap.delete(key);
-          }, 1000));
         }
 
         return valueToStore;
