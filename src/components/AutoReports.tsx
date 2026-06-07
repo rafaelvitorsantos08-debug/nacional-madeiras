@@ -303,25 +303,22 @@ function renderAutoVergas(kits: any[]) {
     <div className="flex flex-col gap-6">
       {sortedKeys.map(vergaKey => (
         <div key={vergaKey} className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
+          <h3 className="bg-gray-100 px-3 py-1.5 font-bold text-black text-xs border-b-2 border-black text-center uppercase tracking-wider flex items-center justify-center gap-2">
+            <span>Tamanho da Verga (mm):</span>
+            <span className="text-green-700 font-mono text-[11px] bg-white px-2 py-0.5 rounded border-2 border-black leading-none">{vergaKey}</span>
+          </h3>
           <table className="min-w-full divide-y-2 divide-black table-fixed">
             <thead className="bg-gray-100">
               <tr>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black w-2/3">
-                    <div className="flex items-center justify-between">
-                      <span>Tamanho da Verga (mm)</span>
-                      <span className="text-green-700 font-mono text-[10px] ml-1 uppercase bg-white px-2 py-0.5 rounded border-2 border-black">{vergaKey}</span>
-                    </div>
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black w-1/3">Largura da Aduela</th>
-                  <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase w-28">Qtd de Vergas</th>
+                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Largura da Aduela</th>
+                  <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase w-32">Qtd de Vergas</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y-2 divide-black">
                {groupedData[vergaKey].map((row, idx) => (
                  <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-                   <td className="px-4 py-1.5 text-sm text-transparent border-r-2 border-black select-none">.</td>
                    <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold truncate">{row.aduelaLargura}</td>
-                   <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-28 bg-gray-50">{row.qtd}</td>
+                   <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-32 bg-gray-50">{row.qtd}</td>
                  </tr>
                ))}
             </tbody>
