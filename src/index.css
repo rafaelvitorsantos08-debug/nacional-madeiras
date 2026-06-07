@@ -15,9 +15,15 @@ body {
 
 @media print {
   @page {
-    margin: 10mm;
+    margin: 0;
   }
   
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding: 10mm 15mm;
+  }
+
   ::-webkit-scrollbar {
     display: none !important;
   }

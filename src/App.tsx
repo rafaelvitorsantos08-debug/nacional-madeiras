@@ -532,14 +532,13 @@ export default function App() {
           )}
 
           {/* PRINT ONLY HEADER */}
-          <div className="hidden print:flex mb-8 items-center justify-between border-b border-gray-300 pb-4">
+          <div className="hidden print:flex mb-4 flex-col border-b border-gray-300 pb-2">
+             <div className="text-gray-500 text-xs font-mono mb-1">
+                {new Date().toLocaleDateString('pt-BR')} {new Date().toLocaleTimeString('pt-BR')}
+             </div>
              <div className="flex flex-col">
                <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
                <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>
-             </div>
-             <div className="text-right text-xs text-gray-500 font-mono">
-                {new Date().toLocaleDateString('pt-BR')} <br/>
-                {new Date().toLocaleTimeString('pt-BR')}
              </div>
           </div>
 
