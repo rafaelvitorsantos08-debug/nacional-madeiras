@@ -303,7 +303,10 @@ function renderAutoVergas(kits: any[]) {
     <div className="flex flex-col gap-6">
       {sortedKeys.map(vergaKey => (
         <div key={vergaKey} className="break-inside-avoid">
-          <div className="text-center font-bold text-green-700 font-mono text-sm mb-1">{vergaKey}</div>
+          <div className="flex w-full mb-1">
+            <div className="flex-1 text-center font-bold text-green-700 font-mono text-sm">{vergaKey}</div>
+            <div className="w-32"></div>
+          </div>
           <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm">
             <table className="min-w-full divide-y-2 divide-black table-fixed">
               <thead className="bg-gray-100">
@@ -315,7 +318,7 @@ function renderAutoVergas(kits: any[]) {
               <tbody className="bg-white divide-y-2 divide-black">
                  {groupedData[vergaKey].map((row, idx) => (
                    <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-                     <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
+                     <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold truncate">{row.aduelaLargura}</td>
                      <td className="px-4 py-1.5 text-sm text-black text-center font-bold w-32 bg-gray-50">{row.qtd}</td>
                    </tr>
                  ))}
