@@ -38,21 +38,21 @@ function processAduelas(kits: any[]) {
 function renderAutoAduelas(kits: any[]) {
   const data = processAduelas(kits);
   return (
-    <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-      <table className="min-w-full divide-y-2 divide-black">
-        <thead className="bg-gray-100">
+    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
+      <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
+        <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
           <tr>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Largura x Altura (mm)</th>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Acabamento</th>
-              <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase">Qtd</th>
+              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Largura x Altura (mm)</th>
+              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Acabamento</th>
+              <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase">Qtd</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y-2 divide-black">
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
            {data.map((row, idx) => (
-             <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-               <td className="px-4 py-1.5 text-sm text-black font-mono border-r-2 border-black font-bold">{row.largura} x {row.altura}</td>
-               <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-bold">{row.acabamento}</td>
-               <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-20">{row.qtd}</td>
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.largura} x {row.altura}</td>
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold w-20">{row.qtd}</td>
              </tr>
            ))}
         </tbody>
@@ -121,18 +121,18 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
          const aberturasOut = cat.aberturas.filter(a => !a.abertura.includes('ESQ') && !a.abertura.includes('DIR'));
 
          return (
-           <div key={cat.categoria} className="border-2 border-black rounded-lg overflow-hidden break-inside-avoid shadow-sm mb-2">
-             <h3 className="bg-gray-200 px-3 py-1 font-bold text-black text-sm border-b-2 border-black text-center uppercase">{cat.categoria}</h3>
+           <div key={cat.categoria} className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden break-inside-avoid shadow-sm mb-2">
+             <h3 className="bg-gray-200 dark:bg-gray-600 print:bg-gray-200 px-3 py-1 font-bold text-gray-900 dark:text-gray-100 print:text-black text-sm border-b-2 border-gray-800 dark:border-gray-600 print:border-black text-center uppercase">{cat.categoria}</h3>
              <div className="p-2">
                 {cat.dobradicas.length > 0 && (
-                   <div className="mb-3 border-2 border-black rounded p-2">
-                      <h4 className="font-bold text-black mb-1 text-xs uppercase text-center border-b-2 border-black pb-1">SÓ DOBRADIÇAS</h4>
+                   <div className="mb-3 border-2 border-gray-800 dark:border-gray-600 print:border-black rounded p-2">
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100 print:text-black mb-1 text-xs uppercase text-center border-b-2 border-gray-800 dark:border-gray-600 print:border-black pb-1">SÓ DOBRADIÇAS</h4>
                       <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center mt-2">
                          {cat.dobradicas.map(d => {
                             const qEsqDir = isPorta ? Math.ceil(d.qtd / 2) : d.qtd;
                             return (
-                               <div key={d.dimensao} className="text-sm font-bold font-mono text-black">
-                                  {d.dimensao}: <span className="text-black">{qEsqDir} Esq / {qEsqDir} Dir</span>
+                               <div key={d.dimensao} className="text-sm font-bold font-mono text-gray-900 dark:text-gray-100 print:text-black">
+                                  {d.dimensao}: <span className="text-gray-900 dark:text-gray-100 print:text-black">{qEsqDir} Esq / {qEsqDir} Dir</span>
                                </div>
                             );
                          })}
@@ -173,14 +173,14 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
 function UsinagemTable({ abertura, itens }: { abertura: string, itens: any[] }) {
   if (itens.length === 0) return null;
   return (
-    <div className="border-2 border-black rounded overflow-hidden shadow-sm">
-       <h4 className="font-bold text-black bg-gray-100 px-2 py-0.5 text-[10px] uppercase text-center border-b-2 border-black truncate">{abertura}</h4>
+    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm">
+       <h4 className="font-bold text-gray-900 dark:text-gray-100 print:text-black bg-gray-100 dark:bg-gray-700 print:bg-gray-100 px-2 py-0.5 text-[10px] uppercase text-center border-b-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{abertura}</h4>
        <table className="min-w-full text-xs">
           <tbody>
             {itens.map((it, i) => (
-               <tr key={i} className="border-b-2 border-black last:border-b-0 hover:bg-gray-50">
-                 <td className="px-2 py-1 text-black font-mono font-bold text-center">{it.dimensao}</td>
-                 <td className="px-2 py-1 text-center text-black font-bold w-12 border-l-2 border-black bg-gray-50">{it.qtd}</td>
+               <tr key={i} className="border-b-2 border-gray-800 dark:border-gray-600 print:border-black last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+                 <td className="px-2 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
+                 <td className="px-2 py-1 text-center text-gray-900 dark:text-gray-100 print:text-black font-bold w-12 border-l-2 border-gray-800 dark:border-gray-600 print:border-black bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{it.qtd}</td>
                </tr>
             ))}
           </tbody>
@@ -237,26 +237,26 @@ function renderAutoPortas(kits: any[]) {
   return (
     <div className="flex flex-col gap-6">
       {Object.entries(groupedData).map(([caracteristica, rows]) => (
-        <div key={caracteristica} className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-          <table className="min-w-full divide-y-2 divide-black table-fixed">
-            <thead className="bg-gray-100">
+        <div key={caracteristica} className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
+          <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black table-fixed">
+            <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
               <tr>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black w-1/3">Dimensão da Folha</th>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">
+                  <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black w-1/3">Dimensão da Folha</th>
+                  <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">
                     <div className="flex items-center justify-between">
                       <span>Acabamento/Mod</span>
-                      <span className="text-black text-[10px] ml-1 uppercase bg-white px-2 py-0.5 rounded border-2 border-black">{caracteristica}</span>
+                      <span className="text-gray-900 dark:text-gray-100 print:text-black text-[10px] ml-1 uppercase bg-white dark:bg-gray-800 print:bg-white px-2 py-0.5 rounded border-2 border-gray-800 dark:border-gray-600 print:border-black">{caracteristica}</span>
                     </div>
                   </th>
-                  <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase w-20">Qtd</th>
+                  <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase w-20">Qtd</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y-2 divide-black">
+            <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
                {rows.map((row, idx) => (
-                 <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-                   <td className="px-4 py-1.5 text-sm text-black font-mono font-bold border-r-2 border-black truncate">{row.largura} x {row.altura}</td>
-                   <td className="px-4 py-1.5 text-sm text-black font-bold border-r-2 border-black truncate">{row.acabamento}</td>
-                   <td className="px-4 py-1.5 text-sm text-black text-right font-bold">{row.qtd}</td>
+                 <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
+                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.largura} x {row.altura}</td>
+                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.acabamento}</td>
+                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold">{row.qtd}</td>
                  </tr>
                ))}
             </tbody>
@@ -304,22 +304,22 @@ function renderAutoVergas(kits: any[]) {
       {sortedKeys.map(vergaKey => (
         <div key={vergaKey} className="break-inside-avoid">
           <div className="flex w-full mb-1">
-            <div className="flex-1 text-center font-bold text-green-700 font-mono text-sm">{vergaKey}</div>
+            <div className="flex-1 text-center font-bold text-emerald-700 dark:text-emerald-400 print:text-green-700 font-mono text-sm">{vergaKey}</div>
             <div className="w-32"></div>
           </div>
-          <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm">
-            <table className="min-w-full divide-y-2 divide-black table-fixed">
-              <thead className="bg-gray-100">
+          <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm">
+            <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black table-fixed">
+              <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
                 <tr>
-                    <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Largura da Aduela</th>
-                    <th className="px-4 py-2 text-center text-xs font-bold text-black uppercase w-32">Qtd de Vergas</th>
+                    <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Largura da Aduela</th>
+                    <th className="px-4 py-2 text-center text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase w-32">Qtd de Vergas</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y-2 divide-black">
+              <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
                  {groupedData[vergaKey].map((row, idx) => (
-                   <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-                     <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold truncate">{row.aduelaLargura}</td>
-                     <td className="px-4 py-1.5 text-sm text-black text-center font-bold w-32 bg-gray-50">{row.qtd}</td>
+                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
+                     <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-mono font-bold truncate">{row.aduelaLargura}</td>
+                     <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
                    </tr>
                  ))}
               </tbody>
@@ -348,21 +348,21 @@ function processAlizares(kits: any[]) {
 function renderAutoAlizares(kits: any[]) {
   const data = processAlizares(kits);
   return (
-    <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-      <table className="min-w-full divide-y-2 divide-black">
-        <thead className="bg-gray-100">
+    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
+      <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
+        <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
           <tr>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Descrição</th>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Acabamento</th>
-              <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase">Qtd (Jogos/Lados)</th>
+              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Descrição</th>
+              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Acabamento</th>
+              <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase">Qtd (Jogos/Lados)</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y-2 divide-black">
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
            {data.map((row, idx) => (
-             <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-               <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-bold">{row.desc}</td>
-               <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-bold">{row.acabamento}</td>
-               <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-32 bg-gray-50">{row.qtd}</td>
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.desc}</td>
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
+               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
              </tr>
            ))}
         </tbody>
