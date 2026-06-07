@@ -39,6 +39,7 @@ interface KitLancamento {
   chapa: boolean;
   vidro: boolean;
   fechaFresta: boolean;
+  kitDuplo: boolean;
 }
 
 const INITIAL_FORM: Omit<KitLancamento, 'id'> = {
@@ -69,6 +70,7 @@ const INITIAL_FORM: Omit<KitLancamento, 'id'> = {
   chapa: false,
   vidro: false,
   fechaFresta: false,
+  kitDuplo: false,
 };
 
 const INITIAL_KITS: KitLancamento[] = [
@@ -78,7 +80,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock2", apto: "104", pavimento: "1", coluna: "4", comodo: "ENTRADA", 
@@ -86,7 +88,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock3", apto: "106", pavimento: "1", coluna: "6", comodo: "QUARTO", 
@@ -94,7 +96,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "90", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock4", apto: "202", pavimento: "2", coluna: "2", comodo: "ENTRADA", 
@@ -102,7 +104,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock5", apto: "206", pavimento: "2", coluna: "6", comodo: "COZINHA", 
@@ -110,7 +112,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock6", apto: "302", pavimento: "3", coluna: "2", comodo: "LIXEIRA", 
@@ -118,7 +120,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock7", apto: "306", pavimento: "3", coluna: "6", comodo: "ELETRICA", 
@@ -126,7 +128,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "2",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock8", apto: "308", pavimento: "3", coluna: "8", comodo: "SUITE 2", 
@@ -134,7 +136,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "150", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock9", apto: "309", pavimento: "3", coluna: "9", comodo: "COZINHA", 
@@ -142,7 +144,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock10", apto: "405", pavimento: "4", coluna: "5", comodo: "BANH. SOCIAL", 
@@ -150,7 +152,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "110", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock11", apto: "501", pavimento: "5", coluna: "1", comodo: "SUITE", 
@@ -158,7 +160,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "110", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock12", apto: "503", pavimento: "5", coluna: "3", comodo: "BANH. SUITE", 
@@ -166,7 +168,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 70", qtdeFolhasPorKit: "1",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock13", apto: "604", pavimento: "6", coluna: "4", comodo: "QUARTO", 
@@ -174,7 +176,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
     acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   },
   {
     id: "mock14", apto: "601", pavimento: "6", coluna: "1", comodo: "ESPECIAIS", 
@@ -182,7 +184,7 @@ const INITIAL_KITS: KitLancamento[] = [
     aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "4",
     acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
     bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false
+    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false
   }
 ];
 
@@ -440,6 +442,10 @@ export function LancamentosRelatoriosModule() {
                         <span>C/ Vidro</span>
                      </label>
                      <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
+                        <input type="checkbox" name="kitDuplo" checked={form.kitDuplo} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
+                        <span>Kit Duplo</span>
+                     </label>
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="fechaFresta" checked={form.fechaFresta} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Fecha Fresta</span>
                      </label>
@@ -507,7 +513,8 @@ export function LancamentosRelatoriosModule() {
                      <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Band.</th>
                      <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Chapa</th>
                      <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Vidro</th>
-                     <th className="p-2 font-bold text-center">Fecha Fresta</th>
+                     <th className="p-2 font-bold text-center border-r border-[#c2d6b3] dark:border-emerald-800/40">Fecha Fresta</th>
+                     <th className="p-2 font-bold text-center">Kit Duplo</th>
                   </tr>
                </thead>
                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -560,7 +567,8 @@ export function LancamentosRelatoriosModule() {
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.bandeira} onChange={v => updateKit(kit.id, "bandeira", v)} /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.chapa} onChange={v => updateKit(kit.id, "chapa", v)} /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.vidro} onChange={v => updateKit(kit.id, "vidro", v)} /></td>
-                        <td className="p-2 text-center"><EditableCell type="boolean" value={kit.fechaFresta} onChange={v => updateKit(kit.id, "fechaFresta", v)} /></td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.fechaFresta} onChange={v => updateKit(kit.id, "fechaFresta", v)} /></td>
+                        <td className="p-2 text-center"><EditableCell type="boolean" value={kit.kitDuplo} onChange={v => updateKit(kit.id, "kitDuplo", v)} /></td>
                      </tr>
                   ))}
                   {kits.length === 0 && (
