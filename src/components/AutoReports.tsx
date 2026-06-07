@@ -179,7 +179,7 @@ function UsinagemTable({ abertura, itens }: { abertura: string, itens: any[] }) 
           <tbody>
             {itens.map((it, i) => (
                <tr key={i} className="border-b-2 border-gray-800 dark:border-gray-600 print:border-black last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
-                 <td className="px-2 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
+                 <td className="pl-12 pr-0 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
                  <td className="px-2 py-1 text-center text-gray-900 dark:text-gray-100 print:text-black font-bold w-12 border-l-2 border-gray-800 dark:border-gray-600 print:border-black bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{it.qtd}</td>
                </tr>
             ))}
