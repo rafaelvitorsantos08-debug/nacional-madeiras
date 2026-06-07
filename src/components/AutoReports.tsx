@@ -302,26 +302,26 @@ function renderAutoVergas(kits: any[]) {
   return (
     <div className="flex flex-col gap-6">
       {sortedKeys.map(vergaKey => (
-        <div key={vergaKey} className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-          <h3 className="bg-gray-100 px-3 py-1.5 font-bold text-green-700 text-sm font-mono border-b-2 border-black text-center uppercase tracking-wider">
-            {vergaKey}
-          </h3>
-          <table className="min-w-full divide-y-2 divide-black table-fixed">
-            <thead className="bg-gray-100">
-              <tr>
-                  <th className="px-4 py-2 text-center text-xs font-bold text-black uppercase border-r-2 border-black">Largura da Aduela</th>
-                  <th className="px-4 py-2 text-center text-xs font-bold text-black uppercase w-32">Qtd de Vergas</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y-2 divide-black">
-               {groupedData[vergaKey].map((row, idx) => (
-                 <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-                   <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
-                   <td className="px-4 py-1.5 text-sm text-black text-center font-bold w-32 bg-gray-50">{row.qtd}</td>
-                 </tr>
-               ))}
-            </tbody>
-          </table>
+        <div key={vergaKey} className="break-inside-avoid">
+          <div className="text-center font-bold text-green-700 font-mono text-sm mb-1">{vergaKey}</div>
+          <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm">
+            <table className="min-w-full divide-y-2 divide-black table-fixed">
+              <thead className="bg-gray-100">
+                <tr>
+                    <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Largura da Aduela</th>
+                    <th className="px-4 py-2 text-center text-xs font-bold text-black uppercase w-32">Qtd de Vergas</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y-2 divide-black">
+                 {groupedData[vergaKey].map((row, idx) => (
+                   <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
+                     <td className="px-4 py-1.5 text-sm text-black border-r-2 border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
+                     <td className="px-4 py-1.5 text-sm text-black text-center font-bold w-32 bg-gray-50">{row.qtd}</td>
+                   </tr>
+                 ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ))}
     </div>
