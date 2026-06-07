@@ -199,7 +199,7 @@ function EditableCell({ value, onChange, type = "text", className = "", options 
   }
   if (type === "select") {
     return (
-      <select value={value} onChange={e => onChange(e.target.value)} className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}>
+      <select value={value} onChange={e => onChange(e.target.value)} className={"bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className.replace(/\bw-\S+/g, '')}>
         {options.map(opt => {
           if (typeof opt === 'string') return <option key={opt} value={opt} className="bg-white dark:bg-gray-800 text-black dark:text-white">{opt}</option>;
           return <option key={opt.value} value={opt.value} className="bg-white dark:bg-gray-800 text-black dark:text-white">{opt.label}</option>;
@@ -211,8 +211,10 @@ function EditableCell({ value, onChange, type = "text", className = "", options 
     <input
       type={type}
       value={value}
+      size={Math.max(String(value || '').length, 3)}
       onChange={e => onChange(e.target.value)}
-      className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}
+      className={"bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className.replace(/\bw-\S+/g, '')}
+      style={{ minWidth: `${Math.max(String(value || '').length + 2, 5)}ch` }}
     />
   );
 }
