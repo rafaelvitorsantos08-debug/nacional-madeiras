@@ -36,6 +36,32 @@ body {
     display: none !important;
   }
 
+  /* Overrides for ALL Tailwind dark: utilities in print mode */
+  [class*="dark:bg-"] {
+    background-color: transparent !important;
+  }
+  [class*="dark:text-gray-100"], [class*="dark:text-white"], [class*="dark:text-gray-200"], [class*="dark:text-gray-300"], [class*="dark:text-emerald-100"] {
+    color: #000 !important;
+  }
+  [class*="dark:border-"] {
+    border-color: #000 !important;
+  }
+  [class*="dark:divide-gray-"] > * + * {
+    border-color: #000 !important;
+  }
+
+  table {
+    background-color: white !important;
+  }
+  th {
+    background-color: #f3f4f6 !important;
+    color: #000 !important;
+  }
+  td, tr {
+    color: #000 !important;
+    background-color: transparent !important;
+  }
+
   /* Make sure everything prints, remove scrollbars and fixed heights */
   * {
     overflow: visible !important;

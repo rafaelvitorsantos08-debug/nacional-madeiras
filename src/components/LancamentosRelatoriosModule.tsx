@@ -235,9 +235,9 @@ export function LancamentosRelatoriosModule() {
       </div>
 
       {/* FORMULÁRIO */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div className="border-b border-gray-100 bg-gray-50/80 p-4">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+        <div className="border-b border-gray-100 bg-gray-50 dark:bg-gray-900/80 p-4">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
             <Plus className="w-5 h-5 mr-2 text-brand-green" />
             Novo Cadastro de Kit
           </h2>
@@ -262,7 +262,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Cômodo</label>
-                <select name="comodo" value={form.comodo} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white">
+                <select name="comodo" value={form.comodo} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-gray-800">
                   <option value="BANHEIRO">Banheiro</option>
                   <option value="BANH. SOCIAL">Banh. Social</option>
                   <option value="BANH. SUITE">Banh. Suíte</option>
@@ -280,15 +280,15 @@ export function LancamentosRelatoriosModule() {
             </div>
 
             {/* ESPECIFICAÇÕES & FOLHA DE PORTA */}
-            <div className="md:col-span-2 grid grid-cols-2 gap-4 p-4 bg-emerald-50/30 rounded-lg border border-emerald-100">
-              <h3 className="col-span-full text-xs font-bold text-emerald-800 uppercase tracking-wider mb-2">Especificações & Folha</h3>
+            <div className="md:col-span-2 grid grid-cols-2 gap-4 p-4 bg-emerald-50/30 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+              <h3 className="col-span-full text-xs font-bold text-emerald-800 dark:text-emerald-500 uppercase tracking-wider mb-2">Especificações & Folha</h3>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Tipologia</label>
-                <input type="text" name="tipologia" value={form.tipologia} onChange={handleInputChange} placeholder="ex: PM1F" className="w-full p-2 border border-emerald-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none uppercase" required />
+                <input type="text" name="tipologia" value={form.tipologia} onChange={handleInputChange} placeholder="ex: PM1F" className="w-full p-2 border border-emerald-200 dark:border-emerald-700/50 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none uppercase" required />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Abertura</label>
-                <select name="abertura" value={form.abertura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white">
+                <select name="abertura" value={form.abertura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 dark:border-emerald-700/50 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none bg-white dark:bg-gray-800">
                   <option value="ESQUERDA">Esquerda</option>
                   <option value="DIREITA">Direita</option>
                   <option value="ESQUERDA P/FORA">Esq P/Fora</option>
@@ -297,11 +297,11 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Folha Largura</label>
-                <input type="text" name="folhaLargura" value={form.folhaLargura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none" required />
+                <input type="text" name="folhaLargura" value={form.folhaLargura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 dark:border-emerald-700/50 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none" required />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Folha Altura</label>
-                <input type="text" name="folhaAltura" value={form.folhaAltura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none" required />
+                <input type="text" name="folhaAltura" value={form.folhaAltura} onChange={handleInputChange} className="w-full p-2 border border-emerald-200 dark:border-emerald-700/50 rounded text-sm focus:ring-1 focus:ring-emerald-500 outline-none" required />
               </div>
             </div>
 
@@ -318,7 +318,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Regulagem</label>
-                <select name="regulagem" value={form.regulagem} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white">
+                <select name="regulagem" value={form.regulagem} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
                   <option value="REG 50">REG 50</option>
                   <option value="REG 70">REG 70</option>
                   <option value="FIXO">FIXO</option>
@@ -330,7 +330,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Acabamento</label>
-                <select name="acabamento" value={form.acabamento} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white">
+                <select name="acabamento" value={form.acabamento} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
                   <option value="BRANCO">Branco</option>
                   <option value="MADEIRA">Madeira</option>
                   <option value="PRETO">Preto</option>
@@ -339,7 +339,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Característica</label>
-                <select name="caracteristica" value={form.caracteristica} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white">
+                <select name="caracteristica" value={form.caracteristica} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
                   <option value="HONEY">Honey (Colmeia)</option>
                   <option value="SOLIDA">Sólida</option>
                   <option value="SARRAFEADA">Sarrafeada</option>
@@ -374,39 +374,39 @@ export function LancamentosRelatoriosModule() {
                <div>
                   <h3 className="text-xs font-bold text-purple-800 uppercase tracking-wider mb-4">Características Especiais</h3>
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="camarao" checked={form.camarao} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Camarão</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="correr" checked={form.correr} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Correr</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="pivotante" checked={form.pivotante} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Pivotante</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="veneziana" checked={form.veneziana} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>C/ Veneziana</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="grelha" checked={form.grelha} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>C/ Grelha</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="bandeira" checked={form.bandeira} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>C/ Bandeira</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="chapa" checked={form.chapa} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>C/ Chapa</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="vidro" checked={form.vidro} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>C/ Vidro</span>
                      </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white rounded">
+                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="fechaFresta" checked={form.fechaFresta} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Fecha Fresta</span>
                      </label>
@@ -426,9 +426,9 @@ export function LancamentosRelatoriosModule() {
       </div>
 
       {/* TABELA DE VISUALIZAÇÃO */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-         <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+         <div className="p-4 border-b border-gray-100 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
               <FileSpreadsheet className="w-5 h-5 mr-2 text-gray-500" />
               Kits Cadastrados
             </h2>
@@ -438,49 +438,49 @@ export function LancamentosRelatoriosModule() {
          </div>
          <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full text-left text-sm border-collapse whitespace-nowrap">
-               <thead className="bg-[#e2efda] text-xs uppercase text-gray-800 sticky top-0 border-b border-gray-300">
+               <thead className="bg-[#e2efda] dark:bg-emerald-900/40 text-xs uppercase text-gray-800 dark:text-emerald-100 sticky top-0 border-b border-gray-300 dark:border-gray-600">
                   <tr>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Ações</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Apto</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Pav.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Coluna</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold">Cômodo</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Ações</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Apto</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Pav.</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Coluna</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold">Cômodo</th>
                      
                      {/* Folha */}
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center" colSpan={2}>Folha de Porta<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Folha de Porta<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
                      
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Tipologia</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Abertura</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Tipologia</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Abertura</th>
                      
                      {/* Aduela */}
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center" colSpan={2}>Aduela<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Aduela<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
                      
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Regulagem</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Qtd Folha<br/>Kit</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Acabamento</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Característica</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Regulagem</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Qtd Folha<br/>Kit</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Acabamento</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Característica</th>
                      
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Qtd Lados<br/>Aduela</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Montantes</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Qtd Lados<br/>Aduela</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Montantes</th>
                      
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center" colSpan={2}>Bits Folha<br/><span className="font-normal text-[10px]">Qtde | Faces</span></th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Bits Folha<br/><span className="font-normal text-[10px]">Qtde | Faces</span></th>
                      
                      {/* Specs */}
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Camarão</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Correr</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">Pivotante</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">C/ Venez.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">C/ Grelha</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">C/ Band.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">C/ Chapa</th>
-                     <th className="p-2 border-r border-[#c2d6b3] font-bold text-center">C/ Vidro</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Camarão</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Correr</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Pivotante</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Venez.</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Grelha</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Band.</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Chapa</th>
+                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Vidro</th>
                      <th className="p-2 font-bold text-center">Fecha Fresta</th>
                   </tr>
                </thead>
-               <tbody className="divide-y divide-gray-200">
+               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {kits.map(kit => (
-                     <tr key={kit.id} className="hover:bg-gray-50 bg-white">
-                        <td className="p-2 border-r border-gray-200 text-center">
+                     <tr key={kit.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800">
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">
                            <div className="flex justify-center space-x-2">
                              <button onClick={() => handleDuplicate(kit)} title="Duplicar para o formulário" className="p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors">
                                <Copy className="w-4 h-4" />
@@ -490,43 +490,43 @@ export function LancamentosRelatoriosModule() {
                              </button>
                            </div>
                         </td>
-                        <td className="p-2 border-r border-gray-200 font-bold text-center">{kit.apto}</td>
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.pavimento}</td>
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.coluna}</td>
-                        <td className="p-2 border-r border-gray-200 font-medium">{kit.comodo}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-bold text-center">{kit.apto}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.pavimento}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.coluna}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-medium">{kit.comodo}</td>
                         
                         {/* Folha */}
-                        <td className="p-2 border-r border-gray-200 text-center font-mono text-xs">{kit.folhaLargura}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-mono text-xs">{kit.folhaAltura}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs">{kit.folhaLargura}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs">{kit.folhaAltura}</td>
                         
-                        <td className="p-2 border-r border-gray-200 font-bold text-center text-xs">{kit.tipologia}</td>
-                        <td className="p-2 border-r border-gray-200 text-center text-xs">{kit.abertura}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-bold text-center text-xs">{kit.tipologia}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center text-xs">{kit.abertura}</td>
                         
                         {/* Aduela */}
-                        <td className="p-2 border-r border-gray-200 text-center font-mono text-xs">{kit.aduelaLargura}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-mono text-xs">{kit.aduelaAltura}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs">{kit.aduelaLargura}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs">{kit.aduelaAltura}</td>
                         
-                        <td className="p-2 border-r border-gray-200 text-center text-xs">{kit.regulagem}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold">{kit.qtdeFolhasPorKit}</td>
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.acabamento}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-medium">{kit.caracteristica}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center text-xs">{kit.regulagem}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold">{kit.qtdeFolhasPorKit}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.acabamento}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-medium">{kit.caracteristica}</td>
                         
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.qtdeLadosAduela}</td>
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.qtdeMontantes}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.qtdeLadosAduela}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.qtdeMontantes}</td>
                         
                         {/* Bits */}
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.bitsQtde}</td>
-                        <td className="p-2 border-r border-gray-200 text-center">{kit.bitsFaces}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.bitsQtde}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">{kit.bitsFaces}</td>
                         
                         {/* Checkboxes em formato X ou V */}
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.camarao ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.correr ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.pivotante ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.veneziana ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.grelha ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.bandeira ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.chapa ? 'X' : ''}</td>
-                        <td className="p-2 border-r border-gray-200 text-center font-bold text-gray-500">{kit.vidro ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.camarao ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.correr ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.pivotante ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.veneziana ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.grelha ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.bandeira ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.chapa ? 'X' : ''}</td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-gray-500">{kit.vidro ? 'X' : ''}</td>
                         <td className="p-2 text-center font-bold text-gray-500">{kit.fechaFresta ? 'X' : ''}</td>
                      </tr>
                   ))}
