@@ -15,13 +15,12 @@ body {
 
 @media print {
   @page {
-    margin: 0;
+    margin: 5mm;
   }
   
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    padding: 10mm 15mm;
   }
 
   ::-webkit-scrollbar {

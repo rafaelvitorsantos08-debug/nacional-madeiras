@@ -354,7 +354,7 @@ export function RelatoriosModule() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-gray-50 overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full bg-gray-50 overflow-hidden relative print:overflow-visible print:h-auto print:block">
       <div className="p-4 bg-white border-b border-gray-200 print:hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-xl font-bold text-gray-800 flex items-center">
@@ -898,7 +898,7 @@ export function RelatoriosModule() {
         </div>
 
         {/* Relatório Impresso (Apenas visível via CSS de Print) */}
-        <div className="hidden print:block w-full text-black font-sans bg-white p-8">
+        <div className="hidden print:block w-full text-black font-sans bg-white pt-2">
           <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
             <div>
               <h1 className="text-3xl font-bold uppercase tracking-tight">
