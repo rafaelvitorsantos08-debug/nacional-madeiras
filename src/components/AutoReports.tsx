@@ -80,7 +80,12 @@ function processUsinagem(kits: any[], isPorta: boolean) {
       let dimensao = '';
       if (isPorta) {
          if (!k.folhaLargura || !k.folhaAltura) return;
-         dimensao = `${k.folhaLargura}x${k.folhaAltura}`;
+         if (k.kitDuplo) {
+             const meiaLag = parseInt(k.folhaLargura, 10) / 2;
+             dimensao = `${k.folhaLargura}x${k.folhaAltura} (2x ${meiaLag}x${k.folhaAltura})`;
+         } else {
+             dimensao = `${k.folhaLargura}x${k.folhaAltura}`;
+         }
       } else {
          if (!k.aduelaLargura || !k.aduelaAltura) return;
          dimensao = `${k.aduelaLargura}x${k.aduelaAltura}`;
@@ -204,12 +209,20 @@ function processPortas(kits: any[]) {
       else if (char.includes('SARRAFEADA')) charOrder = 2;
       else if (char.includes('SOLIDA') || char.includes('SÓLIDA')) charOrder = 3;
 
-      const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamento}-${char}`;
+      const isDuplo = !!k.kitDuplo;
+      const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamento}-${char}-${isDuplo}`;
       const qtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
       
+      let dimensaoDisplay = `${k.folhaLargura} x ${k.folhaAltura}`;
+      if (isDuplo) {
+          const meiaLargura = parseInt(k.folhaLargura, 10) / 2;
+          dimensaoDisplay = `${k.folhaLargura} x ${k.folhaAltura} (2x ${meiaLargura}x${k.folhaAltura})`;
+      }
+
       const val = agrupar.get(key) || { 
           largura: parseInt(k.folhaLargura, 10), 
           altura: parseInt(k.folhaAltura, 10), 
+          dimensaoDisplay,
           acabamento: k.acabamento || 'BRANCO', 
           caracteristica: char,
           charOrder: charOrder,
@@ -255,7 +268,7 @@ function renderAutoPortas(kits: any[]) {
             <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
                {rows.map((row, idx) => (
                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.largura} x {row.altura}</td>
+                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.dimensaoDisplay}</td>
                    <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.acabamento}</td>
                    <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold">{row.qtd}</td>
                  </tr>
