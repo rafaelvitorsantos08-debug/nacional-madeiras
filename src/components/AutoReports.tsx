@@ -227,26 +227,40 @@ function processPortas(kits: any[]) {
 
 function renderAutoPortas(kits: any[]) {
   const data = processPortas(kits);
+  
+  const groupedData = data.reduce((acc, row) => {
+    if (!acc[row.caracteristica]) acc[row.caracteristica] = [];
+    acc[row.caracteristica].push(row);
+    return acc;
+  }, {} as Record<string, typeof data>);
+
   return (
-    <div className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-      <table className="min-w-full divide-y-2 divide-black">
-        <thead className="bg-gray-100">
-          <tr>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Dimensão da Folha</th>
-              <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Acabamento/Mod</th>
-              <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase">Qtd</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y-2 divide-black">
-           {data.map((row, idx) => (
-             <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
-               <td className="px-4 py-1.5 text-sm text-black font-mono font-bold border-r-2 border-black">{row.largura} x {row.altura}</td>
-               <td className="px-4 py-1.5 text-sm text-black font-bold border-r-2 border-black">{row.acabamento} <span className="text-black text-[10px] ml-1 uppercase bg-gray-100 px-1 py-0.5 rounded border-2 border-black">{row.caracteristica}</span></td>
-               <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-20">{row.qtd}</td>
-             </tr>
-           ))}
-        </tbody>
-      </table>
+    <div className="flex flex-col gap-6">
+      {Object.entries(groupedData).map(([caracteristica, rows]) => (
+        <div key={caracteristica} className="border-2 border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
+          <table className="min-w-full divide-y-2 divide-black">
+            <thead className="bg-gray-100">
+              <tr>
+                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black">Dimensão da Folha</th>
+                  <th className="px-4 py-2 text-left text-xs font-bold text-black uppercase border-r-2 border-black flex items-center justify-between">
+                    <span>Acabamento/Mod</span>
+                    <span className="text-black text-[10px] ml-1 uppercase bg-white px-2 py-0.5 rounded border-2 border-black">{caracteristica}</span>
+                  </th>
+                  <th className="px-4 py-2 text-right text-xs font-bold text-black uppercase w-20">Qtd</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y-2 divide-black">
+               {rows.map((row, idx) => (
+                 <tr key={idx} className="hover:bg-gray-50 border-b-2 border-black">
+                   <td className="px-4 py-1.5 text-sm text-black font-mono font-bold border-r-2 border-black">{row.largura} x {row.altura}</td>
+                   <td className="px-4 py-1.5 text-sm text-black font-bold border-r-2 border-black">{row.acabamento}</td>
+                   <td className="px-4 py-1.5 text-sm text-black text-right font-bold w-20">{row.qtd}</td>
+                 </tr>
+               ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }
