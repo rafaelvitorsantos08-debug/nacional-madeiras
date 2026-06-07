@@ -128,11 +128,14 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
                    <div className="mb-3 border border-yellow-400 bg-yellow-50 rounded p-2">
                       <h4 className="font-bold text-yellow-800 mb-1 text-xs uppercase text-center border-b border-yellow-200 pb-1">SÓ DOBRADIÇAS</h4>
                       <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center">
-                         {cat.dobradicas.map(d => (
-                            <div key={d.dimensao} className="text-sm font-medium font-mono text-gray-800">
-                               {d.dimensao}: <span className="text-yellow-700">{d.qtd} un</span>
-                            </div>
-                         ))}
+                         {cat.dobradicas.map(d => {
+                            const qEsqDir = isPorta ? Math.ceil(d.qtd / 2) : d.qtd;
+                            return (
+                               <div key={d.dimensao} className="text-sm font-medium font-mono text-gray-800">
+                                  {d.dimensao}: <span className="text-yellow-700">{qEsqDir} Esq / {qEsqDir} Dir</span>
+                               </div>
+                            );
+                         })}
                       </div>
                    </div>
                 )}
@@ -176,8 +179,8 @@ function UsinagemTable({ abertura, itens }: { abertura: string, itens: any[] }) 
           <tbody>
             {itens.map((it, i) => (
                <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                 <td className="px-2 py-1 text-gray-800 font-mono font-medium">{it.dimensao}</td>
-                 <td className="px-2 py-1 text-right font-bold w-12 border-l border-gray-100 bg-gray-50">{it.qtd}</td>
+                 <td className="px-2 py-1 text-gray-800 font-mono font-medium text-center">{it.dimensao}</td>
+                 <td className="px-2 py-1 text-center font-bold w-12 border-l border-gray-100 bg-gray-50">{it.qtd}</td>
                </tr>
             ))}
           </tbody>
