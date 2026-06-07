@@ -908,20 +908,6 @@ export function RelatoriosModule() {
                 Documento Gerado Via Sistema - Nacional Madeiras
               </p>
             </div>
-            <div className="text-right">
-              <p className="font-bold">
-                Data:{" "}
-                <span className="font-normal">
-                  {header.data ? header.data.split("-").reverse().join("/") : ""}
-                </span>
-              </p>
-              <p className="font-bold">
-                Hora:{" "}
-                <span className="font-normal">
-                  {new Date().toLocaleTimeString("pt-BR")}
-                </span>
-              </p>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-8">
@@ -1018,20 +1004,7 @@ export function RelatoriosModule() {
             </table>
           )}
 
-          <div className="mt-24 pt-8 grid grid-cols-2 gap-16">
-            <div className="text-center">
-              <div className="border-t border-black w-full mb-2"></div>
-              <p className="uppercase text-sm font-bold">
-                Assinatura do Responsável (Emissão)
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="border-t border-black w-full mb-2"></div>
-              <p className="uppercase text-sm font-bold">
-                Assinatura do Recebedor (Conferência)
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
