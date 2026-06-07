@@ -91,7 +91,8 @@ function processUsinagem(kits: any[], isPorta: boolean) {
          dimensao = `${k.aduelaLargura}x${k.aduelaAltura}`;
       }
 
-      const qtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const baseQtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const qtde = (isPorta && k.kitDuplo) ? baseQtde * 2 : baseQtde;
       const amountToAdd = isPorta ? qtde : 1;
 
       if (!agrupar[cat]) agrupar[cat] = { dobradicas: {}, aberturas: {} };
@@ -211,7 +212,8 @@ function processPortas(kits: any[]) {
 
       const isDuplo = !!k.kitDuplo;
       const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamento}-${char}-${isDuplo}`;
-      const qtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const maxQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const qtde = isDuplo ? maxQtd * 2 : maxQtd;
       
       let dimensaoDisplay = `${k.folhaLargura} x ${k.folhaAltura}`;
       if (isDuplo) {
