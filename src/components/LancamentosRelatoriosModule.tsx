@@ -237,7 +237,7 @@ export function LancamentosRelatoriosModule() {
       const parts = line.split('\t');
       if (parts.length < 4) continue; // Skip empty or invalid lines
       
-      const [apto, pav, col, comodo, fLarg, fAlt, tipo, aberto, aLarg, aAlt, reg] = parts.map(p => p?.trim() || '');
+      const [apto, pav, col, comodo, fLarg, fAlt, tipo, aberto, aLarg, aAlt, reg, qtde] = parts.map(p => p?.trim() || '');
       
       newKits.push({
         ...INITIAL_FORM,
@@ -253,6 +253,7 @@ export function LancamentosRelatoriosModule() {
         aduelaLargura: aLarg || '',
         aduelaAltura: aAlt || INITIAL_FORM.aduelaAltura,
         regulagem: reg || INITIAL_FORM.regulagem,
+        qtdeFolhasPorKit: qtde || INITIAL_FORM.qtdeFolhasPorKit,
       });
     }
     
@@ -515,6 +516,50 @@ export function LancamentosRelatoriosModule() {
           </div>
         </form>
       </div>
+
+      {/* BULK MODAL */}
+      {showBulkModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                <FileSpreadsheet className="w-5 h-5 mr-2 text-emerald-600" />
+                Lançamento em Massa
+              </h2>
+              <button type="button" onClick={() => setShowBulkModal(false)} className="text-gray-500 hover:text-red-500 font-bold px-2 py-1">X</button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Copie os dados da planilha e cole na caixa abaixo. A ordem esperada das colunas é:
+                <br />
+                <span className="font-mono text-xs bg-gray-100 dark:bg-gray-900 p-1 rounded mt-2 inline-block">APTO | PAV. | COLUNA | CÔMODO | FOLHA LARGURA | FOLHA ALTURA | TIPOLOGIA | ABERTURA | ADUELA LARGURA | ADUELA ALTURA | REGULAGEM | QTD KITS</span>
+              </p>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder="Cole os dados aqui (separados por tabulação/copiados do Excel)..."
+                className="w-full h-80 p-3 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-sm font-mono whitespace-pre dark:text-gray-200 outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div className="border-t border-gray-100 dark:border-gray-700 p-4 flex justify-end space-x-3 bg-gray-50 dark:bg-gray-900 rounded-b-xl">
+              <button 
+                type="button"
+                onClick={() => setShowBulkModal(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-white dark:hover:bg-gray-800"
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button"
+                onClick={handleMassImport}
+                className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 font-medium"
+              >
+                Importar Dados
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TABELA DE VISUALIZAÇÃO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
