@@ -23,7 +23,7 @@ function processAduelas(kits: any[]) {
       if (!k.aduelaLargura || !k.aduelaAltura) return;
       const key = `${k.aduelaLargura}x${k.aduelaAltura} - ${k.acabamento || 'BRANCO'}`;
       const val = agrupar.get(key) || { largura: parseInt(k.aduelaLargura, 10), altura: parseInt(k.aduelaAltura, 10), acabamento: k.acabamento || 'BRANCO', qtd: 0 };
-      val.qtd += 1; // 1 aduela por kit
+      val.qtd += parseInt(k.qtdeFolhasPorKit || '1', 10) || 1; // multiplicador de kits
       agrupar.set(key, val);
    });
    return Array.from(agrupar.values()).sort((a, b) => {
@@ -93,7 +93,7 @@ function processUsinagem(kits: any[], isPorta: boolean) {
 
       const baseQtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
       const qtde = (isPorta && k.kitDuplo) ? baseQtde * 2 : baseQtde;
-      const amountToAdd = isPorta ? qtde : 1;
+      const amountToAdd = isPorta ? qtde : baseQtde;
 
       if (!agrupar[cat]) agrupar[cat] = { dobradicas: {}, aberturas: {} };
 
@@ -292,7 +292,7 @@ function processVergas(kits: any[]) {
       
       const key = `${k.aduelaLargura}-${vergaLength}`;
       const val = agrupar.get(key) || { aduelaLargura: k.aduelaLargura, vergaLength: vergaLength, folhaRef: fl, qtd: 0 };
-      val.qtd += 1;
+      val.qtd += parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
       agrupar.set(key, val);
    });
    
@@ -355,7 +355,7 @@ function processAlizares(kits: any[]) {
       if (numLados === 0) return;
       const key = `Padrao-${k.cor || k.acabamento || 'NM'}`;
       const val = agrupar.get(key) || { desc: `Alizar - Kit Lados: ${numLados}`, acabamento: k.acabamento, qtd: 0 };
-      val.qtd += numLados; // 1 lado = 1 jogo de alizar
+      val.qtd += numLados * (parseInt(k.qtdeFolhasPorKit || '1', 10) || 1); // multiplicador de kits e lados
       agrupar.set(key, val);
    });
    return Array.from(agrupar.values());

@@ -222,6 +222,46 @@ function EditableCell({ value, onChange, type = "text", className = "", options 
 export function LancamentosRelatoriosModule() {
   const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v2', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+
+  
+  const handleMassImport = () => {
+    if (!bulkText.trim()) return;
+    
+    // Parse TSV
+    const lines = bulkText.split('\n');
+    const newKits: KitLancamento[] = [];
+    
+    for (const line of lines) {
+      const parts = line.split('\t');
+      if (parts.length < 4) continue; // Skip empty or invalid lines
+      
+      const [apto, pav, col, comodo, fLarg, fAlt, tipo, aberto, aLarg, aAlt, reg] = parts.map(p => p?.trim() || '');
+      
+      newKits.push({
+        ...INITIAL_FORM,
+        id: Math.random().toString(36).substr(2, 9),
+        apto: apto || '',
+        pavimento: pav || '',
+        coluna: col || '',
+        comodo: comodo || '',
+        folhaLargura: fLarg || '',
+        folhaAltura: fAlt || INITIAL_FORM.folhaAltura,
+        tipologia: tipo || '',
+        abertura: aberto || INITIAL_FORM.abertura,
+        aduelaLargura: aLarg || '',
+        aduelaAltura: aAlt || INITIAL_FORM.aduelaAltura,
+        regulagem: reg || INITIAL_FORM.regulagem,
+      });
+    }
+    
+    if (newKits.length > 0) {
+      setKits(prev => [...newKits, ...prev]);
+      setShowBulkModal(false);
+      setBulkText('');
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -274,11 +314,21 @@ export function LancamentosRelatoriosModule() {
       {/* FORMULÁRIO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
         <div className="border-b border-gray-100 bg-gray-50 dark:bg-gray-900/80 p-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
-            <Plus className="w-5 h-5 mr-2 text-brand-green" />
-            Novo Cadastro de Kit
-          </h2>
-        </div>
+    <div className="flex justify-between items-center w-full">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+              <Plus className="w-5 h-5 mr-2 text-brand-green" />
+              Novo Cadastro de Kit
+            </h2>
+            <button 
+              type="button" 
+              onClick={() => setShowBulkModal(true)} 
+              className="flex items-center text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-800/50 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
+              Lançamento em Massa
+            </button>
+          </div>
+  </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
