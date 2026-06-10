@@ -50,9 +50,9 @@ function renderAutoAduelas(kits: any[]) {
         <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
            {data.map((row, idx) => (
              <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.largura} x {row.altura}</td>
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold w-20">{row.qtd}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.largura} x {row.altura}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-20">{row.qtd}</td>
              </tr>
            ))}
         </tbody>
@@ -138,7 +138,7 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
                             const qEsqDir = isPorta ? Math.ceil(d.qtd / 2) : d.qtd;
                             return (
                                <div key={d.dimensao} className="text-sm font-bold font-mono text-gray-900 dark:text-gray-100 print:text-black">
-                                  {d.dimensao}: <span className="text-gray-900 dark:text-gray-100 print:text-black">{qEsqDir} Esq / {qEsqDir} Dir</span>
+                                  {d.dimensao}: <span contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded px-1 transition-colors text-gray-900 dark:text-gray-100 print:text-black">{qEsqDir} Esq / {qEsqDir} Dir</span>
                                </div>
                             );
                          })}
@@ -186,8 +186,8 @@ function UsinagemTable({ abertura, itens }: { abertura: string, itens: any[] }) 
             {itens.map((it, i) => (
                <tr key={i} className="border-b-2 border-gray-800 dark:border-gray-600 print:border-black last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
                  <td className="w-12"></td>
-                 <td className="px-2 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
-                 <td className="px-2 py-1 text-center text-gray-900 dark:text-gray-100 print:text-black font-bold w-12 border-l-2 border-gray-800 dark:border-gray-600 print:border-black bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{it.qtd}</td>
+                 <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-2 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
+                 <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-2 py-1 text-center text-gray-900 dark:text-gray-100 print:text-black font-bold w-12 border-l-2 border-gray-800 dark:border-gray-600 print:border-black bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{it.qtd}</td>
                </tr>
             ))}
           </tbody>
@@ -270,9 +270,9 @@ function renderAutoPortas(kits: any[]) {
             <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
                {rows.map((row, idx) => (
                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.dimensaoDisplay}</td>
-                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.acabamento}</td>
-                   <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold">{row.qtd}</td>
+                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.dimensaoDisplay}</td>
+                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.acabamento}</td>
+                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold">{row.qtd}</td>
                  </tr>
                ))}
             </tbody>
@@ -334,8 +334,8 @@ function renderAutoVergas(kits: any[]) {
               <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
                  {groupedData[vergaKey].map((row, idx) => (
                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-                     <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
-                     <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
+                     <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
+                     <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
                    </tr>
                  ))}
               </tbody>
@@ -376,9 +376,9 @@ function renderAutoAlizares(kits: any[]) {
         <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
            {data.map((row, idx) => (
              <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.desc}</td>
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
-               <td className="px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-right font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.desc}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
+               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
              </tr>
            ))}
         </tbody>

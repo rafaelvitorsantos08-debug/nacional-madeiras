@@ -384,7 +384,15 @@ export function RelatoriosModule() {
         </div>
       </div>
 
+      
       <div className="flex-1 overflow-y-auto p-4 md:p-6 print:p-0 print:bg-white print:overflow-visible">
+        {/* ALERTA */}
+        <div className="max-w-5xl mx-auto mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm print:hidden">
+          <div className="text-amber-800 text-sm font-medium whitespace-pre-wrap">
+            ⚠️ <strong>Atenção:</strong> kits com montantes e kits camarão com quantidade de folhas ímpares, adicionar a abertura manualmente.
+          </div>
+        </div>
+
         {/* Formulário Não-Impresso */}
         <div className="max-w-5xl mx-auto space-y-6 print:hidden">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -957,9 +965,9 @@ export function RelatoriosModule() {
                   <tr key={item.id} className="border-b border-black">
                     <td className="border border-black p-2 text-center">{idx + 1}</td>
                     {reportType !== "avarias" && (
-                      <td className="border border-black p-2 font-medium">{item.cor}</td>
+                      <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 focus:ring-1 focus:ring-emerald-500 transition-colors border border-black p-2 font-medium">{item.cor}</td>
                     )}
-                    <td className="border border-black p-2">
+                    <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 focus:ring-1 focus:ring-emerald-500 transition-colors border border-black p-2">
                       {reportType === "portas" && (
                         <>{item.dimensao} - Enc: {item.enchimento} - Mod: {item.modelo}</>
                       )}
@@ -978,7 +986,7 @@ export function RelatoriosModule() {
                         <>Face: <b>{item.face}</b>mm - Aba: <b>{item.aba}</b>mm - Espessura: <b>{item.espessura}</b>mm - Comp: <b>{item.comprimento}</b>mm</>
                       )}
                     </td>
-                    <td className="border border-black p-2 text-center font-bold text-lg">{item.quantidade}</td>
+                    <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 focus:ring-1 focus:ring-emerald-500 transition-colors border border-black p-2 text-center font-bold text-lg">{item.quantidade}</td>
                     <td className="border border-black p-2"></td>
                   </tr>
                 ))}
