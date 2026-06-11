@@ -150,13 +150,13 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
                   {/* Left Column (ESQUERDAS) */}
                   <div className="flex-1 flex flex-col gap-2">
                      {aberturasEsq.map(ab => (
-                        <UsinagemTable key={ab.abertura} abertura={ab.abertura} itens={ab.itens} />
+                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
                      ))}
                   </div>
                   {/* Right Column (DIREITAS) */}
                   <div className="flex-1 flex flex-col gap-2">
                      {aberturasDir.map(ab => (
-                        <UsinagemTable key={ab.abertura} abertura={ab.abertura} itens={ab.itens} />
+                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
                      ))}
                   </div>
                 </div>
@@ -164,7 +164,7 @@ function renderUsinagem(kits: any[], isPorta: boolean) {
                 {aberturasOut.length > 0 && (
                    <div className="mt-2 grid grid-cols-2 gap-4">
                      {aberturasOut.map(ab => (
-                        <UsinagemTable key={ab.abertura} abertura={ab.abertura} itens={ab.itens} />
+                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
                      ))}
                    </div>
                 )}
@@ -252,7 +252,7 @@ function renderAutoPortas(kits: any[]) {
 
   return (
     <div className="flex flex-col gap-6">
-      {Object.entries(groupedData).map(([caracteristica, rows]) => (
+      {Object.entries(groupedData).map(([caracteristica, rows]: [string, any]) => (
         <div key={caracteristica} className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
           <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black table-fixed">
             <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
