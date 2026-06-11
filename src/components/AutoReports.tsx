@@ -21,8 +21,8 @@ function processAduelas(kits: any[]) {
    const agrupar = new Map();
    kits.forEach(k => {
       if (!k.aduelaLargura || !k.aduelaAltura) return;
-      const key = `${k.aduelaLargura}x${k.aduelaAltura} - ${k.acabamento || 'BRANCO'}`;
-      const val = agrupar.get(key) || { largura: parseInt(k.aduelaLargura, 10), altura: parseInt(k.aduelaAltura, 10), acabamento: k.acabamento || 'BRANCO', qtd: 0 };
+      const key = `${k.aduelaLargura}x${k.aduelaAltura} - ${k.acabamentoAduela || 'BRANCO'}`;
+      const val = agrupar.get(key) || { largura: parseInt(k.aduelaLargura, 10), altura: parseInt(k.aduelaAltura, 10), acabamento: k.acabamentoAduelaAduela || 'BRANCO', qtd: 0 };
       val.qtd += parseInt(k.qtdeFolhasPorKit || '1', 10) || 1; // multiplicador de kits
       agrupar.set(key, val);
    });
@@ -204,14 +204,14 @@ function processPortas(kits: any[]) {
    kits.forEach(k => {
       if (!k.folhaLargura || !k.folhaAltura) return;
       
-      const char = (k.caracteristica || k.modelo || 'HONEY').toUpperCase();
+      const char = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
       let charOrder = 99;
       if (char.includes('HONEY') || char.includes('COLMEIA')) charOrder = 1;
       else if (char.includes('SARRAFEADA')) charOrder = 2;
       else if (char.includes('SOLIDA') || char.includes('SÓLIDA')) charOrder = 3;
 
       const isDuplo = !!k.kitDuplo;
-      const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamento}-${char}-${isDuplo}`;
+      const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamentoPorta}-${char}-${isDuplo}`;
       const maxQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
       const qtde = isDuplo ? maxQtd * 2 : maxQtd;
       
@@ -225,7 +225,7 @@ function processPortas(kits: any[]) {
           largura: parseInt(k.folhaLargura, 10), 
           altura: parseInt(k.folhaAltura, 10), 
           dimensaoDisplay,
-          acabamento: k.acabamento || 'BRANCO', 
+          acabamento: k.acabamentoPorta || 'BRANCO', 
           caracteristica: char,
           charOrder: charOrder,
           qtd: 0 
@@ -353,8 +353,8 @@ function processAlizares(kits: any[]) {
       // based on qtdeLadosAduela
       const numLados = parseInt(k.qtdeLadosAduela || '0', 10) || 0;
       if (numLados === 0) return;
-      const key = `Padrao-${k.cor || k.acabamento || 'NM'}`;
-      const val = agrupar.get(key) || { desc: `Alizar - Kit Lados: ${numLados}`, acabamento: k.acabamento, qtd: 0 };
+      const key = `Padrao-${k.cor || k.acabamentoAduela || 'NM'}`;
+      const val = agrupar.get(key) || { desc: `Alizar - Kit Lados: ${numLados}`, acabamento: k.acabamentoAduela || 'NM', qtd: 0 };
       val.qtd += numLados * (parseInt(k.qtdeFolhasPorKit || '1', 10) || 1); // multiplicador de kits e lados
       agrupar.set(key, val);
    });

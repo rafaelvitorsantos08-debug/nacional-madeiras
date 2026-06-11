@@ -9,31 +9,32 @@ import { cn } from '../lib/utils';
 
 interface KitLancamento {
   id: string;
-  // Localização
+  bloco: string;
   apto: string;
   pavimento: string;
   coluna: string;
   comodo: string;
-  // Folha de Porta
+  tipologia: string;
   folhaLargura: string;
   folhaAltura: string;
-  // Especificações
-  tipologia: string;
+  qtdeFolhasPorKit: string;
+  acabamentoPorta: string;
+  caracteristicaPorta: string;
   abertura: string;
-  // Aduela
   aduelaLargura: string;
   aduelaAltura: string;
   regulagem: string;
-  // Detalhes Kits
-  qtdeFolhasPorKit: string;
-  acabamento: string;
-  caracteristica: string;
-  // Complementos
+  acabamentoAduela: string;
+  fechaduraMarca: string;
+  fechaduraGrid: string;
+  fechaduraTipo: string;
+  dobradicaMarca: string;
+  dobradicaMedida: string;
   qtdeLadosAduela: string;
-  qtdeMontantes: string;
+  montantesMedida: string;
+  montantesFolgas: string;
   bitsQtde: string;
   bitsFaces: string;
-  // Características
   camarao: boolean;
   correr: boolean;
   pivotante: boolean;
@@ -44,153 +45,813 @@ interface KitLancamento {
   vidro: boolean;
   fechaFresta: boolean;
   kitDuplo: boolean;
-  observacao?: string;
+  observacao: string;
 }
 
 const INITIAL_FORM: Omit<KitLancamento, 'id'> = {
-  apto: '',
-  pavimento: '',
-  coluna: '',
-  comodo: 'BANHEIRO',
-  folhaLargura: '',
-  folhaAltura: '2100',
-  tipologia: '',
-  abertura: 'ESQUERDA',
-  aduelaLargura: '',
-  aduelaAltura: '2110',
-  regulagem: 'REG 50',
-  qtdeFolhasPorKit: '1',
-  acabamento: 'BRANCO',
-  caracteristica: 'HONEY',
-  qtdeLadosAduela: '3',
-  qtdeMontantes: '',
-  bitsQtde: '',
-  bitsFaces: '',
-  camarao: false,
-  correr: false,
-  pivotante: false,
-  veneziana: false,
-  grelha: false,
-  bandeira: false,
-  chapa: false,
-  vidro: false,
-  fechaFresta: false,
-  kitDuplo: false,
-  observacao: '',
+  bloco: '', apto: '', pavimento: '', coluna: '', comodo: '', tipologia: '',
+  folhaLargura: '', folhaAltura: '', qtdeFolhasPorKit: '',
+  acabamentoPorta: '', caracteristicaPorta: '', abertura: '',
+  aduelaLargura: '', aduelaAltura: '', regulagem: '',
+  acabamentoAduela: '', fechaduraMarca: '', fechaduraGrid: '', fechaduraTipo: '',
+  dobradicaMarca: '', dobradicaMedida: '', qtdeLadosAduela: '',
+  montantesMedida: '', montantesFolgas: '', bitsQtde: '', bitsFaces: '',
+  camarao: false, correr: false, pivotante: false, veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
 };
 
-const INITIAL_KITS: KitLancamento[] = [
+const INITIAL_KITS: KitLancamento[] = 
+[
   {
-    id: "mock1", apto: "102", pavimento: "1", coluna: "2", comodo: "BANHEIRO", 
-    folhaLargura: "620", folhaAltura: "2070", tipologia: "PM1F", abertura: "ESQUERDA",
-    aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k1",
+    "bloco": "1",
+    "apto": "102",
+    "pavimento": "1",
+    "coluna": "2",
+    "comodo": "BANHEIRO",
+    "folhaLargura": "620",
+    "folhaAltura": "2070",
+    "tipologia": "PM1F",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "90",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": true,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 WC | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock2", apto: "104", pavimento: "1", coluna: "4", comodo: "ENTRADA", 
-    folhaLargura: "820", folhaAltura: "2100", tipologia: "PM3", abertura: "ESQUERDA P/FORA",
-    aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k2",
+    "bloco": "1",
+    "apto": "104",
+    "pavimento": "1",
+    "coluna": "4",
+    "comodo": "ENTRADA",
+    "folhaLargura": "820",
+    "folhaAltura": "2100",
+    "tipologia": "PM3",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "170",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SOLIDA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "4",
+    "bitsFaces": "2",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": true,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 40 EXT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock3", apto: "106", pavimento: "1", coluna: "6", comodo: "QUARTO", 
-    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
-    aduelaLargura: "90", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k3",
+    "bloco": "1",
+    "apto": "106",
+    "pavimento": "1",
+    "coluna": "6",
+    "comodo": "QUARTO",
+    "folhaLargura": "720",
+    "folhaAltura": "2100",
+    "tipologia": "PM2",
+    "abertura": "DIREITA",
+    "aduelaLargura": "90",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 70",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock4", apto: "202", pavimento: "2", coluna: "2", comodo: "ENTRADA", 
-    folhaLargura: "820", folhaAltura: "2100", tipologia: "PM3", abertura: "DIREITA",
-    aduelaLargura: "170", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SOLIDA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k4",
+    "bloco": "1",
+    "apto": "202",
+    "pavimento": "2",
+    "coluna": "2",
+    "comodo": "ENTRADA",
+    "folhaLargura": "820",
+    "folhaAltura": "2100",
+    "tipologia": "PM3",
+    "abertura": "DIREITA",
+    "aduelaLargura": "170",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 70",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SOLIDA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "4",
+    "bitsFaces": "2",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": true,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 40 EXT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock5", apto: "206", pavimento: "2", coluna: "6", comodo: "COZINHA", 
-    folhaLargura: "820", folhaAltura: "2070", tipologia: "PM3F", abertura: "DIREITA P/FORA",
-    aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k5",
+    "bloco": "1",
+    "apto": "206",
+    "pavimento": "2",
+    "coluna": "6",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "DIREITA P/FORA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": true,
+    "pivotante": false,
+    "veneziana": true,
+    "grelha": true,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock6", apto: "302", pavimento: "3", coluna: "2", comodo: "LIXEIRA", 
-    folhaLargura: "1440", folhaAltura: "2100", tipologia: "PM7", abertura: "ESQUERDA P/FORA",
-    aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k6",
+    "bloco": "1",
+    "apto": "309",
+    "pavimento": "3",
+    "coluna": "9",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "DIREITA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": true,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": true,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock7", apto: "306", pavimento: "3", coluna: "6", comodo: "ELETRICA", 
-    folhaLargura: "1020", folhaAltura: "2100", tipologia: "PM12", abertura: "ESQUERDA P/FORA",
-    aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "2",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k7",
+    "bloco": "1",
+    "apto": "509",
+    "pavimento": "5",
+    "coluna": "9",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": true,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock8", apto: "308", pavimento: "3", coluna: "8", comodo: "SUITE 2", 
-    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
-    aduelaLargura: "150", aduelaAltura: "2110", regulagem: "REG 70", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k8",
+    "bloco": "1",
+    "apto": "709",
+    "pavimento": "7",
+    "coluna": "9",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": true,
+    "pivotante": false,
+    "veneziana": true,
+    "grelha": true,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": true,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: PAPAIZ 3 x 2,5"
   },
   {
-    id: "mock9", apto: "309", pavimento: "3", coluna: "9", comodo: "COZINHA", 
-    folhaLargura: "820", folhaAltura: "2070", tipologia: "PM3F", abertura: "ESQUERDA",
-    aduelaLargura: "150", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k9",
+    "bloco": "1",
+    "apto": "703",
+    "pavimento": "7",
+    "coluna": "3",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "DIREITA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": true,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": true,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": true,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: PAPAIZ 3 x 2,5"
   },
   {
-    id: "mock10", apto: "405", pavimento: "4", coluna: "5", comodo: "BANH. SOCIAL", 
-    folhaLargura: "620", folhaAltura: "2100", tipologia: "PM1", abertura: "DIREITA",
-    aduelaLargura: "110", aduelaAltura: "2120", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k10",
+    "bloco": "1",
+    "apto": "302",
+    "pavimento": "3",
+    "coluna": "2",
+    "comodo": "LIXEIRA",
+    "folhaLargura": "1440",
+    "folhaAltura": "2100",
+    "tipologia": "PM7",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "130",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "2",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 45,1 SÓ MAÇ. | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock11", apto: "501", pavimento: "5", coluna: "1", comodo: "SUITE", 
-    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "DIREITA",
-    aduelaLargura: "110", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k11",
+    "bloco": "1",
+    "apto": "306",
+    "pavimento": "3",
+    "coluna": "6",
+    "comodo": "ELETRICA",
+    "folhaLargura": "1020",
+    "folhaAltura": "1800",
+    "tipologia": "PM12",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "2",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "4",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 45 MEIO CIL. | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock12", apto: "503", pavimento: "5", coluna: "3", comodo: "BANH. SUITE", 
-    folhaLargura: "620", folhaAltura: "2070", tipologia: "PM1F", abertura: "ESQUERDA",
-    aduelaLargura: "90", aduelaAltura: "2120", regulagem: "REG 70", qtdeFolhasPorKit: "1",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k12",
+    "bloco": "1",
+    "apto": "308",
+    "pavimento": "3",
+    "coluna": "8",
+    "comodo": "SUITE 2",
+    "folhaLargura": "720",
+    "folhaAltura": "2100",
+    "tipologia": "PM2",
+    "abertura": "DIREITA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 70",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock13", apto: "604", pavimento: "6", coluna: "4", comodo: "QUARTO", 
-    folhaLargura: "720", folhaAltura: "2100", tipologia: "PM2", abertura: "ESQUERDA",
-    aduelaLargura: "130", aduelaAltura: "2110", regulagem: "REG 50", qtdeFolhasPorKit: "2",
-    acabamento: "BRANCO", caracteristica: "SARRAFEADA", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k13",
+    "bloco": "1",
+    "apto": "309",
+    "pavimento": "3",
+    "coluna": "9",
+    "comodo": "COZINHA",
+    "folhaLargura": "820",
+    "folhaAltura": "2070",
+    "tipologia": "PM3F",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "150",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: LA FONTE 55 INT | Dobradica: LA FONTE 3 x 2,5"
   },
   {
-    id: "mock14", apto: "601", pavimento: "6", coluna: "1", comodo: "ESPECIAIS", 
-    folhaLargura: "2000", folhaAltura: "2100", tipologia: "PM18", abertura: "ESQUERDA P/FORA",
-    aduelaLargura: "70", aduelaAltura: "2110", regulagem: "FIXO", qtdeFolhasPorKit: "4",
-    acabamento: "BRANCO", caracteristica: "HONEY", qtdeLadosAduela: "", qtdeMontantes: "",
-    bitsQtde: "", bitsFaces: "", camarao: false, correr: false, pivotante: false,
-    veneziana: false, grelha: false, bandeira: false, chapa: false, vidro: false, fechaFresta: false, kitDuplo: false, observacao: ''
+    "id": "k14",
+    "bloco": "2",
+    "apto": "405",
+    "pavimento": "4",
+    "coluna": "5",
+    "comodo": "BANH. SOCIAL",
+    "folhaLargura": "620",
+    "folhaAltura": "2100",
+    "tipologia": "PM1",
+    "abertura": "DIREITA",
+    "aduelaLargura": "110",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55 WC | Dobradica: LA FONTE 3 x 2,5"
+  },
+  {
+    "id": "k15",
+    "bloco": "2",
+    "apto": "501",
+    "pavimento": "5",
+    "coluna": "1",
+    "comodo": "SUITE",
+    "folhaLargura": "720",
+    "folhaAltura": "2100",
+    "tipologia": "PM2",
+    "abertura": "DIREITA",
+    "aduelaLargura": "110",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55 INT | Dobradica: LA FONTE 3 x 2,5"
+  },
+  {
+    "id": "k16",
+    "bloco": "2",
+    "apto": "503",
+    "pavimento": "5",
+    "coluna": "3",
+    "comodo": "BANH. SUITE",
+    "folhaLargura": "620",
+    "folhaAltura": "2070",
+    "tipologia": "PM1F",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "90",
+    "aduelaAltura": "2120",
+    "regulagem": "REG 70",
+    "qtdeFolhasPorKit": "1",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55 WC | Dobradica: LA FONTE 3 x 2,5"
+  },
+  {
+    "id": "k17",
+    "bloco": "2",
+    "apto": "604",
+    "pavimento": "6",
+    "coluna": "4",
+    "comodo": "QUARTO",
+    "folhaLargura": "720",
+    "folhaAltura": "2100",
+    "tipologia": "PM2",
+    "abertura": "ESQUERDA",
+    "aduelaLargura": "130",
+    "aduelaAltura": "2110",
+    "regulagem": "REG 50",
+    "qtdeFolhasPorKit": "2",
+    "acabamento": "BRANCO",
+    "caracteristica": "SARRAFEADA",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55 INT | Dobradica: PAPAIZ 3 x 2,5"
+  },
+  {
+    "id": "k18",
+    "bloco": "2",
+    "apto": "400",
+    "pavimento": "4",
+    "coluna": "0",
+    "comodo": "SHAFT",
+    "folhaLargura": "1800",
+    "folhaAltura": "2100",
+    "tipologia": "PM19",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "3",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 45 MEIO CIL. | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 40 Folg 20"
+  },
+  {
+    "id": "k19",
+    "bloco": "2",
+    "apto": "600",
+    "pavimento": "6",
+    "coluna": "0",
+    "comodo": "ESPECIAIS 1",
+    "folhaLargura": "2000",
+    "folhaAltura": "1800",
+    "tipologia": "PM18",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "4",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "4",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 45 MEIO CIL. | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 40 Folg 20"
+  },
+  {
+    "id": "k20",
+    "bloco": "2",
+    "apto": "600",
+    "pavimento": "6",
+    "coluna": "0",
+    "comodo": "ESPECIAIS 2",
+    "folhaLargura": "1800",
+    "folhaAltura": "2100",
+    "tipologia": "PM15",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "4",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": true,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55,1 EXT | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 40 Folg 20"
+  },
+  {
+    "id": "k21",
+    "bloco": "2",
+    "apto": "700",
+    "pavimento": "7",
+    "coluna": "0",
+    "comodo": "ESPECIAIS 2",
+    "folhaLargura": "1800",
+    "folhaAltura": "2100",
+    "tipologia": "PM15",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "4",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": true,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55,1 EXT | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 40 Folg 20"
+  },
+  {
+    "id": "k22",
+    "bloco": "2",
+    "apto": "800",
+    "pavimento": "8",
+    "coluna": "0",
+    "comodo": "ESPECIAIS 2",
+    "folhaLargura": "1800",
+    "folhaAltura": "2100",
+    "tipologia": "PM15",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "4",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": true,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 55,1 EXT | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 40 Folg 20"
+  },
+  {
+    "id": "k23",
+    "bloco": "2",
+    "apto": "900",
+    "pavimento": "9",
+    "coluna": "0",
+    "comodo": "ESPECIAIS",
+    "folhaLargura": "3600",
+    "folhaAltura": "2100",
+    "tipologia": "PM22",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "6",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "3",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 45 MEIO CIL. | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 80 Folg 40"
+  },
+  {
+    "id": "k24",
+    "bloco": "2",
+    "apto": "900",
+    "pavimento": "9",
+    "coluna": "0",
+    "comodo": "ESPECIAIS",
+    "folhaLargura": "3600",
+    "folhaAltura": "1800",
+    "tipologia": "PM22A",
+    "abertura": "ESQUERDA P/FORA",
+    "aduelaLargura": "70",
+    "aduelaAltura": "2110",
+    "regulagem": "FIXO",
+    "qtdeFolhasPorKit": "6",
+    "acabamento": "BRANCO",
+    "caracteristica": "HONEY",
+    "qtdeLadosAduela": "4",
+    "qtdeMontantes": "",
+    "bitsQtde": "",
+    "bitsFaces": "",
+    "camarao": false,
+    "correr": false,
+    "pivotante": false,
+    "veneziana": false,
+    "grelha": false,
+    "bandeira": false,
+    "chapa": false,
+    "vidro": false,
+    "fechaFresta": false,
+    "kitDuplo": false,
+    "observacao": "Aduela: PET MDF BRA+BOR+REG | Fechadura: PAPAIZ 45 MEIO CIL. | Dobradica: PAPAIZ 3 x 2,5 | Montantes: Med 80 Folg 40"
   }
 ];
 
@@ -246,7 +907,7 @@ function EditableObsCell({ value, onChange }: { value: string, onChange: (val: s
 }
 
 export function LancamentosRelatoriosModule() {
-  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v3', INITIAL_KITS);
+  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v5', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
@@ -255,7 +916,20 @@ export function LancamentosRelatoriosModule() {
   
   const exportToExcel = () => {
     if (kits.length === 0) return;
-    const worksheet = XLSX.utils.json_to_sheet(kits.map(({ id, ...kit }) => kit));
+    const headers = [
+      ['BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'TIPOLOGIA', 'FOLHA DE PORTA LARGURA', 'FOLHA DE PORTA ALTURA', 'QUANTIDADE DE FOLHA POR KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARGURA', 'ADUELA ALTURA', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECHADURA MARCA', 'FECHADURA GRID', 'FECHADURA TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTDE DE LADOS DA ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'BITS POR FOLHA QTDE', 'BITS POR FOLHA FACES', 'CAMARÃO', 'CORRER', 'PIVOTANTE', 'C/VENEZIANA', 'C/GRELHA', 'C/BANDEIRA', 'C/CHAPA', 'C/VIDRO', 'C/FECHA FRESTA']
+    ];
+
+    const dataToExport = kits.map(k => [
+      k.bloco || '', k.apto || '', k.pavimento || '', k.coluna || '', k.comodo || '', k.tipologia || '',
+      k.folhaLargura || '', k.folhaAltura || '', k.qtdeFolhasPorKit || '', k.acabamentoPorta || '', k.caracteristicaPorta || '', k.abertura || '',
+      k.aduelaLargura || '', k.aduelaAltura || '', k.regulagem || '', k.acabamentoAduela || '',
+      k.fechaduraMarca || '', k.fechaduraGrid || '', k.fechaduraTipo || '', k.dobradicaMarca || '', k.dobradicaMedida || '',
+      k.qtdeLadosAduela || '', k.montantesMedida || '', k.montantesFolgas || '', k.bitsQtde || '', k.bitsFaces || '',
+      k.camarao ? 'X' : '', k.correr ? 'X' : '', k.pivotante ? 'X' : '', k.veneziana ? 'X' : '', k.grelha ? 'X' : '', k.bandeira ? 'X' : '', k.chapa ? 'X' : '', k.vidro ? 'X' : '', k.fechaFresta ? 'X' : ''
+    ]);
+
+    const worksheet = XLSX.utils.aoa_to_sheet([...headers, ...dataToExport]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Kits');
     XLSX.writeFile(workbook, 'kits_lancados.xlsx');
@@ -271,11 +945,11 @@ export function LancamentosRelatoriosModule() {
     doc.setFontSize(10);
     doc.text('Gerado em: ' + new Date().toLocaleString(), 14, 22);
 
-    const headers = [['Apto', 'Pav.', 'Col', 'Comodo', 'Folha L', 'Folha A', 'Tipo', 'Abertura', 'Aduela L', 'Aduela A', 'Acabamento', 'Qtd']];
+    const headers = [['Bloco', 'Apto', 'Pav.', 'Col', 'Comodo', 'Tipo', 'FL', 'FA', 'AL', 'AA', 'Qtd']];
     const data = kits.map(k => [
-      k.apto, k.pavimento, k.coluna, k.comodo, 
-      k.folhaLargura, k.folhaAltura, k.tipologia, k.abertura,
-      k.aduelaLargura, k.aduelaAltura, k.acabamento, k.qtdeFolhasPorKit
+      k.bloco, k.apto, k.pavimento, k.coluna, k.comodo, 
+      k.tipologia, k.folhaLargura, k.folhaAltura, 
+      k.aduelaLargura, k.aduelaAltura, k.qtdeFolhasPorKit
     ]);
 
     autoTable(doc, {
@@ -297,33 +971,55 @@ export function LancamentosRelatoriosModule() {
     const newKits: KitLancamento[] = [];
     
     for (const line of lines) {
-      const parts = line.split('\t');
-      if (parts.length < 4) continue; // Skip empty or invalid lines
-      
-      const [apto, pav, col, comodo, fLarg, fAlt, tipo, aberto, aLarg, aAlt, reg, qtde] = parts.map(p => p?.trim() || '');
+      const cols = line.split('\t').map(c => c?.trim() || '');
+      if (cols.length < 5) continue; // Skip invalid lines
       
       newKits.push({
-        ...INITIAL_FORM,
-        id: Math.random().toString(36).substr(2, 9),
-        apto: apto || '',
-        pavimento: pav || '',
-        coluna: col || '',
-        comodo: comodo || '',
-        folhaLargura: fLarg || '',
-        folhaAltura: fAlt || INITIAL_FORM.folhaAltura,
-        tipologia: tipo || '',
-        abertura: aberto || INITIAL_FORM.abertura,
-        aduelaLargura: aLarg || '',
-        aduelaAltura: aAlt || INITIAL_FORM.aduelaAltura,
-        regulagem: reg || INITIAL_FORM.regulagem,
-        qtdeFolhasPorKit: qtde || INITIAL_FORM.qtdeFolhasPorKit,
+        id: 'k' + Date.now() + Math.random().toString(36).substring(7),
+        bloco: cols[0] || '',
+        apto: cols[1] || '',
+        pavimento: cols[2] || '',
+        coluna: cols[3] || '',
+        comodo: cols[4] || '',
+        tipologia: cols[5] || '',
+        folhaLargura: cols[6] || '',
+        folhaAltura: cols[7] || '',
+        qtdeFolhasPorKit: cols[8] || '',
+        acabamentoPorta: cols[9] || '',
+        caracteristicaPorta: cols[10] || '',
+        abertura: cols[11] || '',
+        aduelaLargura: cols[12] || '',
+        aduelaAltura: cols[13] || '',
+        regulagem: cols[14] || '',
+        acabamentoAduela: cols[15] || '',
+        fechaduraMarca: cols[16] || '',
+        fechaduraGrid: cols[17] || '',
+        fechaduraTipo: cols[18] || '',
+        dobradicaMarca: cols[19] || '',
+        dobradicaMedida: cols[20] || '',
+        qtdeLadosAduela: cols[21] || '',
+        montantesMedida: cols[22] || '',
+        montantesFolgas: cols[23] || '',
+        bitsQtde: cols[24] || '',
+        bitsFaces: cols[25] || '',
+        camarao: cols[26] === 'X' || cols[26] === 'x',
+        correr: cols[27] === 'X' || cols[27] === 'x',
+        pivotante: cols[28] === 'X' || cols[28] === 'x',
+        veneziana: cols[29] === 'X' || cols[29] === 'x',
+        grelha: cols[30] === 'X' || cols[30] === 'x',
+        bandeira: cols[31] === 'X' || cols[31] === 'x',
+        chapa: cols[32] === 'X' || cols[32] === 'x',
+        vidro: cols[33] === 'X' || cols[33] === 'x',
+        fechaFresta: cols[34] === 'X' || cols[34] === 'x',
+        kitDuplo: false,
+        observacao: ''
       });
     }
-    
+
     if (newKits.length > 0) {
-      setKits(prev => [...newKits, ...prev]);
-      setShowBulkModal(false);
+      setKits(prev => [...prev, ...newKits]);
       setBulkText('');
+      setShowBulkModal(false);
     }
   };
 
@@ -400,7 +1096,16 @@ export function LancamentosRelatoriosModule() {
             <div className="md:col-span-4 grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-blue-50/30 rounded-lg border border-blue-100">
               <h3 className="col-span-full text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">Localização</h3>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Apto</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Bloco</label>
+                  <input
+                    type="text"
+                    className="w-full text-sm border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
+                    value={form.bloco}
+                    onChange={e => setForm({...form, bloco: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Apto</label>
                 <input type="text" name="apto" value={form.apto} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" required />
               </div>
               <div>
@@ -481,7 +1186,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Acabamento</label>
-                <select name="acabamento" value={form.acabamento} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
+                <select name="acabamento" value={form.acabamentoPorta} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
                   <option value="BRANCO">Branco</option>
                   <option value="MADEIRA">Madeira</option>
                   <option value="PRETO">Preto</option>
@@ -490,7 +1195,7 @@ export function LancamentosRelatoriosModule() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Característica</label>
-                <select name="caracteristica" value={form.caracteristica} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
+                <select name="caracteristica" value={form.caracteristicaPorta} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
                   <option value="HONEY">Honey (Colmeia)</option>
                   <option value="SOLIDA">Sólida</option>
                   <option value="SARRAFEADA">Sarrafeada</option>
@@ -509,7 +1214,7 @@ export function LancamentosRelatoriosModule() {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">Qtd de Montantes</label>
-                        <input type="text" name="qtdeMontantes" value={form.qtdeMontantes} onChange={handleInputChange} className="w-full p-2 border border-purple-200 rounded text-sm focus:ring-1 focus:ring-purple-500 outline-none" />
+                        <input type="text" name="qtdeMontantes" value={form.montantesMedida} onChange={handleInputChange} className="w-full p-2 border border-purple-200 rounded text-sm focus:ring-1 focus:ring-purple-500 outline-none" />
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">Bits (Qtde)</label>
@@ -657,45 +1362,11 @@ export function LancamentosRelatoriosModule() {
          </div>
          <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full text-left text-sm border-collapse whitespace-nowrap">
-               <thead className="bg-[#e2efda] dark:bg-emerald-900/40 text-xs uppercase text-gray-800 dark:text-emerald-100 sticky top-0 border-b border-gray-300 dark:border-gray-600">
+               <thead className="bg-[#e2efda] dark:bg-emerald-900/40 text-[10px] uppercase text-gray-800 dark:text-emerald-100 sticky top-0 border-b border-gray-300 dark:border-gray-600">
                   <tr>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Ações</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Apto</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Pav.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Coluna</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold">Cômodo</th>
-                     
-                     {/* Folha */}
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Folha de Porta<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
-                     
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Tipologia</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Abertura</th>
-                     
-                     {/* Aduela */}
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Aduela<br/><span className="font-normal text-[10px]">Largura | Altura</span></th>
-                     
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Regulagem</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Qtd Folha<br/>Kit</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Acabamento</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Característica</th>
-                     
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Qtd Lados<br/>Aduela</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Montantes</th>
-                     
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center" colSpan={2}>Bits Folha<br/><span className="font-normal text-[10px]">Qtde | Faces</span></th>
-                     
-                     {/* Specs */}
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Camarão</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Correr</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">Pivotante</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Venez.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Grelha</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Band.</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Chapa</th>
-                     <th className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center">C/ Vidro</th>
-                     <th className="p-2 font-bold text-center border-r border-[#c2d6b3] dark:border-emerald-800/40">Fecha Fresta</th>
-                     <th className="p-2 font-bold text-center">Kit Duplo</th>
-<th className="p-2 font-bold text-center">Obs.</th>
+                     {['AÇÕES', 'BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'FOLHA LARG', 'FOLHA ALT', 'QTD FOLHA/KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARG', 'ADUELA ALT', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECH. MARCA', 'FECH. GRID', 'FECH. TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTD LADOS ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'B. QTD', 'B. FACES', 'CAM', 'CORRER', 'PIV', 'C/VEN', 'C/GRE', 'C/BAND', 'C/CHAPA', 'C/VID', 'C/FF'].map((h, i) => (
+                         <th key={i} className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center whitespace-pre">{h}</th>
+                     ))}
                   </tr>
                </thead>
                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
