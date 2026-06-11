@@ -246,7 +246,7 @@ function EditableObsCell({ value, onChange }: { value: string, onChange: (val: s
 }
 
 export function LancamentosRelatoriosModule() {
-  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v2', INITIAL_KITS);
+  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v3', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
