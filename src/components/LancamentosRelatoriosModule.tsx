@@ -418,6 +418,7 @@ export function LancamentosRelatoriosModule() {
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Acabamento</label>
                 <select name="acabamento" value={form.acabamentoPorta} onChange={handleInputChange} className="w-full p-2 border border-amber-200 rounded text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white dark:bg-gray-800">
+                  <option value="BASIC">Basic</option>
                   <option value="BRANCO">Branco</option>
                   <option value="MADEIRA">Madeira</option>
                   <option value="PRETO">Preto</option>
