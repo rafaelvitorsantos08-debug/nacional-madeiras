@@ -187,7 +187,7 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   );
 };
 
-type ReportType = "portas" | "aduelas" | "alizares" | "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares";
+type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares";
 
 export function getCategoriaComodo(comodo: string): string {
   const c = comodo.toUpperCase();
@@ -214,7 +214,7 @@ interface ReportHeader {
 }
 
 export function RelatoriosModule() {
-  const [reportType, setReportType] = useLocalStorage<ReportType>("nm_active_relatorio_tipo", "portas");
+  const [reportType, setReportType] = useLocalStorage<ReportType>("nm_active_relatorio_tipo", "auto_portas");
   const [header, setHeader] = useLocalStorage<ReportHeader>("nm_active_relatorio_header", {
     data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0],
     responsavel: "",
@@ -414,20 +414,14 @@ export function RelatoriosModule() {
                   }}
                   className="w-full rounded-md border-gray-300 bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <optgroup label="Manuais">
-                    <option value="portas">Relatório de Folhas de Porta</option>
-                    <option value="aduelas">Relatório de Aduelas</option>
-                    <option value="alizares">Relatório de Alizares</option>
-                    <option value="avarias">Relatório de Avarias</option>
-                  </optgroup>
-                  <optgroup label="Automáticos (Via Lançamentos)">
-                    <option value="auto_aduelas">Aduelas</option>
-                    <option value="auto_usinagem_aduelas">Usinagem de Aduelas</option>
-                    <option value="auto_portas">Portas</option>
+                  
+                    <option value="auto_portas">Relatório de Folhas de Porta</option>
+                    <option value="auto_aduelas">Relatório de Aduelas</option>
+                    <option value="auto_alizares">Relatório de Alizares</option>
                     <option value="auto_usinagem_portas">Usinagem de Portas</option>
+                    <option value="auto_usinagem_aduelas">Usinagem de Aduelas</option>
                     <option value="auto_vergas">Vergas de Aduelas</option>
-                    <option value="auto_alizares">Alizares</option>
-                  </optgroup>
+                    <option value="avarias">Relatório de Avarias</option>
                 </select>
               </div>
               <div>
@@ -502,7 +496,7 @@ export function RelatoriosModule() {
               <AutoReportsViewer kits={kits} reportType={reportType} />
             )}
 
-            {!isAutoReport(reportType) && reportType === "avarias" ? (
+            {reportType === "avarias" && (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <div className="flex-1 w-full">
@@ -555,243 +549,6 @@ export function RelatoriosModule() {
                   />
                 )}
               </div>
-            ) : (
-              <div className="flex flex-wrap items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="w-full sm:w-auto flex-1 min-w-[150px]">
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Cor / Acabamento
-                </label>
-                <select
-                  value={isCustomCor ? "Outra" : (currentItem.cor || "")}
-                  onChange={handleCorSelect}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                >
-                  <option value="">Selecione</option>
-                  {activeColorList.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                  <option value="Outra">Outra (Personalizada)</option>
-                </select>
-                {isCustomCor && (
-                  <input
-                    type="text"
-                    value={currentItem.cor || ""}
-                    onChange={(e) => handleItemChange("cor", e.target.value)}
-                    placeholder="Especifique a cor"
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2 mt-2"
-                  />
-                )}
-              </div>
-
-              {reportType === "portas" && (
-                <>
-                  <div className="w-full sm:w-auto flex-1 min-w-[120px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Dimensão
-                    </label>
-                    <select
-                      value={currentItem.dimensao || ""}
-                      onChange={(e) =>
-                        handleItemChange("dimensao", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {DIMENSOES_PORTA.map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[120px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Enchimento
-                    </label>
-                    <select
-                      value={currentItem.enchimento || ""}
-                      onChange={(e) =>
-                        handleItemChange("enchimento", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {ENCHIMENTOS_PORTA.map((e) => (
-                        <option key={e} value={e}>
-                          {e}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[120px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Modelo
-                    </label>
-                    <select
-                      value={currentItem.modelo || ""}
-                      onChange={(e) =>
-                        handleItemChange("modelo", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {MODELOS_PORTA.map((m) => (
-                        <option key={m} value={m}>
-                          {m}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {reportType === "aduelas" && (
-                <>
-                  <div className="w-full sm:w-auto flex-1 min-w-[120px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Largura
-                    </label>
-                    <select
-                      value={currentItem.largura || ""}
-                      onChange={(e) =>
-                        handleItemChange("largura", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {LARGURAS_ADUELA.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[120px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Comprimento
-                    </label>
-                    <select
-                      value={currentItem.comprimento || ""}
-                      onChange={(e) =>
-                        handleItemChange("comprimento", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {COMPRIMENTOS_ADUELA.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {reportType === "alizares" && (
-                <>
-                  <div className="w-full sm:w-auto flex-1 min-w-[80px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Face
-                    </label>
-                    <select
-                      value={currentItem.face || ""}
-                      onChange={(e) => handleItemChange("face", e.target.value)}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {FACE_ALIZAR.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[80px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Aba
-                    </label>
-                    <select
-                      value={currentItem.aba || ""}
-                      onChange={(e) => handleItemChange("aba", e.target.value)}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {ABA_ALIZAR.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[80px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Espessura
-                    </label>
-                    <select
-                      value={currentItem.espessura || ""}
-                      onChange={(e) =>
-                        handleItemChange("espessura", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {ESPESSURA_ALIZAR.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="w-full sm:w-auto flex-1 min-w-[100px]">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Comprimento
-                    </label>
-                    <select
-                      value={currentItem.comprimento || ""}
-                      onChange={(e) =>
-                        handleItemChange("comprimento", e.target.value)
-                      }
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                    >
-                      <option value="">Selecione</option>
-                      {COMPRIMENTOS_ALIZAR.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              <div className="w-24">
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Qtd.
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={currentItem.quantidade}
-                  onChange={(e) =>
-                    handleItemChange("quantidade", parseInt(e.target.value))
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 px-2"
-                />
-              </div>
-
-              <div className="w-full sm:w-auto sm:flex-none">
-                <button
-                  onClick={handleAddItem}
-                  className="w-full sm:w-auto px-4 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-medium rounded-md shadow-sm transition-colors flex items-center justify-center text-sm h-[34px]"
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Incluir
-                </button>
-              </div>
-            </div>
             )}
 
             {/* List of items */}
