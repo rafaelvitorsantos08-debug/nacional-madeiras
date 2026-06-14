@@ -14,426 +14,402 @@ export function AutoReportsViewer({ kits, reportType }: { kits: any[], reportTyp
     }
   }, [kits, reportType]);
 
-  return <div className="mt-4">{content}{renderDetailedTable(kits, reportType)}</div>;
+  return <div className="mt-4">{content}</div>;
 }
 
-
-const COLUMN_HEADERS: Record<string, string> = {
-  bloco: "Bloco", apto: "Apto", pavimento: "Pav", coluna: "Col", comodo: "Cômodo", tipologia: "Tipologia", folhaLargura: "F. Larg", folhaAltura: "F. Alt", qtdeFolhasPorKit: "Qtd/Kit", acabamentoPorta: "Acab. Porta", caracteristicaPorta: "Caract. Porta", abertura: "Abertura", aduelaLargura: "Ad. Larg", aduelaAltura: "Ad. Alt", regulagem: "Regulagem", acabamentoAduela: "Acab. Ad.", fechaduraMarca: "F. Marca", fechaduraGrid: "F. Grid", fechaduraTipo: "F. Tipo", dobradicaMarca: "Dob. Marca", dobradicaMedida: "Dob. Medida", qtdeLadosAduela: "Q. Lados", montantesMedida: "Mont. Med.", montantesFolgas: "Mont. Folgas", bitsQtde: "B. Qtd", bitsFaces: "B. Faces", camarao: "Cam.", correr: "Correr", pivotante: "Piv.", veneziana: "Venez.", grelha: "Grelha", bandeira: "Band.", chapa: "Chapa", vidro: "Vidro", fechaFresta: "Fresta", kitDuplo: "K. Duplo", observacao: "Obs"
-};
-
-const REPORT_COLS: Record<string, string[]> = {
-  auto_portas: ['bloco', 'apto', 'comodo', 'tipologia', 'folhaLargura', 'folhaAltura', 'qtdeFolhasPorKit', 'acabamentoPorta', 'caracteristicaPorta', 'abertura', 'veneziana', 'grelha', 'bandeira', 'chapa', 'vidro', 'fechaFresta', 'observacao'],
-  auto_usinagem_portas: ['bloco', 'apto', 'comodo', 'tipologia', 'folhaLargura', 'folhaAltura', 'qtdeFolhasPorKit', 'abertura', 'fechaduraMarca', 'fechaduraGrid', 'fechaduraTipo', 'dobradicaMarca', 'dobradicaMedida', 'camarao', 'correr', 'pivotante', 'observacao'],
-  auto_aduelas: ['bloco', 'apto', 'comodo', 'tipologia', 'aduelaLargura', 'aduelaAltura', 'qtdeFolhasPorKit', 'regulagem', 'acabamentoAduela', 'abertura', 'qtdeLadosAduela', 'bandeira', 'observacao'],
-  auto_usinagem_aduelas: ['bloco', 'apto', 'comodo', 'tipologia', 'aduelaLargura', 'aduelaAltura', 'qtdeFolhasPorKit', 'abertura', 'fechaduraTipo', 'dobradicaMarca', 'dobradicaMedida', 'qtdeLadosAduela', 'montantesMedida', 'montantesFolgas', 'bitsQtde', 'bitsFaces', 'observacao'],
-  auto_alizares: ['bloco', 'apto', 'comodo', 'tipologia', 'qtdeFolhasPorKit', 'qtdeLadosAduela', 'acabamentoAduela', 'observacao'],
-  auto_vergas: ['bloco', 'apto', 'comodo', 'tipologia', 'aduelaLargura', 'aduelaAltura', 'folhaLargura', 'qtdeFolhasPorKit', 'observacao']
-};
-
-function renderDetailedTable(kits: any[], reportKey: string) {
-    const cols = REPORT_COLS[reportKey];
-    if (!cols) return null;
-
-    // Remove empty rows where essential fields might be missing entirely, or just return all? We'll return all
-    return (
-        <div className="mt-12 border-2 border-emerald-900 dark:border-emerald-700 print:border-black rounded-lg overflow-x-auto shadow-sm break-inside-avoid">
-           <h4 className="font-bold text-white bg-emerald-900 dark:bg-emerald-800 print:bg-gray-200 print:text-black px-4 py-2 border-b-2 border-emerald-900 dark:border-emerald-700 print:border-black uppercase flex items-center justify-between">
-               <span>Lista Detalhada ({kits.length} Lançamentos)</span>
-               <span className="text-xs font-normal opacity-80">Linkado com Kits Cadastrados</span>
-           </h4>
-           <table className="min-w-full text-[10px] sm:text-xs">
-              <thead className="bg-emerald-800 dark:bg-emerald-700 text-white print:bg-gray-100 print:text-black">
-                <tr>
-                   {cols.map(c => (
-                       <th key={c} className="px-2 py-2 text-center border-r border-emerald-700 dark:border-emerald-600 print:border-black last:border-r-0 whitespace-nowrap uppercase">
-                           {COLUMN_HEADERS[c] || c}
-                       </th>
-                   ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent text-gray-900 dark:text-gray-100 print:text-black">
-                 {kits.map((k, i) => (
-                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700 print:border-black last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
-                       {cols.map(c => {
-                           let val = k[c];
-                           if (typeof val === 'boolean') val = val ? '✓' : '';
-                           return (
-                               <td key={c} className="px-2 py-1.5 text-center border-r border-gray-200 dark:border-gray-700 print:border-black last:border-r-0 font-medium">
-                                   {val || '-'}
-                               </td>
-                           );
-                       })}
-                    </tr>
-                 ))}
-              </tbody>
-           </table>
-        </div>
-    );
-}
-
-function processAduelas(kits: any[]) {
+// ============== 1. RELATORIO DE PORTAS ==============
+function processPortas(kits: any[]) {
    const agrupar = new Map();
    kits.forEach(k => {
-      if (!k.aduelaLargura || !k.aduelaAltura) return;
-      const key = `${k.aduelaLargura}x${k.aduelaAltura} - ${k.acabamentoAduela || 'BRANCO'}`;
-      const val = agrupar.get(key) || { largura: parseInt(k.aduelaLargura, 10), altura: parseInt(k.aduelaAltura, 10), acabamento: k.acabamentoAduelaAduela || 'BRANCO', qtd: 0 };
-      val.qtd += parseInt(k.qtdeFolhasPorKit || '1', 10) || 1; // multiplicador de kits
+      if (!k.folhaLargura || !k.folhaAltura) return;
+
+      const tipologia = k.tipologia || '-';
+      const fLargura = k.folhaLargura;
+      const fAltura = k.folhaAltura;
+      const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const acabamento = k.acabamentoPorta || '-';
+      const caracteristica = k.caracteristicaPorta || k.modelo || 'HONEY';
+      const isDuplo = !!k.kitDuplo;
+      const qtdFolhaKitStr = k.qtdeFolhasPorKit || '1'; 
+
+      const key = `\${tipologia}-\${fLargura}x\${fAltura}-\${qtdFolhaKitStr}-\${acabamento}-\${caracteristica}-\${isDuplo}`;
+
+      const val = agrupar.get(key) || { 
+          tipologia, largura: fLargura, altura: fAltura, qtdFolhaKit: qtdFolhaKitStr,
+          acabamento, caracteristica, qtdTotal: 0 
+      };
+      
+      const qtde = isDuplo ? fQtd * 2 : fQtd;
+      val.qtdTotal += qtde;
       agrupar.set(key, val);
    });
-   return Array.from(agrupar.values()).sort((a, b) => {
-       // Primeiro altura desc (2120, then 2110)
-       if (b.altura !== a.altura) return b.altura - a.altura;
-       // Then largura desc
-       if (b.largura !== a.largura) return b.largura - a.largura;
-       return a.acabamento.localeCompare(b.acabamento);
-   });
+   
+   return Array.from(agrupar.values()).sort((a, b) => a.tipologia.localeCompare(b.tipologia));
 }
 
-function renderAutoAduelas(kits: any[]) {
-  const data = processAduelas(kits);
+function renderAutoPortas(kits: any[]) {
+  const data = processPortas(kits);
   return (
-    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-      <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
-        <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
           <tr>
-              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Largura x Altura (mm)</th>
-              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Acabamento</th>
-              <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase">Qtd</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Folha Larg</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Folha Alt</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Folha/Kit</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Acabamento da Porta</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Caracteristica da Porta</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Total (Unid)</th>
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
-           {data.map((row, idx) => (
-             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.largura} x {row.altura}</td>
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-20">{row.qtd}</td>
-             </tr>
-           ))}
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
+          {data.map((row, idx) => (
+            <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+              <td className="px-3 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.largura}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.altura}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.qtdFolhaKit}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.acabamento}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.caracteristica}</td>
+              <td className="px-3 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtdTotal}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   );
 }
 
-function processUsinagem(kits: any[], isPorta: boolean) {
-   const agrupar: Record<string, {
-       dobradicas: Record<string, number>,
-       aberturas: Record<string, Record<string, number>>
-   }> = {};
-   
-   kits.forEach(k => {
-      const cat = getCategoriaComodo(k.comodo);
-      let abertura = (k.abertura || 'N/A').toUpperCase();
-      
-      if (!isPorta) {
-         abertura = abertura.replace(' P/FORA', '').replace(' P/ FORA', '').trim();
-      }
-      
-      const isDobra = isEspecialDobraOnly(k.folhaLargura, cat);
-      
-      let dimensao = '';
-      if (isPorta) {
-         if (!k.folhaLargura || !k.folhaAltura) return;
-         if (k.kitDuplo) {
-             const meiaLag = parseInt(k.folhaLargura, 10) / 2;
-             dimensao = `${k.folhaLargura}x${k.folhaAltura} (2x ${meiaLag}x${k.folhaAltura})`;
-         } else {
-             dimensao = `${k.folhaLargura}x${k.folhaAltura}`;
-         }
-      } else {
-         if (!k.aduelaLargura || !k.aduelaAltura) return;
-         dimensao = `${k.aduelaLargura}x${k.aduelaAltura}`;
-      }
 
-      const baseQtde = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
-      const qtde = (isPorta && k.kitDuplo) ? baseQtde * 2 : baseQtde;
-      const amountToAdd = isPorta ? qtde : baseQtde;
-
-      if (!agrupar[cat]) agrupar[cat] = { dobradicas: {}, aberturas: {} };
-
-      if (isDobra) {
-         agrupar[cat].dobradicas[dimensao] = (agrupar[cat].dobradicas[dimensao] || 0) + amountToAdd;
-      } else {
-         if (!agrupar[cat].aberturas[abertura]) agrupar[cat].aberturas[abertura] = {};
-         agrupar[cat].aberturas[abertura][dimensao] = (agrupar[cat].aberturas[abertura][dimensao] || 0) + amountToAdd;
-      }
-   });
-
-   return Object.keys(agrupar).sort().map(cat => ({
-      categoria: cat,
-      dobradicas: Object.keys(agrupar[cat].dobradicas).sort().map(d => ({ dimensao: d, qtd: agrupar[cat].dobradicas[d] })),
-      aberturas: Object.keys(agrupar[cat].aberturas).sort().map(ab => ({
-          abertura: ab,
-          itens: Object.keys(agrupar[cat].aberturas[ab]).sort().map(d => ({ dimensao: d, qtd: agrupar[cat].aberturas[ab][d] }))
-      }))
-   }));
-}
-
-function renderUsinagem(kits: any[], isPorta: boolean) {
-  const data = processUsinagem(kits, isPorta);
-  if (data.length === 0) return <p className="text-gray-500 italic text-sm">Nenhum dado encontrado para usinagem.</p>;
-
-  return (
-    <div className="flex flex-col gap-4">
-       {data.map(cat => {
-         const aberturasEsq = cat.aberturas.filter(a => a.abertura.includes('ESQ'));
-         const aberturasDir = cat.aberturas.filter(a => a.abertura.includes('DIR'));
-         const aberturasOut = cat.aberturas.filter(a => !a.abertura.includes('ESQ') && !a.abertura.includes('DIR'));
-
-         return (
-           <div key={cat.categoria} className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden break-inside-avoid shadow-sm mb-2">
-             <h3 className="bg-gray-200 dark:bg-gray-600 print:bg-gray-200 px-3 py-1 font-bold text-gray-900 dark:text-gray-100 print:text-black text-sm border-b-2 border-gray-800 dark:border-gray-600 print:border-black text-center uppercase">{cat.categoria}</h3>
-             <div className="p-2">
-                {cat.dobradicas.length > 0 && (
-                   <div className="mb-3 border-2 border-gray-800 dark:border-gray-600 print:border-black rounded p-2">
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100 print:text-black mb-1 text-xs uppercase text-center border-b-2 border-gray-800 dark:border-gray-600 print:border-black pb-1">SÓ DOBRADIÇAS</h4>
-                      <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center mt-2">
-                         {cat.dobradicas.map(d => {
-                            const qEsqDir = isPorta ? Math.ceil(d.qtd / 2) : d.qtd;
-                            return (
-                               <div key={d.dimensao} className="text-sm font-bold font-mono text-gray-900 dark:text-gray-100 print:text-black">
-                                  {d.dimensao}: <span contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded px-1 transition-colors text-gray-900 dark:text-gray-100 print:text-black">{qEsqDir} Esq / {qEsqDir} Dir</span>
-                               </div>
-                            );
-                         })}
-                      </div>
-                   </div>
-                )}
-                
-                <div className="flex flex-row gap-4">
-                  {/* Left Column (ESQUERDAS) */}
-                  <div className="flex-1 flex flex-col gap-2">
-                     {aberturasEsq.map(ab => (
-                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
-                     ))}
-                  </div>
-                  {/* Right Column (DIREITAS) */}
-                  <div className="flex-1 flex flex-col gap-2">
-                     {aberturasDir.map(ab => (
-                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
-                     ))}
-                  </div>
-                </div>
-
-                {aberturasOut.length > 0 && (
-                   <div className="mt-2 grid grid-cols-2 gap-4">
-                     {aberturasOut.map(ab => (
-                        <UsinagemTable  abertura={ab.abertura} itens={ab.itens} />
-                     ))}
-                   </div>
-                )}
-             </div>
-           </div>
-         );
-       })}
-    </div>
-  );
-}
-
-function UsinagemTable({ abertura, itens }: { abertura: string, itens: any[] }) {
-  if (itens.length === 0) return null;
-  return (
-    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm">
-       <h4 className="font-bold text-gray-900 dark:text-gray-100 print:text-black bg-gray-100 dark:bg-gray-700 print:bg-gray-100 px-2 py-0.5 text-[10px] uppercase text-center border-b-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{abertura}</h4>
-       <table className="min-w-full text-xs table-fixed">
-          <tbody>
-            {itens.map((it, i) => (
-               <tr key={i} className="border-b-2 border-gray-800 dark:border-gray-600 print:border-black last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
-                 <td className="w-12"></td>
-                 <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-2 py-1 text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold text-center">{it.dimensao}</td>
-                 <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-2 py-1 text-center text-gray-900 dark:text-gray-100 print:text-black font-bold w-12 border-l-2 border-gray-800 dark:border-gray-600 print:border-black bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{it.qtd}</td>
-               </tr>
-            ))}
-          </tbody>
-       </table>
-    </div>
-  );
-}
-
-function renderAutoUsinagemAduelas(kits: any[]) { return renderUsinagem(kits, false); }
-function renderAutoUsinagemPortas(kits: any[]) { return renderUsinagem(kits, true); }
-
-function processPortas(kits: any[]) {
+// ============== 2. RELATORIO DE ADUELAS ==============
+function processAduelas(kits: any[]) {
    const agrupar = new Map();
    kits.forEach(k => {
-      if (!k.folhaLargura || !k.folhaAltura) return;
-      
-      const char = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
-      let charOrder = 99;
-      if (char.includes('HONEY') || char.includes('COLMEIA')) charOrder = 1;
-      else if (char.includes('SARRAFEADA')) charOrder = 2;
-      else if (char.includes('SOLIDA') || char.includes('SÓLIDA')) charOrder = 3;
+      if (!k.aduelaLargura || !k.aduelaAltura) return;
 
+      const tipologia = k.tipologia || '-';
+      const adLargura = k.aduelaLargura;
+      const adAltura = k.aduelaAltura;
+      const fQtdStr = k.qtdeFolhasPorKit || '1';
+      const fQtd = parseInt(fQtdStr, 10) || 1;
+      const regulagem = k.regulagem || '-';
+      const acabamento = k.acabamentoAduela || '-';
+      const qtdLadosAduela = k.qtdeLadosAduela || '-';
       const isDuplo = !!k.kitDuplo;
-      const key = `${k.folhaLargura}x${k.folhaAltura}-${k.acabamentoPorta}-${char}-${isDuplo}`;
-      const maxQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
-      const qtde = isDuplo ? maxQtd * 2 : maxQtd;
-      
-      let dimensaoDisplay = `${k.folhaLargura} x ${k.folhaAltura}`;
-      if (isDuplo) {
-          const meiaLargura = parseInt(k.folhaLargura, 10) / 2;
-          dimensaoDisplay = `${k.folhaLargura} x ${k.folhaAltura} (2x ${meiaLargura}x${k.folhaAltura})`;
-      }
+
+      const key = `\${tipologia}-\${adLargura}x\${adAltura}-\${fQtdStr}-\${regulagem}-\${acabamento}-\${qtdLadosAduela}-\${isDuplo}`;
 
       const val = agrupar.get(key) || { 
-          largura: parseInt(k.folhaLargura, 10), 
-          altura: parseInt(k.folhaAltura, 10), 
-          dimensaoDisplay,
-          acabamento: k.acabamentoPorta || 'BRANCO', 
-          caracteristica: char,
-          charOrder: charOrder,
-          qtd: 0 
+          tipologia, adLargura, adAltura, fQtdStr, regulagem, acabamento, qtdLadosAduela, qtdTotalKits: 0 
       };
-      val.qtd += qtde;
+      
+      const qtde = isDuplo ? fQtd * 2 : fQtd; 
+      // For aduelas, total means how many "conjuntos de aduelas" are there. Usually 1 set per kit (or 2 sets for kitDuplo? Let's say it's just 'count of kits' essentially because 1 kit = 1 aduela set, unless duplo). Let's use qtde to scale proportional.
+      val.qtdTotalKits += isDuplo ? 2 : 1; 
       agrupar.set(key, val);
    });
    
-   return Array.from(agrupar.values()).sort((a, b) => {
-       if (a.charOrder !== b.charOrder) return a.charOrder - b.charOrder;
-       if (b.altura !== a.altura) return b.altura - a.altura;
-       return b.largura - a.largura;
-   });
+   return Array.from(agrupar.values()).sort((a, b) => a.tipologia.localeCompare(b.tipologia));
 }
 
-function renderAutoPortas(kits: any[]) {
-  const data = processPortas(kits);
-  
-  const groupedData = data.reduce((acc, row) => {
-    if (!acc[row.caracteristica]) acc[row.caracteristica] = [];
-    acc[row.caracteristica].push(row);
-    return acc;
-  }, {} as Record<string, typeof data>);
-
+function renderAutoAduelas(kits: any[]) {
+  const data = processAduelas(kits);
   return (
-    <div className="flex flex-col gap-6">
-      {Object.entries(groupedData).map(([caracteristica, rows]: [string, any]) => (
-        <div key={caracteristica} className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-          <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black table-fixed">
-            <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
-              <tr>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black w-1/3">Dimensão da Folha</th>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">
-                    <div className="flex items-center justify-between">
-                      <span>Acabamento/Mod</span>
-                      <span className="text-gray-900 dark:text-gray-100 print:text-black text-[10px] ml-1 uppercase bg-white dark:bg-gray-800 print:bg-white px-2 py-0.5 rounded border-2 border-gray-800 dark:border-gray-600 print:border-black">{caracteristica}</span>
-                    </div>
-                  </th>
-                  <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase w-20">Qtd</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
-               {rows.map((row, idx) => (
-                 <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-mono font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.dimensaoDisplay}</td>
-                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black font-bold border-r-2 border-gray-800 dark:border-gray-600 print:border-black truncate">{row.acabamento}</td>
-                   <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold">{row.qtd}</td>
-                 </tr>
-               ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
+          <tr>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Aduela Larg</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Aduela Alt</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Lados</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Regulagem</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Acabamento da Aduela</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Total (Jogos)</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
+          {data.map((row, idx) => (
+            <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+              <td className="px-3 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.adLargura}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.adAltura}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.qtdLadosAduela}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.regulagem}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.acabamento}</td>
+              <td className="px-3 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtdTotalKits}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
+
+// ============== 3. RELATORIO DE ALIZARES ==============
+function processAlizares(kits: any[]) {
+   const agrupar = new Map();
+   kits.forEach(k => {
+      if (!k.qtdeLadosAduela) return;
+
+      const tipologia = k.tipologia || '-';
+      const qtdLadosAduela = k.qtdeLadosAduela || '-';
+      const fQtdStr = k.qtdeFolhasPorKit || '1';
+      const acabamento = k.acabamentoAduela || '-';
+      const isDuplo = !!k.kitDuplo;
+
+      const key = `\${tipologia}-\${qtdLadosAduela}-\${fQtdStr}-\${acabamento}-\${isDuplo}`;
+
+      const val = agrupar.get(key) || { 
+          tipologia, qtdLadosAduela, fQtdStr, acabamento, qtdTotalJogos: 0 
+      };
+      
+      val.qtdTotalJogos += isDuplo ? 2 : 1;
+      agrupar.set(key, val);
+   });
+   
+   return Array.from(agrupar.values()).sort((a, b) => a.tipologia.localeCompare(b.tipologia));
+}
+
+function renderAutoAlizares(kits: any[]) {
+  const data = processAlizares(kits);
+  return (
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
+          <tr>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Lados Aduela</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Folha/Kit</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Acabamento da Aduela (Alizar)</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Total (Jogos de Alizar)</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
+          {data.map((row, idx) => (
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+              <td className="px-3 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.qtdLadosAduela}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.fQtdStr}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.acabamento}</td>
+              <td className="px-3 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtdTotalJogos}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
+// ============== 4. RELATORIO DE USINAGEM DE PORTAS ==============
+function processUsinagemPortas(kits: any[]) {
+   const agrupar = new Map();
+   kits.forEach(k => {
+      // Usinagem portas depende da abertura e fechadura/dobradica
+      if (!k.folhaLargura || !k.folhaAltura) return;
+
+      const tipologia = k.tipologia || '-';
+      const fLargura = k.folhaLargura;
+      const fAltura = k.folhaAltura;
+      const isDuplo = !!k.kitDuplo;
+      const abertura = k.abertura || '-';
+      const fMarca = k.fechaduraMarca || '-';
+      const fTipo = k.fechaduraTipo || '-';
+      const fGrid = k.fechaduraGrid || '-';
+      const dobMarca = k.dobradicaMarca || '-';
+      const dobMedida = k.dobradicaMedida || '-';
+
+      const key = `\${tipologia}-\${fLargura}x\${fAltura}-\${abertura}-\${fMarca}-\${fTipo}-\${fGrid}-\${dobMarca}-\${dobMedida}-\${isDuplo}`;
+
+      const val = agrupar.get(key) || { 
+          tipologia, largura: fLargura, altura: fAltura, abertura,
+          fMarca, fTipo, fGrid, dobMarca, dobMedida, qtdTotal: 0 
+      };
+      
+      const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const qtde = isDuplo ? fQtd * 2 : fQtd; 
+      val.qtdTotal += qtde;
+      agrupar.set(key, val);
+   });
+   
+   return Array.from(agrupar.values()).sort((a, b) => a.tipologia.localeCompare(b.tipologia));
+}
+
+function renderAutoUsinagemPortas(kits: any[]) {
+  const data = processUsinagemPortas(kits);
+  return (
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid">
+       <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
+          <tr>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Folha</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Abertura</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Fech. Tipo</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Fech. Marca</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Fech. Grid</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Dob. Marca</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Dob. Medida</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd (Folhas)</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
+          {data.map((row, idx) => (
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+              <td className="px-3 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.largura}x{row.altura}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.abertura}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.fTipo}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.fMarca}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.fGrid}</td>
+              <td className="px-3 py-2 border-x border-gray-200 print:border-black">{row.dobMarca}</td>
+              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.dobMedida}</td>
+              <td className="px-3 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtdTotal}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
+// ============== 5. RELATORIO DE USINAGEM DE ADUELAS ==============
+function processUsinagemAduelas(kits: any[]) {
+   const agrupar = new Map();
+   kits.forEach(k => {
+      // Usinagem aduelas depende de aduelaLarg/Alt, abertura, e ferragens e montantes
+      if (!k.aduelaLargura || !k.aduelaAltura) return;
+
+      const tipologia = k.tipologia || '-';
+      const adLargura = k.aduelaLargura;
+      const adAltura = k.aduelaAltura;
+      const isDuplo = !!k.kitDuplo;
+      const abertura = k.abertura || '-';
+      const fTipo = k.fechaduraTipo || '-';
+      const dobMarca = k.dobradicaMarca || '-';
+      const dobMedida = k.dobradicaMedida || '-';
+      
+      const qtdLadosAduela = k.qtdeLadosAduela || '-';
+      const montantesMedida = k.montantesMedida || '-';
+      const montantesFolgas = k.montantesFolgas || '-';
+      const bitsQtde = k.bitsQtde || '-';
+      const bitsFaces = k.bitsFaces || '-';
+
+      const key = `\${tipologia}-\${adLargura}x\${adAltura}-\${abertura}-\${fTipo}-\${dobMarca}-\${dobMedida}-\${qtdLadosAduela}-\${montantesMedida}-\${montantesFolgas}-\${bitsQtde}-\${bitsFaces}-\${isDuplo}`;
+
+      const val = agrupar.get(key) || { 
+          tipologia, adLargura, adAltura, abertura,
+          fTipo, dobMarca, dobMedida, qtdLadosAduela, montantesMedida, montantesFolgas, bitsQtde, bitsFaces, qtdTotalJogos: 0 
+      };
+      
+      val.qtdTotalJogos += isDuplo ? 2 : 1; 
+      agrupar.set(key, val);
+   });
+   
+   return Array.from(agrupar.values()).sort((a, b) => a.tipologia.localeCompare(b.tipologia));
+}
+
+function renderAutoUsinagemAduelas(kits: any[]) {
+  const data = processUsinagemAduelas(kits);
+  return (
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid">
+      <div className="overflow-x-auto w-full">
+       <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-xs">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
+          <tr>
+            <th className="px-2 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Aduela</th>
+            <th className="px-2 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Abertura</th>
+            <th className="px-2 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Fech. Tipo</th>
+            <th className="px-2 py-2 text-left font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Dob. Marca</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Dob. Medida</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd Lados</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Montantes Medida</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Montantes Folgas</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">B. Qtd / Faces</th>
+            <th className="px-2 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black">Qtd (Jogos)</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
+          {data.map((row, idx) => (
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent break-inside-avoid">
+              <td className="px-2 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.adLargura}x{row.adAltura}</td>
+              <td className="px-2 py-2 border-x border-gray-200 print:border-black">{row.abertura}</td>
+              <td className="px-2 py-2 border-x border-gray-200 print:border-black">{row.fTipo}</td>
+              <td className="px-2 py-2 border-x border-gray-200 print:border-black">{row.dobMarca}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.dobMedida}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.qtdLadosAduela}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.montantesMedida}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.montantesFolgas}</td>
+              <td className="px-2 py-2 text-center border-x border-gray-200 print:border-black">{row.bitsQtde !== '-' ? `\${row.bitsQtde} / \${row.bitsFaces}` : '-'}</td>
+              <td className="px-2 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtdTotalJogos}</td>
+            </tr>
+          ))}
+        </tbody>
+       </table>
+      </div>
+    </div>
+  );
+}
+
+
+// ============== 6. RELATORIO DE VERGAS ==============
 function processVergas(kits: any[]) {
    const agrupar = new Map();
    kits.forEach(k => {
       const fl = parseInt(k.folhaLargura, 10);
       if (!k.aduelaLargura || isNaN(fl)) return;
+      const fAltura = k.folhaAltura || '-';
       const vergaLength = fl + 47;
       
-      const key = `${k.aduelaLargura}-${vergaLength}`;
-      const val = agrupar.get(key) || { aduelaLargura: k.aduelaLargura, vergaLength: vergaLength, folhaRef: fl, qtd: 0 };
-      val.qtd += parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+      const tipologia = k.tipologia || '-';
+      const adLargura = k.aduelaLargura;
+      const adAltura = k.aduelaAltura;
+
+      const key = `\${tipologia}-\${adLargura}-\${vergaLength}-\${fl}`;
+      const val = agrupar.get(key) || { 
+          tipologia, adLargura, adAltura, vergaLength, folhaRef: `\${fl}x\${fAltura}`, qtd: 0 
+      };
+      
+      const isDuplo = !!k.kitDuplo;
+      val.qtd += isDuplo ? 2 : 1; 
       agrupar.set(key, val);
    });
    
    return Array.from(agrupar.values()).sort((a,b) => {
-       if (parseInt(b.aduelaLargura) !== parseInt(a.aduelaLargura)) return parseInt(b.aduelaLargura) - parseInt(a.aduelaLargura);
+       if (a.tipologia !== b.tipologia) return a.tipologia.localeCompare(b.tipologia);
+       if (parseInt(b.adLargura) !== parseInt(a.adLargura)) return parseInt(b.adLargura) - parseInt(a.adLargura);
        return b.vergaLength - a.vergaLength;
    });
 }
 
 function renderAutoVergas(kits: any[]) {
   const data = processVergas(kits);
-  
-  const groupedData = data.reduce((acc, row) => {
-    const key = `${row.vergaLength} (${row.folhaRef} + 47)`;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(row);
-    return acc;
-  }, {} as Record<string, typeof data>);
-
-  // Sort keys numerically by verga length descending
-  const sortedKeys = Object.keys(groupedData).sort((a,b) => parseInt(b) - parseInt(a));
-
   return (
-    <div className="flex flex-col gap-6">
-      {sortedKeys.map(vergaKey => (
-        <div key={vergaKey} className="break-inside-avoid">
-          <div className="flex w-full mb-1">
-            <div className="flex-1 text-center font-bold text-emerald-700 dark:text-emerald-400 print:text-green-700 font-mono text-sm">{vergaKey}</div>
-            <div className="w-32"></div>
-          </div>
-          <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm">
-            <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black table-fixed">
-              <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
-                <tr>
-                    <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Largura da Aduela</th>
-                    <th className="px-4 py-2 text-center text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase w-32">Qtd de Vergas</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
-                 {groupedData[vergaKey].map((row, idx) => (
-                   <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-                     <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-mono font-bold text-center truncate">{row.aduelaLargura}</td>
-                     <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
-                   </tr>
-                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function processAlizares(kits: any[]) {
-   const agrupar = new Map();
-   kits.forEach(k => {
-      // based on qtdeLadosAduela
-      const numLados = parseInt(k.qtdeLadosAduela || '0', 10) || 0;
-      if (numLados === 0) return;
-      const key = `Padrao-${k.cor || k.acabamentoAduela || 'NM'}`;
-      const val = agrupar.get(key) || { desc: `Alizar - Kit Lados: ${numLados}`, acabamento: k.acabamentoAduela || 'NM', qtd: 0 };
-      val.qtd += numLados * (parseInt(k.qtdeFolhasPorKit || '1', 10) || 1); // multiplicador de kits e lados
-      agrupar.set(key, val);
-   });
-   return Array.from(agrupar.values());
-}
-
-function renderAutoAlizares(kits: any[]) {
-  const data = processAlizares(kits);
-  return (
-    <div className="border-2 border-gray-800 dark:border-gray-600 print:border-black rounded-lg overflow-hidden shadow-sm break-inside-avoid">
-      <table className="min-w-full divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
-        <thead className="bg-gray-100 dark:bg-gray-700 print:bg-gray-100">
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black rounded overflow-hidden shadow-sm break-inside-avoid w-full sm:w-3/4 mx-auto">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-[#0f172a] text-white print:bg-gray-100 print:text-black">
           <tr>
-              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Descrição</th>
-              <th className="px-4 py-2 text-left text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase border-r-2 border-gray-800 dark:border-gray-600 print:border-black">Acabamento</th>
-              <th className="px-4 py-2 text-right text-xs font-bold text-gray-900 dark:text-gray-100 print:text-black uppercase">Qtd (Jogos/Lados)</th>
+            <th className="px-3 py-2 text-left font-semibold uppercase border-x border-[#1e293b] print:border-black">Tipologia</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase border-x border-[#1e293b] print:border-black">Aduela Larg</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase border-x border-[#1e293b] print:border-black">Verga (Folha L + 47mm)</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase border-x border-[#1e293b] print:border-black">Ref Folha</th>
+            <th className="px-3 py-2 text-center font-semibold uppercase border-x border-[#1e293b] print:border-black">Qtd Total</th>
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y-2 divide-gray-800 dark:divide-gray-600 print:divide-black">
+        <tbody className="bg-white dark:bg-gray-800 print:bg-white divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
            {data.map((row, idx) => (
-             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent border-b-2 border-gray-800 dark:border-gray-600 print:border-black">
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.desc}</td>
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black border-r-2 border-gray-800 dark:border-gray-600 print:border-black font-bold">{row.acabamento}</td>
-               <td contentEditable suppressContentEditableWarning className="outline-none focus:bg-emerald-50 dark:focus:bg-emerald-900/30 focus:ring-1 focus:ring-emerald-500 rounded transition-colors px-4 py-1.5 text-sm text-gray-900 dark:text-gray-100 print:text-black text-center font-bold w-32 bg-gray-50 dark:bg-gray-900 print:bg-gray-50">{row.qtd}</td>
+             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
+               <td className="px-3 py-2 font-medium border-x border-gray-200 print:border-black">{row.tipologia}</td>
+               <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black">{row.adLargura}</td>
+               <td className="px-3 py-2 text-center font-bold font-mono border-x border-gray-200 print:border-black">{row.vergaLength}</td>
+               <td className="px-3 py-2 text-center text-gray-500 print:text-gray-700 border-x border-gray-200 print:border-black">({row.folhaRef})</td>
+               <td className="px-3 py-2 text-center font-bold bg-gray-50 dark:bg-gray-900 print:bg-transparent border-x border-gray-200 print:border-black">{row.qtd}</td>
              </tr>
            ))}
         </tbody>
@@ -441,3 +417,4 @@ function renderAutoAlizares(kits: any[]) {
     </div>
   );
 }
+
