@@ -4,8 +4,8 @@ import React, { useMemo } from 'react';
 export function AutoReportsViewer({ kits, reportType, responsavel, obra }: { kits: any[], reportType: string, responsavel?: string, obra?: string }) {
   const content = useMemo(() => {
     switch (reportType) {
-      case 'auto_portas': return renderAutoPortas(kits);
-      case 'auto_aduelas': return renderAutoAduelas(kits);
+      case 'auto_portas': return renderAutoPortas(kits, responsavel, obra);
+      case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra);
       case 'auto_alizares': return renderAutoAlizares(kits);
       case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
       case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra);
@@ -239,7 +239,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   );
 }
 
-function renderAutoPortas(kits: any[]) {
+function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
   // Group by (1) Caracteristica -> (2) Medida + Acabamento
   const grouped = new Map<string, Array<{dimensao: string, acabamento: string, qtdTotal: number}>>();
   
@@ -329,20 +329,89 @@ function renderAutoPortas(kits: any[]) {
   );
 }
 
-function renderAutoAduelas(kits: any[]) {
-  const headers = [
-    "Tipologia", "Aduela Larg", "Aduela Alt", "Qtd Folha/Kit",
-    "Regulagem", "Acabamento da Aduela"
-  ];
-  const rows = kits.map(k => [
-    k.tipologia || '-',
-    k.aduelaLargura || '-',
-    k.aduelaAltura || '-',
-    k.qtdeFolhasPorKit || '1',
-    k.regulagem || '-',
-    k.acabamentoAduela || '-'
-  ]);
-  return <TableLayout headers={headers} rows={rows} />;
+function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
+  // Group by (1) Acabamento -> (2) Altura
+  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number}>>>();
+
+  kits.forEach(k => {
+    const aLargura = k.aduelaLargura;
+    const aAltura = k.aduelaAltura;
+    if (!aLargura || !aAltura || aLargura === '-' || aAltura === '-') return;
+
+    const acadamento = (k.acabamentoAduela || '-').toUpperCase();
+    const altura = aAltura;
+    const dimensao = `${aLargura}x${aAltura}`;
+    const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+
+    if (!grouped.has(acadamento)) {
+      grouped.set(acadamento, new Map());
+    }
+
+    const alturasMap = grouped.get(acadamento)!;
+    if (!alturasMap.has(altura)) {
+      alturasMap.set(altura, []);
+    }
+
+    const items = alturasMap.get(altura)!;
+    const existing = items.find(i => i.dimensao === dimensao);
+    if (existing) {
+      existing.qtdTotal += fQtd;
+    } else {
+      items.push({ dimensao, qtdTotal: fQtd });
+    }
+  });
+
+  if (grouped.size === 0) {
+    return <div className="text-center p-4 text-gray-500">Nenhum dado de aduela com dimensões para exibir.</div>;
+  }
+
+  // Sort Alturas string array
+  return (
+    <div className="space-y-6">
+      {Array.from(grouped.entries()).map(([acabamento, alturasMap], idx) => {
+         const alturas = Array.from(alturasMap.keys()).sort();
+         return (
+           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6">
+             <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-gray-100 print:border-black print:text-black">
+                {acabamento}
+             </div>
+             
+             {alturas.map((altura, aIdx) => {
+                const items = alturasMap.get(altura)!;
+                return (
+                  <div key={altura} className={aIdx !== alturas.length - 1 ? 'border-b border-gray-300 dark:border-slate-700 print:border-black' : ''}>
+                     <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
+                        <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
+                          <tr>
+                            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                              Medidas
+                            </th>
+                            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                              Qtd Folha/Kit
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
+                          {items.map((k, idx2) => (
+                            <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
+                              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                                {k.dimensao}
+                              </td>
+                              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                                {k.qtdTotal}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                     </table>
+                  </div>
+                );
+             })}
+           </div>
+         );
+      })}
+    </div>
+  );
 }
 
 function renderAutoAlizares(kits: any[]) {
