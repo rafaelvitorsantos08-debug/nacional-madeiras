@@ -223,7 +223,7 @@ export function RelatoriosModule() {
   });
 
   const [items, setItems] = useLocalStorage<any[]>("nm_active_relatorio_items", []);
-  const [kits] = useLocalStorage<any[]>("nacional_madeiras_kits_v5", []);
+  const [kits] = useLocalStorage<any[]>("nacional_madeiras_kits_v6", []);
 
   // Current item being added
   const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });

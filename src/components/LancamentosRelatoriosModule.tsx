@@ -71,80 +71,15 @@ const INITIAL_KITS: KitLancamento[] = [
   {"bloco":"1","apto":"703","pavimento":"7","coluna":"3","comodo":"COZINHA","tipologia":"PM3F","folhaLargura":"820","folhaAltura":"2070","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"150","aduelaAltura":"2120","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":true,"pivotante":false,"veneziana":false,"grelha":true,"bandeira":false,"chapa":false,"vidro":true,"fechaFresta":false,"kitDuplo":false,"observacao":""},
   {"bloco":"1","apto":"302","pavimento":"3","coluna":"2","comodo":"LIXEIRA","tipologia":"PM7","folhaLargura":"1440","folhaAltura":"2100","qtdeFolhasPorKit":"2","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"ESQUERDA P/FORA","aduelaLargura":"130","aduelaAltura":"2110","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"45,1","fechaduraTipo":"SÓ MAÇ.","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
   {"bloco":"1","apto":"306","pavimento":"3","coluna":"6","comodo":"ELETRICA","tipologia":"PM12","folhaLargura":"1020","folhaAltura":"1800","qtdeFolhasPorKit":"2","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"45","fechaduraTipo":"MEIO CIL.","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"4","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"1","apto":"308","pavimento":"3","coluna":"8","comodo":"SUITE 2","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"150","aduelaAltura":"2110","regulagem":"REG 70","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"1","apto":"309","pavimento":"3","coluna":"9","comodo":"COZINHA","tipologia":"PM3F","folhaLargura":"820","folhaAltura":"2070","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"ESQUERDA","aduelaLargura":"150","aduelaAltura":"2120","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"405","pavimento":"4","coluna":"5","comodo":"BANH. SOCIAL","tipologia":"PM1","folhaLargura":"620","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"DIREITA","aduelaLargura":"110","aduelaAltura":"2120","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55","fechaduraTipo":"WC","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"501","pavimento":"5","coluna":"1","comodo":"SUITE","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"110","aduelaAltura":"2110","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"503","pavimento":"5","coluna":"3","comodo":"BANH. SUITE","tipologia":"PM1F","folhaLargura":"620","folhaAltura":"2070","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA","aduelaLargura":"90","aduelaAltura":"2120","regulagem":"REG 70","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55","fechaduraTipo":"WC","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"604","pavimento":"6","coluna":"4","comodo":"QUARTO","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"2","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"ESQUERDA","aduelaLargura":"130","aduelaAltura":"2110","regulagem":"REG 50","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"400","pavimento":"4","coluna":"0","comodo":"SHAFT","tipologia":"PM19","folhaLargura":"1800","folhaAltura":"2100","qtdeFolhasPorKit":"3","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"45","fechaduraTipo":"MEIO CIL.","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"40","montantesFolgas":"20","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"600","pavimento":"6","coluna":"0","comodo":"ESPECIAIS 1","tipologia":"PM18","folhaLargura":"2000","folhaAltura":"1800","qtdeFolhasPorKit":"4","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"45","fechaduraTipo":"MEIO CIL.","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"4","montantesMedida":"40","montantesFolgas":"20","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"600","pavimento":"6","coluna":"0","comodo":"ESPECIAIS 2","tipologia":"PM15","folhaLargura":"1800","folhaAltura":"2100","qtdeFolhasPorKit":"4","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55,1","fechaduraTipo":"EXT","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"40","montantesFolgas":"20","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":true,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"700","pavimento":"7","coluna":"0","comodo":"ESPECIAIS 2","tipologia":"PM15","folhaLargura":"1800","folhaAltura":"2100","qtdeFolhasPorKit":"4","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55,1","fechaduraTipo":"EXT","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"40","montantesFolgas":"20","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":true,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"800","pavimento":"8","coluna":"0","comodo":"ESPECIAIS 2","tipologia":"PM15","folhaLargura":"1800","folhaAltura":"2100","qtdeFolhasPorKit":"4","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"55,1","fechaduraTipo":"EXT","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"40","montantesFolgas":"20","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":true,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"900","pavimento":"9","coluna":"0","comodo":"ESPECIAIS","tipologia":"PM22","folhaLargura":"3600","folhaAltura":"2100","qtdeFolhasPorKit":"6","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"45","fechaduraTipo":"MEIO CIL.","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"80","montantesFolgas":"40","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""},
-  {"bloco":"2","apto":"900","pavimento":"9","coluna":"0","comodo":"ESPECIAIS","tipologia":"PM22A","folhaLargura":"3600","folhaAltura":"1800","qtdeFolhasPorKit":"6","acabamentoPorta":"BRANCO","caracteristicaPorta":"HONEY","abertura":"ESQUERDA P/FORA","aduelaLargura":"70","aduelaAltura":"2110","regulagem":"FIXO","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"PAPAIZ","fechaduraGrid":"45","fechaduraTipo":"MEIO CIL.","dobradicaMarca":"PAPAIZ","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"4","montantesMedida":"80","montantesFolgas":"40","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""}
-].map((k, i) => ({...k, id: 'k'+(i+1)}));
-
-
-function EditableCell({ value, onChange, type = "text", className = "", options = [] }: { value: any, onChange: (val: any) => void, type?: string, className?: string, options?: {label: string, value: string}[] | string[] }) {
-  if (type === "boolean") {
-    return (
-      <div className="flex justify-center">
-        <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} className="cursor-pointer" />
-      </div>
-    );
-  }
-  if (type === "select") {
-    return (
-      <select value={value} onChange={e => onChange(e.target.value)} className={"bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className.replace(/\bw-\S+/g, '')}>
-        {options.map(opt => {
-          if (typeof opt === 'string') return <option key={opt} value={opt} className="bg-white dark:bg-gray-800 text-black dark:text-white">{opt}</option>;
-          return <option key={opt.value} value={opt.value} className="bg-white dark:bg-gray-800 text-black dark:text-white">{opt.label}</option>;
-        })}
-      </select>
-    );
-  }
-  return (
-    <input
-      type={type}
-      value={value}
-      size={Math.max(String(value || '').length, 3)}
-      onChange={e => onChange(e.target.value)}
-      className={"bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className.replace(/\bw-\S+/g, '')}
-      style={{ minWidth: `${Math.max(String(value || '').length + 2, 5)}ch` }}
-    />
-  );
-}
-
-
-function EditableObsCell({ value, onChange }: { value: string, onChange: (val: string) => void }) {
-  const handleEdit = () => {
-    const newValue = window.prompt("Comentário / Observação:", value || "");
-    if (newValue !== null) {
-      onChange(newValue);
-    }
-  };
-  
-  return (
-    <div 
-      onClick={handleEdit}
-      className={"cursor-pointer p-1 rounded transition-colors flex justify-center items-center " + (value ? "bg-amber-100 text-amber-700 hover:bg-amber-200" : "text-gray-300 hover:text-gray-500 hover:bg-gray-100")}
-      title={value || "Adicionar comentário"}
-    >
-      <MessageSquareQuote className="w-5 h-5" />
-    </div>
-  );
-}
+  {"bloco":"1","apto":"308","pavimento":"3","coluna":"8","comodo":"SUITE 2","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"150","aduelaAltura":"2110","regulagem":"REG 70","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""}
+];
 
 export function LancamentosRelatoriosModule() {
-  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v5', INITIAL_KITS);
+  const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v6', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
 
-  
-  
   const exportToExcel = () => {
     if (kits.length === 0) return;
     const headers = [
