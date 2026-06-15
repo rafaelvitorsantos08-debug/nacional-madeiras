@@ -239,9 +239,9 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   );
 }
 
-function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
+function renderAutoPortas(kits: any[]) {
   // Group by (1) Caracteristica -> (2) Medida + Acabamento
-  const grouped = new Map<string, Array<{largura: string, altura: string, acabamento: string, qtdTotal: number}>>();
+  const grouped = new Map<string, Array<{dimensao: string, acabamento: string, qtdTotal: number}>>();
   
   kits.forEach(k => {
     const fLargura = k.folhaLargura;
@@ -255,19 +255,30 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     const caracteristica = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
     const isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
     
-    // Qtde real de folhas = quantidade no kit * (se duplo x 2)
+    // Qtde real de folhas = quantidade no kit
+    // Em relatórios de portas a qtde mostrada costuma ser a de conjuntos ou folhas dependendo, mas se o kit for duplo, o usuário disse: '2 folhas', qtde: 2 ?
+    // "1 KIT DE LARGURA DE 1020 ... SENDO 2 FOLHAS DE 510", então a qtde deve ser multiplicada ou apenas indicamos a QTD do kit?
+    // "Qtde real de folhas = quantidade no kit * (se duplo x 2)" - was there already, let's keep it.
     const qtde = isDuplo ? fQtd * 2 : fQtd;
+
+    let dimensao = `${fLargura}x${fAltura}`;
+    if (isDuplo && fLargura.match(/^\d+$/)) {
+      let metade = parseInt(fLargura, 10) / 2;
+      dimensao = `${fLargura}x${fAltura} (2x ${metade}x${fAltura})`;
+    } else if (isDuplo) {
+      dimensao = `${fLargura}x${fAltura} (Duplo)`;
+    }
 
     if (!grouped.has(caracteristica)) {
       grouped.set(caracteristica, []);
     }
 
     const items = grouped.get(caracteristica)!;
-    const existing = items.find(i => i.largura === fLargura && i.altura === fAltura && i.acabamento === acabamento);
+    const existing = items.find(i => i.dimensao === dimensao && i.acabamento === acabamento);
     if (existing) {
       existing.qtdTotal += qtde;
     } else {
-      items.push({ largura: fLargura, altura: fAltura, acabamento, qtdTotal: qtde });
+      items.push({ dimensao, acabamento, qtdTotal: qtde });
     }
   });
 
@@ -300,7 +311,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
               {items.map((k, idx2) => (
                 <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                   <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
-                    {k.largura}x{k.altura}
+                    {k.dimensao}
                   </td>
                   <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold w-24">
                     {k.qtdTotal}
