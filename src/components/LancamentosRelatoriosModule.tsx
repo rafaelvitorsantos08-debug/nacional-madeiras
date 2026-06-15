@@ -74,6 +74,30 @@ const INITIAL_KITS: KitLancamento[] = [
   {"bloco":"1","apto":"308","pavimento":"3","coluna":"8","comodo":"SUITE 2","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"150","aduelaAltura":"2110","regulagem":"REG 70","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":""}
 ];
 
+const EditableCell = ({ value, onChange, className = "", type = "text", options = [] }: { value: any, onChange: (v: any) => void, className?: string, type?: "text" | "number" | "boolean" | "select", options?: string[] }) => {
+  if (type === "boolean") {
+    return (
+      <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} className="cursor-pointer" />
+    );
+  }
+  if (type === "select") {
+    return (
+      <select value={value} onChange={e => onChange(e.target.value)} className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}>
+        <option value="">-</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    );
+  }
+  return (
+    <input 
+      type={type === "number" ? "number" : "text"}
+      value={value || ''} 
+      onChange={e => onChange(e.target.value)}
+      className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}
+    />
+  );
+};
+
 export function LancamentosRelatoriosModule() {
   const [kits, setKits] = useLocalStorage<KitLancamento[]>('nacional_madeiras_kits_v6', INITIAL_KITS);
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
