@@ -277,18 +277,6 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
 
   return (
     <div className="space-y-6">
-      {/* HEADER SIMILAR A USINAGEM PARA MANTER PADRAO DE IMPRESSAO */}
-      <div className="bg-gray-100 p-4 border border-gray-300 print:bg-transparent print:border-t print:border-b print:border-black flex justify-between uppercase font-semibold text-gray-800 print:text-black text-[11px] mb-6 shadow-sm print:shadow-none">
-        <div>
-           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">RESPONSÁVEL</div>
-           <div className="text-sm font-bold tracking-tight">{responsavel || ''}</div>
-        </div>
-        <div className="text-right">
-           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">OBRA / DESTINO</div>
-           <div className="text-sm font-bold tracking-tight">{obra || ''}</div>
-        </div>
-      </div>
-
       {Array.from(grouped.entries()).map(([caracteristica, items], idx) => (
         <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6">
           <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-gray-100 print:border-black print:text-black">
