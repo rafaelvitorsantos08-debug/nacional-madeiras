@@ -1,4 +1,7 @@
+const fs = require('fs');
+const file = 'src/components/AutoReports.tsx';
 
+const newContent = `
 import React, { useMemo } from 'react';
 
 export function AutoReportsViewer({ kits, reportType }: { kits: any[], reportType: string }) {
@@ -152,3 +155,6 @@ function renderAutoVergas(kits: any[]) {
   return <TableLayout headers={headers} rows={rows} />;
 }
 
+`;
+
+fs.writeFileSync(file, newContent);
