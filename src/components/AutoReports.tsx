@@ -239,8 +239,9 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   );
 }
 
-function renderAutoPortas(kits: any[]) {
-  const agrupar = new Map<string, any>();
+function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
+  // Group by (1) Caracteristica -> (2) Medida + Acabamento
+  const grouped = new Map<string, Array<{largura: string, altura: string, acabamento: string, qtdTotal: number}>>();
   
   kits.forEach(k => {
     const fLargura = k.folhaLargura;
@@ -251,76 +252,80 @@ function renderAutoPortas(kits: any[]) {
     const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
     const acabamento = k.acabamentoPorta || '-';
     // Mapeamento correto para a característica da porta
-    const caracteristica = k.caracteristicaPorta || k.modelo || 'HONEY';
-    const isDuplo = !!k.kitDuplo;
+    const caracteristica = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
+    const isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
     
     // Qtde real de folhas = quantidade no kit * (se duplo x 2)
     const qtde = isDuplo ? fQtd * 2 : fQtd;
 
-    const key = `${fLargura}-${fAltura}-${acabamento}-${caracteristica}`;
+    if (!grouped.has(caracteristica)) {
+      grouped.set(caracteristica, []);
+    }
 
-    const val = agrupar.get(key) || { 
-        largura: fLargura, altura: fAltura,
-        acabamento, caracteristica, qtdTotal: 0 
-    };
-    
-    val.qtdTotal += qtde;
-    agrupar.set(key, val);
+    const items = grouped.get(caracteristica)!;
+    const existing = items.find(i => i.largura === fLargura && i.altura === fAltura && i.acabamento === acabamento);
+    if (existing) {
+      existing.qtdTotal += qtde;
+    } else {
+      items.push({ largura: fLargura, altura: fAltura, acabamento, qtdTotal: qtde });
+    }
   });
 
-  const rows = Array.from(agrupar.values());
+  if (grouped.size === 0) {
+    return <div className="text-center p-4 text-gray-500">Nenhum dado de porta com dimensões para exibir.</div>;
+  }
 
   return (
-    <div className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-x-auto shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white">
-      <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
-        <thead className="bg-gray-100 dark:bg-[#0f172a] print:bg-transparent">
-          <tr>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
-              Medidas
-            </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
-              Qtd Folha/Kit
-            </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
-              Acabamento da Porta
-            </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
-              Caracteristica da Porta
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
-          {rows.length === 0 && (
-            <tr>
-              <td colSpan={4} className="px-4 py-6 text-center text-gray-500 dark:text-slate-400 font-medium">
-                Nenhum kit de porta com dimensões foi preenchido na planilha.
-              </td>
-            </tr>
-          )}
-          {rows.map((k, idx) => (
-            <tr key={idx} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
-              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
-                {k.largura}x{k.altura}
-              </td>
-              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
-                <span className="inline-block min-w-[80px] bg-gray-100 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-900 dark:text-white print:text-black font-bold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
-                  {k.qtdTotal}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
-                 <span className="inline-block min-w-[120px] bg-gray-100 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-900 dark:text-white print:text-black font-bold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
-                  {k.acabamento}
-                 </span>
-              </td>
-              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
-                 <span className="inline-block min-w-[120px] bg-gray-50 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-700 dark:text-gray-300 print:text-black font-semibold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
-                  {k.caracteristica}
-                 </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-6">
+      {/* HEADER SIMILAR A USINAGEM PARA MANTER PADRAO DE IMPRESSAO */}
+      <div className="bg-gray-100 p-4 border border-gray-300 print:bg-transparent print:border-t print:border-b print:border-black flex justify-between uppercase font-semibold text-gray-800 print:text-black text-[11px] mb-6 shadow-sm print:shadow-none">
+        <div>
+           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">RESPONSÁVEL</div>
+           <div className="text-sm font-bold tracking-tight">{responsavel || ''}</div>
+        </div>
+        <div className="text-right">
+           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">OBRA / DESTINO</div>
+           <div className="text-sm font-bold tracking-tight">{obra || ''}</div>
+        </div>
+      </div>
+
+      {Array.from(grouped.entries()).map(([caracteristica, items], idx) => (
+        <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6">
+          <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-gray-100 print:border-black print:text-black">
+             {caracteristica}
+          </div>
+          <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
+            <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
+              <tr>
+                <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
+                  Medidas
+                </th>
+                <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-24">
+                  Quantidade
+                </th>
+                <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
+                  Acabamento da Porta
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
+              {items.map((k, idx2) => (
+                <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
+                  <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                    {k.largura}x{k.altura}
+                  </td>
+                  <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold w-24">
+                    {k.qtdTotal}
+                  </td>
+                  <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-semibold">
+                    {k.acabamento}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }
