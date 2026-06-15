@@ -59,61 +59,55 @@ function mapFechaduraTipo(codigo: string) {
 }
 
 function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: string, obra?: string) {
-  // Step 1: Agrupar por Fechadura Tipo -> Abertura -> Dimensao -> Quantidade
-  const grouped = new Map<string, Array<{abertura: string, dimensao: string, qtd: number}>>();
+  // Grouping structure: fTipo -> { singles: [], doubles: [] }
+  const grouped = new Map<string, {
+    singles: Array<{abertura: string, dimensao: string, qtd: number}>,
+    doubles: Array<{dimensao: string, qtd: number}>
+  }>();
 
   kits.forEach(k => {
     let fTipo = mapFechaduraTipo(k.fechaduraTipo || '');
-    // Some specific cases may override group based on combinations if needed.
-    
     let abertura = k.abertura?.trim().toUpperCase() || 'INDEFINIDA';
+    
     let fLargura = mode === 'portas' ? k.folhaLargura : k.aduelaLargura;
     let fAltura = mode === 'portas' ? k.folhaAltura : k.aduelaAltura;
 
-    // Handle "SÓ DOBRADIÇAS" logic if fechaduraTipo is missing or explicitly Só Dobradiças.
-    if(fTipo === 'SEM FECHADURA' || !k.fechaduraTipo) {
-       // If it has hinges but no lock, we group as SÓ DOBRADIÇAS
-       if (k.dobradicaMarca || k.dobradicaMedida) {
-         fTipo = 'SÓ DOBRADIÇAS';
-       }
-    }
-
     if (!fLargura || !fAltura || fLargura === '-' || fAltura === '-') return;
 
-    let dimensao = `${fLargura}x${fAltura}`;
-    
-    let isDuplo = !!k.kitDuplo;
-    let baseQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
-    // se for usinagem de ADUELA, um "kit duplo" (2 folhas) usa 1 aduela usinada como duplo? A folha usa 2.
-    // the user image says for "EXTERNA MEIO CILINDRO" -> 1440x2100 (2x 720x2100).
-    // Let's assume quantity is literal to the lines. We just aggregate by dimensions right now.
-    
-    // In Portas report, image shows 1440x2100 (2x 720x2100) -> meaning for double kits!
-    if (isDuplo) {
-        let metade = parseInt(fLargura) / 2;
-        dimensao = `${fLargura}x${fAltura} (2x ${metade}x${fAltura})`;
+    if ((fTipo === 'SEM FECHADURA' || !k.fechaduraTipo) && (k.dobradicaMarca || k.dobradicaMedida)) {
+      fTipo = 'SÓ DOBRADIÇAS';
     }
 
-    // Qtde calculation
-    let qtdTotal = isDuplo && mode === 'portas' ? baseQtd * 2 : baseQtd;
-    // Wait, the image says "2 Esq / 2 Dir" for a double kit? Let's just use 1 kit = 1 unless specified.
-    // Actually the image says: 1440x2100 (2x 720x2100): 2 Esq / 2 Dir
-    // Let's stick with 1 item = 1 row in the launch sheet. We just increment by 1 conceptually or parse qtdeFolhasPorKit correctly.
-    // In LancamentosRelatorios: each row is 1 Kit? Wait, is there a QTY column? Not globally. It has qtdeFolhasPorKit.
-    // So 1 row = 1 kit. If kit has 2 folhas, should we add 2 to Portas? The image for 1440 shows "2 Esq / 2 Dir".
-    let qtd = isDuplo && mode === 'portas' ? 2 : 1; 
+    let isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
 
     if (!grouped.has(fTipo)) {
-      grouped.set(fTipo, []);
+      grouped.set(fTipo, { singles: [], doubles: [] });
     }
-    
-    // look for existing
     const groupItems = grouped.get(fTipo)!;
-    const existing = groupItems.find(i => i.abertura === abertura && i.dimensao === dimensao);
-    if(existing) {
-       existing.qtd += 1;
+
+    if (isDuplo) {
+      let dimensao = `${fLargura}x${fAltura}`;
+      if (mode === 'portas' && fLargura.match(/^\d+$/)) {
+        let metade = parseInt(fLargura, 10) / 2;
+        dimensao = `${fLargura}x${fAltura} (2x ${metade}x${fAltura})`;
+      } else if (mode === 'portas') {
+         dimensao = `${fLargura}x${fAltura} (Duplo)`;
+      }
+
+      const existing = groupItems.doubles.find(i => i.dimensao === dimensao);
+      if (existing) {
+        existing.qtd += 1;
+      } else {
+        groupItems.doubles.push({ dimensao, qtd: 1 });
+      }
     } else {
-       groupItems.push({abertura, dimensao, qtd: 1});
+      let dimensao = `${fLargura}x${fAltura}`;
+      const existing = groupItems.singles.find(i => i.abertura === abertura && i.dimensao === dimensao);
+      if (existing) {
+        existing.qtd += 1;
+      } else {
+        groupItems.singles.push({ abertura, dimensao, qtd: 1 });
+      }
     }
   });
 
@@ -124,116 +118,120 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="bg-gray-100 p-4 border border-gray-300 print:bg-transparent print:border-t print:border-b print:border-black flex justify-between uppercase font-semibold text-gray-800 print:text-black text-sm mb-6">
+      <div className="bg-gray-100 p-4 border border-gray-300 print:bg-transparent print:border-t print:border-b print:border-black flex justify-between uppercase font-semibold text-gray-800 print:text-black text-[11px] mb-6 shadow-sm print:shadow-none">
         <div>
-           <div className="text-[10px] text-gray-500 print:text-gray-600 mb-1">RESPONSÁVEL</div>
-           <div>{responsavel || 'Não informado'}</div>
+           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">RESPONSÁVEL</div>
+           <div className="text-sm font-bold tracking-tight">{responsavel || ''}</div>
         </div>
-        <div>
-           <div className="text-[10px] text-gray-500 print:text-gray-600 mb-1">OBRA / DESTINO</div>
-           <div>{obra || 'Não informado'}</div>
+        <div className="text-right">
+           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">OBRA / DESTINO</div>
+           <div className="text-sm font-bold tracking-tight">{obra || ''}</div>
         </div>
       </div>
 
-      {Array.from(grouped.entries()).map(([fTipo, items]) => {
-         // Separate into ESQUERDA and DIREITA logic
-         // For things like CORRER / CAMARÃO / PIVOTANTE we might put them on the left or center.
-         const esquerdas = items.filter(i => i.abertura.includes('ESQUERDA'));
-         const direitas = items.filter(i => i.abertura.includes('DIREITA'));
-         const outros = items.filter(i => !i.abertura.includes('ESQUERDA') && !i.abertura.includes('DIREITA'));
+      {Array.from(grouped.entries()).map(([fTipo, groupData]) => {
+         const { singles, doubles } = groupData;
+         
+         const esquerdas = singles.filter(i => i.abertura.includes('ESQUERDA'));
+         const direitas = singles.filter(i => i.abertura.includes('DIREITA'));
+         const outros = singles.filter(i => !i.abertura.includes('ESQUERDA') && !i.abertura.includes('DIREITA'));
 
-         // Get all unique aberturas for left and right
          const esqAberturas = Array.from(new Set(esquerdas.map(i => i.abertura)));
          const dirAberturas = Array.from(new Set(direitas.map(i => i.abertura)));
-         
          const maxAberturas = Math.max(esqAberturas.length, dirAberturas.length, outros.length > 0 ? 1 : 0);
-         // Build rows for the side-by-side table
-         
-         // In the images, they just put ESQUERDA on left and DIREITA on right. If there are multiple (like ESQUERDA P/FORA), they just label the column specifically.
-         
+
          return (
             <div key={fTipo} className="border border-gray-400 rounded-sm overflow-hidden mb-6 break-inside-avoid shadow-sm print:shadow-none print:border-black">
-               <div className="bg-gray-100 border-b border-gray-400 py-1 text-center font-bold uppercase print:bg-gray-200 print:border-black">
+               <div className="bg-gray-100 border-b border-gray-400 py-1.5 text-center font-bold text-xs uppercase print:bg-gray-100 print:border-black">
                   {fTipo}
                </div>
 
-               <div className="flex flex-col md:flex-row min-h-[60px] divide-y md:divide-y-0 md:divide-x divide-gray-400 print:divide-black">
-                  {/* ESQUERDA SIDE */}
-                  {(esquerdas.length > 0 || maxAberturas > 0) && (
-                    <div className="flex-1 flex flex-col p-0">
-                       {esqAberturas.length > 0 ? esqAberturas.map(abLabel => (
-                         <div key={abLabel} className="w-full h-full flex flex-col">
-                           <div className="text-center font-bold text-[10px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                             {abLabel}
-                           </div>
-                           <div className="flex-1 p-2 flex flex-col justify-start">
-                             {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                               <div key={idxx} className="flex justify-between items-center text-sm py-0.5 border-b border-gray-100 last:border-0 print:border-black/20">
-                                 <span className="font-mono text-gray-700 font-semibold print:text-black">{item.dimensao}</span>
-                                 <span className="font-bold">{item.qtd}</span>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )) : (
-                         <div className="w-full flex-1 flex flex-col">
-                           <div className="text-center font-bold text-[10px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                             ESQUERDA
-                           </div>
-                           <div className="flex-1"></div>
-                         </div>
-                       )}
-                    </div>
-                  )}
-
-                  {/* DIREITA SIDE */}
-                  {(direitas.length > 0 || maxAberturas > 0) && (
-                    <div className="flex-1 flex flex-col p-0">
-                       {dirAberturas.length > 0 ? dirAberturas.map(abLabel => (
-                         <div key={abLabel} className="w-full h-full flex flex-col">
-                           <div className="text-center font-bold text-[10px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                             {abLabel}
-                           </div>
-                           <div className="flex-1 p-2 flex flex-col justify-start">
-                             {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                               <div key={idxx} className="flex justify-between items-center text-sm py-0.5 border-b border-gray-100 last:border-0 print:border-black/20">
-                                 <span className="font-mono text-gray-700 font-semibold print:text-black">{item.dimensao}</span>
-                                 <span className="font-bold">{item.qtd}</span>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )) : (
-                         <div className="w-full flex-1 flex flex-col">
-                           <div className="text-center font-bold text-[10px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                             DIREITA
-                           </div>
-                           <div className="flex-1"></div>
-                         </div>
-                       )}
-                    </div>
-                  )}
-
-                  {/* OUTRAS ABERTURAS (e.g. CORRER, CAMARÃO) */}
-                  {outros.length > 0 && (
-                     <div className="flex-1 flex flex-col p-0">
-                       <div className="text-center font-bold text-[10px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                         OUTROS / ESPECIAIS
-                       </div>
-                       <div className="flex-1 p-2 flex flex-col justify-start">
-                         {outros.map((item, idxx) => (
-                           <div key={idxx} className="flex justify-between items-center text-sm py-0.5 border-b border-gray-100 last:border-0 print:border-black/20">
-                             <div className="flex flex-col">
-                               <span className="text-[10px] font-bold text-brand-green uppercase">{item.abertura}</span>
-                               <span className="font-mono text-gray-700 font-semibold print:text-black">{item.dimensao}</span>
+               {/* SINGLES: ESQUERDA | DIREITA | OUTROS */}
+               {(singles.length > 0 || doubles.length === 0) && (
+                 <div className="flex flex-col md:flex-row min-h-[40px] divide-y md:divide-y-0 md:divide-x divide-gray-400 print:divide-black">
+                    {/* ESQUERDA */}
+                    {(esquerdas.length > 0 || maxAberturas > 0) && (
+                      <div className="flex-1 flex flex-col p-0">
+                         {esqAberturas.length > 0 ? esqAberturas.map(abLabel => (
+                           <div key={abLabel} className="w-full border-b border-gray-200 last:border-b-0 print:border-black/50">
+                             <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
+                               {abLabel}
                              </div>
-                             <span className="font-bold">{item.qtd}</span>
+                             <div className="p-2 flex flex-col gap-1">
+                               {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
+                                 <div key={idxx} className="flex justify-between items-center text-xs">
+                                   <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
+                                   <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                                 </div>
+                               ))}
+                             </div>
                            </div>
-                         ))}
+                         )) : null}
+                      </div>
+                    )}
+
+                    {/* DIREITA */}
+                    {(direitas.length > 0 || maxAberturas > 0) && (
+                      <div className="flex-1 flex flex-col p-0">
+                         {dirAberturas.length > 0 ? dirAberturas.map(abLabel => (
+                           <div key={abLabel} className="w-full border-b border-gray-200 last:border-b-0 print:border-black/50">
+                             <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
+                               {abLabel}
+                             </div>
+                             <div className="p-2 flex flex-col gap-1">
+                               {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
+                                 <div key={idxx} className="flex justify-between items-center text-xs">
+                                   <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
+                                   <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         )) : null}
+                      </div>
+                    )}
+
+                    {/* OUTROS */}
+                    {outros.length > 0 && (
+                       <div className="flex-1 flex flex-col p-0 border-b border-gray-200 last:border-b-0 print:border-black/50">
+                         <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
+                           OUTROS / ESPECIAIS
+                         </div>
+                         <div className="p-2 flex flex-col gap-1">
+                           {outros.map((item, idxx) => (
+                             <div key={idxx} className="flex justify-between items-center text-xs">
+                               <div className="flex flex-col">
+                                 <span className="text-[8px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
+                                 <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
+                               </div>
+                               <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                             </div>
+                           ))}
+                         </div>
                        </div>
-                     </div>
-                  )}
-               </div>
+                    )}
+                 </div>
+               )}
+
+               {/* DOUBLES (SÓ DOBRADIÇAS BOX) */}
+               {doubles.length > 0 && (
+                 <div className="bg-amber-50/50 print:bg-transparent border-t border-gray-400 print:border-black p-2">
+                    <div className="border border-[#eab308]/40 print:border-black rounded-sm bg-[#fefce8] print:bg-transparent p-2 text-center text-xs">
+                      <div className="font-bold uppercase text-[#ca8a04] print:text-black mb-2 text-[10px]">
+                        SÓ DOBRADIÇAS
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
+                        {doubles.map((item, idxx) => (
+                          <div key={idxx} className="flex items-center gap-2 font-mono text-gray-800 font-semibold print:text-black">
+                            <span>{item.dimensao}:</span>
+                            <span>{item.qtd} Esq / {item.qtd} Dir</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                 </div>
+               )}
+
             </div>
          );
       })}
