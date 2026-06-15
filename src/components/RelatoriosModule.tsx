@@ -493,7 +493,7 @@ export function RelatoriosModule() {
             </h3>
 
             {isAutoReport(reportType) && (
-              <AutoReportsViewer kits={kits} reportType={reportType} />
+              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} />
             )}
 
             {reportType === "avarias" && (
@@ -704,7 +704,7 @@ export function RelatoriosModule() {
 
           {isAutoReport(reportType) ? (
             <div className="mb-8 print-auto-report">
-              <AutoReportsViewer kits={kits} reportType={reportType} />
+              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} />
             </div>
           ) : (
             <table className="w-full border-collapse border border-black text-left mb-8">
