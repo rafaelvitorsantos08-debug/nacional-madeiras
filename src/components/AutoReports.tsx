@@ -371,42 +371,44 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
       {Array.from(grouped.entries()).map(([acabamento, alturasMap], idx) => {
          const alturas = Array.from(alturasMap.keys()).sort();
          return (
-           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6">
-             <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-gray-100 print:border-black print:text-black">
+           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-8">
+             <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-gray-200 print:border-black print:text-black">
                 {acabamento}
              </div>
              
-             {alturas.map((altura, aIdx) => {
-                const items = alturasMap.get(altura)!;
-                return (
-                  <div key={altura} className={aIdx !== alturas.length - 1 ? 'border-b border-gray-300 dark:border-slate-700 print:border-black' : ''}>
-                     <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
-                        <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
-                          <tr>
-                            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
-                              Medidas
-                            </th>
-                            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
-                              Qtd Folha/Kit
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
-                          {items.map((k, idx2) => (
-                            <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
-                              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
-                                {k.dimensao}
-                              </td>
-                              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
-                                {k.qtdTotal}
-                              </td>
+             <div className="p-4 flex flex-col gap-6">
+               {alturas.map((altura, aIdx) => {
+                  const items = alturasMap.get(altura)!;
+                  return (
+                    <div key={altura} className="rounded border border-gray-300 dark:border-slate-700 print:border-black overflow-hidden bg-white dark:bg-[#0f172a] shadow-sm">
+                       <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
+                          <thead className="bg-[#f8fafc] dark:bg-slate-800/50 print:bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                                Medidas
+                              </th>
+                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-black text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                                Quantidade
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                     </table>
-                  </div>
-                );
-             })}
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
+                            {items.map((k, idx2) => (
+                              <tr key={idx2} className="hover:bg-gray-50 print:hover:bg-transparent">
+                                <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                                  {k.dimensao}
+                                </td>
+                                <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                                  {k.qtdTotal}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                       </table>
+                    </div>
+                  );
+               })}
+             </div>
            </div>
          );
       })}
