@@ -271,55 +271,49 @@ function renderAutoPortas(kits: any[]) {
   const rows = Array.from(agrupar.values());
 
   return (
-    <div className="rounded border border-slate-800 overflow-x-auto shadow-sm break-inside-avoid bg-[#0f172a]">
-      <table className="min-w-full divide-y divide-slate-800 text-[11px] sm:text-sm">
-        <thead>
+    <div className="rounded border border-gray-300 dark:border-gray-800 print:border-black overflow-x-auto shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-sm">
+        <thead className="bg-gray-100 dark:bg-[#0f172a] print:bg-transparent">
           <tr>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
-              Folha Larg
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
+              Medidas
             </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
-              Folha Alt
-            </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
               Qtd Folha/Kit
             </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
               Acabamento da Porta
             </th>
-            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-black text-gray-800 dark:text-emerald-400 print:text-black">
               Caracteristica da Porta
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800">
+        <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
           {rows.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-6 text-center text-slate-400 font-medium">
+              <td colSpan={4} className="px-4 py-6 text-center text-gray-500 dark:text-slate-400 font-medium">
                 Nenhum kit de porta com dimensões foi preenchido na planilha.
               </td>
             </tr>
           )}
           {rows.map((k, idx) => (
-            <tr key={idx} className="bg-[#151f32]">
-              <td className="px-4 py-3 text-center border-x border-slate-800 text-white font-bold">
-                {k.largura}
+            <tr key={idx} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
+              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black text-gray-900 dark:text-white print:text-black font-bold">
+                {k.largura}x{k.altura}
               </td>
-              <td className="px-4 py-3 text-center border-x border-slate-800 text-white font-bold">
-                {k.altura}
-              </td>
-              <td className="px-4 py-3 text-center border-x border-slate-800">
-                <span className="inline-block min-w-[80px] bg-[#0f172a] rounded px-4 py-1.5 text-white font-bold shadow-inner border border-slate-700/50">
+              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
+                <span className="inline-block min-w-[80px] bg-gray-100 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-900 dark:text-white print:text-black font-bold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
                   {k.qtdTotal}
                 </span>
               </td>
-              <td className="px-4 py-3 text-center border-x border-slate-800">
-                 <span className="inline-block min-w-[120px] bg-[#0f172a] rounded px-4 py-1.5 text-white font-bold shadow-inner border border-slate-700/50">
+              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
+                 <span className="inline-block min-w-[120px] bg-gray-100 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-900 dark:text-white print:text-black font-bold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
                   {k.acabamento}
                  </span>
               </td>
-              <td className="px-4 py-3 text-center border-x border-slate-800">
-                 <span className="inline-block min-w-[120px] bg-[#0f172a] rounded px-4 py-1.5 text-gray-300 font-semibold shadow-inner border border-slate-700/50">
+              <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-black">
+                 <span className="inline-block min-w-[120px] bg-gray-50 dark:bg-[#0f172a] print:bg-transparent rounded print:rounded-none px-4 py-1.5 text-gray-700 dark:text-gray-300 print:text-black font-semibold shadow-inner print:shadow-none border border-gray-200 dark:border-slate-700/50 print:border-none">
                   {k.caracteristica}
                  </span>
               </td>
