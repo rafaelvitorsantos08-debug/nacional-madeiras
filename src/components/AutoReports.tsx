@@ -47,19 +47,58 @@ function TableLayout({ headers, rows }: { headers: string[], rows: (string | num
 }
 
 function renderAutoPortas(kits: any[]) {
-  const headers = [
-    "Tipologia", "Folha Larg", "Folha Alt", "Qtd Folha/Kit", 
-    "Acabamento da Porta", "Caracteristica da Porta"
-  ];
-  const rows = kits.map(k => [
-    k.tipologia || '-',
-    k.folhaLargura || '-',
-    k.folhaAltura || '-',
-    k.qtdeFolhasPorKit || '1',
-    k.acabamentoPorta || '-',
-    k.caracteristicaPorta || k.modelo || '-'
-  ]);
-  return <TableLayout headers={headers} rows={rows} />;
+  return (
+    <div className="rounded border border-slate-800 overflow-x-auto shadow-sm break-inside-avoid bg-[#0f172a]">
+      <table className="min-w-full divide-y divide-slate-800 text-[11px] sm:text-sm">
+        <thead>
+          <tr>
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+              Folha Larg
+            </th>
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+              Folha Alt
+            </th>
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+              Qtd Folha/Kit
+            </th>
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+              Acabamento da Porta
+            </th>
+            <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-slate-800 text-emerald-400">
+              Caracteristica da Porta
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-800">
+          {kits.map((k, idx) => (
+            <tr key={idx} className="bg-[#151f32]">
+              <td className="px-4 py-3 text-center border-x border-slate-800 text-white font-bold">
+                {k.folhaLargura || '-'}
+              </td>
+              <td className="px-4 py-3 text-center border-x border-slate-800 text-white font-bold">
+                {k.folhaAltura || '-'}
+              </td>
+              <td className="px-4 py-3 text-center border-x border-slate-800">
+                <span className="inline-block min-w-[80px] bg-[#0f172a] rounded px-4 py-1.5 text-white font-bold shadow-inner">
+                  {k.qtdeFolhasPorKit || '1'}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-center border-x border-slate-800">
+                 <span className="inline-block min-w-[120px] bg-[#0f172a] rounded px-4 py-1.5 text-white font-bold shadow-inner">
+                  {k.acabamentoPorta || '-'}
+                 </span>
+              </td>
+              <td className="px-4 py-3 text-center border-x border-slate-800">
+                 <span className="inline-block min-w-[120px] bg-[#0f172a] rounded px-4 py-1.5 text-gray-300 font-semibold shadow-inner">
+                  {k.caracteristicaPorta || k.modelo || '-'}
+                 </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function renderAutoAduelas(kits: any[]) {
