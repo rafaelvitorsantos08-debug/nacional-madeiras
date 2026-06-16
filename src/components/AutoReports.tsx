@@ -115,9 +115,29 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     return <div className="text-center p-4 text-gray-500">Nenhum dado com dimensões para exibir.</div>;
   }
 
+  // Define the required order
+  const typeOrder = [
+    "WC",
+    "INTERNA",
+    "EXTERNA",
+    "EXTERNA MEIO CILINDRO",
+    "SÓ MAÇANETA",
+    "SÓ DOBRADIÇAS"
+  ];
+
+  const sortedEntries = Array.from(grouped.entries()).sort((a, b) => {
+    const idxA = typeOrder.indexOf(a[0]);
+    const idxB = typeOrder.indexOf(b[0]);
+    
+    if (idxA === -1 && idxB === -1) return a[0].localeCompare(b[0]);
+    if (idxA === -1) return 1;
+    if (idxB === -1) return -1;
+    return idxA - idxB;
+  });
+
   return (
     <div className="space-y-6">
-      {Array.from(grouped.entries()).map(([fTipo, groupData]) => {
+      {sortedEntries.map(([fTipo, groupData]) => {
          const { singles, doubles } = groupData;
          
          const esquerdas = singles.filter(i => i.abertura.includes('ESQUERDA'));
@@ -126,100 +146,112 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
          const esqAberturas = Array.from(new Set(esquerdas.map(i => i.abertura)));
          const dirAberturas = Array.from(new Set(direitas.map(i => i.abertura)));
-         const maxAberturas = Math.max(esqAberturas.length, dirAberturas.length, outros.length > 0 ? 1 : 0);
 
          return (
-            <div key={fTipo} className="border border-gray-400 rounded-sm overflow-hidden mb-6 break-inside-avoid shadow-sm print:shadow-none print:border-black">
-               <div className="bg-gray-100 border-b border-gray-400 py-1.5 text-center font-bold text-xs uppercase print:bg-gray-100 print:border-black">
-                  {fTipo}
-               </div>
-
-               {/* SINGLES: ESQUERDA | DIREITA | OUTROS */}
-               {(singles.length > 0 || doubles.length === 0) && (
-                 <div className="flex flex-col print:flex-row md:flex-row min-h-[40px] divide-y print:divide-y-0 md:divide-y-0 print:divide-x md:divide-x divide-gray-400 print:divide-black">
-                    {/* ESQUERDA */}
-                    {(esquerdas.length > 0 || maxAberturas > 0) && (
-                      <div className="flex-1 flex flex-col p-0">
-                         {esqAberturas.length > 0 ? esqAberturas.map(abLabel => (
-                           <div key={abLabel} className="w-full border-b border-gray-200 last:border-b-0 print:border-black">
-                             <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
+            <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none mb-6">
+              <table className="w-full border-collapse border border-black print:border-black text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
+                <thead>
+                  <tr>
+                    <th colSpan={2} className="bg-gray-100 print:bg-transparent border-b border-black print:border-black py-1.5 text-center font-bold uppercase">
+                      {fTipo}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(singles.length > 0 || doubles.length === 0) && (
+                    <tr className="align-top">
+                      {/* COLUNA ESQUERDA */}
+                      <td className="w-1/2 p-0 border-r border-black print:border-black relative">
+                        {esqAberturas.map((abLabel, idx) => (
+                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black" : ""}>
+                             <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
                                {abLabel}
                              </div>
-                             <div className="flex flex-col">
-                               {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                                 <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black">
-                                   <span className="flex-1 px-2 py-1 font-mono text-gray-800 font-semibold print:text-black text-center flex items-center justify-center">{item.dimensao}</span>
-                                   <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black text-center flex items-center justify-center">{item.qtd}</span>
+                             {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
+                               <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
+                                 <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
+                                   {item.dimensao}
                                  </div>
-                               ))}
-                             </div>
-                           </div>
-                         )) : null}
-                      </div>
-                    )}
-
-                    {/* DIREITA */}
-                    {(direitas.length > 0 || maxAberturas > 0) && (
-                      <div className="flex-1 flex flex-col p-0">
-                         {dirAberturas.length > 0 ? dirAberturas.map(abLabel => (
-                           <div key={abLabel} className="w-full border-b border-gray-200 last:border-b-0 print:border-black">
-                             <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                               {abLabel}
-                             </div>
-                             <div className="flex flex-col">
-                               {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                                 <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black">
-                                   <span className="flex-1 px-2 py-1 font-mono text-gray-800 font-semibold print:text-black text-center flex items-center justify-center">{item.dimensao}</span>
-                                   <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black text-center flex items-center justify-center">{item.qtd}</span>
+                                 <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
+                                   {item.qtd}
                                  </div>
-                               ))}
-                             </div>
-                           </div>
-                         )) : null}
-                      </div>
-                    )}
-
-                    {/* OUTROS */}
-                    {outros.length > 0 && (
-                       <div className="flex-1 flex flex-col p-0 border-b border-gray-200 last:border-b-0 print:border-black">
-                         <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black print:bg-transparent">
-                           OUTROS / ESPECIAIS
-                         </div>
-                         <div className="flex flex-col">
-                           {outros.map((item, idxx) => (
-                             <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black">
-                               <div className="flex-1 px-2 py-1 flex items-center justify-center gap-2">
-                                 <span className="text-[8px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
-                                 <span className="font-mono text-gray-800 font-semibold print:text-black text-center flex items-center justify-center">{item.dimensao}</span>
                                </div>
-                               <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black text-center flex items-center justify-center">{item.qtd}</span>
-                             </div>
-                           ))}
-                         </div>
-                       </div>
-                    )}
-                 </div>
-               )}
+                             ))}
+                           </div>
+                        ))}
+                        {esqAberturas.length === 0 && <div className="min-h-[40px] w-full"></div>}
+                      </td>
 
-               {/* DOUBLES (SÓ DOBRADIÇAS BOX) */}
-               {doubles.length > 0 && (
-                 <div className="bg-gray-50 print:bg-transparent border-t border-gray-400 print:border-black p-2">
-                    <div className="text-center text-xs">
-                      <div className="font-bold uppercase text-gray-800 print:text-black mb-2 text-[10px]">
-                        SÓ DOBRADIÇAS
-                      </div>
-                      <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
-                        {doubles.map((item, idxx) => (
-                          <div key={idxx} className="flex items-center gap-2 font-mono text-gray-800 font-semibold print:text-black">
-                            <span>{item.dimensao}:</span>
-                            <span className="font-black text-gray-900 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
+                      {/* COLUNA DIREITA */}
+                      <td className="w-1/2 p-0 relative">
+                        {dirAberturas.map((abLabel, idx) => (
+                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black" : ""}>
+                             <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
+                               {abLabel}
+                             </div>
+                             {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
+                               <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
+                                 <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
+                                   {item.dimensao}
+                                 </div>
+                                 <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
+                                   {item.qtd}
+                                 </div>
+                               </div>
+                             ))}
+                           </div>
+                        ))}
+                        {dirAberturas.length === 0 && <div className="min-h-[40px] w-full"></div>}
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* OUTROS / ESPECIAIS */}
+                  {outros.length > 0 && (
+                    <tr>
+                      <td colSpan={2} className="border-t border-black print:border-black p-0 print:border-solid">
+                        <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
+                          OUTROS / ESPECIAIS
+                        </div>
+                        {outros.map((item, idxx) => (
+                          <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
+                            <div className="w-1/2 flex items-center justify-center px-4 py-1.5 border-r border-black print:border-black print:border-solid">
+                              <span className="text-[9px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
+                            </div>
+                            <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
+                              {item.dimensao}
+                            </div>
+                            <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
+                              {item.qtd}
+                            </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                 </div>
-               )}
+                      </td>
+                    </tr>
+                  )}
 
+                  {/* SÓ DOBRADIÇAS BOX */}
+                  {doubles.length > 0 && (
+                    <tr>
+                      <td colSpan={2} className="border-t border-black print:border-black p-2 print:border-solid">
+                        <div className="text-center">
+                          <div className="font-bold uppercase text-gray-800 print:text-black mb-2 text-[10px]">
+                            SÓ DOBRADIÇAS
+                          </div>
+                          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
+                            {doubles.map((item, idxx) => (
+                              <div key={idxx} className="flex items-center gap-2 font-mono font-semibold print:text-black">
+                                <span>{item.dimensao}:</span>
+                                <span className="font-black text-gray-900 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
          );
       })}
