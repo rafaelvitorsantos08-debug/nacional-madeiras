@@ -61,6 +61,10 @@ function mapFechaduraTipo(codigo: string) {
 function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: string, obra?: string) {
   // Grouping structure: fTipo -> { singles: [], doubles: [] }
   const grouped = new Map<string, {
+    caracteristicas: Set<string>,
+    acabamentos: Set<string>,
+    fechMarcas: Set<string>,
+    fechGrids: Set<string>,
     singles: Array<{abertura: string, dimensao: string, qtd: number}>,
     doubles: Array<{dimensao: string, qtd: number}>
   }>();
@@ -81,9 +85,20 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     let isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
 
     if (!grouped.has(fTipo)) {
-      grouped.set(fTipo, { singles: [], doubles: [] });
+      grouped.set(fTipo, { 
+        singles: [], doubles: [],
+        caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set()
+      });
     }
     const groupItems = grouped.get(fTipo)!;
+
+    const carac = mode === 'portas' ? (k.caracteristicaPorta || k.modelo || k.tipologia) : (k.modelo || k.tipologia);
+    const acab = mode === 'portas' ? k.acabamentoPorta : k.acabamentoAduela;
+
+    if (carac && carac !== '-') groupItems.caracteristicas.add(String(carac).toUpperCase());
+    if (acab && acab !== '-') groupItems.acabamentos.add(String(acab).toUpperCase());
+    if (k.fechaduraMarca && k.fechaduraMarca !== '-') groupItems.fechMarcas.add(String(k.fechaduraMarca).toUpperCase());
+    if (k.fechaduraGrid && k.fechaduraGrid !== '-') groupItems.fechGrids.add(String(k.fechaduraGrid).toUpperCase());
 
     if (isDuplo) {
       let dimensao = `${fLargura}x${fAltura}`;
@@ -147,69 +162,102 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
          const esqAberturas = Array.from(new Set(esquerdas.map(i => i.abertura)));
          const dirAberturas = Array.from(new Set(direitas.map(i => i.abertura)));
 
+         type RowElement = { type: 'header', label: string } | { type: 'item', item: { dimensao: string, qtd: number } };
+         const leftElements: RowElement[] = [];
+         esqAberturas.forEach(ab => {
+             leftElements.push({ type: 'header', label: ab });
+             esquerdas.filter(x => x.abertura === ab).forEach(item => leftElements.push({ type: 'item', item }));
+         });
+         const rightElements: RowElement[] = [];
+         dirAberturas.forEach(ab => {
+             rightElements.push({ type: 'header', label: ab });
+             direitas.filter(x => x.abertura === ab).forEach(item => rightElements.push({ type: 'item', item }));
+         });
+
+         const maxRows = Math.max(leftElements.length, rightElements.length);
+
          return (
             <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none mb-6">
               <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="bg-gray-100 print:bg-transparent border-b border-black print:border-black print:border-solid py-1.5 text-center font-bold uppercase">
+                    <th colSpan={2} className="bg-gray-200 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[11px]">
+                      {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="bg-gray-100 print:bg-transparent border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2">
+                      <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
+                      {Array.from(groupData.acabamentos).join(" / ") || "-"}
+                    </th>
+                    <th className="bg-gray-100 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2">
+                      <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
+                      {Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th colSpan={2} className="bg-gray-300 print:bg-transparent border-b border-black print:border-black print:border-solid py-1.5 text-center font-black uppercase text-[12px]">
                       {fTipo}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(singles.length > 0 || doubles.length === 0) && (
-                    <tr className="align-top">
-                      {/* COLUNA ESQUERDA */}
-                      <td className="w-1/2 p-0 border-r border-black print:border-black print:border-solid relative">
-                        {esqAberturas.map((abLabel, idx) => (
-                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black print:border-solid" : ""}>
-                             <div className="flex border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent items-stretch">
-                               <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 flex items-center justify-center">
-                                 {abLabel}
-                               </div>
-                               <div className="w-12 border-l border-transparent"></div>
-                             </div>
-                             {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                               <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
-                                 <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
-                                   {item.dimensao}
-                                 </div>
-                                 <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
-                                   {item.qtd}
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                        ))}
-                        {esqAberturas.length === 0 && <div className="min-h-[40px] w-full"></div>}
-                      </td>
-
-                      {/* COLUNA DIREITA */}
-                      <td className="w-1/2 p-0 relative">
-                        {dirAberturas.map((abLabel, idx) => (
-                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black print:border-solid" : ""}>
-                             <div className="flex border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent items-stretch">
-                               <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 flex items-center justify-center">
-                                 {abLabel}
-                               </div>
-                               <div className="w-12 border-l border-transparent"></div>
-                             </div>
-                             {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                               <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
-                                 <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
-                                   {item.dimensao}
-                                 </div>
-                                 <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
-                                   {item.qtd}
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                        ))}
-                        {dirAberturas.length === 0 && <div className="min-h-[40px] w-full"></div>}
-                      </td>
-                    </tr>
+                  {(maxRows > 0 || doubles.length === 0) && (
+                    <>
+                      {Array.from({ length: maxRows }).map((_, idx) => {
+                         const l = leftElements[idx];
+                         const r = rightElements[idx];
+                         return (
+                           <tr key={idx} className="border-b border-black print:border-black print:border-solid last:border-b-0">
+                             {/* COLUNA ESQUERDA */}
+                             <td className="w-1/2 p-0 border-r border-black print:border-black print:border-solid align-top">
+                               {l ? (
+                                  l.type === 'header' ? (
+                                    <div className="flex bg-gray-50 print:bg-transparent items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center">
+                                         {l.label}
+                                      </div>
+                                      <div className="w-12 border-l border-transparent"></div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-stretch w-full h-full">
+                                      <div className="flex-1 px-2 py-1 text-center font-mono font-semibold print:text-black flex items-center justify-center">
+                                        {l.item.dimensao}
+                                      </div>
+                                      <div className="w-12 px-2 py-1 text-center font-bold border-l border-black print:border-black print:border-solid print:text-black flex items-center justify-center">
+                                        {l.item.qtd}
+                                      </div>
+                                    </div>
+                                  )
+                               ) : <div className="h-full min-h-[24px]"></div>}
+                             </td>
+                             
+                             {/* COLUNA DIREITA */}
+                             <td className="w-1/2 p-0 align-top">
+                               {r ? (
+                                  r.type === 'header' ? (
+                                    <div className="flex bg-gray-50 print:bg-transparent items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center">
+                                         {r.label}
+                                      </div>
+                                      <div className="w-12 border-l border-transparent"></div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-stretch w-full h-full">
+                                      <div className="flex-1 px-2 py-1 text-center font-mono font-semibold print:text-black flex items-center justify-center">
+                                        {r.item.dimensao}
+                                      </div>
+                                      <div className="w-12 px-2 py-1 text-center font-bold border-l border-black print:border-black print:border-solid print:text-black flex items-center justify-center">
+                                        {r.item.qtd}
+                                      </div>
+                                    </div>
+                                  )
+                               ) : <div className="h-full min-h-[24px]"></div>}
+                             </td>
+                           </tr>
+                         );
+                      })}
+                    </>
                   )}
 
                   {/* OUTROS / ESPECIAIS */}
