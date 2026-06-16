@@ -207,11 +207,6 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                       {Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}
                     </th>
                   </tr>
-                  <tr>
-                    <th colSpan={2} className="bg-gray-300 dark:bg-gray-700 print:bg-gray-300 border-b border-black print:border-black print:border-solid py-1.5 text-center font-black uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
-                      {fTipoDisplay}
-                    </th>
-                  </tr>
                 </thead>
                 <tbody>
                   {(maxRows > 0 || doubles.length === 0) && (
@@ -238,7 +233,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                       <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {l.item.qtd}
                                       </div>
-                                      <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                      <div className="w-[50%] px-3 pl-12 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
                                         {fTipoDisplay}
                                       </div>
                                     </div>
@@ -263,7 +258,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                       <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {r.item.qtd}
                                       </div>
-                                      <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                      <div className="w-[50%] px-3 pl-12 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
                                         {fTipoDisplay}
                                       </div>
                                     </div>
@@ -291,7 +286,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                {item.qtd}
                              </div>
-                             <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                             <div className="w-[50%] px-3 pl-12 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
                                {fTipoDisplay}
                              </div>
                            </div>
