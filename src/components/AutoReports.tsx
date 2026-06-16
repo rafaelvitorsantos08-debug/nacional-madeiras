@@ -149,10 +149,10 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
          return (
             <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none mb-6">
-              <table className="w-full border-collapse border border-black print:border-black text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
+              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="bg-gray-100 print:bg-transparent border-b border-black print:border-black py-1.5 text-center font-bold uppercase">
+                    <th colSpan={2} className="bg-gray-100 print:bg-transparent border-b border-black print:border-black print:border-solid py-1.5 text-center font-bold uppercase">
                       {fTipo}
                     </th>
                   </tr>
@@ -161,11 +161,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                   {(singles.length > 0 || doubles.length === 0) && (
                     <tr className="align-top">
                       {/* COLUNA ESQUERDA */}
-                      <td className="w-1/2 p-0 border-r border-black print:border-black relative">
+                      <td className="w-1/2 p-0 border-r border-black print:border-black print:border-solid relative">
                         {esqAberturas.map((abLabel, idx) => (
-                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black" : ""}>
-                             <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
-                               {abLabel}
+                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black print:border-solid" : ""}>
+                             <div className="flex border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent items-stretch">
+                               <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 flex items-center justify-center">
+                                 {abLabel}
+                               </div>
+                               <div className="w-12 border-l border-transparent"></div>
                              </div>
                              {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
                                <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
@@ -185,9 +188,12 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                       {/* COLUNA DIREITA */}
                       <td className="w-1/2 p-0 relative">
                         {dirAberturas.map((abLabel, idx) => (
-                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black" : ""}>
-                             <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
-                               {abLabel}
+                           <div key={idx} className={idx !== 0 ? "border-t border-black print:border-black print:border-solid" : ""}>
+                             <div className="flex border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent items-stretch">
+                               <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 flex items-center justify-center">
+                                 {abLabel}
+                               </div>
+                               <div className="w-12 border-l border-transparent"></div>
                              </div>
                              {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
                                <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
@@ -209,8 +215,8 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                   {/* OUTROS / ESPECIAIS */}
                   {outros.length > 0 && (
                     <tr>
-                      <td colSpan={2} className="border-t border-black print:border-black p-0 print:border-solid">
-                        <div className="text-center font-bold text-[9px] uppercase border-b border-black bg-gray-50 py-1 print:border-black print:bg-transparent">
+                      <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-0">
+                        <div className="text-center font-bold text-[9px] uppercase border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent">
                           OUTROS / ESPECIAIS
                         </div>
                         {outros.map((item, idxx) => (
@@ -233,7 +239,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                   {/* SÓ DOBRADIÇAS BOX */}
                   {doubles.length > 0 && (
                     <tr>
-                      <td colSpan={2} className="border-t border-black print:border-black p-2 print:border-solid">
+                      <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-2">
                         <div className="text-center">
                           <div className="font-bold uppercase text-gray-800 print:text-black mb-2 text-[10px]">
                             SÓ DOBRADIÇAS
