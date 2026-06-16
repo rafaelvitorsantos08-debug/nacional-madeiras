@@ -117,18 +117,6 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
   return (
     <div className="space-y-6">
-      {/* HEADER */}
-      <div className="bg-gray-100 p-4 border border-gray-300 print:bg-transparent print:border-t print:border-b print:border-black flex justify-between uppercase font-semibold text-gray-800 print:text-black text-[11px] mb-6 shadow-sm print:shadow-none">
-        <div>
-           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">RESPONSÁVEL</div>
-           <div className="text-sm font-bold tracking-tight">{responsavel || ''}</div>
-        </div>
-        <div className="text-right">
-           <div className="text-[9px] text-gray-500 print:text-gray-600 mb-0.5">OBRA / DESTINO</div>
-           <div className="text-sm font-bold tracking-tight">{obra || ''}</div>
-        </div>
-      </div>
-
       {Array.from(grouped.entries()).map(([fTipo, groupData]) => {
          const { singles, doubles } = groupData;
          
@@ -148,7 +136,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
                {/* SINGLES: ESQUERDA | DIREITA | OUTROS */}
                {(singles.length > 0 || doubles.length === 0) && (
-                 <div className="flex flex-col md:flex-row min-h-[40px] divide-y md:divide-y-0 md:divide-x divide-gray-400 print:divide-black">
+                 <div className="flex flex-col print:flex-row md:flex-row min-h-[40px] divide-y print:divide-y-0 md:divide-y-0 print:divide-x md:divide-x divide-gray-400 print:divide-black">
                     {/* ESQUERDA */}
                     {(esquerdas.length > 0 || maxAberturas > 0) && (
                       <div className="flex-1 flex flex-col p-0">
@@ -157,11 +145,11 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
                                {abLabel}
                              </div>
-                             <div className="p-2 flex flex-col gap-1">
+                             <div className="flex flex-col">
                                {esquerdas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                                 <div key={idxx} className="flex justify-between items-center text-xs">
-                                   <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
-                                   <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                                 <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black/50">
+                                   <span className="flex-1 px-2 py-1 font-mono text-gray-800 font-semibold print:text-black text-center">{item.dimensao}</span>
+                                   <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black/50 text-center">{item.qtd}</span>
                                  </div>
                                ))}
                              </div>
@@ -178,11 +166,11 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
                                {abLabel}
                              </div>
-                             <div className="p-2 flex flex-col gap-1">
+                             <div className="flex flex-col">
                                {direitas.filter(x => x.abertura === abLabel).map((item, idxx) => (
-                                 <div key={idxx} className="flex justify-between items-center text-xs">
-                                   <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
-                                   <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                                 <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black/50">
+                                   <span className="flex-1 px-2 py-1 font-mono text-gray-800 font-semibold print:text-black text-center">{item.dimensao}</span>
+                                   <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black/50 text-center">{item.qtd}</span>
                                  </div>
                                ))}
                              </div>
@@ -197,14 +185,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                          <div className="text-center font-bold text-[9px] uppercase border-b border-gray-200 bg-gray-50 py-0.5 print:border-black/50 print:bg-transparent">
                            OUTROS / ESPECIAIS
                          </div>
-                         <div className="p-2 flex flex-col gap-1">
+                         <div className="flex flex-col">
                            {outros.map((item, idxx) => (
-                             <div key={idxx} className="flex justify-between items-center text-xs">
-                               <div className="flex flex-col">
+                             <div key={idxx} className="flex text-xs flex-row bg-white print:bg-transparent border-t border-gray-200 print:border-black/50">
+                               <div className="flex-1 px-2 py-1 flex items-center justify-center gap-2">
                                  <span className="text-[8px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
                                  <span className="font-mono text-gray-800 font-semibold print:text-black">{item.dimensao}</span>
                                </div>
-                               <span className="font-bold text-gray-900 print:text-black">{item.qtd}</span>
+                               <span className="w-12 px-2 py-1 font-bold text-gray-900 print:text-black border-l border-gray-200 print:border-black/50 text-center flex items-center justify-center">{item.qtd}</span>
                              </div>
                            ))}
                          </div>
@@ -215,16 +203,16 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
                {/* DOUBLES (SÓ DOBRADIÇAS BOX) */}
                {doubles.length > 0 && (
-                 <div className="bg-amber-50/50 print:bg-transparent border-t border-gray-400 print:border-black p-2">
-                    <div className="border border-[#eab308]/40 print:border-black rounded-sm bg-[#fefce8] print:bg-transparent p-2 text-center text-xs">
-                      <div className="font-bold uppercase text-[#ca8a04] print:text-black mb-2 text-[10px]">
+                 <div className="bg-gray-50 print:bg-transparent border-t border-gray-400 print:border-black p-2">
+                    <div className="text-center text-xs">
+                      <div className="font-bold uppercase text-gray-800 print:text-black mb-2 text-[10px]">
                         SÓ DOBRADIÇAS
                       </div>
                       <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
                         {doubles.map((item, idxx) => (
                           <div key={idxx} className="flex items-center gap-2 font-mono text-gray-800 font-semibold print:text-black">
                             <span>{item.dimensao}:</span>
-                            <span>{item.qtd} Esq / {item.qtd} Dir</span>
+                            <span className="font-black text-gray-900 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
                           </div>
                         ))}
                       </div>
