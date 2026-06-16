@@ -82,6 +82,10 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
       fTipo = 'SÓ DOBRADIÇAS';
     }
 
+    if (abertura.includes('P/FORA') || abertura.includes('P/ FORA')) {
+      fTipo += ' P/FORA';
+    }
+
     let isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
 
     if (!grouped.has(fTipo)) {
@@ -133,11 +137,17 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   // Define the required order
   const typeOrder = [
     "WC",
+    "WC P/FORA",
     "INTERNA",
+    "INTERNA P/FORA",
     "EXTERNA",
+    "EXTERNA P/FORA",
     "EXTERNA MEIO CILINDRO",
+    "EXTERNA MEIO CILINDRO P/FORA",
     "SÓ MAÇANETA",
-    "SÓ DOBRADIÇAS"
+    "SÓ MAÇANETA P/FORA",
+    "SÓ DOBRADIÇAS",
+    "SÓ DOBRADIÇAS P/FORA"
   ];
 
   const sortedEntries = Array.from(grouped.entries()).sort((a, b) => {
@@ -176,23 +186,30 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
          const maxRows = Math.max(leftElements.length, rightElements.length);
 
+         const fTipoDisplay = fTipo.replace(' P/FORA', '');
+
          return (
             <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none mb-6">
-              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
+              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="bg-gray-200 dark:bg-gray-800 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[11px] text-gray-900 dark:text-gray-100">
+                    <th colSpan={2} className="bg-gray-200 dark:bg-gray-800 print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[11px] text-gray-900 dark:text-gray-100 print:text-black">
                       {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
                     </th>
                   </tr>
                   <tr>
-                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-transparent border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
                       {Array.from(groupData.acabamentos).join(" / ") || "-"}
                     </th>
-                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
                       {Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}
+                    </th>
+                  </tr>
+                  <tr>
+                    <th colSpan={2} className="bg-gray-300 dark:bg-gray-700 print:bg-gray-300 border-b border-black print:border-black print:border-solid py-1.5 text-center font-black uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
+                      {fTipoDisplay}
                     </th>
                   </tr>
                 </thead>
@@ -208,21 +225,21 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <td className="w-1/2 p-0 border-r border-black print:border-black print:border-solid align-top">
                                {l ? (
                                   l.type === 'header' ? (
-                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-transparent items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300">
+                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
                                          {l.label}
                                       </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-stretch w-full h-full py-1">
-                                      <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
+                                      <div className="w-[35%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
                                         {l.item.dimensao}
                                       </div>
-                                      <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
+                                      <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {l.item.qtd}
                                       </div>
-                                      <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
-                                        {fTipo}
+                                      <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                        {fTipoDisplay}
                                       </div>
                                     </div>
                                   )
@@ -233,21 +250,21 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <td className="w-1/2 p-0 align-top">
                                {r ? (
                                   r.type === 'header' ? (
-                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-transparent items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300">
+                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
                                          {r.label}
                                       </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-stretch w-full h-full py-1">
-                                      <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
+                                      <div className="w-[35%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
                                         {r.item.dimensao}
                                       </div>
-                                      <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
+                                      <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {r.item.qtd}
                                       </div>
-                                      <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
-                                        {fTipo}
+                                      <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                        {fTipoDisplay}
                                       </div>
                                     </div>
                                   )
@@ -258,25 +275,24 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                       })}
                     </>
                   )}
-
-                  {/* OUTROS / ESPECIAIS */}
+                   {/* OUTROS / ESPECIAIS */}
                   {outros.length > 0 && (
                      <tr>
                        <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-0">
-                         <div className="text-center font-bold text-[9px] uppercase border-b border-black print:border-black print:border-solid bg-gray-50 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 py-1 print:bg-transparent">
+                         <div className="text-center font-bold text-[9px] uppercase border-b border-black print:border-black print:border-solid bg-gray-50 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 py-1 print:bg-gray-50 print:text-black">
                            OUTROS / ESPECIAIS
                          </div>
                          {outros.map((item, idxx) => (
                            <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid py-1">
-                             <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100 gap-2">
+                             <div className="w-[35%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100 gap-2">
                                <span className="text-[9px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
                                <span>{item.dimensao}</span>
                              </div>
-                             <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
+                             <div className="w-[15%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                {item.qtd}
                              </div>
-                             <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
-                               {fTipo}
+                             <div className="w-[50%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                               {fTipoDisplay}
                              </div>
                            </div>
                          ))}
