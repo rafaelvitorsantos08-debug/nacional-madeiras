@@ -90,8 +90,10 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
     let groupKey = fTipo;
     if (mode === 'aduelas' && !fTipo.includes('SÓ DOBRADIÇAS')) {
-      // Group all aduelas that are not "SÓ DOBRADIÇAS" into a single block
-      groupKey = 'ADUELAS_PADRAO';
+      // Group all aduelas that are not "SÓ DOBRADIÇAS" by their Fechadura Marca and Grid
+      const marca = k.fechaduraMarca?.trim().toUpperCase() || 'SEM MARCA';
+      const grid = k.fechaduraGrid?.trim().toUpperCase() || 'SEM GRID';
+      groupKey = `ADUELA_${marca}_${grid}`;
     }
 
     if (!grouped.has(groupKey)) {
@@ -244,7 +246,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           {l.item.qtd}
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {l.item.itemMeta}
+                                          {mode === 'portas' && l.item.itemMeta}
                                         </div>
                                       </div>
                                     </div>
@@ -271,7 +273,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           {r.item.qtd}
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {r.item.itemMeta}
+                                          {mode === 'portas' && r.item.itemMeta}
                                         </div>
                                       </div>
                                     </div>
@@ -301,7 +303,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                  {item.qtd}
                                </div>
                                <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-32 text-left">
-                                 {item.itemMeta}
+                                 {mode === 'portas' && item.itemMeta}
                                </div>
                              </div>
                            </div>
