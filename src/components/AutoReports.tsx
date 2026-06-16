@@ -577,20 +577,77 @@ function renderAutoUsinagemAduelas(kits: any[]) {
 }
 
 function renderAutoVergas(kits: any[]) {
-  const headers = [
-    "Tipologia", "Folha Larg", "Aduela Larg", "Verga (Folha + 47mm)", "Qtd Folha/Kit"
-  ];
-  const rows = kits.map(k => {
-    const fLarg = parseInt(k.folhaLargura, 10);
-    const verga = !isNaN(fLarg) ? fLarg + 47 : '-';
-    return [
-      k.tipologia || '-',
-      k.folhaLargura || '-',
-      k.aduelaLargura || '-',
-      verga,
-      k.qtdeFolhasPorKit || '1'
-    ];
+  const grouped = new Map<string, Map<string, number>>();
+
+  kits.forEach(k => {
+    let aLarg = k.aduelaLargura;
+    const fLarg = k.folhaLargura;
+    
+    if (!aLarg || !fLarg || aLarg === '-' || fLarg === '-') return;
+
+    aLarg = String(aLarg).replace(' cm', '').replace('cm', '').trim();
+    const parsedFolha = parseInt(String(fLarg), 10);
+    if (isNaN(parsedFolha)) return;
+
+    const verga = `${parsedFolha + 47}`;
+    
+    let qtd = parseInt(k.qtdeFolhasPorKit || '1', 10);
+    if (isNaN(qtd)) qtd = 1;
+
+    if (!grouped.has(aLarg)) {
+      grouped.set(aLarg, new Map());
+    }
+
+    const vergasMap = grouped.get(aLarg)!;
+    vergasMap.set(verga, (vergasMap.get(verga) || 0) + qtd);
   });
-  return <TableLayout headers={headers} rows={rows} />;
+
+  if (grouped.size === 0) {
+    return <div className="text-center p-4 text-gray-500">Nenhum dado de verga para exibir.</div>;
+  }
+
+  const sortedAduelas = Array.from(grouped.entries()).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+
+  return (
+    <div className="space-y-6">
+      {sortedAduelas.map(([aLarg, vergasMap], idx) => {
+         const vergasList = Array.from(vergasMap.entries()).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+         
+         return (
+           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-6">
+             <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
+                {`Aduela ${aLarg}`}
+             </div>
+             <div className="print:mt-0">
+               <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
+                  <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
+                    <tr>
+                      <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                        Verga (Folha + 47mm)
+                      </th>
+                      <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                        Quantidade
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
+                    {vergasList.map(([verga, qtd], idx2) => (
+                      <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
+                        <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/2">
+                          {verga}
+                        </td>
+                        <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/2">
+                          {qtd}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+               </table>
+             </div>
+           </div>
+         );
+      })}
+    </div>
+  );
 }
 
