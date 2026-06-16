@@ -65,8 +65,8 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     acabamentos: Set<string>,
     fechMarcas: Set<string>,
     fechGrids: Set<string>,
-    singles: Array<{abertura: string, dimensao: string, qtd: number}>,
-    doubles: Array<{dimensao: string, qtd: number}>
+    singles: Array<{abertura: string, dimensao: string, qtd: number, itemMeta: string}>,
+    doubles: Array<{dimensao: string, qtd: number, itemMeta: string}>
   }>();
 
   kits.forEach(k => {
@@ -88,13 +88,19 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
     let isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
 
-    if (!grouped.has(fTipo)) {
-      grouped.set(fTipo, { 
+    let groupKey = fTipo;
+    if (mode === 'aduelas' && !fTipo.includes('SÓ DOBRADIÇAS')) {
+      // Group all aduelas that are not "SÓ DOBRADIÇAS" into a single block
+      groupKey = 'ADUELAS_PADRAO';
+    }
+
+    if (!grouped.has(groupKey)) {
+      grouped.set(groupKey, { 
         singles: [], doubles: [],
         caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set()
       });
     }
-    const groupItems = grouped.get(fTipo)!;
+    const groupItems = grouped.get(groupKey)!;
 
     const carac = mode === 'portas' ? (k.caracteristicaPorta || k.modelo || k.tipologia) : (k.modelo || k.tipologia);
     const acab = mode === 'portas' ? k.acabamentoPorta : k.acabamentoAduela;
@@ -103,6 +109,8 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (acab && acab !== '-') groupItems.acabamentos.add(String(acab).toUpperCase());
     if (k.fechaduraMarca && k.fechaduraMarca !== '-') groupItems.fechMarcas.add(String(k.fechaduraMarca).toUpperCase());
     if (k.fechaduraGrid && k.fechaduraGrid !== '-') groupItems.fechGrids.add(String(k.fechaduraGrid).toUpperCase());
+
+    const itemMeta = fTipo.replace(' P/FORA', '');
 
     if (isDuplo) {
       let dimensao = `${fLargura}x${fAltura}`;
@@ -113,19 +121,19 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
          dimensao = `${fLargura}x${fAltura} (Duplo)`;
       }
 
-      const existing = groupItems.doubles.find(i => i.dimensao === dimensao);
+      const existing = groupItems.doubles.find(i => i.dimensao === dimensao && i.itemMeta === itemMeta);
       if (existing) {
         existing.qtd += 1;
       } else {
-        groupItems.doubles.push({ dimensao, qtd: 1 });
+        groupItems.doubles.push({ dimensao, qtd: 1, itemMeta });
       }
     } else {
       let dimensao = `${fLargura}x${fAltura}`;
-      const existing = groupItems.singles.find(i => i.abertura === abertura && i.dimensao === dimensao);
+      const existing = groupItems.singles.find(i => i.abertura === abertura && i.dimensao === dimensao && i.itemMeta === itemMeta);
       if (existing) {
         existing.qtd += 1;
       } else {
-        groupItems.singles.push({ abertura, dimensao, qtd: 1 });
+        groupItems.singles.push({ abertura, dimensao, qtd: 1, itemMeta });
       }
     }
   });
@@ -136,6 +144,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
   // Define the required order
   const typeOrder = [
+    "ADUELAS_PADRAO",
     "WC",
     "WC P/FORA",
     "INTERNA",
@@ -172,7 +181,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
          const esqAberturas = Array.from(new Set(esquerdas.map(i => i.abertura)));
          const dirAberturas = Array.from(new Set(direitas.map(i => i.abertura)));
 
-         type RowElement = { type: 'header', label: string } | { type: 'item', item: { dimensao: string, qtd: number } };
+         type RowElement = { type: 'header', label: string } | { type: 'item', item: { dimensao: string, qtd: number, itemMeta: string } };
          const leftElements: RowElement[] = [];
          esqAberturas.forEach(ab => {
              leftElements.push({ type: 'header', label: ab });
@@ -186,17 +195,17 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
          const maxRows = Math.max(leftElements.length, rightElements.length);
 
-         const fTipoDisplay = fTipo.replace(' P/FORA', '');
-
          return (
             <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none">
               <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden">
                 <thead>
-                  <tr>
-                    <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
-                      {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
-                    </th>
-                  </tr>
+                  {mode === 'portas' && (
+                    <tr>
+                      <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
+                        {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
+                      </th>
+                    </tr>
+                  )}
                   <tr>
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
@@ -235,7 +244,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           {l.item.qtd}
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {fTipoDisplay}
+                                          {l.item.itemMeta}
                                         </div>
                                       </div>
                                     </div>
@@ -262,7 +271,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           {r.item.qtd}
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {fTipoDisplay}
+                                          {r.item.itemMeta}
                                         </div>
                                       </div>
                                     </div>
@@ -292,7 +301,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                  {item.qtd}
                                </div>
                                <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-32 text-left">
-                                 {fTipoDisplay}
+                                 {item.itemMeta}
                                </div>
                              </div>
                            </div>
