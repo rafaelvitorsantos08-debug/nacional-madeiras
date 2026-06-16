@@ -221,18 +221,17 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center justify-between w-full h-full py-1 px-3 relative">
-                                      <div className="absolute inset-x-0 inset-y-0 flex items-center justify-center gap-12 pointer-events-none">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100">
+                                    <div className="flex items-center justify-center w-full h-full py-1">
+                                      <div className="flex items-center justify-center gap-4 sm:gap-8">
+                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
                                           {l.item.dimensao}
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100">
+                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
                                           {l.item.qtd}
                                         </div>
-                                      </div>
-                                      <div className="flex-1"></div>
-                                      <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 text-right shrink-0 z-10 w-1/3 flex justify-end items-center">
-                                        {fTipoDisplay}
+                                        <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
+                                          {fTipoDisplay}
+                                        </div>
                                       </div>
                                     </div>
                                   )
@@ -249,18 +248,17 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center justify-between w-full h-full py-1 px-3 relative">
-                                      <div className="absolute inset-x-0 inset-y-0 flex items-center justify-center gap-12 pointer-events-none">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100">
+                                    <div className="flex items-center justify-center w-full h-full py-1">
+                                      <div className="flex items-center justify-center gap-4 sm:gap-8">
+                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
                                           {r.item.dimensao}
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100">
+                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
                                           {r.item.qtd}
                                         </div>
-                                      </div>
-                                      <div className="flex-1"></div>
-                                      <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 text-right shrink-0 z-10 w-1/3 flex justify-end items-center">
-                                        {fTipoDisplay}
+                                        <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
+                                          {fTipoDisplay}
+                                        </div>
                                       </div>
                                     </div>
                                   )
@@ -279,19 +277,18 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                            OUTROS / ESPECIAIS
                          </div>
                          {outros.map((item, idxx) => (
-                           <div key={idxx} className="flex items-center justify-between w-full border-b border-black print:border-black last:border-b-0 print:border-solid py-1 px-3 relative">
-                             <div className="absolute inset-x-0 inset-y-0 flex items-center justify-center gap-12 pointer-events-none">
-                               <div className="font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100 gap-2">
+                           <div key={idxx} className="flex items-center justify-center w-full border-b border-black print:border-black last:border-b-0 print:border-solid py-1">
+                             <div className="flex items-center justify-center gap-4 sm:gap-8">
+                               <div className="font-mono font-semibold print:text-black flex items-center justify-end text-gray-900 dark:text-gray-100 gap-2 w-32 text-right">
                                  <span className="text-[9px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
                                  <span>{item.dimensao}</span>
                                </div>
-                               <div className="font-bold print:text-black text-gray-900 dark:text-gray-100">
+                               <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
                                  {item.qtd}
                                </div>
-                             </div>
-                             <div className="flex-1"></div>
-                             <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 text-right shrink-0 z-10 w-1/3 flex justify-end items-center">
-                               {fTipoDisplay}
+                               <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-32 text-left">
+                                 {fTipoDisplay}
+                               </div>
                              </div>
                            </div>
                          ))}
