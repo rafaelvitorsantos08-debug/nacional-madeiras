@@ -1,6 +1,16 @@
 
 import React, { useMemo } from 'react';
 
+const EditableText = ({ children }: { children: React.ReactNode }) => (
+  <span 
+    contentEditable 
+    suppressContentEditableWarning 
+    className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
+  >
+    {children}
+  </span>
+);
+
 export function AutoReportsViewer({ kits, reportType, responsavel, obra }: { kits: any[], reportType: string, responsavel?: string, obra?: string }) {
   const content = useMemo(() => {
     switch (reportType) {
@@ -25,7 +35,7 @@ function TableLayout({ headers, rows }: { headers: string[], rows: (string | num
           <tr>
             {headers.map((h, i) => (
               <th key={i} className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">
-                {h}
+                <EditableText>{h}</EditableText>
               </th>
             ))}
           </tr>
@@ -35,7 +45,7 @@ function TableLayout({ headers, rows }: { headers: string[], rows: (string | num
             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
               {row.map((cell, cIdx) => (
                 <td key={cIdx} className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium text-gray-900 dark:text-gray-100 print:text-black">
-                  {cell || '-'}
+                  <EditableText>{cell || '-'}</EditableText>
                 </td>
               ))}
             </tr>
@@ -204,18 +214,18 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                   {mode === 'portas' && (
                     <tr>
                       <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
-                        {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
+                        <EditableText>{Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}</EditableText>
                       </th>
                     </tr>
                   )}
                   <tr>
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
-                      {Array.from(groupData.acabamentos).join(" / ") || "-"}
+                      <EditableText>{Array.from(groupData.acabamentos).join(" / ") || "-"}</EditableText>
                     </th>
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
-                      {Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}
+                      <EditableText>{Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}</EditableText>
                     </th>
                   </tr>
                 </thead>
@@ -233,20 +243,20 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   l.type === 'header' ? (
                                     <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
                                       <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
-                                         {l.label}
+                                         <EditableText>{l.label}</EditableText>
                                       </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       <div className="flex items-center justify-center gap-4 sm:gap-8">
                                         <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
-                                          {l.item.dimensao}
+                                          <EditableText>{l.item.dimensao}</EditableText>
                                         </div>
                                         <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
-                                          {l.item.qtd}
+                                          <EditableText>{l.item.qtd}</EditableText>
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {mode === 'portas' && l.item.itemMeta}
+                                          <EditableText>{mode === 'portas' && l.item.itemMeta ? String(l.item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
                                         </div>
                                       </div>
                                     </div>
@@ -260,20 +270,20 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   r.type === 'header' ? (
                                     <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
                                       <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
-                                         {r.label}
+                                         <EditableText>{r.label}</EditableText>
                                       </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       <div className="flex items-center justify-center gap-4 sm:gap-8">
                                         <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
-                                          {r.item.dimensao}
+                                          <EditableText>{r.item.dimensao}</EditableText>
                                         </div>
                                         <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
-                                          {r.item.qtd}
+                                          <EditableText>{r.item.qtd}</EditableText>
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          {mode === 'portas' && r.item.itemMeta}
+                                          <EditableText>{mode === 'portas' && r.item.itemMeta ? String(r.item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
                                         </div>
                                       </div>
                                     </div>
@@ -300,10 +310,10 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                  <span>{item.dimensao}</span>
                                </div>
                                <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
-                                 {item.qtd}
+                                 <EditableText>{item.qtd}</EditableText>
                                </div>
                                <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-32 text-left">
-                                 {mode === 'portas' && item.itemMeta}
+                                 <EditableText>{mode === 'portas' && item.itemMeta ? String(item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
                                </div>
                              </div>
                            </div>
@@ -324,7 +334,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                             {doubles.map((item, idxx) => (
                               <div key={idxx} className="flex items-center gap-2 font-mono font-semibold text-gray-800 dark:text-gray-300 print:text-black">
                                 <span>{item.dimensao}:</span>
-                                <span className="font-black text-gray-900 dark:text-gray-100 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
+                                <span className="font-black text-gray-900 dark:text-gray-100 print:text-black"><EditableText>{item.qtd}</EditableText> Esq / <EditableText>{item.qtd}</EditableText> Dir</span>
                               </div>
                             ))}
                           </div>
@@ -393,7 +403,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
       {Array.from(grouped.entries()).map(([caracteristica, items], idx) => (
         <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white">
           <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
-             {caracteristica}
+             <EditableText>{caracteristica}</EditableText>
           </div>
           <div className="print:mt-2">
             <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
@@ -414,13 +424,13 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                 {items.map((k, idx2) => (
                   <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
-                      {k.dimensao}
+                      <EditableText>{k.dimensao}</EditableText>
                     </td>
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
-                      {k.qtdTotal}
+                      <EditableText>{k.qtdTotal}</EditableText>
                     </td>
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold w-1/3">
-                      {k.acabamento}
+                      <EditableText>{k.acabamento}</EditableText>
                     </td>
                   </tr>
                 ))}
@@ -477,7 +487,7 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
          return (
            <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-8">
              <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
-                {acabamento}
+                <EditableText>{acabamento}</EditableText>
              </div>
              
              <div className="p-4 print:p-0 flex flex-col gap-6 print:gap-4 print:mt-2">
@@ -500,10 +510,10 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                             {items.map((k, idx2) => (
                               <tr key={idx2} className="hover:bg-gray-50 print:hover:bg-transparent">
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                  {k.dimensao}
+                                  <EditableText>{k.dimensao}</EditableText>
                                 </td>
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                  {k.qtdTotal}
+                                  <EditableText>{k.qtdTotal}</EditableText>
                                 </td>
                               </tr>
                             ))}
@@ -616,17 +626,17 @@ function renderAutoVergas(kits: any[]) {
          return (
            <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-6">
              <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
-                {`Verga (Folha + 47mm): ${verga}`}
+                <EditableText>{`Verga (Folha + 47mm): ${verga}`}</EditableText>
              </div>
              <div className="print:mt-0">
                <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
                   <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                     <tr>
                       <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
-                        Aduela
+                        <EditableText>Aduela</EditableText>
                       </th>
                       <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
-                        Quantidade
+                        <EditableText>Quantidade</EditableText>
                       </th>
                     </tr>
                   </thead>
@@ -634,10 +644,10 @@ function renderAutoVergas(kits: any[]) {
                     {aduelasList.map(([aLarg, qtd], idx2) => (
                       <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                         <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/2">
-                          {aLarg}
+                          <EditableText>{aLarg}</EditableText>
                         </td>
                         <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/2">
-                          {qtd}
+                          <EditableText>{qtd}</EditableText>
                         </td>
                       </tr>
                     ))}
