@@ -193,6 +193,11 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
               <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden">
                 <thead>
                   <tr>
+                    <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
+                      {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
+                    </th>
+                  </tr>
+                  <tr>
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
                       {Array.from(groupData.acabamentos).join(" / ") || "-"}
