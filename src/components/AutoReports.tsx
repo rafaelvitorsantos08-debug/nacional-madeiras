@@ -181,23 +181,18 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
               <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-transparent overflow-hidden">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="bg-gray-200 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[11px]">
+                    <th colSpan={2} className="bg-gray-200 dark:bg-gray-800 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[11px] text-gray-900 dark:text-gray-100">
                       {Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}
                     </th>
                   </tr>
                   <tr>
-                    <th className="bg-gray-100 print:bg-transparent border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-transparent border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
                       {Array.from(groupData.acabamentos).join(" / ") || "-"}
                     </th>
-                    <th className="bg-gray-100 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-transparent border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200">
                       <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
                       {Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}
-                    </th>
-                  </tr>
-                  <tr>
-                    <th colSpan={2} className="bg-gray-300 print:bg-transparent border-b border-black print:border-black print:border-solid py-1.5 text-center font-black uppercase text-[12px]">
-                      {fTipo}
                     </th>
                   </tr>
                 </thead>
@@ -213,19 +208,21 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <td className="w-1/2 p-0 border-r border-black print:border-black print:border-solid align-top">
                                {l ? (
                                   l.type === 'header' ? (
-                                    <div className="flex bg-gray-50 print:bg-transparent items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center">
+                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-transparent items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300">
                                          {l.label}
                                       </div>
-                                      <div className="w-12 border-l border-transparent"></div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-stretch w-full h-full">
-                                      <div className="flex-1 px-2 py-1 text-center font-mono font-semibold print:text-black flex items-center justify-center">
+                                    <div className="flex items-stretch w-full h-full py-1">
+                                      <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
                                         {l.item.dimensao}
                                       </div>
-                                      <div className="w-12 px-2 py-1 text-center font-bold border-l border-black print:border-black print:border-solid print:text-black flex items-center justify-center">
+                                      <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {l.item.qtd}
+                                      </div>
+                                      <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                        {fTipo}
                                       </div>
                                     </div>
                                   )
@@ -236,19 +233,21 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                              <td className="w-1/2 p-0 align-top">
                                {r ? (
                                   r.type === 'header' ? (
-                                    <div className="flex bg-gray-50 print:bg-transparent items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center">
+                                    <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-transparent items-stretch w-full h-full">
+                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300">
                                          {r.label}
                                       </div>
-                                      <div className="w-12 border-l border-transparent"></div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-stretch w-full h-full">
-                                      <div className="flex-1 px-2 py-1 text-center font-mono font-semibold print:text-black flex items-center justify-center">
+                                    <div className="flex items-stretch w-full h-full py-1">
+                                      <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100">
                                         {r.item.dimensao}
                                       </div>
-                                      <div className="w-12 px-2 py-1 text-center font-bold border-l border-black print:border-black print:border-solid print:text-black flex items-center justify-center">
+                                      <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
                                         {r.item.qtd}
+                                      </div>
+                                      <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                                        {fTipo}
                                       </div>
                                     </div>
                                   )
@@ -262,26 +261,27 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
                   {/* OUTROS / ESPECIAIS */}
                   {outros.length > 0 && (
-                    <tr>
-                      <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-0">
-                        <div className="text-center font-bold text-[9px] uppercase border-b border-black print:border-black print:border-solid bg-gray-50 py-1 print:bg-transparent">
-                          OUTROS / ESPECIAIS
-                        </div>
-                        {outros.map((item, idxx) => (
-                          <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid">
-                            <div className="w-1/2 flex items-center justify-center px-4 py-1.5 border-r border-black print:border-black print:border-solid">
-                              <span className="text-[9px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
-                            </div>
-                            <div className="flex-1 px-2 py-1.5 text-center font-mono font-semibold print:text-black">
-                              {item.dimensao}
-                            </div>
-                            <div className="w-12 px-2 py-1.5 text-center font-bold border-l border-black print:border-black print:text-black print:border-solid">
-                              {item.qtd}
-                            </div>
-                          </div>
-                        ))}
-                      </td>
-                    </tr>
+                     <tr>
+                       <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-0">
+                         <div className="text-center font-bold text-[9px] uppercase border-b border-black print:border-black print:border-solid bg-gray-50 dark:bg-gray-800/30 text-gray-700 dark:text-gray-300 py-1 print:bg-transparent">
+                           OUTROS / ESPECIAIS
+                         </div>
+                         {outros.map((item, idxx) => (
+                           <div key={idxx} className="flex border-b border-black print:border-black last:border-b-0 print:border-solid py-1">
+                             <div className="w-[45%] px-3 text-left font-mono font-semibold print:text-black flex items-center text-gray-900 dark:text-gray-100 gap-2">
+                               <span className="text-[9px] font-bold text-brand-green uppercase leading-tight">{item.abertura}</span>
+                               <span>{item.dimensao}</span>
+                             </div>
+                             <div className="w-[10%] px-1 text-center font-bold print:text-black flex items-center justify-center text-gray-900 dark:text-gray-100">
+                               {item.qtd}
+                             </div>
+                             <div className="w-[45%] px-3 text-left font-bold text-[10px] uppercase print:text-black flex items-center text-gray-600 dark:text-gray-400">
+                               {fTipo}
+                             </div>
+                           </div>
+                         ))}
+                       </td>
+                     </tr>
                   )}
 
                   {/* SÓ DOBRADIÇAS BOX */}
@@ -289,14 +289,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                     <tr>
                       <td colSpan={2} className="border-t border-black print:border-black print:border-solid p-2">
                         <div className="text-center">
-                          <div className="font-bold uppercase text-gray-800 print:text-black mb-2 text-[10px]">
+                          <div className="font-bold uppercase text-gray-800 dark:text-gray-200 print:text-black mb-2 text-[10px]">
                             SÓ DOBRADIÇAS
                           </div>
                           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
                             {doubles.map((item, idxx) => (
-                              <div key={idxx} className="flex items-center gap-2 font-mono font-semibold print:text-black">
+                              <div key={idxx} className="flex items-center gap-2 font-mono font-semibold text-gray-800 dark:text-gray-300 print:text-black">
                                 <span>{item.dimensao}:</span>
-                                <span className="font-black text-gray-900 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
+                                <span className="font-black text-gray-900 dark:text-gray-100 print:text-black">{item.qtd} Esq / {item.qtd} Dir</span>
                               </div>
                             ))}
                           </div>
