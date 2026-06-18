@@ -75,6 +75,8 @@ const INITIAL_KITS: KitLancamento[] = [
 ];
 
 const EditableCell = ({ value, onChange, className = "", type = "text", options = [] }: { value: any, onChange: (v: any) => void, className?: string, type?: "text" | "number" | "boolean" | "select", options?: string[] }) => {
+  const safeClassName = className.replace(/\bw-\S+/g, '');
+  
   if (type === "boolean") {
     return (
       <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} className="cursor-pointer" />
@@ -82,19 +84,22 @@ const EditableCell = ({ value, onChange, className = "", type = "text", options 
   }
   if (type === "select") {
     return (
-      <select value={value} onChange={e => onChange(e.target.value)} className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}>
+      <select value={value} onChange={e => onChange(e.target.value)} className={`bg-transparent outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 ${safeClassName}`}>
         <option value="">-</option>
         {options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
     );
   }
   return (
-    <input 
-      type={type === "number" ? "number" : "text"}
-      value={value || ''} 
-      onChange={e => onChange(e.target.value)}
-      className={"w-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1 " + className}
-    />
+    <div className={`relative inline-flex items-center justify-center min-w-[4rem] max-w-[20rem] ${safeClassName}`}>
+      <span className="invisible whitespace-pre px-2">{value || ' '}</span>
+      <input 
+        type={type === "number" ? "number" : "text"}
+        value={value || ''} 
+        onChange={e => onChange(e.target.value)}
+        className="absolute inset-0 w-full h-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1"
+      />
+    </div>
   );
 };
 

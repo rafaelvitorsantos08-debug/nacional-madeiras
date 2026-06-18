@@ -868,9 +868,19 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
     setObras(prev => {
       const obra = prev[obraId];
       if (!obra) return prev;
-      const itens = (Array.isArray(obra.itens) ? obra.itens : []).map((item: any) => 
-        item.id === itemId ? { ...item, [field]: value } : item
-      );
+      const itens = (Array.isArray(obra.itens) ? obra.itens : []).map((item: any) => {
+        if (item.id === itemId) {
+          const newItem = { ...item, [field]: value };
+          const today = new Date().toISOString().split('T')[0];
+          
+          if (field === 'folhas' && value && !item.dataChegadaFolhas) newItem.dataChegadaFolhas = today;
+          if (field === 'aduelas' && value && !item.dataChegadaAduelas) newItem.dataChegadaAduelas = today;
+          if (field === 'alizares' && value && !item.dataChegadaAlizares) newItem.dataChegadaAlizares = today;
+          
+          return newItem;
+        }
+        return item;
+      });
       return {
         ...prev,
         [obraId]: {
@@ -1018,16 +1028,16 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                       (activeObra.itens || []).map((item: any) => (
                         <tr key={item.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative group">
-                            <select 
+                            <input 
+                              type="text"
+                              list="dimensoes_porta_list"
                               value={item.dimensao || ''} 
                               onChange={(e) => handleChangeItem(activeObra.id, item.id, 'dimensao', e.target.value)}
-                              className="w-full h-full min-h-[44px] p-3 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 dark:text-gray-100"
-                            >
-                              <option value="" className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">Selecione...</option>
-                              {DIMENSOES_PORTA.map(op => <option key={op} value={op} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{op}</option>)}
-                            </select>
+                              placeholder="Dimensão"
+                              className="w-full h-full min-h-[44px] p-3 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 dark:text-gray-100 placeholder:text-gray-400 placeholder:font-normal"
+                            />
                             {item.dimensao && (
-                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'dimensao', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Limpar célula">
+                              <button onClick={() => handleChangeItem(activeObra.id, item.id, 'dimensao', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar célula">
                                 <X className="w-3 h-3" />
                               </button>
                             )}
@@ -1099,18 +1109,14 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                           <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-amber-50/30 dark:bg-amber-900/30">
                             <div className="flex h-full min-h-[44px]">
                               <div className="w-[75%] relative group">
-                                <select 
+                                <input 
+                                  type="text"
+                                  list="medida_aduela_list"
                                   value={item.medidaAduela || ''} 
                                   onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAduela', e.target.value)}
-                                  className="w-full p-2 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800 dark:text-amber-100 text-xs sm:text-sm"
-                                >
-                                  <option value="" className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">Medida</option>
-                                  {LARGURAS_ADUELA.flatMap(largura => 
-                                    COMPRIMENTOS_ADUELA.map(comprimento => (
-                                      <option key={`${largura}x${comprimento}`} value={`${largura}x${comprimento}`} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{`${largura}x${comprimento}`}</option>
-                                    ))
-                                  )}
-                                </select>
+                                  placeholder="Medida Aduela"
+                                  className="w-full p-2 h-full text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-amber-800 dark:text-amber-100 text-xs sm:text-sm placeholder:text-amber-400/50"
+                                />
                                 {item.medidaAduela && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'medidaAduela', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar medida">
                                     <X className="w-3 h-3" />
@@ -1146,22 +1152,14 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
                           <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-purple-50/30 dark:bg-purple-900/30">
                             <div className="flex h-full min-h-[44px]">
                               <div className="w-[75%] relative group">
-                                <select 
+                                <input 
+                                  type="text"
+                                  list="medida_alizar_list"
                                   value={item.medidaAlizar || ''} 
                                   onChange={(e) => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', e.target.value)}
-                                  className="w-full p-2 pl-8 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800 dark:text-purple-100 text-xs sm:text-sm"
-                                >
-                                  <option value="" className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">Face</option>
-                                  {FACE_ALIZAR.flatMap(face => 
-                                    ['40', '50', '60', '70', '80'].flatMap(aba => 
-                                      ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
-                                        COMPRIMENTOS_ALIZAR.map(comprimento => (
-                                          <option key={`${face}x${aba}x${espessura}x${comprimento}`} value={`${face}x${aba}x${espessura}x${comprimento}`} className="text-gray-800 dark:text-white bg-white dark:bg-gray-800">{`${face}x${aba}x${espessura}x${comprimento}`}</option>
-                                        ))
-                                      )
-                                    )
-                                  )}
-                                </select>
+                                  placeholder="Face/Medida"
+                                  className="w-full p-2 h-full text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-purple-800 dark:text-purple-100 text-xs sm:text-sm placeholder:text-purple-400/50"
+                                />
                                 {item.medidaAlizar && (
                                   <button onClick={() => handleChangeItem(activeObra.id, item.id, 'medidaAlizar', '')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10" title="Limpar face">
                                     <X className="w-3 h-3" />
@@ -1237,7 +1235,27 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
           </div>
         )}
       </div>
-
+      <datalist id="dimensoes_porta_list">
+        {DIMENSOES_PORTA.map(op => <option key={op} value={op} />)}
+      </datalist>
+      <datalist id="medida_aduela_list">
+        {LARGURAS_ADUELA.flatMap(largura => 
+          COMPRIMENTOS_ADUELA.map(comprimento => (
+            <option key={`${largura}x${comprimento}`} value={`${largura}x${comprimento}`} />
+          ))
+        )}
+      </datalist>
+      <datalist id="medida_alizar_list">
+        {FACE_ALIZAR.flatMap(face => 
+          ['40', '50', '60', '70', '80'].flatMap(aba => 
+            ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
+              COMPRIMENTOS_ALIZAR.map(comprimento => (
+                <option key={`${face}x${aba}x${espessura}x${comprimento}`} value={`${face}x${aba}x${espessura}x${comprimento}`} />
+              ))
+            )
+          )
+        )}
+      </datalist>
     </div>
   );
 }
@@ -1578,12 +1596,30 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                         return (
                           <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 bg-white dark:bg-gray-900 transition-colors">
                             <td className="p-4 border-r border-gray-200 dark:border-gray-700 text-left align-top">
-                              <div className="font-semibold text-gray-800 dark:text-gray-200 text-base">{item.dimensao || 'Sem dimensão'}</div>
-                              <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">{item.cor || 'Sem cor'}</div>
-                              <div className="text-xs text-gray-500 mt-1.5 flex flex-wrap gap-1">
-                                {item.enchimento && <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">{item.enchimento}</span>}
-                                {item.modelo && <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">{item.modelo}</span>}
-                              </div>
+                              {activeCategoryTab === 'folhas' && (
+                                <>
+                                  <div className="font-semibold text-gray-800 dark:text-gray-200 text-base">{item.dimensao || 'Sem dimensão'}</div>
+                                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">{item.cor || 'Sem cor'}</div>
+                                  <div className="text-xs text-gray-500 mt-1.5 flex flex-wrap gap-1">
+                                    {item.enchimento && <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">{item.enchimento}</span>}
+                                    {item.modelo && <span className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">{item.modelo}</span>}
+                                  </div>
+                                </>
+                              )}
+                              {activeCategoryTab === 'aduelas' && (
+                                <>
+                                  <div className="font-semibold text-amber-800 dark:text-amber-200 text-base">{item.medidaAduela || 'Sem medida'}</div>
+                                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">{item.cor || 'Sem cor'}</div>
+                                  <div className="text-[10px] text-gray-400 uppercase mt-2">📍 REF: Folha {item.dimensao || 'Sem dimensão'}</div>
+                                </>
+                              )}
+                              {activeCategoryTab === 'alizares' && (
+                                <>
+                                  <div className="font-semibold text-purple-800 dark:text-purple-200 text-base">{item.medidaAlizar || 'Sem face/medida'}</div>
+                                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">{item.cor || 'Sem cor'}</div>
+                                  <div className="text-[10px] text-gray-400 uppercase mt-2">📍 REF: Folha {item.dimensao || 'Sem dimensão'}</div>
+                                </>
+                              )}
                             </td>
                             
                             {/* FOLHAS */}
@@ -1623,9 +1659,6 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                             {activeCategoryTab === 'aduelas' && (
                             <td className="p-0 align-top bg-amber-50/10 dark:bg-amber-900/5">
                               <div className="p-4 h-full flex flex-col">
-                                <div className="mb-4 text-center bg-amber-100/50 dark:bg-amber-900/30 py-1.5 px-3 rounded-md text-sm font-bold text-amber-800 dark:text-amber-200 truncate border border-amber-200/50 dark:border-amber-700/30">
-                                  {item.medidaAduela || 'S/ Medida'}
-                                </div>
                                 <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
                                   <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAduelas} <span className="text-xs font-semibold text-amber-500 ml-1">jgs</span></div>
@@ -1659,9 +1692,6 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
                             {activeCategoryTab === 'alizares' && (
                             <td className="p-0 align-top bg-purple-50/10 dark:bg-purple-900/5">
                               <div className="p-4 h-full flex flex-col">
-                                <div className="mb-4 text-center bg-purple-100/50 dark:bg-purple-900/30 py-1.5 px-3 rounded-md text-sm font-bold text-purple-800 dark:text-purple-200 truncate border border-purple-200/50 dark:border-purple-700/30">
-                                  {item.medidaAlizar || 'S/ Face'}
-                                </div>
                                 <div className="flex justify-between items-center mb-2">
                                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Entrada</div>
                                   <div className="font-bold text-xl text-gray-800 dark:text-gray-200">{reqAlizares}</div>
