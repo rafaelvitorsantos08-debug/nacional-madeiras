@@ -319,60 +319,72 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
   }
 
   // Padrão Médio/Grande (6182, 6183)
+  const INSTAGRAM_LOGO_DATA_URI = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' overflow='visible' fill='black'%3E%3Cpath d='M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z'/%3E%3C/svg%3E";
+
   return (
-    <div className="w-full h-full p-3 pl-4 flex flex-col justify-center font-sans tracking-tight">
-      <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1.5">
+    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-3">
+      <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5">
-          <div className="font-extrabold text-[12px] uppercase leading-none mb-0.5 tracking-tight text-gray-900">
+          <div className="font-extrabold text-[12px] uppercase leading-none mb-1 tracking-tight text-gray-900">
             Nacional Madeiras <span className="font-medium text-gray-600">Kit Porta</span>
           </div>
-          <div className="font-bold text-[14px] uppercase mt-1 leading-none text-black">
-            Bloco: {kit.bloco} | Apto: {kit.apto} <span className="text-[12px] text-gray-700 ml-1">({kit.comodo})</span>
+          <div className="font-bold text-[11px] uppercase mt-0.5 leading-none text-black flex items-center flex-wrap">
+            BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto} <span className="mx-1 text-gray-400">|</span> {kit.abertura}
           </div>
-          <div className="font-black text-[12px] mt-1.5 uppercase leading-none">
-            {kit.abertura}
+          <div className="font-semibold text-[10px] uppercase mt-1 leading-none text-gray-700">
+            ({kit.comodo})
           </div>
         </div>
-        <div className="flex-shrink-0 pt-0.5 pr-2">
-          <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={42} level="L" />
+        <div className="flex-shrink-0 pt-0 pr-2">
+          <QRCodeSVG 
+            value="https://www.instagram.com/nacionalmadeirasltda/" 
+            size={36} 
+            level="H" 
+            imageSettings={{
+              src: INSTAGRAM_LOGO_DATA_URI,
+              height: 10,
+              width: 10,
+              excavate: true,
+            }}
+          />
         </div>
       </div>
       
-      <div className="flex flex-col gap-y-1.5 text-[9px] font-mono leading-tight uppercase font-semibold pl-0.5">
-        <div className="grid grid-cols-4 gap-x-2">
+      <div className="flex flex-col gap-y-1 text-[9px] font-mono leading-tight uppercase font-semibold pl-0.5 mt-0.5 shrink-0">
+        <div className="grid grid-cols-5 gap-x-1">
           <div className="col-span-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Tipologia:</span>
-            <span className="text-[11px] truncate block">{kit.tipologia}</span>
+            <span className="text-[10px] truncate block">{kit.tipologia}</span>
           </div>
-          <div className="col-span-2 border-l border-gray-300 pl-2">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fechadura Marca:</span>
-            <span className="text-[11px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo}</span>
+          <div className="col-span-2 border-l border-gray-300 pl-1">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Marca:</span>
+            <span className="text-[10px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo}</span>
           </div>
-          <div className="col-span-1 border-l border-gray-300 pl-2">
+          <div className="col-span-2 border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Grid:</span>
-            <span className="text-[11px] truncate block">{kit.fechaduraGrid}</span>
+            <span className="text-[10px] truncate block">{kit.fechaduraGrid}</span>
           </div>
         </div>
         
-        <div className="grid grid-cols-4 gap-x-2 border-t border-gray-200 pt-1">
-          <div className="col-span-2">
+        <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
+          <div>
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Dobradiça Medida:</span>
-            <span className="text-[11px] truncate block">{kit.dobradicaMedida}</span>
+            <span className="text-[10px] truncate block">{kit.dobradicaMedida}</span>
           </div>
-          <div className="col-span-2 border-l border-gray-300 pl-2">
+          <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
-            <span className="text-[10px] truncate block">{kit.acabamentoAduela}</span>
+            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-x-2 border-t border-gray-200 pt-1">
-          <div className="col-span-2">
+        <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
+          <div>
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
-            <span className="text-[11px] truncate block">{kit.folhaLargura}x{kit.folhaAltura} {kit.acabamentoPorta}</span>
+            <span className="text-[10px] truncate block">{kit.folhaLargura}x{kit.folhaAltura} {kit.acabamentoPorta}</span>
           </div>
-          <div className="col-span-2 border-l border-gray-300 pl-2">
+          <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
-            <span className="text-[11px] truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+            <span className="text-[10px] truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
           </div>
         </div>
       </div>
