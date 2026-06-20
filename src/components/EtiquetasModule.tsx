@@ -7,6 +7,20 @@ import { QRCodeSVG } from 'qrcode.react';
 // Constantes de formatos Pimaco
 const FORMATOS_PIMACO = [
   {
+    id: '6187',
+    name: 'Pimaco 6187 / 6287 (10 / folha) - 99x55.8mm',
+    desc: '99.0mm x 55.8mm',
+    labelsPerPage: 10,
+    cols: 2,
+    rows: 5,
+    marginTop: 8.8, // mm (aproximado)
+    marginLeft: 4.8, // mm (aproximado)
+    labelWidth: 99.0, // mm
+    labelHeight: 55.8, // mm
+    gapX: 2.6, // (210 - 2*99)/2 = 6, but typical gap is 2.6 for pitch 101.6
+    gapY: 0
+  },
+  {
     id: '6182',
     name: 'Pimaco 6182 / 6282 / 6082 (14 / folha)',
     desc: '101.6mm x 33.9mm',
@@ -224,6 +238,10 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                 <Printer className="w-4 h-4" /> <span>Imprimir Etiquetas</span>
               </button>
             </div>
+            
+            <div className="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-md border border-yellow-200 mt-2">
+              <strong>Atenção para impressão:</strong> Na tela de opções do navegador, mude as <strong>Margens para "Nenhuma"</strong> (ou Nenhuma / Customizada com 0) e desmarque <strong>Cabeçalhos e Rodapés</strong>.
+            </div>
           </div>
         </div>
       </div>
@@ -248,30 +266,34 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             className="box-border"
             style={{ 
               width: '210mm', 
-              height: '296.5mm', // using 296.5 to avoid extra blank pages sometimes
-              paddingTop: `${formato.marginTop}mm`, 
-              paddingLeft: `${formato.marginLeft}mm`,
+              height: '297mm', 
               pageBreakAfter: pageIndex < pages.length - 1 ? 'always' : 'auto',
-              display: 'grid',
-              gridTemplateColumns: `repeat(${formato.cols}, ${formato.labelWidth}mm)`,
-              gridTemplateRows: `repeat(${formato.rows}, ${formato.labelHeight}mm)`,
-              columnGap: `${formato.gapX}mm`,
-              rowGap: `${formato.gapY}mm`,
-              position: 'relative'
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
-            {pageLabels.map((kit, i) => (
-              <div 
-                key={i}
-                className="box-border border border-dashed border-gray-300 print:border-transparent overflow-hidden"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                <LabelInnerContent kit={kit} formato={formato} />
-              </div>
-            ))}
+            {pageLabels.map((kit, i) => {
+              const row = Math.floor(i / formato.cols);
+              const col = i % formato.cols;
+              const top = formato.marginTop + (row * (formato.labelHeight + formato.gapY));
+              const left = formato.marginLeft + (col * (formato.labelWidth + formato.gapX));
+              
+              return (
+                <div 
+                  key={i}
+                  className="box-border border border-dashed border-gray-300 print:border-transparent overflow-hidden"
+                  style={{
+                    position: 'absolute',
+                    top: `${top}mm`,
+                    left: `${left}mm`,
+                    width: `${formato.labelWidth}mm`,
+                    height: `${formato.labelHeight}mm`,
+                  }}
+                >
+                  <LabelInnerContent kit={kit} formato={formato} />
+                </div>
+              );
+            })}
           </div>
         ))}
         {pages.length === 0 && (
