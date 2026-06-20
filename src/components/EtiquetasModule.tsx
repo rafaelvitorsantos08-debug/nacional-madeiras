@@ -315,7 +315,7 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
       <div className="w-full h-full p-2 flex flex-col justify-center">
         <div className="flex justify-between items-start border-b border-black pb-0.5 mb-1">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5">Nacional Madeiras KIT PORTA</div>
+            <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5 text-brand-green">Nacional Madeiras <span className="font-medium text-gray-600">KIT PORTA</span></div>
             <div className="font-bold text-[8px] uppercase leading-none truncate">
               {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo})</span>
             </div>
@@ -347,7 +347,7 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
     <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-3">
       <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
-          <div className="font-extrabold text-[12px] uppercase leading-[0.9] mb-1 tracking-tight text-gray-900">
+          <div className="font-extrabold text-[12px] uppercase leading-[0.9] mb-1 tracking-tight text-brand-green">
             Nacional Madeiras <span className="font-medium text-gray-600 tracking-normal">Kit Porta</span>
           </div>
           <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
