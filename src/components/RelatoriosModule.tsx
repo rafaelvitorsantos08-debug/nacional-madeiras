@@ -187,7 +187,7 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   );
 };
 
-type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares";
+type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares" | "auto_montagem";
 
 export function getCategoriaComodo(comodo: string): string {
   const c = comodo.toUpperCase();
@@ -421,6 +421,7 @@ export function RelatoriosModule() {
                     <option value="auto_usinagem_portas">Usinagem de Portas</option>
                     <option value="auto_usinagem_aduelas">Usinagem de Aduelas</option>
                     <option value="auto_vergas">Vergas de Aduelas</option>
+                    <option value="auto_montagem">Relatório de Montagem</option>
                     <option value="avarias">Relatório de Avarias</option>
                 </select>
               </div>

@@ -20,6 +20,7 @@ export function AutoReportsViewer({ kits, reportType, responsavel, obra }: { kit
       case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
       case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra);
       case 'auto_vergas': return renderAutoVergas(kits);
+      case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra);
       default: return null;
     }
   }, [kits, reportType, responsavel, obra]);
@@ -661,3 +662,74 @@ function renderAutoVergas(kits: any[]) {
   );
 }
 
+export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string) {
+  const grouped = new Map<string, any>();
+
+  kits.forEach(k => {
+    const key = [
+      k.tipologia, k.comodo, k.abertura,
+      k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
+      k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.modeloPorta, k.corFolha,
+      k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
+      k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
+      k.qtdeLadosAduela
+    ].join('||');
+
+    let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
+    // Also, handle the case where `k` might have `quantidade` or `qtde` directly (just in case they have it on the kit obj)
+    if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
+    if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
+
+    const qty = parseInt(stringQtdStr, 10);
+    const validQty = isNaN(qty) ? 1 : qty;
+
+    if (grouped.has(key)) {
+      grouped.get(key).qtd += validQty;
+    } else {
+      const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' - ');
+      const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas} un`].filter(Boolean).join(' - ');
+      
+      let acabPorta = k.acabamentoPorta || k.modeloPorta || k.corFolha || '-';
+      
+      grouped.set(key, {
+        tipologia: k.tipologia || '-',
+        qtd: validQty,
+        comodo: k.comodo || '-',
+        abertura: k.abertura || '-',
+        aduela: `${k.aduelaLargura || '-'} x ${k.aduelaAltura || '-'}`,
+        acabAduela: k.acabamentoAduela || '-',
+        folha: `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`,
+        acabPorta: acabPorta,
+        fechadura: fech || '-',
+        dobradica: dob || '-',
+        lados: k.qtdeLadosAduela || '-',
+      });
+    }
+  });
+
+  const headers = [
+    "Tipologia", "Qtd", "Aduela", 
+    "Acab. Aduela", "Folha", "Acab. Porta", 
+    "Fechadura", "Dobradiça", "Lados", "Cômodo", "Abertura"
+  ];
+
+  const rows = Array.from(grouped.values()).map(g => [
+     g.tipologia, g.qtd, g.aduela,
+     g.acabAduela, g.folha, g.acabPorta, g.fechadura, g.dobradica, g.lados, g.comodo, g.abertura
+  ]);
+
+  return (
+    <div className="space-y-4 print:space-y-6">
+      <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
+        <EditableText>Relatório de Montagem de Kits</EditableText>
+      </div>
+      {(obra || responsavel) && (
+        <div className="flex justify-between items-end mb-4 print:mb-6 px-2 text-sm text-gray-800 dark:text-gray-200 print:text-black">
+          {obra && <div><span className="font-semibold text-gray-500">Obra:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{obra}</span></EditableText></div>}
+          {responsavel && <div><span className="font-semibold text-gray-500">Resp:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{responsavel}</span></EditableText></div>}
+        </div>
+      )}
+      <TableLayout headers={headers} rows={rows} />
+    </div>
+  );
+}
