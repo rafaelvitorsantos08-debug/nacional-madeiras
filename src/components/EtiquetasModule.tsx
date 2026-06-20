@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from './EstoqueModule';
 import { Printer, Search, Plus, Minus, X, Trash2, Settings } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Constantes de formatos Pimaco
 const FORMATOS_PIMACO = [
@@ -290,16 +291,28 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
   if (isSmall) {
     return (
       <div className="w-full h-full p-2 flex flex-col justify-center">
-        <div className="font-bold text-[10px] leading-tight text-center border-b border-black pb-0.5 mb-1 truncate uppercase">
-          {kit.bloco} - {kit.apto} <span className="font-normal">({kit.comodo})</span>
+        <div className="flex justify-between items-start border-b border-black pb-0.5 mb-1">
+          <div className="flex flex-col flex-1 truncate pr-1">
+            <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5">Nacional Madeiras KIT PORTA</div>
+            <div className="font-bold text-[8px] uppercase leading-none truncate">
+              {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo})</span>
+            </div>
+            <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
+          </div>
+          <div className="flex-shrink-0 pt-0.5">
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={24} level="L" />
+          </div>
         </div>
-        <div className="flex justify-between text-[8px] font-mono leading-tight px-1">
-          <div><span className="font-bold">Pta:</span> {kit.folhaLargura}x{kit.folhaAltura}</div>
-          <div className="text-right"><span className="font-bold">{kit.abertura}</span></div>
-        </div>
-        <div className="flex justify-between text-[8px] font-mono leading-tight px-1 mt-0.5">
-          <div className="truncate"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
-          <div className="text-right truncate ml-1">{kit.caracteristicaPorta?.substring(0, 8)}</div>
+        
+        <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[6.5px] font-mono leading-tight px-1 uppercase">
+          <div className="truncate"><span className="font-bold">Tip:</span> {kit.tipologia}</div>
+          <div className="truncate text-right"><span className="font-bold">Grid:</span> {kit.fechaduraGrid}</div>
+          
+          <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
+          <div className="truncate text-right"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
+          
+          <div className="truncate"><span className="font-bold">Pta:</span> {kit.folhaLargura}x{kit.folhaAltura}</div>
+          <div className="truncate text-right"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
         </div>
       </div>
     );
@@ -307,33 +320,60 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
 
   // Padrão Médio/Grande (6182, 6183)
   return (
-    <div className="w-full h-full p-3 pl-4 flex flex-col justify-center">
-      <div className="flex justify-between items-start border-b-2 border-black pb-1 mb-1.5">
-        <div className="flex flex-col">
-          <div className="font-black text-xs tracking-widest uppercase">Bloco: {kit.bloco} | Apto: {kit.apto}</div>
-          <div className="font-bold text-[10px] text-gray-700 mt-0.5 uppercase">CÔMODO: {kit.comodo}</div>
+    <div className="w-full h-full p-3 pl-4 flex flex-col justify-center font-sans tracking-tight">
+      <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1.5">
+        <div className="flex flex-col flex-1 pl-0.5">
+          <div className="font-extrabold text-[12px] uppercase leading-none mb-0.5 tracking-tight text-gray-900">
+            Nacional Madeiras <span className="font-medium text-gray-600">Kit Porta</span>
+          </div>
+          <div className="font-bold text-[14px] uppercase mt-1 leading-none text-black">
+            Bloco: {kit.bloco} | Apto: {kit.apto} <span className="text-[12px] text-gray-700 ml-1">({kit.comodo})</span>
+          </div>
+          <div className="font-black text-[12px] mt-1.5 uppercase leading-none">
+            {kit.abertura}
+          </div>
         </div>
-        <div className="text-right ml-2 flex flex-col items-end">
-          <span className="font-black text-[10px] px-1.5 py-0.5 border border-black rounded uppercase whitespace-nowrap">{kit.abertura}</span>
+        <div className="flex-shrink-0 pt-0.5 pr-2">
+          <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={42} level="L" />
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] font-mono leading-tight uppercase font-semibold">
-        <div>
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-2px]">Folha Porta:</span>
-          <span className="text-[11px]">{kit.folhaLargura}x{kit.folhaAltura} {kit.acabamentoPorta}</span>
+      <div className="flex flex-col gap-y-1.5 text-[9px] font-mono leading-tight uppercase font-semibold pl-0.5">
+        <div className="grid grid-cols-4 gap-x-2">
+          <div className="col-span-1">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Tipologia:</span>
+            <span className="text-[11px] truncate block">{kit.tipologia}</span>
+          </div>
+          <div className="col-span-2 border-l border-gray-300 pl-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fechadura Marca:</span>
+            <span className="text-[11px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo}</span>
+          </div>
+          <div className="col-span-1 border-l border-gray-300 pl-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Grid:</span>
+            <span className="text-[11px] truncate block">{kit.fechaduraGrid}</span>
+          </div>
         </div>
-        <div>
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-2px]">Aduela:</span>
-          <span className="text-[11px]">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+        
+        <div className="grid grid-cols-4 gap-x-2 border-t border-gray-200 pt-1">
+          <div className="col-span-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Dobradiça Medida:</span>
+            <span className="text-[11px] truncate block">{kit.dobradicaMedida}</span>
+          </div>
+          <div className="col-span-2 border-l border-gray-300 pl-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
+            <span className="text-[10px] truncate block">{kit.acabamentoAduela}</span>
+          </div>
         </div>
-        <div className="mt-0.5">
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-2px]">Características:</span>
-          {kit.caracteristicaPorta.substring(0,25)} {kit.caracteristicaPorta.length > 25 ? '...' : ''}
-        </div>
-        <div className="mt-0.5">
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-2px]">Fech./Dobradiça:</span>
-          {kit.fechaduraMarca} - {kit.fechaduraTipo} | {kit.dobradicaMedida}
+
+        <div className="grid grid-cols-4 gap-x-2 border-t border-gray-200 pt-1">
+          <div className="col-span-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
+            <span className="text-[11px] truncate block">{kit.folhaLargura}x{kit.folhaAltura} {kit.acabamentoPorta}</span>
+          </div>
+          <div className="col-span-2 border-l border-gray-300 pl-2">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
+            <span className="text-[11px] truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+          </div>
         </div>
       </div>
     </div>
