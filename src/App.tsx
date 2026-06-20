@@ -5,7 +5,7 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar, ClipboardCheck
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar, ClipboardCheck, Tags
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
@@ -16,6 +16,7 @@ import { CalendarioModule } from './components/CalendarioModule';
 import { ConferenciaModule } from './components/ConferenciaModule';
 
 import { LancamentosRelatoriosModule } from './components/LancamentosRelatoriosModule';
+import { EtiquetasModule } from './components/EtiquetasModule';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -428,6 +429,7 @@ export default function App() {
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
           <NavItem icon={<ClipboardCheck />} label="Lançamentos" active={activeTab === 'lancamentos'} isOpen={sidebarOpen} onClick={() => setActiveTab('lancamentos')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
+          <NavItem icon={<Tags />} label="Etiquetas" active={activeTab === 'etiquetas'} isOpen={sidebarOpen} onClick={() => setActiveTab('etiquetas')} />
           <NavItem icon={<Calendar />} label="Calendário" active={activeTab === 'calendario'} isOpen={sidebarOpen} onClick={() => setActiveTab('calendario')} />
           
           <div className="pt-4 mt-2 mb-2 border-t border-gray-100"></div>
@@ -767,6 +769,9 @@ export default function App() {
           )}
           {activeTab === 'lancamentos' && (
             <LancamentosRelatoriosModule />
+          )}
+          {activeTab === 'etiquetas' && (
+            <EtiquetasModule globalSearch={globalSearch} />
           )}
 
           {activeTab === 'configuracoes' && (
