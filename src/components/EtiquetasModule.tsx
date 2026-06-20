@@ -322,7 +322,7 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
             <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
           </div>
           <div className="flex-shrink-0 pt-0.5">
-            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={30} level="L" />
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={30} level="M" includeMargin={true} />
           </div>
         </div>
         
@@ -361,7 +361,8 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
           <QRCodeSVG 
             value="https://www.instagram.com/nacionalmadeirasltda/" 
             size={52} 
-            level="L" 
+            level="M" 
+            includeMargin={true}
           />
         </div>
       </div>
