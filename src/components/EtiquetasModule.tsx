@@ -252,9 +252,11 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               paddingTop: `${formato.marginTop}mm`, 
               paddingLeft: `${formato.marginLeft}mm`,
               pageBreakAfter: pageIndex < pages.length - 1 ? 'always' : 'auto',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignContent: 'flex-start',
+              display: 'grid',
+              gridTemplateColumns: `repeat(${formato.cols}, ${formato.labelWidth}mm)`,
+              gridTemplateRows: `repeat(${formato.rows}, ${formato.labelHeight}mm)`,
+              columnGap: `${formato.gapX}mm`,
+              rowGap: `${formato.gapY}mm`,
               position: 'relative'
             }}
           >
@@ -263,10 +265,8 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                 key={i}
                 className="box-border border border-dashed border-gray-300 print:border-transparent overflow-hidden"
                 style={{
-                  width: `${formato.labelWidth}mm`,
-                  height: `${formato.labelHeight}mm`,
-                  marginRight: `${formato.gapX}mm`,
-                  marginBottom: `${formato.gapY}mm`,
+                  width: '100%',
+                  height: '100%',
                 }}
               >
                 <LabelInnerContent kit={kit} formato={formato} />
