@@ -402,7 +402,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen print:min-h-0 bg-gray-50 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen print:min-h-0 bg-gray-50 flex flex-col md:flex-row print:block font-sans">
       
       {/* SIDEBAR */}
       <aside className={cn(
@@ -441,7 +441,7 @@ export default function App() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden print:block print:overflow-visible">
         
         {/* HEADER */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10 print:hidden">
@@ -534,15 +534,17 @@ export default function App() {
           )}
 
           {/* PRINT ONLY HEADER */}
-          <div className="hidden print:flex mb-4 flex-col border-b border-gray-300 pb-2">
-             <div className="text-gray-500 text-xs font-mono mb-1">
-                {new Date().toLocaleDateString('pt-BR')} {new Date().toLocaleTimeString('pt-BR')}
-             </div>
-             <div className="flex flex-col">
-               <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
-               <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>
-             </div>
-          </div>
+          {activeTab !== 'etiquetas' && (
+            <div className="hidden print:flex mb-4 flex-col border-b border-gray-300 pb-2">
+               <div className="text-gray-500 text-xs font-mono mb-1">
+                  {new Date().toLocaleDateString('pt-BR')} {new Date().toLocaleTimeString('pt-BR')}
+               </div>
+               <div className="flex flex-col">
+                 <span className="font-bold text-brand-green text-2xl leading-tight uppercase">Nacional Madeiras</span>
+                 <span className="font-bold text-gray-500 text-sm tracking-widest uppercase mt-1">Kit Porta</span>
+               </div>
+            </div>
+          )}
 
           {activeTab === 'dashboard' && (
             <div className="animate-in fade-in duration-300">

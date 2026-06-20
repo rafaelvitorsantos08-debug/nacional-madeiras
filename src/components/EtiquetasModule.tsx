@@ -324,15 +324,15 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
   return (
     <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-3">
       <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1 shrink-0">
-        <div className="flex flex-col flex-1 pl-0.5">
-          <div className="font-extrabold text-[12px] uppercase leading-none mb-1 tracking-tight text-gray-900">
-            Nacional Madeiras <span className="font-medium text-gray-600">Kit Porta</span>
+        <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
+          <div className="font-extrabold text-[12px] uppercase leading-[0.9] mb-1 tracking-tight text-gray-900">
+            Nacional Madeiras <span className="font-medium text-gray-600 tracking-normal">Kit Porta</span>
           </div>
-          <div className="font-bold text-[11px] uppercase mt-0.5 leading-none text-black flex items-center flex-wrap">
-            BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto} <span className="mx-1 text-gray-400">|</span> {kit.abertura}
+          <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
+            BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto}
           </div>
-          <div className="font-semibold text-[10px] uppercase mt-1 leading-none text-gray-700">
-            ({kit.comodo})
+          <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black">
+            {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo})</span>
           </div>
         </div>
         <div className="flex-shrink-0 pt-0 pr-2">
