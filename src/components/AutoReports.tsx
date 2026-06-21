@@ -698,10 +698,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         tipoKits.forEach(k => {
           const key = [
             k.comodo, k.abertura, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
-            k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.modeloPorta, k.corFolha,
+            k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
             k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
             k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
-            k.qtdeLadosAduela, k.observacoes
+            k.qtdeLadosAduela
           ].join('||');
 
           let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
@@ -713,10 +713,6 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
           if (grouped.has(key)) {
             grouped.get(key).qtd += validQty;
-            const existingApto = grouped.get(key).apto;
-            if (k.apto && !existingApto.includes(k.apto)) {
-               grouped.get(key).apto = existingApto ? `${existingApto}, ${k.apto}` : k.apto;
-            }
           } else {
             const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
             const aduelaInfo = [
@@ -727,8 +723,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas}un`].filter(Boolean).join(' / ');
             
             let acabPorta = k.acabamentoPorta || k.corFolha || '-';
-            let caracteristicas = k.modeloPorta || k.comodo || '-';
-            let extraInfo = k.observacoes || k.apto || ''; // Fallback
+            let caracteristicas = k.caracteristicaPorta || '-';
 
             grouped.set(key, {
               qtd: validQty,
@@ -738,26 +733,20 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
               abertura: k.abertura || '-',
               aduela: aduelaInfo,
               fechadura: fech || '-',
-              extra: extraInfo,
               dobradica: dob || '-',
-              apto: k.apto || ''
             });
           }
         });
 
         const headers = [
           "Qtd", "Folha de Porta", "Características", "Acabamento", "Abertura", 
-          "Info. Aduela", "Fech. Grid", "Info Extra (Kits)", "Dobradiças", "Marcação"
+          "Info. Aduela", "Fech. Grid", "Dobradiças", "Concluído"
         ];
 
         const rows = Array.from(grouped.values()).map(g => {
-          let infoExtra = g.extra;
-          if (g.apto && !infoExtra.includes(g.apto)) {
-             infoExtra = infoExtra ? `${infoExtra} (Apto: ${g.apto})` : `Apto: ${g.apto}`;
-          }
           return [
              g.qtd, g.folha, g.caracteristicas, g.acabamento, g.abertura,
-             g.aduela, g.fechadura, infoExtra, g.dobradica, ""
+             g.aduela, g.fechadura, g.dobradica, " "
           ];
         });
 
