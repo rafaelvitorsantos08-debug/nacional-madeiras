@@ -693,75 +693,87 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
       {tipologias.map((tipo, idx) => {
         const tipoKits = byTipologia.get(tipo) || [];
         
-        // Group exact matches within this tipologia
-        const grouped = new Map<string, any>();
+        // Group by Abertura
+        const byAbertura = new Map<string, any[]>();
         tipoKits.forEach(k => {
-          const key = [
-            k.comodo, k.abertura, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
-            k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
-            k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
-            k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
-            k.qtdeLadosAduela
-          ].join('||');
-
-          let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
-          if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
-          if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
-
-          const qty = parseInt(stringQtdStr, 10);
-          const validQty = isNaN(qty) ? 1 : qty;
-
-          if (grouped.has(key)) {
-            grouped.get(key).qtd += validQty;
-          } else {
-            const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
-            const aduelaInfo = [
-              `${k.aduelaLargura || '-'}x${k.aduelaAltura || '-'}`, 
-              k.acabamentoAduela, 
-              k.qtdeLadosAduela && `${k.qtdeLadosAduela} lados`
-            ].filter(Boolean).join(' - ');
-            const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas}un`].filter(Boolean).join(' / ');
-            
-            let acabPorta = k.acabamentoPorta || k.corFolha || '-';
-            let caracteristicas = k.caracteristicaPorta || '-';
-
-            grouped.set(key, {
-              qtd: validQty,
-              folha: `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`,
-              caracteristicas,
-              acabamento: acabPorta,
-              abertura: k.abertura || '-',
-              aduela: aduelaInfo,
-              fechadura: fech || '-',
-              dobradica: dob || '-',
-            });
-          }
+          const ab = k.abertura || 'SEM ABERTURA';
+          if (!byAbertura.has(ab)) byAbertura.set(ab, []);
+          byAbertura.get(ab).push(k);
         });
 
-        const headers = [
-          "Qtd", "Folha de Porta", "Características", "Acabamento", "Abertura", 
-          "Info. Aduela", "Fech. Grid", "Dobradiças", "Concluído"
-        ];
-
-        const rows = Array.from(grouped.values()).map(g => {
-          return [
-             g.qtd, g.folha, g.caracteristicas, g.acabamento, g.abertura,
-             g.aduela, g.fechadura, g.dobradica, " "
-          ];
-        });
+        const aberturas = Array.from(byAbertura.keys()).sort();
 
         return (
-          <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col">
-            <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black mb-4">
+          <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col gap-6">
+            <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
               <EditableText>Relatório de Montagem - {tipo}</EditableText>
             </div>
-            {(obra || responsavel) && (
-              <div className="flex justify-between items-end mb-4 print:mb-6 px-2 text-sm text-gray-800 dark:text-gray-200 print:text-black">
-                {obra && <div><span className="font-semibold text-gray-500">Obra:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{obra}</span></EditableText></div>}
-                {responsavel && <div><span className="font-semibold text-gray-500">Resp:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{responsavel}</span></EditableText></div>}
-              </div>
-            )}
-            <TableLayout headers={headers} rows={rows} />
+
+            {aberturas.map((abertura, abIdx) => {
+              const abKits = byAbertura.get(abertura) || [];
+              
+              const grouped = new Map<string, any>();
+              abKits.forEach(k => {
+                const key = [
+                  k.comodo, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
+                  k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
+                  k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
+                  k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
+                  k.qtdeLadosAduela
+                ].join('||');
+
+                let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
+                if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
+                if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
+
+                const qty = parseInt(stringQtdStr, 10);
+                const validQty = isNaN(qty) ? 1 : qty;
+
+                if (grouped.has(key)) {
+                  grouped.get(key).qtd += validQty;
+                } else {
+                  const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
+                  const aduelaInfo = [
+                    `${k.aduelaLargura || '-'}x${k.aduelaAltura || '-'}`, 
+                    k.acabamentoAduela, 
+                    k.qtdeLadosAduela && `${k.qtdeLadosAduela} lados`
+                  ].filter(Boolean).join(' - ');
+                  const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas}un`].filter(Boolean).join(' / ');
+                  
+                  let acabPorta = k.acabamentoPorta || k.corFolha || '-';
+                  let caracteristicas = k.caracteristicaPorta || '-';
+
+                  grouped.set(key, {
+                    qtd: validQty,
+                    folha: `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`,
+                    caracteristicas,
+                    acabamento: acabPorta,
+                    aduela: aduelaInfo,
+                    fechadura: fech || '-',
+                    dobradica: dob || '-',
+                  });
+                }
+              });
+
+              const headers = [
+                "Qtd", "Folha de Porta", "Características", "Acabamento", 
+                "Info. Aduela", "Fech. Grid", "Dobradiças", "Concluído"
+              ];
+
+              const rows = Array.from(grouped.values()).map(g => [
+                g.qtd, g.folha, g.caracteristicas, g.acabamento,
+                g.aduela, g.fechadura, g.dobradica, " "
+              ]);
+
+              return (
+                <div key={abIdx} className="flex flex-col gap-2">
+                  <div className="text-center font-bold text-sm uppercase">
+                    <EditableText>{abertura}</EditableText>
+                  </div>
+                  <TableLayout headers={headers} rows={rows} />
+                </div>
+              );
+            })}
           </div>
         );
       })}
