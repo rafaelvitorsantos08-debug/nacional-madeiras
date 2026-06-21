@@ -840,6 +840,15 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 })}
               </tbody>
             </table>
+            
+            <div className="mt-8 mb-2 break-inside-avoid w-full">
+              <p className="text-xs font-bold uppercase text-gray-800 dark:text-gray-200 print:text-black mb-1">Observações Gerais:</p>
+              <div 
+                contentEditable 
+                suppressContentEditableWarning 
+                className="min-h-[100px] w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500"
+              />
+            </div>
           </div>
         );
       })}
