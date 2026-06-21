@@ -817,7 +817,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                   const rows = Array.from(grouped.values());
 
                   return (
-                    <Fragment key={abIdx}>
+                    <React.Fragment key={abIdx}>
                       <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-b border-gray-300 w-full">
                         <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-x border-gray-300 print:border-transparent">
                           <EditableText>{abertura}</EditableText>
@@ -835,7 +835,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"> </td>
                         </tr>
                       ))}
-                    </Fragment>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
