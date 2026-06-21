@@ -705,75 +705,141 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
         return (
           <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col gap-6">
-            <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
-              <EditableText>Relatório de Montagem - {tipo}</EditableText>
-            </div>
+            <table className="min-w-full border-collapse">
+              <thead className="print:table-header-group">
+                {/* Print Header */}
+                <tr className="hidden print:table-row">
+                  <td colSpan={8} className="p-0 border-0">
+                    <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4 mt-2 print:border-black">
+                       <div>
+                         <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black">RELATÓRIO DE MONTAGEM</h1>
+                         <p className="text-sm mt-1 text-black print:text-black">Documento Gerado Via Sistema - Nacional Madeiras</p>
+                       </div>
+                       <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6">
+                         <div className="flex items-end mt-2">
+                           <span className="font-bold mr-1 uppercase whitespace-nowrap">Data:</span>
+                           <div className="border-b border-black w-16 h-4"></div>
+                         </div>
+                         <div className="flex items-end mt-2">
+                           <span className="font-bold mr-1 uppercase whitespace-nowrap">Previsão de Entrega:</span>
+                           <div className="border-b border-black w-24 h-4"></div>
+                         </div>
+                       </div>
+                    </div>
+                    {(obra || responsavel) && (
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="border border-gray-300 p-2">
+                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Responsável</p>
+                          <p className="font-medium text-lg print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
+                        </div>
+                        <div className="border border-gray-300 p-2">
+                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Obra / Destino</p>
+                          <p className="font-medium text-lg print:text-black text-black">{obra || "Não informado"}</p>
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                </tr>
 
-            {aberturas.map((abertura, abIdx) => {
-              const abKits = byAbertura.get(abertura) || [];
-              
-              const grouped = new Map<string, any>();
-              abKits.forEach(k => {
-                const key = [
-                  k.comodo, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
-                  k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
-                  k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
-                  k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
-                  k.qtdeLadosAduela
-                ].join('||');
+                {/* Sub-Header / Tipo */}
+                <tr>
+                   <td colSpan={8} className="p-0 border-0">
+                      <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase mb-4 print:bg-transparent print:text-black">
+                        <EditableText>Relatório de Montagem - {tipo}</EditableText>
+                      </div>
+                   </td>
+                </tr>
 
-                let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
-                if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
-                if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
-
-                const qty = parseInt(stringQtdStr, 10);
-                const validQty = isNaN(qty) ? 1 : qty;
-
-                if (grouped.has(key)) {
-                  grouped.get(key).qtd += validQty;
-                } else {
-                  const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
-                  const aduelaInfo = [
-                    `${k.aduelaLargura || '-'}x${k.aduelaAltura || '-'}`, 
-                    k.acabamentoAduela, 
-                    k.qtdeLadosAduela && `${k.qtdeLadosAduela} lados`
-                  ].filter(Boolean).join(' - ');
-                  const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas}un`].filter(Boolean).join(' / ');
+                {/* Table Columns Header */}
+                <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-y-gray-300 print:text-black text-[11px] sm:text-sm">
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">QTD</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">FOLHA DE PORTA</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">CARACTERÍSTICAS</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">ACABAMENTO</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">INFO. ADUELA</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">FECH. GRID</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">DOBRADIÇAS</th>
+                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">CONCLUÍDO</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent divide-y divide-gray-300 print:divide-y print:divide-gray-300 text-[11px] sm:text-sm print:text-sm">
+                {aberturas.map((abertura, abIdx) => {
+                  const abKits = byAbertura.get(abertura) || [];
                   
-                  let acabPorta = k.acabamentoPorta || k.corFolha || '-';
-                  let caracteristicas = k.caracteristicaPorta || '-';
+                  const grouped = new Map<string, any>();
+                  abKits.forEach(k => {
+                    const key = [
+                      k.comodo, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
+                      k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
+                      k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
+                      k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
+                      k.qtdeLadosAduela, k.kitDuplo
+                    ].join('||');
 
-                  grouped.set(key, {
-                    qtd: validQty,
-                    folha: `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`,
-                    caracteristicas,
-                    acabamento: acabPorta,
-                    aduela: aduelaInfo,
-                    fechadura: fech || '-',
-                    dobradica: dob || '-',
+                    let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
+                    if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
+                    if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
+
+                    const qty = parseInt(stringQtdStr, 10);
+                    const validQty = isNaN(qty) ? 1 : qty;
+
+                    if (grouped.has(key)) {
+                      grouped.get(key).qtd += validQty;
+                    } else {
+                      const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
+                      const aduelaInfo = [
+                        `${k.aduelaLargura || '-'}x${k.aduelaAltura || '-'}`, 
+                        k.acabamentoAduela, 
+                        k.qtdeLadosAduela && `${k.qtdeLadosAduela} lados`
+                      ].filter(Boolean).join(' - ');
+                      const dob = [k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas && `${k.qtdeDobradicas}un`].filter(Boolean).join(' / ');
+                      
+                      let acabPorta = k.acabamentoPorta || k.corFolha || '-';
+                      let caracteristicas = k.caracteristicaPorta || '-';
+                      
+                      let leafSizeStr = `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`;
+                      if (k.kitDuplo && k.qtdeFolhasPorKit) {
+                          leafSizeStr = `${k.qtdeFolhasPorKit} folhas de ${leafSizeStr}`;
+                      }
+
+                      grouped.set(key, {
+                        qtd: validQty,
+                        folha: leafSizeStr,
+                        caracteristicas,
+                        acabamento: acabPorta,
+                        aduela: aduelaInfo,
+                        fechadura: fech || '-',
+                        dobradica: dob || '-',
+                      });
+                    }
                   });
-                }
-              });
 
-              const headers = [
-                "Qtd", "Folha de Porta", "Características", "Acabamento", 
-                "Info. Aduela", "Fech. Grid", "Dobradiças", "Concluído"
-              ];
+                  const rows = Array.from(grouped.values());
 
-              const rows = Array.from(grouped.values()).map(g => [
-                g.qtd, g.folha, g.caracteristicas, g.acabamento,
-                g.aduela, g.fechadura, g.dobradica, " "
-              ]);
-
-              return (
-                <div key={abIdx} className="flex flex-col gap-2">
-                  <div className="text-center font-bold text-sm uppercase">
-                    <EditableText>{abertura}</EditableText>
-                  </div>
-                  <TableLayout headers={headers} rows={rows} />
-                </div>
-              );
-            })}
+                  return (
+                    <Fragment key={abIdx}>
+                      <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-b border-gray-300 w-full">
+                        <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-x border-gray-300 print:border-transparent">
+                          <EditableText>{abertura}</EditableText>
+                        </td>
+                      </tr>
+                      {rows.map((g, rIdx) => (
+                        <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black">
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.qtd}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.folha}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.caracteristicas}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.acabamento}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.aduela}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.fechadura}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"><EditableText>{g.dobradica}</EditableText></td>
+                          <td className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium"> </td>
+                        </tr>
+                      ))}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         );
       })}

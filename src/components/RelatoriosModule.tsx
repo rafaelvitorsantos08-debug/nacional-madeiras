@@ -666,44 +666,48 @@ export function RelatoriosModule() {
 
         {/* Relatório Impresso (Apenas visível via CSS de Print) */}
         <div className="hidden print:block w-full text-black font-sans bg-white pt-2">
-          <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
-            <div>
-              <h1 className="text-3xl font-bold uppercase tracking-tight">
-                Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
-              </h1>
-              <p className="text-sm mt-1">
-                Documento Gerado Via Sistema - Nacional Madeiras
-              </p>
-            </div>
-          </div>
-
-          {!reportType.includes("usinagem") && (
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="border border-gray-300 p-3">
-                <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                  Responsável
-                </p>
-                <p className="font-medium text-lg">
-                  {header.responsavel || "Não informado"}
-                </p>
-              </div>
-              <div className="border border-gray-300 p-3">
-                <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                  Obra / Destino
-                </p>
-                <p className="font-medium text-lg">
-                  {header.obra || "Não informado"}
-                </p>
-              </div>
-              {header.observacoes && (
-                <div className="border border-gray-300 p-3 col-span-2">
-                  <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                    Observações Gerais
+          {reportType !== "auto_montagem" && (
+            <>
+              <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+                <div>
+                  <h1 className="text-3xl font-bold uppercase tracking-tight">
+                    Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
+                  </h1>
+                  <p className="text-sm mt-1">
+                    Documento Gerado Via Sistema - Nacional Madeiras
                   </p>
-                  <p className="font-medium whitespace-pre-wrap">{header.observacoes}</p>
+                </div>
+              </div>
+
+              {!reportType.includes("usinagem") && (
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="border border-gray-300 p-3">
+                    <p className="text-xs uppercase text-gray-600 font-bold mb-1">
+                      Responsável
+                    </p>
+                    <p className="font-medium text-lg">
+                      {header.responsavel || "Não informado"}
+                    </p>
+                  </div>
+                  <div className="border border-gray-300 p-3">
+                    <p className="text-xs uppercase text-gray-600 font-bold mb-1">
+                      Obra / Destino
+                    </p>
+                    <p className="font-medium text-lg">
+                      {header.obra || "Não informado"}
+                    </p>
+                  </div>
+                  {header.observacoes && (
+                    <div className="border border-gray-300 p-3 col-span-2">
+                      <p className="text-xs uppercase text-gray-600 font-bold mb-1">
+                        Observações Gerais
+                      </p>
+                      <p className="font-medium whitespace-pre-wrap">{header.observacoes}</p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
 
           {isAutoReport(reportType) ? (
