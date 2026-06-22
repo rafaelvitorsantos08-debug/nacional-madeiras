@@ -766,7 +766,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       k.qtdeLadosAduela, k.kitDuplo
                     ].join('||');
 
-                    let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
+                    let stringQtdStr = '1';
                     if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
                     if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
 
