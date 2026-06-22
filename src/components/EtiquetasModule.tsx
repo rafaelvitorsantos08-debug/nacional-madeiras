@@ -64,6 +64,18 @@ const FORMATOS_PIMACO = [
   }
 ];
 
+// Helper for dimension
+const getPortaDimensao = (kit: any) => {
+  const qtdeFolhas = parseInt(String(kit.qtdeFolhasPorKit || '1'), 10);
+  const w = kit.folhaLargura;
+  const h = kit.folhaAltura;
+  if (!isNaN(qtdeFolhas) && qtdeFolhas > 1 && w && !isNaN(parseInt(w, 10))) {
+    const met = parseInt(w, 10) / qtdeFolhas;
+    return `${w}x${h} (${qtdeFolhas}x ${met}x${h})`;
+  }
+  return `${w}x${h}`;
+};
+
 export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }) {
   const [kits] = useLocalStorage<any[]>('nacional_madeiras_kits_v6', []);
   const [fila, setFila] = useState<{kit: any; qtd: number; id: string}[]>([]);
@@ -164,7 +176,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                       </button>
                     </div>
                     <div className="text-xs text-gray-600 space-y-0.5">
-                      <p><span className="font-semibold text-gray-500 w-16 inline-block">Porta:</span> {kit.folhaLargura}x{kit.folhaAltura} {kit.caracteristicaPorta}</p>
+                      <p><span className="font-semibold text-gray-500 w-16 inline-block">Porta:</span> {getPortaDimensao(kit)} {kit.caracteristicaPorta}</p>
                       <p><span className="font-semibold text-gray-500 w-16 inline-block">Aduela:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</p>
                       <p><span className="font-semibold text-gray-500 w-16 inline-block">Lado:</span> {kit.abertura}</p>
                     </div>
@@ -196,7 +208,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                   <div key={item.id} className="border border-gray-200 rounded flex items-center justify-between p-2">
                     <div className="flex-1 truncate pr-2">
                       <div className="text-sm font-bold text-gray-800 truncate">{item.kit.bloco} - {item.kit.apto}</div>
-                      <div className="text-xs text-gray-500 truncate">{item.kit.comodo} | {item.kit.folhaLargura}x{item.kit.folhaAltura}</div>
+                      <div className="text-xs text-gray-500 truncate">{item.kit.comodo} | {getPortaDimensao(item.kit)}</div>
                     </div>
                     <div className="flex items-center space-x-1 border border-gray-200 rounded-md p-0.5 bg-gray-50">
                       <button onClick={() => updateQtd(item.id, -1)} className="p-1 hover:bg-gray-200 rounded text-gray-600"><Minus className="w-3 h-3" /></button>
@@ -333,7 +345,7 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
           <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
           <div className="truncate text-right"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
           
-          <div className="truncate"><span className="font-bold">Pta:</span> {kit.folhaLargura}x{kit.folhaAltura}</div>
+          <div className="truncate"><span className="font-bold">Pta:</span> {getPortaDimensao(kit)}</div>
           <div className="truncate text-right"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
         </div>
       </div>
@@ -397,7 +409,7 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
         <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
           <div>
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
-            <span className="text-[10px] truncate block">{kit.folhaLargura}x{kit.folhaAltura} {kit.acabamentoPorta}</span>
+            <span className="text-[10px] truncate block">{getPortaDimensao(kit)} {kit.acabamentoPorta}</span>
           </div>
           <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>

@@ -382,13 +382,12 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     }
 
     const items = grouped.get(caracteristica)!;
-    const qtdeKits = 1; // CADA k é UM KIT no array atual. E eles querem a qtd do "kit", ou de folhas? 'QTD FOLHA/KIT' diz 'quando do kit contem duas folhas'. O display vai mostrar '4' no caso do screenshot. Ou '1'? No screenshot, pra 1020x1800 ele fala "Quantidade 4". So it seems there's 4 kits of that size. Or maybe qtde = 1 for each object in kits array. Let's trace it.
     let kitCount = 1;
     if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
     if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
     
     // Qtde na view "Relatório: Portas".
-    // 1020x1800 (2x 510x1800) -> Quantidade = número de KITS (não multiplicar por 2 de novo, a dimensão já diz)
+    // Quantidade = número de KITS (não multiplicar por qtde de folhas do kit de novo, a dimensão já diz)
     const existing = items.find(i => i.dimensao === dimensao && i.acabamento === acabamento);
     if (existing) {
       existing.qtdTotal += kitCount;
@@ -458,7 +457,10 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     const acadamento = (k.acabamentoAduela || '-').toUpperCase();
     const altura = aAltura;
     const dimensao = `${aLargura}x${aAltura}`;
-    const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+    
+    let kitCount = 1;
+    if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
+    if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
 
     if (!grouped.has(acadamento)) {
       grouped.set(acadamento, new Map());
@@ -472,9 +474,9 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     const items = alturasMap.get(altura)!;
     const existing = items.find(i => i.dimensao === dimensao);
     if (existing) {
-      existing.qtdTotal += fQtd;
+      existing.qtdTotal += kitCount;
     } else {
-      items.push({ dimensao, qtdTotal: fQtd });
+      items.push({ dimensao, qtdTotal: kitCount });
     }
   });
 
@@ -604,15 +606,16 @@ function renderAutoVergas(kits: any[]) {
 
     const verga = `${parsedFolha + 47}`;
     
-    let qtd = parseInt(k.qtdeFolhasPorKit || '1', 10);
-    if (isNaN(qtd)) qtd = 1;
+    let kitCount = 1;
+    if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
+    if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
 
     if (!grouped.has(verga)) {
       grouped.set(verga, new Map());
     }
 
     const aduelasMap = grouped.get(verga)!;
-    aduelasMap.set(aLarg, (aduelasMap.get(aLarg) || 0) + qtd);
+    aduelasMap.set(aLarg, (aduelasMap.get(aLarg) || 0) + kitCount);
   });
 
   if (grouped.size === 0) {
@@ -763,7 +766,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
                       k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
                       k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
-                      k.qtdeLadosAduela, k.kitDuplo
+                      k.qtdeLadosAduela
                     ].join('||');
 
                     let stringQtdStr = '1';
