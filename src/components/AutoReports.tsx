@@ -749,20 +749,8 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       </div>
                    </td>
                 </tr>
-
-                {/* Table Columns Header */}
-                <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-y-gray-300 print:text-black text-[11px] sm:text-sm">
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">QTD</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FOLHA DE PORTA</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CARACTERÍSTICAS</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">ACABAMENTO</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">INFO. ADUELA</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECH. GRID</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">DOBRADIÇAS</th>
-                  <th className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
-                </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent divide-y divide-gray-300 print:divide-y print:divide-gray-300 text-[11px] sm:text-sm print:text-sm">
+              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent text-[11px] sm:text-sm print:text-sm">
                 {aberturas.map((abertura, abIdx) => {
                   const abKits = byAbertura.get(abertura) || [];
                   
@@ -818,13 +806,26 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
                   return (
                     <React.Fragment key={abIdx}>
-                      <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-b border-gray-300 w-full">
+                       {/* Abertura Header */}
+                      <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
                         <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-x border-gray-300 print:border-gray-300">
                           <EditableText>{abertura}</EditableText>
                         </td>
                       </tr>
+                      {/* Títulos do Bloco */}
+                      <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-gray-300 print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none">
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">QTD</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FOLHA DE PORTA</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CARACTERÍSTICAS</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">ACABAMENTO</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">INFO. ADUELA</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECH. GRID</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">DOBRADIÇAS</th>
+                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
+                      </tr>
+                      {/* Linhas de Dados */}
                       {rows.map((g, rIdx) => (
-                        <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black">
+                        <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 break-inside-avoid">
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.qtd}</EditableText></td>
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.folha}</EditableText></td>
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.caracteristicas}</EditableText></td>
