@@ -715,13 +715,15 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                          <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black">RELATÓRIO DE MONTAGEM</h1>
                          <p className="text-sm mt-1 text-black print:text-black">Documento Gerado Via Sistema - Nacional Madeiras</p>
                        </div>
-                       <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6">
+                       <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
                          <div className="flex items-end mt-2">
-                           <span className="font-bold mr-1 uppercase whitespace-nowrap">Data:</span>
-                           <div className="border-b border-black w-16 h-4"></div>
+                           <span className="font-bold mr-2 uppercase whitespace-nowrap">Data de Liberação:</span>
+                           <span className="font-medium text-sm text-black print:text-black border-b border-black min-w-[80px] text-center inline-block">
+                             {new Date().toLocaleDateString('pt-BR')}
+                           </span>
                          </div>
-                         <div className="flex items-end mt-2">
-                           <span className="font-bold mr-1 uppercase whitespace-nowrap">Previsão de Entrega:</span>
+                         <div className="flex items-end mt-2 whitespace-nowrap">
+                           <span className="font-bold mr-1 uppercase">Previsão de Entrega:</span>
                            <div className="border-b border-black w-24 h-4"></div>
                          </div>
                        </div>
@@ -806,9 +808,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
                   return (
                     <React.Fragment key={abIdx}>
+                      {abIdx > 0 && (
+                        <tr className="border-0 bg-transparent h-6 break-inside-avoid">
+                           <td colSpan={8} className="border-0"></td>
+                        </tr>
+                      )}
                        {/* Abertura Header */}
                       <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
-                        <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-x border-gray-300 print:border-gray-300">
+                        <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
                           <EditableText>{abertura}</EditableText>
                         </td>
                       </tr>

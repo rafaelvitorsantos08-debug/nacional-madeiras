@@ -534,7 +534,7 @@ export default function App() {
           )}
 
           {/* PRINT ONLY HEADER */}
-          {activeTab !== 'etiquetas' && (
+          {activeTab !== 'etiquetas' && activeTab !== 'relatorios' && (
             <div className="hidden print:flex mb-4 flex-col border-b border-gray-300 pb-2">
                <div className="text-gray-500 text-xs font-mono mb-1">
                   {new Date().toLocaleDateString('pt-BR')} {new Date().toLocaleTimeString('pt-BR')}
