@@ -120,6 +120,12 @@ export function LancamentosRelatoriosModule() {
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
 
+  const clearAllKits = () => {
+    if (window.confirm('Tem certeza que deseja excluir todos os kits? Esta ação não pode ser desfeita.')) {
+      setKits([]);
+    }
+  };
+
   const exportToExcel = () => {
     if (kits.length === 0) return;
     const headers = [
@@ -557,6 +563,15 @@ export function LancamentosRelatoriosModule() {
               >
                 <Download className="w-4 h-4 mr-2" />
                 Excel / XLS
+              </button>
+              <button
+                type="button"
+                onClick={clearAllKits}
+                className="flex items-center text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/50 px-3 py-1.5 rounded-lg transition-colors"
+                title="Excluir todos os kits"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Limpar Tudo
               </button>
               <div className="text-sm text-gray-500 ml-2">
                  {kits.length} registro(s)
