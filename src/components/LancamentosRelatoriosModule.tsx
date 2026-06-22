@@ -123,7 +123,7 @@ export function LancamentosRelatoriosModule() {
   const exportToExcel = () => {
     if (kits.length === 0) return;
     const headers = [
-      ['BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'TIPOLOGIA', 'FOLHA DE PORTA LARGURA', 'FOLHA DE PORTA ALTURA', 'QUANTIDADE DE FOLHA POR KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARGURA', 'ADUELA ALTURA', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECHADURA MARCA', 'FECHADURA GRID', 'FECHADURA TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTDE DE LADOS DA ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'BITS POR FOLHA QTDE', 'BITS POR FOLHA FACES', 'CAMARÃO', 'CORRER', 'PIVOTANTE', 'C/VENEZIANA', 'C/GRELHA', 'C/BANDEIRA', 'C/CHAPA', 'C/VIDRO', 'C/FECHA FRESTA', 'KIT DUPLO', 'OBSERVAÇÃO']
+      ['BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'TIPOLOGIA', 'FOLHA DE PORTA LARGURA', 'FOLHA DE PORTA ALTURA', 'QUANTIDADE DE FOLHA POR KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARGURA', 'ADUELA ALTURA', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECHADURA MARCA', 'FECHADURA GRID', 'FECHADURA TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTDE DE LADOS DA ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'BITS POR FOLHA QTDE', 'BITS POR FOLHA FACES', 'CAMARÃO', 'CORRER', 'PIVOTANTE', 'C/VENEZIANA', 'C/GRELHA', 'C/BANDEIRA', 'C/CHAPA', 'C/VIDRO', 'C/FECHA FRESTA', 'OBSERVAÇÃO']
     ];
 
     const dataToExport = kits.map(k => [
@@ -132,7 +132,7 @@ export function LancamentosRelatoriosModule() {
       k.aduelaLargura || '', k.aduelaAltura || '', k.regulagem || '', k.acabamentoAduela || '',
       k.fechaduraMarca || '', k.fechaduraGrid || '', k.fechaduraTipo || '', k.dobradicaMarca || '', k.dobradicaMedida || '',
       k.qtdeLadosAduela || '', k.montantesMedida || '', k.montantesFolgas || '', k.bitsQtde || '', k.bitsFaces || '',
-      k.camarao ? 'X' : '', k.correr ? 'X' : '', k.pivotante ? 'X' : '', k.veneziana ? 'X' : '', k.grelha ? 'X' : '', k.bandeira ? 'X' : '', k.chapa ? 'X' : '', k.vidro ? 'X' : '', k.fechaFresta ? 'X' : '', k.kitDuplo ? 'X' : '', k.observacao || ''
+      k.camarao ? 'X' : '', k.correr ? 'X' : '', k.pivotante ? 'X' : '', k.veneziana ? 'X' : '', k.grelha ? 'X' : '', k.bandeira ? 'X' : '', k.chapa ? 'X' : '', k.vidro ? 'X' : '', k.fechaFresta ? 'X' : '', k.observacao || ''
     ]);
 
     const worksheet = XLSX.utils.aoa_to_sheet([...headers, ...dataToExport]);
@@ -470,10 +470,6 @@ export function LancamentosRelatoriosModule() {
                         <span>C/ Vidro</span>
                      </label>
                      <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
-                        <input type="checkbox" name="kitDuplo" checked={form.kitDuplo} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
-                        <span>Kit Duplo</span>
-                     </label>
-                     <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer p-1.5 hover:bg-white dark:bg-gray-800 rounded">
                         <input type="checkbox" name="fechaFresta" checked={form.fechaFresta} onChange={handleInputChange} className="rounded text-brand-green focus:ring-brand-green" />
                         <span>Fecha Fresta</span>
                      </label>
@@ -571,7 +567,7 @@ export function LancamentosRelatoriosModule() {
             <table className="w-full text-left text-sm border-collapse whitespace-nowrap">
                <thead className="bg-[#e2efda] dark:bg-emerald-900/40 text-[10px] uppercase text-gray-800 dark:text-emerald-100 sticky top-0 border-b border-gray-300 dark:border-gray-600">
                   <tr>
-                     {['AÇÕES', 'BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'TIPOLOGIA', 'FOLHA LARG', 'FOLHA ALT', 'QTD FOLHA/KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARG', 'ADUELA ALT', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECH. MARCA', 'FECH. GRID', 'FECH. TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTD LADOS ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'B. QTD', 'B. FACES', 'CAM', 'CORRER', 'PIV', 'C/VEN', 'C/GRE', 'C/BAND', 'C/CHAPA', 'C/VID', 'C/FF', 'KIT DUPLO', 'OBSERVAÇÃO'].map((h, i) => (
+                     {['AÇÕES', 'BLOCO', 'APTO', 'PAVIMENTO', 'COLUNA', 'CÔMODO', 'TIPOLOGIA', 'FOLHA LARG', 'FOLHA ALT', 'QTD FOLHA/KIT', 'ACABAMENTO DA PORTA', 'CARACTERISTICA DA PORTA', 'ABERTURA', 'ADUELA LARG', 'ADUELA ALT', 'REGULAGEM', 'ACABAMENTO DA ADUELA', 'FECH. MARCA', 'FECH. GRID', 'FECH. TIPO', 'DOBRADIÇA MARCA', 'DOBRADIÇA MEDIDA', 'QTD LADOS ADUELA', 'MONTANTES MEDIDA', 'MONTANTES FOLGAS', 'B. QTD', 'B. FACES', 'CAM', 'CORRER', 'PIV', 'C/VEN', 'C/GRE', 'C/BAND', 'C/CHAPA', 'C/VID', 'C/FF', 'OBSERVAÇÃO'].map((h, i) => (
                          <th key={i} className="p-2 border-r border-[#c2d6b3] dark:border-emerald-800/40 font-bold text-center whitespace-pre">{h}</th>
                      ))}
                   </tr>
@@ -624,7 +620,6 @@ export function LancamentosRelatoriosModule() {
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.chapa} onChange={v => updateKit(kit.id, "chapa", v)} /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.vidro} onChange={v => updateKit(kit.id, "vidro", v)} /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.fechaFresta} onChange={v => updateKit(kit.id, "fechaFresta", v)} /></td>
-                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell type="boolean" value={kit.kitDuplo} onChange={v => updateKit(kit.id, "kitDuplo", v)} /></td>
                         <td className="p-2 text-center border-r border-gray-200 dark:border-gray-700"><EditableObsCell value={kit.observacao || ""} onChange={v => updateKit(kit.id, "observacao", v)} /></td>
                      </tr>
                   ))}

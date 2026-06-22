@@ -367,20 +367,14 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     const acabamento = k.acabamentoPorta || '-';
     // Mapeamento correto para a característica da porta
     const caracteristica = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
-    const isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
+    const isMultiFolhas = fQtd > 1;
     
-    // Qtde real de folhas = quantidade no kit
-    // Em relatórios de portas a qtde mostrada costuma ser a de conjuntos ou folhas dependendo, mas se o kit for duplo, o usuário disse: '2 folhas', qtde: 2 ?
-    // "1 KIT DE LARGURA DE 1020 ... SENDO 2 FOLHAS DE 510", então a qtde deve ser multiplicada ou apenas indicamos a QTD do kit?
-    // "Qtde real de folhas = quantidade no kit * (se duplo x 2)" - was there already, let's keep it.
-    const qtde = isDuplo ? fQtd * 2 : fQtd;
-
     let dimensao = `${fLargura}x${fAltura}`;
-    if (isDuplo && fLargura.match(/^\d+$/)) {
-      let metade = parseInt(fLargura, 10) / 2;
-      dimensao = `${fLargura}x${fAltura} (2x ${metade}x${fAltura})`;
-    } else if (isDuplo) {
-      dimensao = `${fLargura}x${fAltura} (Duplo)`;
+    if (isMultiFolhas && String(fLargura).match(/^\d+$/)) {
+      let divisor = parseInt(fLargura, 10) / fQtd;
+      dimensao = `${fLargura}x${fAltura} (${fQtd}x ${divisor}x${fAltura})`;
+    } else if (isMultiFolhas) {
+      dimensao = `${fLargura}x${fAltura} (${fQtd} folhas)`;
     }
 
     if (!grouped.has(caracteristica)) {
@@ -388,11 +382,18 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     }
 
     const items = grouped.get(caracteristica)!;
+    const qtdeKits = 1; // CADA k é UM KIT no array atual. E eles querem a qtd do "kit", ou de folhas? 'QTD FOLHA/KIT' diz 'quando do kit contem duas folhas'. O display vai mostrar '4' no caso do screenshot. Ou '1'? No screenshot, pra 1020x1800 ele fala "Quantidade 4". So it seems there's 4 kits of that size. Or maybe qtde = 1 for each object in kits array. Let's trace it.
+    let kitCount = 1;
+    if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
+    if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
+    
+    // Qtde na view "Relatório: Portas".
+    // 1020x1800 (2x 510x1800) -> Quantidade = número de KITS (não multiplicar por 2 de novo, a dimensão já diz)
     const existing = items.find(i => i.dimensao === dimensao && i.acabamento === acabamento);
     if (existing) {
-      existing.qtdTotal += qtde;
+      existing.qtdTotal += kitCount;
     } else {
-      items.push({ dimensao, acabamento, qtdTotal: qtde });
+      items.push({ dimensao, acabamento, qtdTotal: kitCount });
     }
   });
 
@@ -712,8 +713,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                   <td colSpan={8} className="p-0 border-0">
                     <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4 mt-2 print:border-black">
                        <div>
-                         <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black">RELATÓRIO DE MONTAGEM</h1>
-                         <p className="text-sm mt-1 text-black print:text-black">Documento Gerado Via Sistema - Nacional Madeiras</p>
+                         <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-4">RELATÓRIO DE MONTAGEM</h1>
                        </div>
                        <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
                          <div className="flex items-end mt-2">
@@ -788,8 +788,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       let caracteristicas = k.caracteristicaPorta || '-';
                       
                       let leafSizeStr = `${k.folhaLargura || '-'} x ${k.folhaAltura || '-'}`;
-                      if (k.kitDuplo && k.qtdeFolhasPorKit) {
-                          leafSizeStr = `${k.qtdeFolhasPorKit} folhas de ${leafSizeStr}`;
+                      const folhaQtd = parseInt(String(k.qtdeFolhasPorKit || '1'), 10);
+                      if (!isNaN(folhaQtd) && folhaQtd > 1 && k.folhaLargura && !isNaN(parseInt(k.folhaLargura, 10))) {
+                          const dividedWidth = parseInt(k.folhaLargura, 10) / folhaQtd;
+                          leafSizeStr = `${k.folhaLargura} x ${k.folhaAltura || '-'} (${folhaQtd}x ${dividedWidth} x ${k.folhaAltura || '-'})`;
                       }
 
                       grouped.set(key, {
@@ -813,7 +815,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                            <td colSpan={8} className="border-0"></td>
                         </tr>
                       )}
-                       {/* Abertura Header */}
+                      {/* Abertura Header */}
                       <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
                         <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
                           <EditableText>{abertura}</EditableText>
