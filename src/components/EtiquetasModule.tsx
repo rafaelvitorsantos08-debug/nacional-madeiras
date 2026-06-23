@@ -334,7 +334,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5 text-brand-green">Nacional Madeiras <span className="font-medium text-gray-600">KIT PORTA</span></div>
             {(header?.cliente || header?.obra) && (
               <div className="font-bold text-[6px] uppercase leading-none mb-0.5 text-gray-600 truncate">
-                {header.cliente && `CLI: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
+                {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
               </div>
             )}
             <div className="font-bold text-[8px] uppercase leading-none truncate">
@@ -376,7 +376,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
           </div>
           {(header?.cliente || header?.obra) && (
              <div className="font-bold text-[8px] uppercase mt-0.5 leading-none text-gray-600 truncate">
-               {header.cliente && `CLI: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5">|</span>} {header.obra && `OBRA: ${header.obra}`}
+               {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5">|</span>} {header.obra && `OBRA: ${header.obra}`}
              </div>
           )}
           <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
