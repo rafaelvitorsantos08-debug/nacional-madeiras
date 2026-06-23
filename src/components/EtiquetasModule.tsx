@@ -16,7 +16,7 @@ const FORMATOS_PIMACO = [
     marginTop: 8.8, // mm (aproximado)
     marginLeft: 4.8, // mm (aproximado)
     labelWidth: 99.0, // mm
-    labelHeight: 55.8, // mm
+    labelHeight: 55.88, // mm
     gapX: 2.6, // (210 - 2*99)/2 = 6, but typical gap is 2.6 for pitch 101.6
     gapY: 0
   },
@@ -256,7 +256,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             </div>
             
             <div className="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-md border border-yellow-200 mt-2">
-              <strong>Atenção para impressão:</strong> Na tela de opções do navegador, mude as <strong>Margens para "Nenhuma"</strong> (ou Nenhuma / Customizada com 0) e desmarque <strong>Cabeçalhos e Rodapés</strong>.
+              <strong>Atenção para impressão:</strong> Na tela de opções do navegador, mude as <strong>Margens para "Nenhuma"</strong> (ou Nenhuma / Customizada com 0) e <strong>Escala (Scale) para "Padrão" ou "100%"</strong>, e desmarque Cabeçalhos e Rodapés.
             </div>
           </div>
         </div>
@@ -342,11 +342,10 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             </div>
             <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
           </div>
-          <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
-            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={true} />
-            <div className="flex items-center text-[4px] mt-0.5 font-bold uppercase tracking-tighter text-gray-700">
-              <Instagram className="w-1.5 h-1.5 mr-0.5" />
-              instagram
+          <div className="flex-shrink-0 pt-0.5 flex flex-col items-center w-[30px]">
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={false} />
+            <div className="text-[4px] mt-0.5 font-bold uppercase text-center leading-[1.1] text-gray-800">
+              Siga nosso<br/>Instagram
             </div>
           </div>
         </div>
@@ -387,16 +386,15 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo})</span>
           </div>
         </div>
-        <div className="flex-shrink-0 pt-0 pr-2 flex flex-col items-center">
+        <div className="flex-shrink-0 pt-0 pr-2 flex flex-col items-center w-[56px]">
           <QRCodeSVG 
             value="https://www.instagram.com/nacionalmadeirasltda/" 
-            size={48} 
+            size={46} 
             level="M" 
-            includeMargin={true}
+            includeMargin={false}
           />
-          <div className="flex items-center text-[5px] mt-0.5 font-bold uppercase tracking-tighter text-gray-700">
-            <Instagram className="w-2 h-2 mr-0.5" />
-            nosso instagram
+          <div className="text-[5.5px] mt-1 font-bold uppercase text-center leading-[1.1] text-gray-800">
+            Aponte a câmera<br/>p/ nosso Instagram
           </div>
         </div>
       </div>

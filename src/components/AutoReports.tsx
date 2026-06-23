@@ -184,7 +184,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   });
 
   return (
-    <div className="space-y-6">
+    <div className="block">
       {sortedEntries.map(([fTipo, groupData]) => {
          const { singles, doubles } = groupData;
          
@@ -210,8 +210,8 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
          const maxRows = Math.max(leftElements.length, rightElements.length);
 
          return (
-            <div key={fTipo} className="break-inside-avoid shadow-sm print:shadow-none">
-              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden">
+            <div key={fTipo} className="break-inside-avoid mb-6 print:mb-6 shadow-sm print:shadow-none bg-white" style={{ pageBreakInside: 'avoid' }}>
+              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden" style={{ pageBreakInside: 'avoid' }}>
                 <thead>
                   {mode === 'portas' && (
                     <tr>
@@ -401,14 +401,14 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="block">
       {Array.from(grouped.entries()).map(([caracteristica, items], idx) => (
-        <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white">
+        <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6 print:mb-6" style={{ pageBreakInside: 'avoid' }}>
           <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
              <EditableText>{caracteristica}</EditableText>
           </div>
           <div className="print:mt-2">
-            <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
+            <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300" style={{ pageBreakInside: 'avoid' }}>
               <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                 <tr>
                   <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
@@ -486,11 +486,11 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
 
   // Sort Alturas string array
   return (
-    <div className="space-y-6">
+    <div className="block">
       {Array.from(grouped.entries()).map(([acabamento, alturasMap], idx) => {
          const alturas = Array.from(alturasMap.keys()).sort();
          return (
-           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-8">
+           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-8 print:mb-8" style={{ pageBreakInside: 'avoid' }}>
              <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
                 <EditableText>{acabamento}</EditableText>
              </div>
@@ -625,17 +625,17 @@ function renderAutoVergas(kits: any[]) {
   const sortedVergas = Array.from(grouped.entries()).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
 
   return (
-    <div className="space-y-6">
+    <div className="block">
       {sortedVergas.map(([verga, aduelasMap], idx) => {
          const aduelasList = Array.from(aduelasMap.entries()).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
          
          return (
-           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-6">
+           <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-gray-50 dark:bg-slate-900 print:bg-white mb-6 print:mb-6" style={{ pageBreakInside: 'avoid' }}>
              <div className="bg-gray-200 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-2 text-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
                 <EditableText>{`Verga (Folha + 47mm): ${verga}`}</EditableText>
              </div>
              <div className="print:mt-0">
-               <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
+               <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300" style={{ pageBreakInside: 'avoid' }}>
                   <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                     <tr>
                       <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
