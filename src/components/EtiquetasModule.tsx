@@ -94,9 +94,10 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   });
   
   const filteredKits = useMemo(() => {
-    if (!globalSearch.trim()) return kits;
+    const safeKits = Array.isArray(kits) ? kits : [];
+    if (!globalSearch.trim()) return safeKits;
     const lbd = globalSearch.toLowerCase();
-    return kits.filter((k: any) => 
+    return safeKits.filter((k: any) => 
       k.bloco?.toLowerCase().includes(lbd) ||
       k.apto?.toLowerCase().includes(lbd) ||
       k.comodo?.toLowerCase().includes(lbd) ||
@@ -111,7 +112,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
       if (exists) {
         return prev.map(i => i.kit.id === kit.id ? { ...i, qtd: i.qtd + 1 } : i);
       }
-      return [...prev, { kit, qtd: 1, id: Math.random().toString(36).substr(2, 9) }];
+      return [...prev, { kit, qtd: 1, id: Math.random().toString(36).substring(2, 9) }];
     });
   };
 
@@ -131,6 +132,22 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
       }
       return i;
     }));
+  };
+
+  const addAllFiltered = () => {
+    setFila(prev => {
+      const newFila = [...prev];
+      filteredKits.forEach(kit => {
+        if (!kit) return;
+        const existsIndex = newFila.findIndex(i => i.kit?.id === kit.id);
+        if (existsIndex >= 0) {
+          newFila[existsIndex] = { ...newFila[existsIndex], qtd: newFila[existsIndex].qtd + 1 };
+        } else {
+          newFila.push({ kit, qtd: 1, id: Math.random().toString(36).substring(2, 9) });
+        }
+      });
+      return newFila;
+    });
   };
 
   const handlePrint = () => {
@@ -170,7 +187,17 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               <Search className="w-5 h-5 text-gray-500" /> 
               Buscar Kits Cadastrados
             </h2>
-            <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">{filteredKits.length} reg</span>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={addAllFiltered}
+                className="text-xs font-bold bg-brand-green/10 text-brand-green hover:bg-brand-green/20 px-3 py-1 rounded transition-colors flex items-center gap-1"
+                title="Adicionar todos os filtrados à fila"
+              >
+                <Plus className="w-3 h-3" />
+                Selecionar Todas
+              </button>
+              <span className="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-xs font-bold">{filteredKits.length} reg</span>
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {filteredKits.length === 0 ? (

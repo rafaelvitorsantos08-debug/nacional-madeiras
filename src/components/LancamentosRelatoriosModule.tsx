@@ -250,7 +250,7 @@ export function LancamentosRelatoriosModule() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newKit: KitLancamento = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 9),
       ...form,
     };
     setKits(prev => [newKit, ...prev]);

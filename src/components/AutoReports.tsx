@@ -14,11 +14,11 @@ const EditableText = ({ children }: { children: React.ReactNode }) => (
 export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente }: { kits: any[], reportType: string, responsavel?: string, obra?: string, cliente?: string }) {
   const content = useMemo(() => {
     switch (reportType) {
-      case 'auto_portas': return renderAutoPortas(kits, responsavel, obra, cliente);
-      case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra, cliente);
+      case 'auto_portas': return renderAutoPortas(kits, responsavel, obra);
+      case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra);
       case 'auto_alizares': return renderAutoAlizares(kits); // Alizares may need it too if it takes it, but currently it doesn't.
-      case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra, cliente);
-      case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra, cliente);
+      case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
+      case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra);
       case 'auto_vergas': return renderAutoVergas(kits); // Same here
       case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra, cliente);
       case 'auto_entrega': return renderAutoEntrega(kits, responsavel, obra, cliente);
