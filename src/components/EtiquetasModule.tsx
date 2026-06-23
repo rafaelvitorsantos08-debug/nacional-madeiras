@@ -18,7 +18,9 @@ const FORMATOS_PIMACO = [
     labelWidth: 101.6, // mm
     labelHeight: 50.8, // mm
     gapX: 4.6, // mm
-    gapY: 0
+    gapY: 0,
+    pageWidth: 215.9,
+    pageHeight: 279.4
   },
   {
     id: '6187',
@@ -32,7 +34,9 @@ const FORMATOS_PIMACO = [
     labelWidth: 99.0, // mm
     labelHeight: 55.88, // mm
     gapX: 2.6, // (210 - 2*99)/2 = 6, but typical gap is 2.6 for pitch 101.6
-    gapY: 0
+    gapY: 0,
+    pageWidth: 210,
+    pageHeight: 297
   },
   {
     id: '6182',
@@ -46,7 +50,9 @@ const FORMATOS_PIMACO = [
     labelWidth: 101.6, // mm
     labelHeight: 33.9, // mm
     gapX: 0,
-    gapY: 0
+    gapY: 0,
+    pageWidth: 215.9,
+    pageHeight: 279.4
   },
   {
     id: '6180',
@@ -60,7 +66,9 @@ const FORMATOS_PIMACO = [
     labelWidth: 66.7, // mm
     labelHeight: 25.4, // mm
     gapX: 0,
-    gapY: 0
+    gapY: 0,
+    pageWidth: 215.9,
+    pageHeight: 279.4
   }
 ];
 
@@ -266,7 +274,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
       <div className="hidden print:block font-sans text-black" style={{ backgroundColor: 'white' }}>
         <style dangerouslySetInnerHTML={{__html: `
           @page {
-            size: A4 portrait;
+            size: ${formato.pageWidth}mm ${formato.pageHeight}mm;
             margin: 0;
           }
           body {
@@ -281,8 +289,8 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             key={pageIndex} 
             className="box-border"
             style={{ 
-              width: '210mm', 
-              height: '297mm', 
+              width: `${formato.pageWidth}mm`, 
+              height: `${formato.pageHeight}mm`, 
               pageBreakAfter: pageIndex < pages.length - 1 ? 'always' : 'auto',
               position: 'relative',
               overflow: 'hidden'
@@ -333,7 +341,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
           <div className="flex flex-col flex-1 truncate pr-1">
             <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5 text-brand-green">Nacional Madeiras <span className="font-medium text-gray-600">KIT PORTA</span></div>
             {(header?.cliente || header?.obra) && (
-              <div className="font-bold text-[6px] uppercase leading-none mb-0.5 text-gray-600 truncate">
+              <div className="font-bold text-[6px] uppercase leading-tight mb-0.5 text-gray-600">
                 {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
               </div>
             )}
@@ -375,7 +383,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             Nacional Madeiras <span className="font-medium text-gray-600 tracking-normal">Kit Porta</span>
           </div>
           {(header?.cliente || header?.obra) && (
-             <div className="font-bold text-[8px] uppercase mt-0.5 leading-none text-gray-600 truncate">
+             <div className="font-bold text-[8px] uppercase mt-0.5 leading-tight text-gray-600">
                {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5">|</span>} {header.obra && `OBRA: ${header.obra}`}
              </div>
           )}
