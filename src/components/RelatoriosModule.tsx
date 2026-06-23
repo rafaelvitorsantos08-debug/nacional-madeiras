@@ -210,6 +210,7 @@ interface ReportHeader {
   data: string;
   responsavel: string;
   obra: string;
+  cliente: string;
   observacoes: string;
 }
 
@@ -219,6 +220,7 @@ export function RelatoriosModule() {
     data: new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0],
     responsavel: "",
     obra: "",
+    cliente: "",
     observacoes: "",
   });
 
@@ -310,8 +312,9 @@ export function RelatoriosModule() {
 
     let content = `RELATÓRIO DE ${reportType.replace("auto_", "").replace(/_/g, " ").toUpperCase()}\n`;
     content += `Data: ${header.data ? header.data.split("-").reverse().join("/") : ""}\n`;
+    content += `Cliente: ${header.cliente}\n`;
+    content += `Obra: ${header.obra}\n`;
     content += `Responsável: ${header.responsavel}\n`;
-    content += `Obra / Destino: ${header.obra}\n`;
     content += `Observações Gerais: ${header.observacoes || ""}\n\n`;
 
     if (items.length > 0) {
@@ -400,7 +403,7 @@ export function RelatoriosModule() {
               <ClipboardList className="w-5 h-5 mr-2 text-gray-500" />
               Cabeçalho do Relatório
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Tipo de Relatório
@@ -459,7 +462,22 @@ export function RelatoriosModule() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Obra / Destino
+                  Cliente
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Nome do Cliente"
+                    value={header.cliente}
+                    onChange={(e) => handleHeaderChange("cliente", e.target.value)}
+                    className="w-full pl-9 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Obra
                 </label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -472,7 +490,7 @@ export function RelatoriosModule() {
                   />
                 </div>
               </div>
-              <div className="md:col-span-2 lg:col-span-4">
+              <div className="md:col-span-2 lg:col-span-5">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Observações Gerais
                 </label>
@@ -495,7 +513,7 @@ export function RelatoriosModule() {
             </h3>
 
             {isAutoReport(reportType) && (
-              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} />
+              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} cliente={header.cliente} />
             )}
 
             {reportType === "avarias" && (
@@ -680,7 +698,23 @@ export function RelatoriosModule() {
               </div>
 
               {!reportType.includes("usinagem") && (
-                <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="border border-gray-300 p-3">
+                    <p className="text-xs uppercase text-gray-600 font-bold mb-1">
+                      Cliente
+                    </p>
+                    <p className="font-medium text-lg">
+                      {header.cliente || "Não informado"}
+                    </p>
+                  </div>
+                  <div className="border border-gray-300 p-3">
+                    <p className="text-xs uppercase text-gray-600 font-bold mb-1">
+                      Obra
+                    </p>
+                    <p className="font-medium text-lg">
+                      {header.obra || "Não informado"}
+                    </p>
+                  </div>
                   <div className="border border-gray-300 p-3">
                     <p className="text-xs uppercase text-gray-600 font-bold mb-1">
                       Responsável
@@ -689,16 +723,8 @@ export function RelatoriosModule() {
                       {header.responsavel || "Não informado"}
                     </p>
                   </div>
-                  <div className="border border-gray-300 p-3">
-                    <p className="text-xs uppercase text-gray-600 font-bold mb-1">
-                      Obra / Destino
-                    </p>
-                    <p className="font-medium text-lg">
-                      {header.obra || "Não informado"}
-                    </p>
-                  </div>
                   {header.observacoes && (
-                    <div className="border border-gray-300 p-3 col-span-2">
+                    <div className="border border-gray-300 p-3 col-span-3">
                       <p className="text-xs uppercase text-gray-600 font-bold mb-1">
                         Observações Gerais
                       </p>
@@ -712,7 +738,7 @@ export function RelatoriosModule() {
 
           {isAutoReport(reportType) ? (
             <div className="mb-8 print-auto-report">
-              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} />
+              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} cliente={header.cliente} />
             </div>
           ) : (
             <table className="w-full border-collapse border border-black text-left mb-8">

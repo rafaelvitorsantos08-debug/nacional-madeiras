@@ -11,20 +11,20 @@ const EditableText = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-export function AutoReportsViewer({ kits, reportType, responsavel, obra }: { kits: any[], reportType: string, responsavel?: string, obra?: string }) {
+export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente }: { kits: any[], reportType: string, responsavel?: string, obra?: string, cliente?: string }) {
   const content = useMemo(() => {
     switch (reportType) {
-      case 'auto_portas': return renderAutoPortas(kits, responsavel, obra);
-      case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra);
-      case 'auto_alizares': return renderAutoAlizares(kits);
-      case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
-      case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra);
-      case 'auto_vergas': return renderAutoVergas(kits);
-      case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra);
-      case 'auto_entrega': return renderAutoEntrega(kits, responsavel, obra);
+      case 'auto_portas': return renderAutoPortas(kits, responsavel, obra, cliente);
+      case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra, cliente);
+      case 'auto_alizares': return renderAutoAlizares(kits); // Alizares may need it too if it takes it, but currently it doesn't.
+      case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra, cliente);
+      case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra, cliente);
+      case 'auto_vergas': return renderAutoVergas(kits); // Same here
+      case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra, cliente);
+      case 'auto_entrega': return renderAutoEntrega(kits, responsavel, obra, cliente);
       default: return null;
     }
-  }, [kits, reportType, responsavel, obra]);
+  }, [kits, reportType, responsavel, obra, cliente]);
 
   return <div className="mt-4">{content}</div>;
 }
@@ -667,7 +667,7 @@ function renderAutoVergas(kits: any[]) {
   );
 }
 
-export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string) {
+export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string, cliente?: string) {
   // Group by Tipologia first
   const byTipologia = new Map<string, any[]>();
   kits.forEach(k => {
@@ -731,15 +731,19 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                          </div>
                        </div>
                     </div>
-                    {(obra || responsavel) && (
-                      <div className="grid grid-cols-2 gap-4 mb-6">
+                    {(obra || responsavel || cliente) && (
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="border border-gray-300 p-2">
+                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Cliente</p>
+                          <p className="font-medium text-lg print:text-black uppercase text-black">{cliente || "Não informado"}</p>
+                        </div>
+                        <div className="border border-gray-300 p-2">
+                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Obra</p>
+                          <p className="font-medium text-lg print:text-black text-black">{obra || "Não informado"}</p>
+                        </div>
                         <div className="border border-gray-300 p-2">
                           <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Responsável</p>
                           <p className="font-medium text-lg print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
-                        </div>
-                        <div className="border border-gray-300 p-2">
-                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Obra / Destino</p>
-                          <p className="font-medium text-lg print:text-black text-black">{obra || "Não informado"}</p>
                         </div>
                       </div>
                     )}
@@ -869,7 +873,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
   );
 }
 
-export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: string) {
+export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: string, cliente?: string) {
   const grouped = new Map<string, any>();
 
   kits.forEach(k => {
@@ -920,8 +924,9 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
       <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
         <EditableText>Relatório de Entrega</EditableText>
       </div>
-      {(obra || responsavel) && (
+      {(obra || responsavel || cliente) && (
         <div className="flex justify-between items-end mb-4 print:mb-6 px-2 text-sm text-gray-800 dark:text-gray-200 print:text-black">
+          {cliente && <div><span className="font-semibold text-gray-500">Cliente:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{cliente}</span></EditableText></div>}
           {obra && <div><span className="font-semibold text-gray-500">Obra:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{obra}</span></EditableText></div>}
           {responsavel && <div><span className="font-semibold text-gray-500">Resp:</span> <EditableText><span className="font-bold uppercase text-black dark:text-white print:text-black">{responsavel}</span></EditableText></div>}
         </div>

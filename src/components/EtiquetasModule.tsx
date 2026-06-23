@@ -80,6 +80,10 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   const [kits] = useLocalStorage<any[]>('nacional_madeiras_kits_v6', []);
   const [fila, setFila] = useState<{kit: any; qtd: number; id: string}[]>([]);
   const [formato, setFormato] = useState(FORMATOS_PIMACO[0]);
+  const [header] = useLocalStorage<any>("nm_active_relatorio_header", {
+    cliente: "",
+    obra: "",
+  });
   
   const filteredKits = useMemo(() => {
     if (!globalSearch.trim()) return kits;
@@ -302,7 +306,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                     height: `${formato.labelHeight}mm`,
                   }}
                 >
-                  <LabelInnerContent kit={kit} formato={formato} />
+                  <LabelInnerContent kit={kit} formato={formato} header={header} />
                 </div>
               );
             })}
@@ -316,7 +320,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   );
 }
 
-function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
+function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; header: any }) {
   // Ajustar o layout interno com base no tamanho da etiqueta.
   // Etiquetas menores (6180) precisam de fonte menor e menos informações.
   
@@ -328,6 +332,11 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
         <div className="flex justify-between items-start border-b border-black pb-0.5 mb-1">
           <div className="flex flex-col flex-1 truncate pr-1">
             <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5 text-brand-green">Nacional Madeiras <span className="font-medium text-gray-600">KIT PORTA</span></div>
+            {(header?.cliente || header?.obra) && (
+              <div className="font-bold text-[6px] uppercase leading-none mb-0.5 text-gray-600 truncate">
+                {header.cliente && `CLI: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
+              </div>
+            )}
             <div className="font-bold text-[8px] uppercase leading-none truncate">
               {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo})</span>
             </div>
@@ -362,6 +371,11 @@ function LabelInnerContent({ kit, formato }: { kit: any; formato: any }) {
           <div className="font-extrabold text-[12px] uppercase leading-[0.9] mb-1 tracking-tight text-brand-green">
             Nacional Madeiras <span className="font-medium text-gray-600 tracking-normal">Kit Porta</span>
           </div>
+          {(header?.cliente || header?.obra) && (
+             <div className="font-bold text-[8px] uppercase mt-0.5 leading-none text-gray-600 truncate">
+               {header.cliente && `CLI: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5">|</span>} {header.obra && `OBRA: ${header.obra}`}
+             </div>
+          )}
           <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
             BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto}
           </div>
