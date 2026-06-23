@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from './EstoqueModule';
-import { Printer, Search, Plus, Minus, X, Trash2, Settings } from 'lucide-react';
+import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -342,8 +342,12 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             </div>
             <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
           </div>
-          <div className="flex-shrink-0 pt-0.5">
-            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={30} level="M" includeMargin={true} />
+          <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={true} />
+            <div className="flex items-center text-[4px] mt-0.5 font-bold uppercase tracking-tighter text-gray-700">
+              <Instagram className="w-1.5 h-1.5 mr-0.5" />
+              instagram
+            </div>
           </div>
         </div>
         
@@ -354,7 +358,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
           <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
           <div className="truncate text-right"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
           
-          <div className="truncate"><span className="font-bold">Pta:</span> {getPortaDimensao(kit)}</div>
+          <div className="truncate"><span className="font-bold">Pta:</span> {getPortaDimensao(kit)} {kit.caracteristicaPorta}</div>
           <div className="truncate text-right"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
         </div>
       </div>
@@ -383,13 +387,17 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo})</span>
           </div>
         </div>
-        <div className="flex-shrink-0 pt-0 pr-2">
+        <div className="flex-shrink-0 pt-0 pr-2 flex flex-col items-center">
           <QRCodeSVG 
             value="https://www.instagram.com/nacionalmadeirasltda/" 
-            size={52} 
+            size={48} 
             level="M" 
             includeMargin={true}
           />
+          <div className="flex items-center text-[5px] mt-0.5 font-bold uppercase tracking-tighter text-gray-700">
+            <Instagram className="w-2 h-2 mr-0.5" />
+            nosso instagram
+          </div>
         </div>
       </div>
       
@@ -423,7 +431,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
         <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
           <div>
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
-            <span className="text-[10px] truncate block">{getPortaDimensao(kit)} {kit.acabamentoPorta}</span>
+            <span className="text-[9px] leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
           </div>
           <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
