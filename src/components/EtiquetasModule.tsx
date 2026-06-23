@@ -7,6 +7,20 @@ import { QRCodeSVG } from 'qrcode.react';
 // Constantes de formatos Pimaco
 const FORMATOS_PIMACO = [
   {
+    id: '6183',
+    name: 'Pimaco 6183 (Carta - 10/folha)',
+    desc: '101.6mm x 50.8mm',
+    labelsPerPage: 10,
+    cols: 2,
+    rows: 5,
+    marginTop: 12.7, // mm
+    marginLeft: 4.0, // mm
+    labelWidth: 101.6, // mm
+    labelHeight: 50.8, // mm
+    gapX: 4.6, // mm
+    gapY: 0
+  },
+  {
     id: '6187',
     name: 'Pimaco 6187 / 6287 (10 / folha) - 99x55.8mm',
     desc: '99.0mm x 55.8mm',
@@ -31,20 +45,6 @@ const FORMATOS_PIMACO = [
     marginLeft: 4.0, // mm
     labelWidth: 101.6, // mm
     labelHeight: 33.9, // mm
-    gapX: 0,
-    gapY: 0
-  },
-  {
-    id: '6183',
-    name: 'Pimaco 6183 / 6283 / 6083 (10 / folha)',
-    desc: '101.6mm x 50.8mm',
-    labelsPerPage: 10,
-    cols: 2,
-    rows: 5,
-    marginTop: 21.5, // mm
-    marginLeft: 4.0, // mm
-    labelWidth: 101.6, // mm
-    labelHeight: 50.8, // mm
     gapX: 0,
     gapY: 0
   },
