@@ -286,14 +286,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
-                                      <div className="flex items-center justify-center gap-4 sm:gap-8">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
+                                      <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
+                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
                                           <EditableText>{l.item.dimensao}</EditableText>
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
+                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
                                           <EditableText>{l.item.qtd}</EditableText>
                                         </div>
-                                        <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
+                                        <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
                                           <EditableText>{mode === 'portas' && l.item.itemMeta ? String(l.item.itemMeta) : ''}</EditableText>
                                         </div>
                                       </div>
@@ -313,14 +313,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
-                                      <div className="flex items-center justify-center gap-4 sm:gap-8">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 w-24 text-right">
+                                      <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
+                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
                                           <EditableText>{r.item.dimensao}</EditableText>
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-8 text-center shrink-0">
+                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
                                           <EditableText>{r.item.qtd}</EditableText>
                                         </div>
-                                        <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
+                                        <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
                                           <EditableText>{mode === 'portas' && r.item.itemMeta ? String(r.item.itemMeta) : ''}</EditableText>
                                         </div>
                                       </div>
@@ -935,14 +935,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         aduela: aduelaInfo,
                         fechadura: fech || '-',
                         dobradica: dob || '-',
-                        bitsQtde: k.bitsQtde || '-',
-                        correr: k.correr ? 'X' : '',
-                        veneziana: k.veneziana ? 'X' : '',
-                        grelha: k.grelha ? 'X' : '',
-                        bandeira: k.bandeira ? 'X' : '',
-                        pivotante: k.pivotante ? 'X' : '',
-                        fechaFresta: k.fechaFresta ? 'X' : '',
-                        vidro: k.vidro ? 'X' : '',
+                        bitsQtde: k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0' ? k.bitsQtde : '',
+                        correr: k.correr ? 'CORRER' : '',
+                        veneziana: k.veneziana ? 'VENEZIANA' : '',
+                        grelha: k.grelha ? 'GRELHA' : '',
+                        bandeira: k.bandeira ? 'BANDEIRA' : '',
+                        pivotante: k.pivotante ? 'PIVOTANTE' : '',
+                        fechaFresta: k.fechaFresta ? 'FECHA FRESTA' : '',
+                        vidro: k.vidro ? 'COM VIDRO' : '',
                       });
                     }
                   });
@@ -971,14 +971,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">INFO. ADUELA</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECH. GRID</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">DOBRADIÇAS</th>
-                        {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">B. QTD</th>}
+                        {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">BITS</th>}
                         {showCorrer && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CORRER</th>}
-                        {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. VEN</th>}
-                        {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. GRE</th>}
-                        {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. BAND</th>}
-                        {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">PIV</th>}
-                        {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C/FF</th>}
-                        {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C/VID</th>}
+                        {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">VENEZIANA</th>}
+                        {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">GRELHA</th>}
+                        {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">BANDEIRA</th>}
+                        {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">PIVOTANTE</th>}
+                        {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECHA FRESTA</th>}
+                        {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">COM VIDRO</th>}
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
                       </tr>
                       {/* Linhas de Dados */}
