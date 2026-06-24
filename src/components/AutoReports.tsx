@@ -100,13 +100,17 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
     let isDuplo = !!k.kitDuplo || parseInt(k.qtdeFolhasPorKit || '1', 10) > 1;
 
-    let groupKey = fTipo;
-    if (mode === 'aduelas' && !fTipo.includes('SÓ DOBRADIÇAS')) {
-      // Group all aduelas that are not "SÓ DOBRADIÇAS" by their Fechadura Marca and Grid
-      const marca = k.fechaduraMarca?.trim().toUpperCase() || 'SEM MARCA';
-      const grid = k.fechaduraGrid?.trim().toUpperCase() || 'SEM GRID';
-      groupKey = `ADUELA_${marca}_${grid}`;
-    }
+    const carac = mode === 'portas' ? (k.caracteristicaPorta || k.modelo || k.tipologia) : (k.modelo || k.tipologia);
+    const acab = mode === 'portas' ? k.acabamentoPorta : k.acabamentoAduela;
+
+    const charStr = String(carac || '-').toUpperCase().trim();
+    const acabStr = String(acab || '-').toUpperCase().trim();
+    const fechMarca = String(k.fechaduraMarca || '-').toUpperCase().trim();
+    const fechGrid = String(k.fechaduraGrid || '-').toUpperCase().trim();
+    const dobMarca = String(k.dobradicaMarca || '-').toUpperCase().trim();
+    const dobMedida = String(k.dobradicaMedida || '-').toUpperCase().trim();
+
+    let groupKey = `${mode}_${charStr}_${acabStr}_${fechMarca}_${fechGrid}_${dobMarca}_${dobMedida}`;
 
     if (!grouped.has(groupKey)) {
       grouped.set(groupKey, { 
@@ -115,9 +119,6 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
       });
     }
     const groupItems = grouped.get(groupKey)!;
-
-    const carac = mode === 'portas' ? (k.caracteristicaPorta || k.modelo || k.tipologia) : (k.modelo || k.tipologia);
-    const acab = mode === 'portas' ? k.acabamentoPorta : k.acabamentoAduela;
 
     if (carac && carac !== '-') groupItems.caracteristicas.add(String(carac).toUpperCase());
     if (acab && acab !== '-') groupItems.acabamentos.add(String(acab).toUpperCase());
@@ -174,18 +175,26 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   ];
 
   const sortedEntries = Array.from(grouped.entries()).sort((a, b) => {
-    const idxA = typeOrder.indexOf(a[0]);
-    const idxB = typeOrder.indexOf(b[0]);
-    
-    if (idxA === -1 && idxB === -1) return a[0].localeCompare(b[0]);
-    if (idxA === -1) return 1;
-    if (idxB === -1) return -1;
-    return idxA - idxB;
+    return a[0].localeCompare(b[0]);
   });
+
+  const getSortIndex = (meta: string) => {
+    const idx = typeOrder.findIndex(t => t.startsWith(meta));
+    return idx === -1 ? 999 : idx;
+  };
+
+  const sortItems = (items: Array<{dimensao: string, qtd: number, itemMeta: string}>) => {
+    return items.sort((a, b) => {
+      const sortA = getSortIndex(a.itemMeta);
+      const sortB = getSortIndex(b.itemMeta);
+      if (sortA !== sortB) return sortA - sortB;
+      return a.dimensao.localeCompare(b.dimensao);
+    });
+  };
 
   return (
     <div className="block">
-      {sortedEntries.map(([fTipo, groupData]) => {
+      {sortedEntries.map(([groupKey, groupData]) => {
          const { singles, doubles } = groupData;
          
          const esquerdas = singles.filter(i => i.abertura.includes('ESQUERDA'));
@@ -199,18 +208,18 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
          const leftElements: RowElement[] = [];
          esqAberturas.forEach(ab => {
              leftElements.push({ type: 'header', label: ab });
-             esquerdas.filter(x => x.abertura === ab).forEach(item => leftElements.push({ type: 'item', item }));
+             sortItems(esquerdas.filter(x => x.abertura === ab)).forEach(item => leftElements.push({ type: 'item', item }));
          });
          const rightElements: RowElement[] = [];
          dirAberturas.forEach(ab => {
              rightElements.push({ type: 'header', label: ab });
-             direitas.filter(x => x.abertura === ab).forEach(item => rightElements.push({ type: 'item', item }));
+             sortItems(direitas.filter(x => x.abertura === ab)).forEach(item => rightElements.push({ type: 'item', item }));
          });
 
          const maxRows = Math.max(leftElements.length, rightElements.length);
 
          return (
-            <div key={fTipo} className="break-inside-avoid mb-6 print:mb-6 shadow-sm print:shadow-none bg-white" style={{ pageBreakInside: 'avoid' }}>
+            <div key={groupKey} className="break-inside-avoid mb-6 print:mb-6 shadow-sm print:shadow-none bg-white" style={{ pageBreakInside: 'avoid' }}>
               <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden" style={{ pageBreakInside: 'avoid' }}>
                 <thead>
                   {mode === 'portas' && (
@@ -225,7 +234,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
                       <EditableText>{Array.from(groupData.acabamentos).join(" / ") || "-"}</EditableText>
                     </th>
-                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-right uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
                       <EditableText>{Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}</EditableText>
                     </th>
