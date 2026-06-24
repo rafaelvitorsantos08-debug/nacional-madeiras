@@ -455,59 +455,43 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
             <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300" style={{ pageBreakInside: 'avoid' }}>
               <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                 <tr>
-                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">
+                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
                     Medidas
                   </th>
-                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">
+                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
                     Quantidade
                   </th>
-                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">
+                  <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
                     Acabamento da Porta
                   </th>
-                  {showBits && <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">B. Qtd</th>}
-                  {showCorrer && <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">Correr</th>}
-                  {showVen && <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">C. Ven</th>}
-                  {showGre && <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">C. Gre</th>}
-                  {showBand && <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black">C. Band</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
                 {items.map((k, idx2) => (
                   <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
-                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
+                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
                       <EditableText>{k.dimensao}</EditableText>
                     </td>
-                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
+                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
                       <EditableText>{k.qtdTotal}</EditableText>
                     </td>
-                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                      <EditableText>{k.acabamento}</EditableText>
+                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold w-1/3">
+                      <EditableText>
+                        {(() => {
+                          const extras = [];
+                          if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') extras.push(`${k.bitsQtde} bits`);
+                          if (k.correr) extras.push('Correr');
+                          if (k.veneziana) extras.push('veneziana');
+                          if (k.grelha) extras.push('grelha');
+                          if (k.bandeira) extras.push('bandeira');
+                          
+                          if (extras.length > 0) {
+                            return `${k.acabamento} (${extras.join(', ')})`;
+                          }
+                          return k.acabamento;
+                        })()}
+                      </EditableText>
                     </td>
-                    {showBits && (
-                      <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                        <EditableText>{k.bitsQtde || '-'}</EditableText>
-                      </td>
-                    )}
-                    {showCorrer && (
-                      <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                        <EditableText>{k.correr ? 'X' : ''}</EditableText>
-                      </td>
-                    )}
-                    {showVen && (
-                      <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                        <EditableText>{k.veneziana ? 'X' : ''}</EditableText>
-                      </td>
-                    )}
-                    {showGre && (
-                      <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                        <EditableText>{k.grelha ? 'X' : ''}</EditableText>
-                      </td>
-                    )}
-                    {showBand && (
-                      <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
-                        <EditableText>{k.bandeira ? 'X' : ''}</EditableText>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
