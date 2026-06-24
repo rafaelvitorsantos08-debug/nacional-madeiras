@@ -77,6 +77,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     acabamentos: Set<string>,
     fechMarcas: Set<string>,
     fechGrids: Set<string>,
+    dobMarcas: Set<string>,
     singles: Array<{abertura: string, dimensao: string, qtd: number, itemMeta: string}>,
     doubles: Array<{dimensao: string, qtd: number, itemMeta: string}>
   }>();
@@ -115,7 +116,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (!grouped.has(groupKey)) {
       grouped.set(groupKey, { 
         singles: [], doubles: [],
-        caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set()
+        caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set(), dobMarcas: new Set()
       });
     }
     const groupItems = grouped.get(groupKey)!;
@@ -124,6 +125,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (acab && acab !== '-') groupItems.acabamentos.add(String(acab).toUpperCase());
     if (k.fechaduraMarca && k.fechaduraMarca !== '-') groupItems.fechMarcas.add(String(k.fechaduraMarca).toUpperCase());
     if (k.fechaduraGrid && k.fechaduraGrid !== '-') groupItems.fechGrids.add(String(k.fechaduraGrid).toUpperCase());
+    if (k.dobradicaMarca && k.dobradicaMarca !== '-') groupItems.dobMarcas.add(String(k.dobradicaMarca).toUpperCase());
 
     let itemMeta = fTipo.replace(' P/FORA', '');
 
@@ -264,6 +266,13 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
                       <EditableText>{Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}</EditableText>
+                      {mode === 'aduelas' && groupData.dobMarcas.size > 0 && (
+                        <>
+                          <br />
+                          <span className="font-semibold text-gray-500 uppercase mr-1 mt-1 inline-block">DOBRADIÇA:</span>
+                          <EditableText>{Array.from(groupData.dobMarcas).join(" / ")}</EditableText>
+                        </>
+                      )}
                     </th>
                   </tr>
                 </thead>
@@ -286,17 +295,28 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
-                                      <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
-                                          <EditableText>{l.item.dimensao}</EditableText>
+                                      {mode === 'aduelas' ? (
+                                        <div className="flex items-center justify-center gap-4 sm:gap-8 w-full px-1">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right leading-none whitespace-nowrap">
+                                            <EditableText>{l.item.dimensao}</EditableText>
+                                          </div>
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-left shrink-0">
+                                            <EditableText>{l.item.qtd}</EditableText>
+                                          </div>
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
-                                          <EditableText>{l.item.qtd}</EditableText>
+                                      ) : (
+                                        <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
+                                            <EditableText>{l.item.dimensao}</EditableText>
+                                          </div>
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
+                                            <EditableText>{l.item.qtd}</EditableText>
+                                          </div>
+                                          <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
+                                            <EditableText>{l.item.itemMeta ? String(l.item.itemMeta) : ''}</EditableText>
+                                          </div>
                                         </div>
-                                        <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
-                                          <EditableText>{mode === 'portas' && l.item.itemMeta ? String(l.item.itemMeta) : ''}</EditableText>
-                                        </div>
-                                      </div>
+                                      )}
                                     </div>
                                   )
                                ) : <div className="h-full min-h-[24px]"></div>}
@@ -313,17 +333,28 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                     </div>
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
-                                      <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
-                                        <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
-                                          <EditableText>{r.item.dimensao}</EditableText>
+                                      {mode === 'aduelas' ? (
+                                        <div className="flex items-center justify-center gap-4 sm:gap-8 w-full px-1">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right leading-none whitespace-nowrap">
+                                            <EditableText>{r.item.dimensao}</EditableText>
+                                          </div>
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-left shrink-0">
+                                            <EditableText>{r.item.qtd}</EditableText>
+                                          </div>
                                         </div>
-                                        <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
-                                          <EditableText>{r.item.qtd}</EditableText>
+                                      ) : (
+                                        <div className="flex items-center justify-center gap-2 sm:gap-4 w-full px-1">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right max-w-[85px] leading-none whitespace-nowrap">
+                                            <EditableText>{r.item.dimensao}</EditableText>
+                                          </div>
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
+                                            <EditableText>{r.item.qtd}</EditableText>
+                                          </div>
+                                          <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
+                                            <EditableText>{r.item.itemMeta ? String(r.item.itemMeta) : ''}</EditableText>
+                                          </div>
                                         </div>
-                                        <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
-                                          <EditableText>{mode === 'portas' && r.item.itemMeta ? String(r.item.itemMeta) : ''}</EditableText>
-                                        </div>
-                                      </div>
+                                      )}
                                     </div>
                                   )
                                ) : <div className="h-full min-h-[24px]"></div>}
@@ -550,7 +581,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
 
 function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
   // Group by (1) Acabamento -> (2) Altura
-  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number}>>>();
+  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number, montantesMedida: string}>>>();
 
   kits.forEach(k => {
     const aLargura = k.aduelaLargura;
@@ -560,10 +591,14 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     const acadamento = (k.acabamentoAduela || '-').toUpperCase();
     const altura = aAltura;
     const dimensao = `${aLargura}x${aAltura}`;
+    const montantesMedida = k.montantesMedida || '';
     
     let kitCount = 1;
     if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
     if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
+    
+    // Multiplica a quantidade por 2 no relatorio de aduelas
+    kitCount = kitCount * 2;
 
     if (!grouped.has(acadamento)) {
       grouped.set(acadamento, new Map());
@@ -575,11 +610,11 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     }
 
     const items = alturasMap.get(altura)!;
-    const existing = items.find(i => i.dimensao === dimensao);
+    const existing = items.find(i => i.dimensao === dimensao && i.montantesMedida === montantesMedida);
     if (existing) {
       existing.qtdTotal += kitCount;
     } else {
-      items.push({ dimensao, qtdTotal: kitCount });
+      items.push({ dimensao, qtdTotal: kitCount, montantesMedida });
     }
   });
 
@@ -601,15 +636,21 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
              <div className="p-4 print:p-0 flex flex-col gap-6 print:gap-4 print:mt-2">
                {alturas.map((altura, aIdx) => {
                   const items = alturasMap.get(altura)!;
+                  const hasMontantes = items.some(i => i.montantesMedida && i.montantesMedida !== '-');
                   return (
                     <div key={altura} className="rounded border border-gray-300 dark:border-slate-700 print:border-transparent overflow-hidden bg-white dark:bg-[#0f172a] shadow-sm print:shadow-none">
                        <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
                           <thead className="bg-[#f8fafc] dark:bg-slate-800/50 print:bg-transparent">
                             <tr>
-                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                              <th className={`px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black ${hasMontantes ? 'w-1/3' : 'w-1/2'}`}>
                                 Medidas
                               </th>
-                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
+                              {hasMontantes && (
+                                <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
+                                  Montantes Medidas
+                                </th>
+                              )}
+                              <th className={`px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black ${hasMontantes ? 'w-1/3' : 'w-1/2'}`}>
                                 Quantidade
                               </th>
                             </tr>
@@ -620,6 +661,11 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                   <EditableText>{k.dimensao}</EditableText>
                                 </td>
+                                {hasMontantes && (
+                                  <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
+                                    <EditableText>{k.montantesMedida || '-'}</EditableText>
+                                  </td>
+                                )}
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                   <EditableText>{k.qtdTotal}</EditableText>
                                 </td>
