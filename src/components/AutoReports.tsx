@@ -267,7 +267,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           <EditableText>{l.item.qtd}</EditableText>
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          <EditableText>{mode === 'portas' && l.item.itemMeta ? String(l.item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
+                                          <EditableText>{mode === 'portas' && l.item.itemMeta ? String(l.item.itemMeta) : ''}</EditableText>
                                         </div>
                                       </div>
                                     </div>
@@ -294,7 +294,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           <EditableText>{r.item.qtd}</EditableText>
                                         </div>
                                         <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-24 text-left">
-                                          <EditableText>{mode === 'portas' && r.item.itemMeta ? String(r.item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
+                                          <EditableText>{mode === 'portas' && r.item.itemMeta ? String(r.item.itemMeta) : ''}</EditableText>
                                         </div>
                                       </div>
                                     </div>
@@ -324,7 +324,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                  <EditableText>{item.qtd}</EditableText>
                                </div>
                                <div className="font-bold text-[10px] uppercase print:text-black text-gray-600 dark:text-gray-400 w-32 text-left">
-                                 <EditableText>{mode === 'portas' && item.itemMeta ? String(item.itemMeta).replace(/INTERNA/gi, '') : ''}</EditableText>
+                                 <EditableText>{mode === 'portas' && item.itemMeta ? String(item.itemMeta) : ''}</EditableText>
                                </div>
                              </div>
                            </div>
