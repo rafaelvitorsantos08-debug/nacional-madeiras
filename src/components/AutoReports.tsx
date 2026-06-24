@@ -127,9 +127,13 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
     let itemMeta = fTipo.replace(' P/FORA', '');
 
+    if (!k.fechaduraTipo && itemMeta === 'SEM FECHADURA') {
+      itemMeta = 'DESEJA ASSOCIAR COM ALGUMA COLUNA?';
+    }
+
     if (mode === 'portas') {
       const extras = [];
-      if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') extras.push(`com bits`);
+      if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') extras.push(`com ${k.bitsQtde} bits`);
       if (k.correr) extras.push('correr');
       if (k.veneziana) extras.push('veneziana');
       if (k.grelha) extras.push('com grelha');
