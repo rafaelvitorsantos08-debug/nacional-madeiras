@@ -138,6 +138,9 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
       if (k.veneziana) extras.push('veneziana');
       if (k.grelha) extras.push('com grelha');
       if (k.bandeira) extras.push('bandeira');
+      if (k.pivotante) extras.push('Pivotante');
+      if (k.fechaFresta) extras.push('Com Fecha Fresta');
+      if (k.vidro) extras.push('Com Vidro');
       
       if (extras.length > 0) {
         itemMeta = `${itemMeta} (${extras.join(', ')})`;
@@ -396,7 +399,10 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     correr: boolean,
     veneziana: boolean,
     grelha: boolean,
-    bandeira: boolean
+    bandeira: boolean,
+    pivotante: boolean,
+    fechaFresta: boolean,
+    vidro: boolean
   }>>();
   
   let showBits = false;
@@ -404,6 +410,9 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
   let showVen = false;
   let showGre = false;
   let showBand = false;
+  let showPiv = false;
+  let showFf = false;
+  let showVid = false;
 
   kits.forEach(k => {
     const fLargura = k.folhaLargura;
@@ -422,12 +431,18 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
     const veneziana = !!k.veneziana;
     const grelha = !!k.grelha;
     const bandeira = !!k.bandeira;
+    const pivotante = !!k.pivotante;
+    const fechaFresta = !!k.fechaFresta;
+    const vidro = !!k.vidro;
 
     if (bitsQtde && bitsQtde !== '-' && bitsQtde !== '0') showBits = true;
     if (correr) showCorrer = true;
     if (veneziana) showVen = true;
     if (grelha) showGre = true;
     if (bandeira) showBand = true;
+    if (pivotante) showPiv = true;
+    if (fechaFresta) showFf = true;
+    if (vidro) showVid = true;
 
     let dimensao = `${fLargura}x${fAltura}`;
     if (isMultiFolhas && String(fLargura).match(/^\d+$/)) {
@@ -455,12 +470,15 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
       i.correr === correr &&
       i.veneziana === veneziana &&
       i.grelha === grelha &&
-      i.bandeira === bandeira
+      i.bandeira === bandeira &&
+      i.pivotante === pivotante &&
+      i.fechaFresta === fechaFresta &&
+      i.vidro === vidro
     );
     if (existing) {
       existing.qtdTotal += kitCount;
     } else {
-      items.push({ dimensao, acabamento, qtdTotal: kitCount, bitsQtde, correr, veneziana, grelha, bandeira });
+      items.push({ dimensao, acabamento, qtdTotal: kitCount, bitsQtde, correr, veneziana, grelha, bandeira, pivotante, fechaFresta, vidro });
     }
   });
 
@@ -508,6 +526,9 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                           if (k.veneziana) extras.push('veneziana');
                           if (k.grelha) extras.push('grelha');
                           if (k.bandeira) extras.push('bandeira');
+                          if (k.pivotante) extras.push('Pivotante');
+                          if (k.fechaFresta) extras.push('Com Fecha Fresta');
+                          if (k.vidro) extras.push('Com Vidro');
                           
                           if (extras.length > 0) {
                             return `${k.acabamento} (${extras.join(', ')})`;
@@ -784,6 +805,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         let showVen = false;
         let showGre = false;
         let showBand = false;
+        let showPiv = false;
+        let showFf = false;
+        let showVid = false;
 
         tipoKits.forEach(k => {
             if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') showBits = true;
@@ -791,9 +815,12 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             if (k.veneziana) showVen = true;
             if (k.grelha) showGre = true;
             if (k.bandeira) showBand = true;
+            if (k.pivotante) showPiv = true;
+            if (k.fechaFresta) showFf = true;
+            if (k.vidro) showVid = true;
         });
 
-        const totalCols = 8 + (showBits ? 1 : 0) + (showCorrer ? 1 : 0) + (showVen ? 1 : 0) + (showGre ? 1 : 0) + (showBand ? 1 : 0);
+        const totalCols = 8 + (showBits ? 1 : 0) + (showCorrer ? 1 : 0) + (showVen ? 1 : 0) + (showGre ? 1 : 0) + (showBand ? 1 : 0) + (showPiv ? 1 : 0) + (showFf ? 1 : 0) + (showVid ? 1 : 0);
 
         // Group by Abertura
         const byAbertura = new Map<string, any[]>();
@@ -869,7 +896,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
                       k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
                       k.qtdeLadosAduela,
-                      k.bitsQtde, k.correr, k.veneziana, k.grelha, k.bandeira
+                      k.bitsQtde, k.correr, k.veneziana, k.grelha, k.bandeira, k.pivotante, k.fechaFresta, k.vidro
                     ].join('||');
 
                     let stringQtdStr = '1';
@@ -913,6 +940,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         veneziana: k.veneziana ? 'X' : '',
                         grelha: k.grelha ? 'X' : '',
                         bandeira: k.bandeira ? 'X' : '',
+                        pivotante: k.pivotante ? 'X' : '',
+                        fechaFresta: k.fechaFresta ? 'X' : '',
+                        vidro: k.vidro ? 'X' : '',
                       });
                     }
                   });
@@ -946,6 +976,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. VEN</th>}
                         {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. GRE</th>}
                         {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. BAND</th>}
+                        {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">PIV</th>}
+                        {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C/FF</th>}
+                        {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C/VID</th>}
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
                       </tr>
                       {/* Linhas de Dados */}
@@ -963,6 +996,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                           {showVen && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.veneziana}</EditableText></td>}
                           {showGre && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.grelha}</EditableText></td>}
                           {showBand && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.bandeira}</EditableText></td>}
+                          {showPiv && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.pivotante}</EditableText></td>}
+                          {showFf && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.fechaFresta}</EditableText></td>}
+                          {showVid && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.vidro}</EditableText></td>}
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"> </td>
                         </tr>
                       ))}
