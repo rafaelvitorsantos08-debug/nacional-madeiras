@@ -125,7 +125,20 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (k.fechaduraMarca && k.fechaduraMarca !== '-') groupItems.fechMarcas.add(String(k.fechaduraMarca).toUpperCase());
     if (k.fechaduraGrid && k.fechaduraGrid !== '-') groupItems.fechGrids.add(String(k.fechaduraGrid).toUpperCase());
 
-    const itemMeta = fTipo.replace(' P/FORA', '');
+    let itemMeta = fTipo.replace(' P/FORA', '');
+
+    if (mode === 'portas') {
+      const extras = [];
+      if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') extras.push(`com bits`);
+      if (k.correr) extras.push('correr');
+      if (k.veneziana) extras.push('veneziana');
+      if (k.grelha) extras.push('com grelha');
+      if (k.bandeira) extras.push('bandeira');
+      
+      if (extras.length > 0) {
+        itemMeta = `${itemMeta} (${extras.join(', ')})`;
+      }
+    }
 
     if (isDuplo) {
       let dimensao = `${fLargura}x${fAltura}`;
@@ -179,8 +192,15 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
   });
 
   const getSortIndex = (meta: string) => {
-    const idx = typeOrder.findIndex(t => t.startsWith(meta));
-    return idx === -1 ? 999 : idx;
+    let bestMatchIdx = 999;
+    let longestMatchLen = 0;
+    typeOrder.forEach((t, idx) => {
+      if (meta.startsWith(t) && t.length > longestMatchLen) {
+        bestMatchIdx = idx;
+        longestMatchLen = t.length;
+      }
+    });
+    return bestMatchIdx;
   };
 
   const sortItems = (items: Array<{dimensao: string, qtd: number, itemMeta: string}>) => {
@@ -755,6 +775,22 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
       {tipologias.map((tipo, idx) => {
         const tipoKits = byTipologia.get(tipo) || [];
         
+        let showBits = false;
+        let showCorrer = false;
+        let showVen = false;
+        let showGre = false;
+        let showBand = false;
+
+        tipoKits.forEach(k => {
+            if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') showBits = true;
+            if (k.correr) showCorrer = true;
+            if (k.veneziana) showVen = true;
+            if (k.grelha) showGre = true;
+            if (k.bandeira) showBand = true;
+        });
+
+        const totalCols = 8 + (showBits ? 1 : 0) + (showCorrer ? 1 : 0) + (showVen ? 1 : 0) + (showGre ? 1 : 0) + (showBand ? 1 : 0);
+
         // Group by Abertura
         const byAbertura = new Map<string, any[]>();
         tipoKits.forEach(k => {
@@ -771,7 +807,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
               <thead className="print:table-header-group">
                 {/* Print Header */}
                 <tr className="hidden print:table-row">
-                  <td colSpan={8} className="p-0 border-0">
+                  <td colSpan={totalCols} className="p-0 border-0">
                     <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4 mt-2 print:border-black">
                        <div>
                          <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-4">RELATÓRIO DE MONTAGEM</h1>
@@ -810,7 +846,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
                 {/* Sub-Header / Tipo */}
                 <tr>
-                   <td colSpan={8} className="p-0 border-0">
+                   <td colSpan={totalCols} className="p-0 border-0">
                       <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase mb-4 print:bg-transparent print:text-black">
                         <EditableText>Relatório de Montagem - {tipo}</EditableText>
                       </div>
@@ -828,7 +864,8 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
                       k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
                       k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
-                      k.qtdeLadosAduela
+                      k.qtdeLadosAduela,
+                      k.bitsQtde, k.correr, k.veneziana, k.grelha, k.bandeira
                     ].join('||');
 
                     let stringQtdStr = '1';
@@ -867,6 +904,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         aduela: aduelaInfo,
                         fechadura: fech || '-',
                         dobradica: dob || '-',
+                        bitsQtde: k.bitsQtde || '-',
+                        correr: k.correr ? 'X' : '',
+                        veneziana: k.veneziana ? 'X' : '',
+                        grelha: k.grelha ? 'X' : '',
+                        bandeira: k.bandeira ? 'X' : '',
                       });
                     }
                   });
@@ -877,12 +919,12 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                     <React.Fragment key={abIdx}>
                       {abIdx > 0 && (
                         <tr className="border-0 bg-transparent h-6 break-inside-avoid">
-                           <td colSpan={8} className="border-0"></td>
+                           <td colSpan={totalCols} className="border-0"></td>
                         </tr>
                       )}
                       {/* Abertura Header */}
                       <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
-                        <td colSpan={8} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
+                        <td colSpan={totalCols} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
                           <EditableText>{abertura}</EditableText>
                         </td>
                       </tr>
@@ -895,6 +937,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">INFO. ADUELA</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECH. GRID</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">DOBRADIÇAS</th>
+                        {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">B. QTD</th>}
+                        {showCorrer && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CORRER</th>}
+                        {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. VEN</th>}
+                        {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. GRE</th>}
+                        {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">C. BAND</th>}
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
                       </tr>
                       {/* Linhas de Dados */}
@@ -907,6 +954,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.aduela}</EditableText></td>
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.fechadura}</EditableText></td>
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.dobradica}</EditableText></td>
+                          {showBits && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.bitsQtde}</EditableText></td>}
+                          {showCorrer && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.correr}</EditableText></td>}
+                          {showVen && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.veneziana}</EditableText></td>}
+                          {showGre && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.grelha}</EditableText></td>}
+                          {showBand && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.bandeira}</EditableText></td>}
                           <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"> </td>
                         </tr>
                       ))}
