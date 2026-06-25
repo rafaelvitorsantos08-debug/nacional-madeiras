@@ -78,6 +78,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     fechMarcas: Set<string>,
     fechGrids: Set<string>,
     dobMarcas: Set<string>,
+    dobMedidas: Set<string>,
     singles: Array<{abertura: string, dimensao: string, qtd: number, itemMeta: string}>,
     doubles: Array<{dimensao: string, qtd: number, itemMeta: string}>
   }>();
@@ -116,7 +117,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (!grouped.has(groupKey)) {
       grouped.set(groupKey, { 
         singles: [], doubles: [],
-        caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set(), dobMarcas: new Set()
+        caracteristicas: new Set(), acabamentos: new Set(), fechMarcas: new Set(), fechGrids: new Set(), dobMarcas: new Set(), dobMedidas: new Set()
       });
     }
     const groupItems = grouped.get(groupKey)!;
@@ -126,6 +127,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
     if (k.fechaduraMarca && k.fechaduraMarca !== '-') groupItems.fechMarcas.add(String(k.fechaduraMarca).toUpperCase());
     if (k.fechaduraGrid && k.fechaduraGrid !== '-') groupItems.fechGrids.add(String(k.fechaduraGrid).toUpperCase());
     if (k.dobradicaMarca && k.dobradicaMarca !== '-') groupItems.dobMarcas.add(String(k.dobradicaMarca).toUpperCase());
+    if (k.dobradicaMedida && k.dobradicaMedida !== '-') groupItems.dobMedidas.add(String(k.dobradicaMedida).toUpperCase());
 
     let itemMeta = fTipo.replace(' P/FORA', '');
 
@@ -264,15 +266,23 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                       <EditableText>{Array.from(groupData.acabamentos).join(" / ") || "-"}</EditableText>
                     </th>
                     <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
-                      <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
-                      <EditableText>{Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}</EditableText>
-                      {mode === 'aduelas' && groupData.dobMarcas.size > 0 && (
-                        <>
-                          <br />
-                          <span className="font-semibold text-gray-500 uppercase mr-1 mt-1 inline-block">DOBRADIÇA:</span>
-                          <EditableText>{Array.from(groupData.dobMarcas).join(" / ")}</EditableText>
-                        </>
-                      )}
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
+                          <EditableText>{Array.from(groupData.fechMarcas).join(" / ")} {groupData.fechGrids.size > 0 && Array.from(groupData.fechGrids).filter(Boolean).length > 0 ? `- GRID ${Array.from(groupData.fechGrids).filter(Boolean).join(" / ")}` : ""}</EditableText>
+                        </div>
+                        {(groupData.dobMarcas.size > 0 || groupData.dobMedidas.size > 0) && (
+                          <div className="text-right">
+                            <span className="font-semibold text-gray-500 uppercase mr-1">{mode === 'aduelas' ? 'DOBRADIÇA:' : 'DOBRADIÇAS:'}</span>
+                            <EditableText>
+                              {[
+                                Array.from(groupData.dobMarcas).join(" / "),
+                                Array.from(groupData.dobMedidas).join(" / ")
+                              ].filter(Boolean).join(" ")}
+                            </EditableText>
+                          </div>
+                        )}
+                      </div>
                     </th>
                   </tr>
                 </thead>
