@@ -591,7 +591,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
 
 function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
   // Group by (1) Acabamento -> (2) Altura
-  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number, montantesMedida: string}>>>();
+  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number, montantesMedida: string, vergas1000: number, vergas2000: number}>>>();
 
   kits.forEach(k => {
     const aLargura = k.aduelaLargura;
@@ -603,12 +603,17 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     const dimensao = `${aLargura}x${aAltura}`;
     const montantesMedida = k.montantesMedida || '';
     
-    let kitCount = 1;
-    if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
-    if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
+    let baseCount = 1;
+    if ((k as any).quantidade) baseCount = parseInt((k as any).quantidade, 10) || 1;
+    if ((k as any).qtde) baseCount = parseInt((k as any).qtde, 10) || 1;
     
-    // Multiplica a quantidade por 2 no relatorio de aduelas
-    kitCount = kitCount * 2;
+    // Multiplica a quantidade por 2 no relatorio de aduelas para obter as pernas/montantes
+    const pernasCount = baseCount * 2;
+
+    const folhaLargura = parseFloat(k.folhaLargura) || 0;
+    const isVerga1000 = folhaLargura <= 920;
+    const vergas1000Count = isVerga1000 ? baseCount : 0;
+    const vergas2000Count = !isVerga1000 ? baseCount : 0;
 
     if (!grouped.has(acadamento)) {
       grouped.set(acadamento, new Map());
@@ -622,9 +627,11 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
     const items = alturasMap.get(altura)!;
     const existing = items.find(i => i.dimensao === dimensao && i.montantesMedida === montantesMedida);
     if (existing) {
-      existing.qtdTotal += kitCount;
+      existing.qtdTotal += pernasCount;
+      existing.vergas1000 += vergas1000Count;
+      existing.vergas2000 += vergas2000Count;
     } else {
-      items.push({ dimensao, qtdTotal: kitCount, montantesMedida });
+      items.push({ dimensao, qtdTotal: pernasCount, montantesMedida, vergas1000: vergas1000Count, vergas2000: vergas2000Count });
     }
   });
 
@@ -663,6 +670,9 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                               <th className={`px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black ${hasMontantes ? 'w-1/3' : 'w-1/2'}`}>
                                 Quantidade
                               </th>
+                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/4">
+                                Qtde Vergas
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
@@ -678,6 +688,11 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                                 )}
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                   <EditableText>{k.qtdTotal}</EditableText>
+                                </td>
+                                <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
+                                  {k.vergas1000 > 0 && <div><EditableText>{k.vergas1000} un (1000mm)</EditableText></div>}
+                                  {k.vergas2000 > 0 && <div><EditableText>{k.vergas2000} un (2000mm)</EditableText></div>}
+                                  {k.vergas1000 === 0 && k.vergas2000 === 0 && <div><EditableText>-</EditableText></div>}
                                 </td>
                               </tr>
                             ))}
