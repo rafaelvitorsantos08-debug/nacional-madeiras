@@ -208,24 +208,22 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
       return matchesStatus;
     }
 
-    const normSearch = combinedSearchTerm.toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
+    const searchTerms = combinedSearchTerm.toLowerCase().replace(/×/g, 'x').split(/\s+/);
     
-    const normId = String(item.id || '').toLowerCase().replace(/\s+/g, '');
-    const normDimensao = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
-    const normLargura = String(item.largura || '').toLowerCase().replace(/\s+/g, '');
-    const normComprimento = String(item.comprimento || '').toLowerCase().replace(/\s+/g, '');
+    const normId = String(item.id || '').toLowerCase();
+    const normDimensao = String(item.dimensao || '').toLowerCase().replace(/×/g, 'x');
+    const normLargura = String(item.largura || '').toLowerCase();
+    const normComprimento = String(item.comprimento || '').toLowerCase();
     const normLargComp = (normLargura && normComprimento) ? `${normLargura}x${normComprimento}` : '';
+    const normCor = String(item.cor || '').toLowerCase();
 
-    let isMatch = false;
-
-    // Match exato
-    if (normId === normSearch || normDimensao === normSearch || normLargComp === normSearch) {
-      isMatch = true;
-    } 
-    // Match parcial (se o usuário digitar apenas "800x" ou "PO-6")
-    else if (normId.includes(normSearch) || normDimensao.includes(normSearch) || normLargComp.includes(normSearch)) {
-      isMatch = true;
-    }
+    // To match, EVERY search term must be found in at least one of the fields
+    const isMatch = searchTerms.every(term => {
+      return normId.includes(term) || 
+             normDimensao.includes(term) || 
+             normLargComp.includes(term) || 
+             normCor.includes(term);
+    });
 
     return isMatch && matchesStatus;
   });
@@ -237,17 +235,62 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
     const id = String(item.id || '').toLowerCase().replace(/\s+/g, '');
     const dim = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
     const lxc = (item.largura && item.comprimento) ? `${String(item.largura).trim()}x${String(item.comprimento).trim()}`.toLowerCase() : '';
-    return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm;
+    const cor = String(item.cor || '').toLowerCase().replace(/\s+/g, '');
+    return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm || cor === normCombinedSearchTerm;
   });
   
-  const finalFilteredList = hasExactMatch 
+  let finalFilteredList = hasExactMatch 
     ? filteredList.filter(item => {
         const id = String(item.id || '').toLowerCase().replace(/\s+/g, '');
         const dim = String(item.dimensao || '').toLowerCase().replace(/\s+/g, '').replace(/×/g, 'x');
         const lxc = (item.largura && item.comprimento) ? `${String(item.largura).trim()}x${String(item.comprimento).trim()}`.toLowerCase() : '';
-        return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm;
+        const cor = String(item.cor || '').toLowerCase().replace(/\s+/g, '');
+        return id === normCombinedSearchTerm || dim === normCombinedSearchTerm || lxc === normCombinedSearchTerm || cor === normCombinedSearchTerm;
       })
     : filteredList;
+
+  finalFilteredList.sort((a, b) => {
+    const corA = String(a.cor || '').toLowerCase();
+    const corB = String(b.cor || '').toLowerCase();
+    if (corA !== corB) return corA.localeCompare(corB);
+
+    const modeloA = String(a.modelo || '').toLowerCase();
+    const modeloB = String(b.modelo || '').toLowerCase();
+    if (modeloA !== modeloB) return modeloA.localeCompare(modeloB);
+
+    const enchA = String(a.enchimento || '').toLowerCase();
+    const enchB = String(b.enchimento || '').toLowerCase();
+    if (enchA !== enchB) return enchA.localeCompare(enchB);
+
+    const dimA = a.dimensao ? a.dimensao : (a.largura && a.comprimento ? `${a.largura}x${a.comprimento}` : '');
+    const dimB = b.dimensao ? b.dimensao : (b.largura && b.comprimento ? `${b.largura}x${b.comprimento}` : '');
+    
+    const parseD = (dim: string) => {
+      const parts = String(dim).toLowerCase().replace(/×/g, 'x').split('x');
+      return [(parseFloat(parts[0]) || 0), (parseFloat(parts[1]) || 0)];
+    };
+    
+    const [wa, ha] = parseD(dimA);
+    const [wb, hb] = parseD(dimB);
+    
+    if (wa !== wb) return wa - wb;
+    if (ha !== hb) return ha - hb;
+
+    // Fallback for Alizares / Aduelas dimensions
+    const compA = parseFloat(a.comprimento) || 0;
+    const compB = parseFloat(b.comprimento) || 0;
+    if (compA !== compB) return compA - compB;
+
+    const faceA = parseFloat(a.face) || 0;
+    const faceB = parseFloat(b.face) || 0;
+    if (faceA !== faceB) return faceA - faceB;
+
+    const abaA = parseFloat(a.aba) || 0;
+    const abaB = parseFloat(b.aba) || 0;
+    if (abaA !== abaB) return abaA - abaB;
+
+    return 0;
+  });
 
   return (
     <div className="animate-in fade-in duration-300">
