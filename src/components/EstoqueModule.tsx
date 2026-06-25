@@ -198,6 +198,10 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
     setIsModalOpen(true);
   };
 
+  const totalPortas = Array.isArray(portas) ? portas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
+  const totalAduelas = Array.isArray(aduelas) ? aduelas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
+  const totalAlizares = Array.isArray(alizares) ? alizares.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
+
   const baseList: any[] = activeSubTab === 'portas' ? (Array.isArray(portas) ? portas : []) : (activeSubTab === 'aduelas' ? (Array.isArray(aduelas) ? aduelas : []) : (Array.isArray(alizares) ? alizares : []));
 
   const filteredList = baseList.filter(item => {
@@ -301,21 +305,24 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {/* SUBTABS */}
-        <div className="flex border-b border-gray-200 bg-gray-50/50 px-4 pt-2">
+        <div className="flex border-b border-gray-200 bg-gray-50/50 px-4 pt-2 overflow-x-auto hide-scrollbar">
           <SubTabButton
             active={activeSubTab === 'portas'}
             onClick={() => setActiveSubTab('portas')}
             label="Folhas de Portas"
+            badge={`${totalPortas}`}
           />
           <SubTabButton
             active={activeSubTab === 'aduelas'}
             onClick={() => setActiveSubTab('aduelas')}
             label="Aduelas / Batentes"
+            badge={`${totalAduelas}`}
           />
           <SubTabButton
             active={activeSubTab === 'alizares'}
             onClick={() => setActiveSubTab('alizares')}
             label="Alizares"
+            badge={`${totalAlizares}`}
           />
         </div>
 
@@ -691,18 +698,26 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
   );
 }
 
-function SubTabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function SubTabButton({ active, onClick, label, badge }: { active: boolean; onClick: () => void; label: string; badge?: string }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+        "px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-2",
         active
           ? "border-brand-green text-brand-green"
           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
       )}
     >
       {label}
+      {badge && (
+        <span className={cn(
+          "px-2 py-0.5 rounded-full text-xs font-semibold",
+          active ? "bg-brand-green/10 text-brand-green" : "bg-gray-100 text-gray-500"
+        )}>
+          {badge}
+        </span>
+      )}
     </button>
   );
 }
