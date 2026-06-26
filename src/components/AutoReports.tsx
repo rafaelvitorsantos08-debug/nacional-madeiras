@@ -591,7 +591,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
 
 function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
   // Group by (1) Acabamento -> (2) Altura
-  const grouped = new Map<string, Map<string, Array<{dimensao: string, qtdTotal: number, montantesMedida: string, vergas1000: number, vergas2000: number}>>>();
+  const grouped = new Map<string, Map<string, Array<{dimensao: string, aLargura: string, qtdTotal: number, montantesMedida: string, vergas1000: number, vergas2000: number}>>>();
 
   kits.forEach(k => {
     const aLargura = k.aduelaLargura;
@@ -631,7 +631,7 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
       existing.vergas1000 += vergas1000Count;
       existing.vergas2000 += vergas2000Count;
     } else {
-      items.push({ dimensao, qtdTotal: pernasCount, montantesMedida, vergas1000: vergas1000Count, vergas2000: vergas2000Count });
+      items.push({ dimensao, aLargura, qtdTotal: pernasCount, montantesMedida, vergas1000: vergas1000Count, vergas2000: vergas2000Count });
     }
   });
 
@@ -670,29 +670,33 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                               <th className={`px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black ${hasMontantes ? 'w-1/3' : 'w-1/2'}`}>
                                 Quantidade
                               </th>
-                              <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/4">
-                                Qtde Vergas
-                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
                             {items.map((k, idx2) => (
                               <tr key={idx2} className="hover:bg-gray-50 print:hover:bg-transparent">
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                  <EditableText>{k.dimensao}</EditableText>
+                                  <div className="flex flex-col gap-1 items-center">
+                                    <EditableText>{k.dimensao}</EditableText>
+                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.aLargura}x1000</EditableText></span>}
+                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.aLargura}x2000</EditableText></span>}
+                                  </div>
                                 </td>
                                 {hasMontantes && (
                                   <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                    <EditableText>{k.montantesMedida || '-'}</EditableText>
+                                    <div className="flex flex-col gap-1 items-center">
+                                      <EditableText>{k.montantesMedida || '-'}</EditableText>
+                                      {k.vergas1000 > 0 && <span className="text-transparent text-[11px]">-</span>}
+                                      {k.vergas2000 > 0 && <span className="text-transparent text-[11px]">-</span>}
+                                    </div>
                                   </td>
                                 )}
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                  <EditableText>{k.qtdTotal}</EditableText>
-                                </td>
-                                <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
-                                  {k.vergas1000 > 0 && <div><EditableText>{k.vergas1000} un (1000mm)</EditableText></div>}
-                                  {k.vergas2000 > 0 && <div><EditableText>{k.vergas2000} un (2000mm)</EditableText></div>}
-                                  {k.vergas1000 === 0 && k.vergas2000 === 0 && <div><EditableText>-</EditableText></div>}
+                                  <div className="flex flex-col gap-1 items-center">
+                                    <EditableText>{k.qtdTotal}</EditableText>
+                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.vergas1000}</EditableText></span>}
+                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.vergas2000}</EditableText></span>}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
