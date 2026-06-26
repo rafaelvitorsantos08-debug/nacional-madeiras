@@ -306,11 +306,11 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       {mode === 'aduelas' ? (
-                                        <div className="flex items-center justify-center gap-4 sm:gap-8 w-full px-1">
-                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right leading-none whitespace-nowrap">
+                                        <div className="grid grid-cols-2 gap-4 w-full px-4">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
                                             <EditableText>{l.item.dimensao}</EditableText>
                                           </div>
-                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-left shrink-0">
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
                                             <EditableText>{l.item.qtd}</EditableText>
                                           </div>
                                         </div>
@@ -344,11 +344,11 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       {mode === 'aduelas' ? (
-                                        <div className="flex items-center justify-center gap-4 sm:gap-8 w-full px-1">
-                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-right leading-none whitespace-nowrap">
+                                        <div className="grid grid-cols-2 gap-4 w-full px-4">
+                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
                                             <EditableText>{r.item.dimensao}</EditableText>
                                           </div>
-                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 flex-1 text-left shrink-0">
+                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
                                             <EditableText>{r.item.qtd}</EditableText>
                                           </div>
                                         </div>
