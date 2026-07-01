@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from './EstoqueModule';
-import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram } from 'lucide-react';
+import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram, Download } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -175,6 +175,75 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     return paginated;
   }, [labelsToPrint, formato]);
 
+  const exportarRelatorioEntrega = () => {
+    const grouped = new Map<string, any>();
+    
+    fila.forEach(item => {
+      const k = item.kit;
+      const key = [
+        k.apto, k.comodo, k.abertura,
+        k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
+        k.tipologia
+      ].join('||');
+      
+      let stringQtdStr = String((k as any).qtdeFolhasPorKit || '1');
+      if ((k as any).quantidade) stringQtdStr = String((k as any).quantidade);
+      if ((k as any).qtde) stringQtdStr = String((k as any).qtde);
+      
+      const qtyPerKit = parseInt(stringQtdStr, 10);
+      const validQtyPerKit = isNaN(qtyPerKit) ? 1 : qtyPerKit;
+      const totalQty = validQtyPerKit * item.qtd;
+
+      if (grouped.has(key)) {
+        grouped.get(key).qtd += totalQty;
+      } else {
+        grouped.set(key, {
+          apto: k.apto || '-',
+          comodo: k.comodo || '-',
+          abertura: k.abertura || '-',
+          aduela: `${k.aduelaLargura || '-'} x ${k.aduelaAltura || '-'}`,
+          acabAduela: k.acabamentoAduela || '-',
+          tipologia: k.tipologia || '-',
+          qtd: totalQty
+        });
+      }
+    });
+
+    const rows = Array.from(grouped.values())
+      .sort((a, b) => {
+          const aptoA = String(a.apto);
+          const aptoB = String(b.apto);
+          if (aptoA !== aptoB) return aptoA.localeCompare(aptoB, undefined, {numeric: true});
+          return String(a.comodo).localeCompare(String(b.comodo));
+      });
+
+    const csvRows = [];
+    csvRows.push(['APTO', 'CÔMODO', 'SENTIDO DE ABERTURA', 'ADUELA', 'ACABAMENTO ADUELA', 'TIPOLOGIA', 'QUANTIDADE'].join(';'));
+    
+    rows.forEach(row => {
+      csvRows.push([
+        row.apto, 
+        row.comodo, 
+        row.abertura, 
+        row.aduela, 
+        row.acabAduela, 
+        row.tipologia, 
+        row.qtd
+      ].map(r => `"${String(r).replace(/"/g, '""')}"`).join(';'));
+    });
+
+    const csvContent = "\uFEFF" + csvRows.join('\n'); // Add BOM
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Relatorio_Entregas_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col h-full print:block bg-gray-50">
       {/* UI DE CONTROLE (Não visível na impressão) */}
@@ -273,21 +342,31 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               </select>
             </div>
             
-            <div className="flex space-x-2">
+            <div className="flex flex-col space-y-2">
               <button 
-                onClick={clearFila}
+                onClick={exportarRelatorioEntrega}
                 disabled={fila.length === 0}
-                className="px-3 py-2 border border-gray-300 rounded text-gray-600 font-medium text-sm hover:bg-gray-100 disabled:opacity-50 transition-colors flex items-center justify-center" title="Limpar Fila"
+                className="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
               >
-                <Trash2 className="w-4 h-4" />
+                <Download className="w-4 h-4" /> <span>Exportar Relatório Entregas (.csv)</span>
               </button>
-              <button 
-                onClick={handlePrint}
-                disabled={labelsToPrint.length === 0}
-                className="flex-1 px-4 py-2 bg-brand-green text-white font-bold rounded shadow-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Printer className="w-4 h-4" /> <span>Imprimir Etiquetas</span>
-              </button>
+              
+              <div className="flex space-x-2">
+                <button 
+                  onClick={clearFila}
+                  disabled={fila.length === 0}
+                  className="px-3 py-2 border border-gray-300 rounded text-gray-600 font-medium text-sm hover:bg-gray-100 disabled:opacity-50 transition-colors flex items-center justify-center" title="Limpar Fila"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={handlePrint}
+                  disabled={labelsToPrint.length === 0}
+                  className="flex-1 px-4 py-2 bg-brand-green text-white font-bold rounded shadow-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <Printer className="w-4 h-4" /> <span>Imprimir Etiquetas</span>
+                </button>
+              </div>
             </div>
             
             <div className="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-md border border-yellow-200 mt-2">
