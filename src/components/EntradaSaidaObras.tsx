@@ -261,6 +261,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     else if (activeTab === 'aduelas') specHeaders = ['MEDIDA ADUELA', 'COR'];
     else specHeaders = ['FACE/MEDIDA ALIZAR', 'COR'];
 
+    const getTotalForColumn = (items: any[], type: 'entradas' | 'saidas', cargaId: string) => {
+      return items.reduce((acc, item) => acc + (parseInt(item[type]?.[cargaId]) || 0), 0);
+    };
+
     return (
       <div className="flex-1 overflow-auto bg-gray-50 p-4 w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto w-full">
@@ -287,14 +291,20 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                 {specHeaders.map(h => <th key={h} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs">{h}</th>)}
                 
                 {/* Entradas */}
-                {cargasEntrada.map((c: any) => (
+                {cargasEntrada.map((c: any) => {
+                  const total = getTotalForColumn(currentItens, 'entradas', c.id);
+                  return (
                   <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-blue-50/50 dark:bg-blue-900/40 w-[100px] relative group">
-                    <button onClick={() => removerColuna('Entrada', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Coluna">
+                    <button onClick={() => removerColuna('Entrada', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 z-10" title="Excluir Coluna">
                        <X className="w-3 h-3"/>
                     </button>
-                    {c.nome}<br/><span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                    <div className="flex flex-col items-center justify-center">
+                      <span>{c.nome}</span>
+                      <span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                      <span className="mt-1 bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {total}</span>
+                    </div>
                   </th>
-                ))}
+                )})}
                 <th className="p-2 border-r border-gray-300 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/40">
                   <button onClick={() => adicionarColuna('Entrada', abaCapitalized)} className="flex flex-col items-center justify-center w-full h-full text-blue-600 hover:text-blue-800 transition-colors" title="Adicionar nova carga">
                     <Plus className="w-4 h-4"/>
@@ -303,14 +313,20 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                 </th>
 
                 {/* Saídas */}
-                {cargasSaida.map((c: any) => (
+                {cargasSaida.map((c: any) => {
+                  const total = getTotalForColumn(currentItens, 'saidas', c.id);
+                  return (
                   <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-purple-50/50 dark:bg-purple-900/40 w-[100px] relative group">
-                    <button onClick={() => removerColuna('Saida', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Coluna">
+                    <button onClick={() => removerColuna('Saida', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 z-10" title="Excluir Coluna">
                        <X className="w-3 h-3"/>
                     </button>
-                    {c.nome}<br/><span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                    <div className="flex flex-col items-center justify-center">
+                      <span>{c.nome}</span>
+                      <span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                      <span className="mt-1 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {total}</span>
+                    </div>
                   </th>
-                ))}
+                )})}
                 <th className="p-2 border-r border-gray-300 dark:border-gray-700 bg-purple-50/50 dark:bg-purple-900/40">
                   <button onClick={() => adicionarColuna('Saida', abaCapitalized)} className="flex flex-col items-center justify-center w-full h-full text-purple-600 hover:text-purple-800 transition-colors" title="Adicionar nova saída">
                     <Plus className="w-4 h-4"/>
