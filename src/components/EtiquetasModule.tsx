@@ -373,24 +373,37 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
               </div>
             )}
             <div className="font-bold text-[8px] uppercase leading-none truncate">
-              {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo})</span>
+              {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo} - {kit.tipologia})</span>
             </div>
             <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
           </div>
-          <div className="flex-shrink-0 pt-0.5 flex flex-col items-center w-[30px]">
+          <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
             <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={false} />
-            <div className="text-[4px] mt-0.5 font-bold uppercase text-center leading-[1.1] text-gray-800">
-              Siga nosso<br/>Instagram
+            <div className="flex items-center gap-0.5 mt-0.5">
+              <svg width="6" height="6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial_small)" />
+                <path d="M12 6.8c-2.87 0-5.2 2.33-5.2 5.2s2.33 5.2 5.2 5.2 5.2-2.33 5.2-5.2-2.33-5.2-5.2-5.2zm0 8.5c-1.82 0-3.3-1.48-3.3-3.3s1.48-3.3 3.3-3.3 3.3 1.48 3.3 3.3-1.48 3.3-3.3 3.3zm5.3-7.55c-.52 0-.95-.43-.95-.95s.43-.95.95-.95.95.43.95.95-.43.95-.95.95z" fill="#fff" />
+                <defs>
+                  <radialGradient id="paint0_radial_small" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0 24 -24 0 12 12)">
+                    <stop stopColor="#F58529" />
+                    <stop offset="0.25" stopColor="#FEDA77" />
+                    <stop offset="0.5" stopColor="#DD2A7B" />
+                    <stop offset="0.75" stopColor="#8134AF" />
+                    <stop offset="1" stopColor="#515BD4" />
+                  </radialGradient>
+                </defs>
+              </svg>
+              <span className="text-[3.5px] font-bold uppercase whitespace-nowrap text-gray-800 tracking-tighter">Visite nossa página no Instagram</span>
             </div>
           </div>
         </div>
         
         <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[6.5px] font-mono leading-tight px-1 uppercase">
-          <div className="truncate"><span className="font-bold">Tip:</span> {kit.tipologia}</div>
+          <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
           <div className="truncate text-right"><span className="font-bold">Grid:</span> {kit.fechaduraGrid}</div>
           
-          <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
-          <div className="truncate text-right"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
+          <div className="truncate"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
+          <div className="truncate text-right"><span className="font-bold">Ad Acab:</span> {kit.acabamentoAduela}</div>
           
           <div className="truncate"><span className="font-bold">Pta:</span> {getPortaDimensao(kit)} {kit.caracteristicaPorta}</div>
           <div className="truncate text-right"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
@@ -418,47 +431,54 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
             BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto}
           </div>
           <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black">
-            {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo})</span>
+            {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo} - {kit.tipologia})</span>
           </div>
         </div>
-        <div className="flex-shrink-0 pt-0 pr-2 flex flex-col items-center w-[56px]">
+        <div className="flex-shrink-0 pt-0 flex flex-col items-center">
           <QRCodeSVG 
             value="https://www.instagram.com/nacionalmadeirasltda/" 
             size={46} 
             level="M" 
             includeMargin={false}
           />
-          <div className="text-[5.5px] mt-1 font-bold uppercase text-center leading-[1.1] text-gray-800">
-            Aponte a câmera<br/>p/ nosso Instagram
+          <div className="flex items-center gap-1 mt-1">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial)" />
+              <path d="M12 6.8c-2.87 0-5.2 2.33-5.2 5.2s2.33 5.2 5.2 5.2 5.2-2.33 5.2-5.2-2.33-5.2-5.2-5.2zm0 8.5c-1.82 0-3.3-1.48-3.3-3.3s1.48-3.3 3.3-3.3 3.3 1.48 3.3 3.3-1.48 3.3-3.3 3.3zm5.3-7.55c-.52 0-.95-.43-.95-.95s.43-.95.95-.95.95.43.95.95-.43.95-.95.95z" fill="#fff" />
+              <defs>
+                <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0 24 -24 0 12 12)">
+                  <stop stopColor="#F58529" />
+                  <stop offset="0.25" stopColor="#FEDA77" />
+                  <stop offset="0.5" stopColor="#DD2A7B" />
+                  <stop offset="0.75" stopColor="#8134AF" />
+                  <stop offset="1" stopColor="#515BD4" />
+                </radialGradient>
+              </defs>
+            </svg>
+            <span className="text-[4.5px] font-bold uppercase whitespace-nowrap text-gray-800 tracking-tighter">Visite nossa página no Instagram</span>
           </div>
         </div>
       </div>
       
       <div className="flex flex-col gap-y-1 text-[9px] font-mono leading-tight uppercase font-semibold pl-0.5 mt-0.5 shrink-0">
         <div className="grid grid-cols-5 gap-x-1">
-          <div className="col-span-1">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Tipologia:</span>
-            <span className="text-[10px] truncate block">{kit.tipologia}</span>
-          </div>
-          <div className="col-span-2 border-l border-gray-300 pl-1">
+          <div className="col-span-2">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Marca:</span>
             <span className="text-[10px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo}</span>
           </div>
-          <div className="col-span-2 border-l border-gray-300 pl-1">
+          <div className="col-span-1 border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Grid:</span>
             <span className="text-[10px] truncate block">{kit.fechaduraGrid}</span>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
-          <div>
+          <div className="col-span-2 border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Dobradiça Medida:</span>
             <span className="text-[10px] truncate block">{kit.dobradicaMedida}</span>
           </div>
-          <div className="border-l border-gray-300 pl-1">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
-            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
-          </div>
+        </div>
+        
+        <div className="border-t border-gray-200 pt-1 mt-0.5">
+          <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
+          <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
