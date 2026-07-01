@@ -41,19 +41,10 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
             onClick={() => setActiveTab('entradas')}
             className={cn(
               "px-4 py-2 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'entradas' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              (activeTab === 'entradas' || activeTab === 'saidas_obras') ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
             )}
           >
-            Entrada de Obras
-          </button>
-          <button 
-            onClick={() => setActiveTab('saidas_obras')}
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'saidas_obras' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-            )}
-          >
-            Saídas de Obras
+            Entrada / Saída Obras
           </button>
         </div>
       </div>
@@ -61,14 +52,14 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
         {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
-        {activeTab === 'entradas' && <EntradaObras globalSearch={globalSearch} />}
-        {activeTab === 'saidas_obras' && <SaidasObras globalSearch={globalSearch} />}
+        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras globalSearch={globalSearch} />}
       </div>
     </div>
   );
 }
 
 // --- SUBMODULES ---
+import { EntradaSaidaObras } from './EntradaSaidaObras';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR, ENCHIMENTOS_PORTA } from './EstoqueModule';
 
 const MESES = [
