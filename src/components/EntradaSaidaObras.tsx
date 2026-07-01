@@ -251,7 +251,31 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     
     const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1) as 'Folhas' | 'Aduelas' | 'Alizares';
     const listField = `itens${abaCapitalized}`;
-    const currentItens = activeObra[listField] || [];
+    const currentItens = [...(activeObra[listField] || [])].sort((a, b) => {
+      let valA = '';
+      let valB = '';
+      if (activeTab === 'folhas') {
+        valA = a.dimensao || '';
+        valB = b.dimensao || '';
+      } else if (activeTab === 'aduelas') {
+        valA = a.medidaAduela || '';
+        valB = b.medidaAduela || '';
+      } else if (activeTab === 'alizares') {
+        valA = a.medidaAlizar || '';
+        valB = b.medidaAlizar || '';
+      }
+      
+      const parseDim = (str: string) => str.split(/[xX]/).map(n => parseInt(n) || 0);
+      const numsA = parseDim(valA);
+      const numsB = parseDim(valB);
+      
+      for (let i = 0; i < Math.max(numsA.length, numsB.length); i++) {
+        const nA = numsA[i] || 0;
+        const nB = numsB[i] || 0;
+        if (nA !== nB) return nA - nB;
+      }
+      return valA.localeCompare(valB);
+    });
     
     const cargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`] || [];
     const cargasSaida = activeObra[`cargasSaida${abaCapitalized}`] || [];
