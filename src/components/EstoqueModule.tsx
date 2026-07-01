@@ -198,11 +198,28 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
     setIsModalOpen(true);
   };
 
-  const totalPortas = Array.isArray(portas) ? portas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
-  const totalAduelas = Array.isArray(aduelas) ? aduelas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
-  const totalAlizares = Array.isArray(alizares) ? alizares.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0) : 0;
+  const uniquePortas = Array.isArray(portas) ? Array.from(new Map(portas.map(item => [item.id, item])).values()) : [];
+  const uniqueAduelas = Array.isArray(aduelas) ? Array.from(new Map(aduelas.map(item => [item.id, item])).values()) : [];
+  const uniqueAlizares = Array.isArray(alizares) ? Array.from(new Map(alizares.map(item => [item.id, item])).values()) : [];
 
-  const baseList: any[] = activeSubTab === 'portas' ? (Array.isArray(portas) ? portas : []) : (activeSubTab === 'aduelas' ? (Array.isArray(aduelas) ? aduelas : []) : (Array.isArray(alizares) ? alizares : []));
+  useEffect(() => {
+    if (Array.isArray(portas) && portas.length !== uniquePortas.length) {
+      setPortas(uniquePortas);
+    }
+    if (Array.isArray(aduelas) && aduelas.length !== uniqueAduelas.length) {
+      setAduelas(uniqueAduelas);
+    }
+    if (Array.isArray(alizares) && alizares.length !== uniqueAlizares.length) {
+      setAlizares(uniqueAlizares);
+    }
+  }, [portas, aduelas, alizares]);
+
+  const totalPortas = uniquePortas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
+  const totalAduelas = uniqueAduelas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
+  const totalAlizares = uniqueAlizares.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
+
+  const rawBaseList: any[] = activeSubTab === 'portas' ? uniquePortas : (activeSubTab === 'aduelas' ? uniqueAduelas : uniqueAlizares);
+  const baseList = rawBaseList;
 
   const filteredList = baseList.filter(item => {
     const combinedSearchTerm = (searchTerm || globalSearch || "").trim();
