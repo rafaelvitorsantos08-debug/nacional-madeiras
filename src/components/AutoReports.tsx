@@ -306,12 +306,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       {mode === 'aduelas' ? (
-                                        <div className="grid grid-cols-2 gap-4 w-full px-4">
-                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
-                                            <EditableText>{l.item.dimensao}</EditableText>
-                                          </div>
-                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
-                                            <EditableText>{l.item.qtd}</EditableText>
+                                        <div className="flex justify-center items-center w-full">
+                                          <div className="flex justify-between items-center w-32 px-1">
+                                            <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
+                                              <EditableText>{l.item.dimensao}</EditableText>
+                                            </div>
+                                            <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
+                                              <EditableText>{l.item.qtd}</EditableText>
+                                            </div>
                                           </div>
                                         </div>
                                       ) : (
@@ -344,12 +346,14 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                   ) : (
                                     <div className="flex items-center justify-center w-full h-full py-1">
                                       {mode === 'aduelas' ? (
-                                        <div className="grid grid-cols-2 gap-4 w-full px-4">
-                                          <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
-                                            <EditableText>{r.item.dimensao}</EditableText>
-                                          </div>
-                                          <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
-                                            <EditableText>{r.item.qtd}</EditableText>
+                                        <div className="flex justify-center items-center w-full">
+                                          <div className="flex justify-between items-center w-32 px-1">
+                                            <div className="font-mono font-semibold print:text-black text-gray-900 dark:text-gray-100 text-right leading-none whitespace-nowrap">
+                                              <EditableText>{r.item.dimensao}</EditableText>
+                                            </div>
+                                            <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 text-left shrink-0">
+                                              <EditableText>{r.item.qtd}</EditableText>
+                                            </div>
                                           </div>
                                         </div>
                                       ) : (
