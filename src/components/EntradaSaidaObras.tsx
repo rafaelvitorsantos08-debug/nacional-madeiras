@@ -4,16 +4,16 @@ import { Target, Plus, Trash2, X, Info } from 'lucide-react';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR } from './EstoqueModule';
 
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
-  const [obrasV5, setObrasV5] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v5', {});
+  const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
 
-  // Migration from v4 to v5
+  // Migration from v4 to v6
   useEffect(() => {
     const v4Data = localStorage.getItem('nm_entrada_obras_v4');
-    const v5Data = localStorage.getItem('nm_entrada_obras_v5');
+    const v6Data = localStorage.getItem('nm_entrada_obras_v6');
     
-    if (v4Data && (!v5Data || Object.keys(JSON.parse(v5Data)).length === 0)) {
+    if (v4Data && (!v6Data || Object.keys(JSON.parse(v6Data)).length === 0)) {
       try {
         const parsedV4 = JSON.parse(v4Data);
         const migrated: Record<string, any> = {};
@@ -22,6 +22,43 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
           const o = parsedV4[obraId];
           const today = new Date().toISOString().split('T')[0];
           
+          const baseItems = o.itens || [];
+          
+          const itensFolhas = baseItems.filter((i:any) => i.folhas || i.dimensao).map((item:any) => {
+             const sf = (item.saidas || []).filter((s:any) => s.tipo === 'folhas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
+             return {
+                 id: 'f_' + item.id,
+                 dimensao: item.dimensao || '',
+                 cor: item.cor || '',
+                 enchimento: item.enchimento || '',
+                 modelo: item.modelo || '',
+                 entradas: { 'ce_f_1': item.folhas || '' },
+                 saidas: { 'cs_f_1': sf > 0 ? String(sf) : '' },
+             };
+          });
+
+          const itensAduelas = baseItems.filter((i:any) => i.aduelas || i.medidaAduela).map((item:any) => {
+             const sad = (item.saidas || []).filter((s:any) => s.tipo === 'aduelas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
+             return {
+                 id: 'ad_' + item.id,
+                 medidaAduela: item.medidaAduela || '',
+                 cor: item.cor || '',
+                 entradas: { 'ce_ad_1': item.aduelas || '' },
+                 saidas: { 'cs_ad_1': sad > 0 ? String(sad) : '' },
+             };
+          });
+
+          const itensAlizares = baseItems.filter((i:any) => i.alizares || i.medidaAlizar).map((item:any) => {
+             const sal = (item.saidas || []).filter((s:any) => s.tipo === 'alizares').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
+             return {
+                 id: 'al_' + item.id,
+                 medidaAlizar: item.medidaAlizar || '',
+                 cor: item.cor || '',
+                 entradas: { 'ce_al_1': item.alizares || '' },
+                 saidas: { 'cs_al_1': sal > 0 ? String(sal) : '' },
+             };
+          });
+
           migrated[obraId] = {
             id: o.id,
             nome: o.nome,
@@ -31,49 +68,30 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
             cargasSaidaAduelas: [{ id: 'cs_ad_1', nome: '1ª Saída', data: today }],
             cargasEntradaAlizares: [{ id: 'ce_al_1', nome: '1ª Carga', data: today }],
             cargasSaidaAlizares: [{ id: 'cs_al_1', nome: '1ª Saída', data: today }],
-            itens: (o.itens || []).map((item: any) => {
-               // sum up saidas
-               const sf = (item.saidas || []).filter((s:any) => s.tipo === 'folhas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
-               const sad = (item.saidas || []).filter((s:any) => s.tipo === 'aduelas').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
-               const sal = (item.saidas || []).filter((s:any) => s.tipo === 'alizares').reduce((acc:number, s:any) => acc + (parseInt(s.quantidade)||0), 0);
-               
-               return {
-                 id: item.id,
-                 dimensao: item.dimensao || '',
-                 cor: item.cor || '',
-                 enchimento: item.enchimento || '',
-                 modelo: item.modelo || '',
-                 medidaAduela: item.medidaAduela || '',
-                 medidaAlizar: item.medidaAlizar || '',
-                 
-                 entradasFolhas: { 'ce_f_1': item.folhas || '' },
-                 saidasFolhas: { 'cs_f_1': sf > 0 ? String(sf) : '' },
-                 
-                 entradasAduelas: { 'ce_ad_1': item.aduelas || '' },
-                 saidasAduelas: { 'cs_ad_1': sad > 0 ? String(sad) : '' },
-                 
-                 entradasAlizares: { 'ce_al_1': item.alizares || '' },
-                 saidasAlizares: { 'cs_al_1': sal > 0 ? String(sal) : '' },
-               };
-            })
+            itensFolhas,
+            itensAduelas,
+            itensAlizares
           };
         }
-        setObrasV5(migrated);
+        setObrasV6(migrated);
       } catch (e) {
-        console.error("Erro ao migrar dados da v4 para v5", e);
+        console.error("Erro ao migrar dados da v4 para v6", e);
       }
     }
   }, []);
 
-  const obrasList = Object.values(obrasV5 || {})
+  const obrasList = Object.values(obrasV6 || {})
     .filter((obra: any) => {
        if (!globalSearch) return true;
        const searchLower = globalSearch.toLowerCase();
        const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
-       const inItens = (obra.itens || []).some((i: any) => 
-         (i.dimensao || '').toLowerCase().includes(searchLower) ||
-         (i.cor || '').toLowerCase().includes(searchLower) ||
-         (i.medidaAduela || '').toLowerCase().includes(searchLower)
+       const inItens = ['itensFolhas', 'itensAduelas', 'itensAlizares'].some(k => 
+         (obra[k] || []).some((i: any) => 
+           (i.dimensao || '').toLowerCase().includes(searchLower) ||
+           (i.cor || '').toLowerCase().includes(searchLower) ||
+           (i.medidaAduela || '').toLowerCase().includes(searchLower) ||
+           (i.medidaAlizar || '').toLowerCase().includes(searchLower)
+         )
        );
        return inNome || inItens;
     })
@@ -85,7 +103,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     }
   }, [obrasList.length, selectedObraId]);
 
-  const activeObra = selectedObraId ? obrasV5[selectedObraId] : null;
+  const activeObra = selectedObraId ? obrasV6[selectedObraId] : null;
 
   const adicionarObra = () => {
     const nome = window.prompt('Digite o nome da nova obra:');
@@ -93,7 +111,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     const id = Date.now().toString();
     const today = new Date().toISOString().split('T')[0];
     
-    setObrasV5(prev => ({
+    setObrasV6(prev => ({
       ...prev,
       [id]: {
          id,
@@ -104,15 +122,9 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
          cargasSaidaAduelas: [{ id: 'cs_ad_1', nome: '1ª Saída', data: today }],
          cargasEntradaAlizares: [{ id: 'ce_al_1', nome: '1ª Carga', data: today }],
          cargasSaidaAlizares: [{ id: 'cs_al_1', nome: '1ª Saída', data: today }],
-         itens: [
-           { 
-             id: Date.now().toString() + '_1', 
-             dimensao: '', cor: '', enchimento: '', modelo: '', medidaAduela: '', medidaAlizar: '',
-             entradasFolhas: {}, saidasFolhas: {},
-             entradasAduelas: {}, saidasAduelas: {},
-             entradasAlizares: {}, saidasAlizares: {}
-           }
-         ]
+         itensFolhas: [{ id: 'f_'+Date.now(), dimensao: '', cor: '', enchimento: '', modelo: '', entradas: {}, saidas: {} }],
+         itensAduelas: [{ id: 'ad_'+Date.now(), medidaAduela: '', cor: '', entradas: {}, saidas: {} }],
+         itensAlizares: [{ id: 'al_'+Date.now(), medidaAlizar: '', cor: '', entradas: {}, saidas: {} }]
       }
     }));
     setSelectedObraId(id);
@@ -120,7 +132,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
   const deletarObra = (id: string) => {
     if(!window.confirm('Tem certeza que deseja excluir esta obra?')) return;
-    setObrasV5(prev => {
+    setObrasV6(prev => {
       const novas = { ...prev };
       delete novas[id];
       return novas;
@@ -130,7 +142,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
   const updateObra = (fn: (obra: any) => any) => {
     if (!selectedObraId) return;
-    setObrasV5(prev => {
+    setObrasV6(prev => {
       const obra = prev[selectedObraId];
       if (!obra) return prev;
       return { ...prev, [selectedObraId]: fn(obra) };
@@ -153,22 +165,46 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     });
   };
 
+  const removerColuna = (tipo: 'Entrada' | 'Saida', aba: 'Folhas' | 'Aduelas' | 'Alizares', cargaId: string) => {
+    if(!window.confirm('Excluir esta coluna e todos os seus dados?')) return;
+    
+    const targetField = `cargas${tipo}${aba}`;
+    const propMap = tipo === 'Entrada' ? 'entradas' : 'saidas';
+    const listField = `itens${aba}`;
+
+    updateObra(obra => {
+       const novasCargas = (obra[targetField] || []).filter((c:any) => c.id !== cargaId);
+       
+       const novosItens = (obra[listField] || []).map((it:any) => {
+          const newMap = { ...(it[propMap] || {}) };
+          delete newMap[cargaId];
+          return { ...it, [propMap]: newMap };
+       });
+
+       return { ...obra, [targetField]: novasCargas, [listField]: novosItens };
+    });
+  };
+
   const handleChangeItemField = (itemId: string, field: string, value: string) => {
+    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const listField = `itens${abaCapitalized}`;
     updateObra(obra => ({
       ...obra,
-      itens: obra.itens.map((it: any) => it.id === itemId ? { ...it, [field]: value } : it)
+      [listField]: (obra[listField] || []).map((it: any) => it.id === itemId ? { ...it, [field]: value } : it)
     }));
   };
 
-  const handleChangeQty = (itemId: string, targetMap: string, cargaId: string, value: string) => {
+  const handleChangeQty = (itemId: string, propMap: string, cargaId: string, value: string) => {
+    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const listField = `itens${abaCapitalized}`;
     updateObra(obra => ({
       ...obra,
-      itens: obra.itens.map((it: any) => {
+      [listField]: (obra[listField] || []).map((it: any) => {
         if (it.id === itemId) {
           return {
             ...it,
-            [targetMap]: {
-               ...(it[targetMap] || {}),
+            [propMap]: {
+               ...(it[propMap] || {}),
                [cargaId]: value
             }
           };
@@ -179,40 +215,47 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   };
 
   const adicionarLinha = () => {
-    updateObra(obra => ({
-      ...obra,
-      itens: [
-        ...(obra.itens || []),
-        { 
-          id: Date.now().toString(), 
-          dimensao: '', cor: '', enchimento: '', modelo: '', medidaAduela: '', medidaAlizar: '',
-          entradasFolhas: {}, saidasFolhas: {},
-          entradasAduelas: {}, saidasAduelas: {},
-          entradasAlizares: {}, saidasAlizares: {}
-        }
-      ]
-    }));
+    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const listField = `itens${abaCapitalized}`;
+    
+    updateObra(obra => {
+      let newItem: any = { id: Date.now().toString(), entradas: {}, saidas: {} };
+      if (activeTab === 'folhas') {
+        newItem = { ...newItem, dimensao: '', cor: '', enchimento: '', modelo: '' };
+      } else if (activeTab === 'aduelas') {
+        newItem = { ...newItem, medidaAduela: '', cor: '' };
+      } else {
+        newItem = { ...newItem, medidaAlizar: '', cor: '' };
+      }
+      
+      return {
+        ...obra,
+        [listField]: [...(obra[listField] || []), newItem]
+      };
+    });
   };
 
   const deletarLinha = (itemId: string) => {
     if(!window.confirm('Excluir esta linha?')) return;
+    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const listField = `itens${abaCapitalized}`;
+    
     updateObra(obra => ({
       ...obra,
-      itens: obra.itens.filter((it: any) => it.id !== itemId)
+      [listField]: (obra[listField] || []).filter((it: any) => it.id !== itemId)
     }));
   };
 
-  const TabTitleMap = { folhas: 'Folhas', aduelas: 'Aduelas', alizares: 'Alizares' };
-  
   const renderTable = () => {
     if (!activeObra) return null;
     
     const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1) as 'Folhas' | 'Aduelas' | 'Alizares';
+    const listField = `itens${abaCapitalized}`;
+    const currentItens = activeObra[listField] || [];
     
     const cargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`] || [];
     const cargasSaida = activeObra[`cargasSaida${abaCapitalized}`] || [];
     
-    // Configurações de colunas de especificação baseadas na aba
     let specHeaders = [];
     if (activeTab === 'folhas') specHeaders = ['DIMENSÃO', 'COR', 'ENCHIMENTO', 'MODELO'];
     else if (activeTab === 'aduelas') specHeaders = ['MEDIDA ADUELA', 'COR'];
@@ -245,7 +288,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                 
                 {/* Entradas */}
                 {cargasEntrada.map((c: any) => (
-                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-blue-50/50 dark:bg-blue-900/40 w-[100px]">
+                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-blue-50/50 dark:bg-blue-900/40 w-[100px] relative group">
+                    <button onClick={() => removerColuna('Entrada', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Coluna">
+                       <X className="w-3 h-3"/>
+                    </button>
                     {c.nome}<br/><span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
                   </th>
                 ))}
@@ -258,7 +304,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
                 {/* Saídas */}
                 {cargasSaida.map((c: any) => (
-                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-purple-50/50 dark:bg-purple-900/40 w-[100px]">
+                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-purple-50/50 dark:bg-purple-900/40 w-[100px] relative group">
+                    <button onClick={() => removerColuna('Saida', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5" title="Excluir Coluna">
+                       <X className="w-3 h-3"/>
+                    </button>
                     {c.nome}<br/><span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
                   </th>
                 ))}
@@ -274,17 +323,17 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {(activeObra.itens || []).length === 0 ? (
+              {currentItens.length === 0 ? (
                 <tr>
                   <td colSpan={specHeaders.length + cargasEntrada.length + cargasSaida.length + 4} className="p-8 text-center text-gray-500">
                     Nenhum item cadastrado.
                   </td>
                 </tr>
               ) : (
-                (activeObra.itens || []).map((item: any) => {
+                currentItens.map((item: any) => {
                   
-                  const mapEntradas = item[`entradas${abaCapitalized}`] || {};
-                  const mapSaidas = item[`saidas${abaCapitalized}`] || {};
+                  const mapEntradas = item.entradas || {};
+                  const mapSaidas = item.saidas || {};
                   
                   const totalEntradas = Object.values(mapEntradas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0);
                   const totalSaidas = Object.values(mapSaidas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0);
@@ -353,7 +402,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                             type="number"
                             min="0"
                             value={mapEntradas[c.id] || ''}
-                            onChange={e => handleChangeQty(item.id, `entradas${abaCapitalized}`, c.id, e.target.value)}
+                            onChange={e => handleChangeQty(item.id, 'entradas', c.id, e.target.value)}
                             className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-bold text-blue-900 dark:text-blue-100"
                             placeholder="-"
                           />
@@ -368,7 +417,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                             type="number"
                             min="0"
                             value={mapSaidas[c.id] || ''}
-                            onChange={e => handleChangeQty(item.id, `saidas${abaCapitalized}`, c.id, e.target.value)}
+                            onChange={e => handleChangeQty(item.id, 'saidas', c.id, e.target.value)}
                             className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-bold text-purple-900 dark:text-purple-100"
                             placeholder="-"
                           />
