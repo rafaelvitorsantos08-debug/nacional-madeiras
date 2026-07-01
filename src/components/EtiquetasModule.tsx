@@ -464,7 +464,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
         <div className="grid grid-cols-5 gap-x-1">
           <div className="col-span-2">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Marca:</span>
-            <span className="text-[10px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo}</span>
+            <span className="text-[10px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo === 'WC' ? 'BANHEIRO' : kit.fechaduraTipo === 'INT' ? 'INTERNA' : kit.fechaduraTipo === 'EXT' ? 'EXTERNA' : kit.fechaduraTipo}</span>
           </div>
           <div className="col-span-1 border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Grid:</span>
@@ -477,14 +477,14 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
         </div>
         
         <div className="border-t border-gray-200 pt-1 mt-0.5">
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
-          <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
+          <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
+          <span className="text-[9px] leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
           <div>
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
-            <span className="text-[9px] leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
+            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
           </div>
           <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
