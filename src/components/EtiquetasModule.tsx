@@ -483,12 +483,12 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
         <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
           <div>
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
-            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
-          </div>
-          <div className="border-l border-gray-300 pl-1">
             <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
             <span className="text-[10px] truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+          </div>
+          <div className="border-l border-gray-300 pl-1">
+            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
+            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
           </div>
         </div>
       </div>
