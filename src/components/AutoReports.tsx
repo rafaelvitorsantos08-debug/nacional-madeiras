@@ -546,10 +546,10 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                     Medidas
                   </th>
                   <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
-                    Quantidade
+                    Acabamento da Porta
                   </th>
                   <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
-                    Acabamento da Porta
+                    Quantidade
                   </th>
                 </tr>
               </thead>
@@ -558,9 +558,6 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                   <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
                       <EditableText>{k.dimensao}</EditableText>
-                    </td>
-                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
-                      <EditableText>{k.qtdTotal}</EditableText>
                     </td>
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold w-1/3">
                       <EditableText>
@@ -581,6 +578,9 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                           return k.acabamento;
                         })()}
                       </EditableText>
+                    </td>
+                    <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
+                      <EditableText>{k.qtdTotal}</EditableText>
                     </td>
                   </tr>
                 ))}
