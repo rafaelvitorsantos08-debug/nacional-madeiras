@@ -289,6 +289,14 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
       return items.reduce((acc, item) => acc + (parseInt(item[type]?.[cargaId]) || 0), 0);
     };
 
+    const getTotalSaldo = (items: any[]) => {
+       return items.reduce((acc, item) => {
+         const totalEntradas = Object.values(item.entradas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0);
+         const totalSaidas = Object.values(item.saidas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0);
+         return acc + (totalEntradas - totalSaidas);
+       }, 0);
+    };
+
     return (
       <div className="flex-1 overflow-auto bg-gray-50 p-4 w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto w-full">
@@ -358,7 +366,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                   </button>
                 </th>
 
-                <th className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs">RESTOU</th>
+                <th className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs">
+                  <div className="flex flex-col items-center justify-center">
+                    <span>RESTOU</span>
+                    <span className="mt-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {getTotalSaldo(currentItens)}</span>
+                  </div>
+                </th>
                 <th className="p-2"></th>
               </tr>
             </thead>
