@@ -217,28 +217,84 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           return String(a.comodo).localeCompare(String(b.comodo));
       });
 
-    const csvRows = [];
-    csvRows.push(['APTO', 'CÔMODO', 'SENTIDO DE ABERTURA', 'ADUELA', 'ACABAMENTO ADUELA', 'TIPOLOGIA', 'QUANTIDADE'].join(';'));
-    
-    rows.forEach(row => {
-      csvRows.push([
-        row.apto, 
-        row.comodo, 
-        row.abertura, 
-        row.aduela, 
-        row.acabAduela, 
-        row.tipologia, 
-        row.qtd
-      ].map(r => `"${String(r).replace(/"/g, '""')}"`).join(';'));
-    });
+    const cliente = fila[0]?.kit?.cliente || header.cliente || 'CLIENTE NÃO INFORMADO';
+    const obra = fila[0]?.kit?.obra || header.obra || 'OBRA NÃO INFORMADA';
 
-    const csvContent = "\uFEFF" + csvRows.join('\n'); // Add BOM
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const htmlContent = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>Relatório de Entrega</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 11pt; color: #000; }
+        .logo { font-size: 24pt; font-weight: bold; color: #166534; text-align: center; margin-bottom: 20px; }
+        .title { text-align: center; font-size: 14pt; font-weight: bold; background-color: #1a202c; color: white; padding: 10px; margin-bottom: 10px; }
+        .header-table { width: 100%; border: none; margin-bottom: 20px; }
+        .header-table td { border: none; padding: 5px; font-size: 10pt; vertical-align: top; }
+        .data-table { border-collapse: collapse; width: 100%; }
+        .data-table th, .data-table td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 10pt; }
+        .data-table th { background-color: #f2f2f2; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="logo">NACIONAL MADEIRAS</div>
+    <div class="title">RELATÓRIO DE ENTREGA</div>
+    
+    <table class="header-table">
+        <tr>
+            <td width="33%">
+                <strong>Cliente:</strong><br>
+                ${cliente}
+            </td>
+            <td width="33%" style="text-align: center;">
+                <strong>Obra:</strong><br>
+                ${obra}
+            </td>
+            <td width="33%" style="text-align: right;">
+                <strong>Resp:</strong><br>
+                __________________
+            </td>
+        </tr>
+    </table>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>APTO</th>
+                <th>CÔMODO</th>
+                <th>SENTIDO DE ABERTURA</th>
+                <th>ADUELA</th>
+                <th>ACABAMENTO ADUELA</th>
+                <th>TIPOLOGIA</th>
+                <th>QTD</th>
+                <th>CONFERIDO</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${rows.map(r => `
+            <tr>
+                <td>${r.apto}</td>
+                <td>${r.comodo}</td>
+                <td>${r.abertura}</td>
+                <td>${r.aduela}</td>
+                <td>${r.acabAduela}</td>
+                <td>${r.tipologia}</td>
+                <td>${r.qtd}</td>
+                <td></td>
+            </tr>
+            `).join('')}
+        </tbody>
+    </table>
+</body>
+</html>
+    `;
+
+    const blob = new Blob([htmlContent], { type: 'application/msword;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Relatorio_Entregas_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Relatorio_Entregas_${new Date().toISOString().split('T')[0]}.doc`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -348,7 +404,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                 disabled={fila.length === 0}
                 className="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
               >
-                <Download className="w-4 h-4" /> <span>Exportar Relatório Entregas (.csv)</span>
+                <Download className="w-4 h-4" /> <span>Exportar Relatório Entregas (.doc)</span>
               </button>
               
               <div className="flex space-x-2">
