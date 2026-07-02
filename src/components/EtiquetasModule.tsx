@@ -217,8 +217,8 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           return String(a.comodo).localeCompare(String(b.comodo));
       });
 
-    const cliente = fila[0]?.kit?.cliente || header.cliente || 'CLIENTE NÃO INFORMADO';
-    const obra = fila[0]?.kit?.obra || header.obra || 'OBRA NÃO INFORMADA';
+    const cliente = fila[0]?.kit?.cliente || header?.cliente || 'CLIENTE NÃO INFORMADO';
+    const obra = fila[0]?.kit?.obra || header?.obra || 'OBRA NÃO INFORMADA';
 
     const htmlContent = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">

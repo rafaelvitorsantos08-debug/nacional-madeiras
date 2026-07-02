@@ -99,7 +99,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
   useEffect(() => {
     if (!selectedObraId && obrasList.length > 0) {
-      setSelectedObraId(obrasList[0].id);
+      setSelectedObraId((obrasList[0] as any).id);
     }
   }, [obrasList.length, selectedObraId]);
 
@@ -290,9 +290,9 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     };
 
     const getTotalSaldo = (items: any[]) => {
-       return items.reduce((acc, item) => {
-         const totalEntradas = Object.values(item.entradas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0);
-         const totalSaidas = Object.values(item.saidas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0);
+       return items.reduce((acc: number, item: any) => {
+         const totalEntradas = Object.values(item.entradas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
+         const totalSaidas = Object.values(item.saidas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
          return acc + (totalEntradas - totalSaidas);
        }, 0);
     };
@@ -388,8 +388,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                   const mapEntradas = item.entradas || {};
                   const mapSaidas = item.saidas || {};
                   
-                  const totalEntradas = Object.values(mapEntradas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0);
-                  const totalSaidas = Object.values(mapSaidas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0);
+                  const totalEntradas = Object.values(mapEntradas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0) as number;
+                  const totalSaidas = Object.values(mapSaidas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0) as number;
                   const saldo = totalEntradas - totalSaidas;
 
                   return (
