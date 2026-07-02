@@ -13,6 +13,8 @@ export const ABA_ALIZAR = ['08', '40', '50', '60', '70', '80'];
 export const ESPESSURA_ALIZAR = ['10', '15', '18', '20'];
 export const COMPRIMENTOS_ALIZAR = ['1000', '2250', '2700'];
 
+export const MEDIDAS_RODAPE = ['50x15x2250', '50x10x2250', '70x15x2250', '70x10x2250', '100x15x2250', '100x10x2250', '150x15x2250', '200x15x2250'];
+
 // Mockup data
 export const INITIAL_PORTAS = [
   { id: 'FP-01', cor: 'Branco Pinhal', dimensao: '800x2100', enchimento: 'Colmeia', modelo: 'Lisa', estoque: 145, status: 'OK' },
@@ -32,6 +34,11 @@ export const INITIAL_ALIZARES = [
   { id: 'AL-01', cor: 'Branco Pinhal', face: '50', aba: '60', espessura: '15', comprimento: '2700', estoque: 450, status: 'OK' },
   { id: 'AL-02', cor: 'Freijó Médio', face: '50', aba: '40', espessura: '10', comprimento: '2250', estoque: 85, status: 'Atenção' },
   { id: 'AL-03', cor: 'Preto', face: '50', aba: '80', espessura: '20', comprimento: '2250', estoque: 12, status: 'Crítico' },
+];
+
+export const INITIAL_RODAPES = [
+  { id: 'RD-01', cor: 'Branco Pinhal', medida: '50x15x2250', estoque: 200, status: 'OK' },
+  { id: 'RD-02', cor: 'Freijó Médio', medida: '70x10x2250', estoque: 15, status: 'Crítico' },
 ];
 
 import { auth, db } from '../lib/firebase';
@@ -167,11 +174,12 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 }
 
 export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) {
-  const [activeSubTab, setActiveSubTab] = useLocalStorage<'portas' | 'aduelas' | 'alizares'>('nm_active_sub_tab', 'portas');
+  const [activeSubTab, setActiveSubTab] = useLocalStorage<'portas' | 'aduelas' | 'alizares' | 'rodapes'>('nm_active_sub_tab', 'portas');
   
   const [portas, setPortas] = useLocalStorage('nm_portas', INITIAL_PORTAS);
   const [aduelas, setAduelas] = useLocalStorage('nm_aduelas', INITIAL_ADUELAS);
   const [alizares, setAlizares] = useLocalStorage('nm_alizares', INITIAL_ALIZARES);
+  const [rodapes, setRodapes] = useLocalStorage('nm_rodapes', INITIAL_RODAPES);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null); // null means adding a new item
@@ -185,6 +193,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
       if (activeSubTab === 'portas') setPortas(prev => prev.filter(item => item.id !== id));
       if (activeSubTab === 'aduelas') setAduelas(prev => prev.filter(item => item.id !== id));
       if (activeSubTab === 'alizares') setAlizares(prev => prev.filter(item => item.id !== id));
+      if (activeSubTab === 'rodapes') setRodapes(prev => prev.filter(item => item.id !== id));
     }
   };
 
@@ -201,6 +210,7 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
   const uniquePortas = Array.isArray(portas) ? Array.from(new Map(portas.map(item => [item.id, item])).values()) : [];
   const uniqueAduelas = Array.isArray(aduelas) ? Array.from(new Map(aduelas.map(item => [item.id, item])).values()) : [];
   const uniqueAlizares = Array.isArray(alizares) ? Array.from(new Map(alizares.map(item => [item.id, item])).values()) : [];
+  const uniqueRodapes = Array.isArray(rodapes) ? Array.from(new Map(rodapes.map(item => [item.id, item])).values()) : [];
 
   useEffect(() => {
     if (Array.isArray(portas) && portas.length !== uniquePortas.length) {
@@ -212,13 +222,17 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
     if (Array.isArray(alizares) && alizares.length !== uniqueAlizares.length) {
       setAlizares(uniqueAlizares);
     }
-  }, [portas, aduelas, alizares]);
+    if (Array.isArray(rodapes) && rodapes.length !== uniqueRodapes.length) {
+      setRodapes(uniqueRodapes);
+    }
+  }, [portas, aduelas, alizares, rodapes]);
 
   const totalPortas = uniquePortas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
   const totalAduelas = uniqueAduelas.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
   const totalAlizares = uniqueAlizares.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
+  const totalRodapes = uniqueRodapes.reduce((acc: number, curr: any) => acc + (parseInt(curr.estoque) || 0), 0);
 
-  const rawBaseList: any[] = activeSubTab === 'portas' ? uniquePortas : (activeSubTab === 'aduelas' ? uniqueAduelas : uniqueAlizares);
+  const rawBaseList: any[] = activeSubTab === 'portas' ? uniquePortas : (activeSubTab === 'aduelas' ? uniqueAduelas : (activeSubTab === 'alizares' ? uniqueAlizares : uniqueRodapes));
   const baseList = rawBaseList;
 
   const filteredList = baseList.filter(item => {
@@ -341,6 +355,12 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
             label="Alizares"
             badge={`${totalAlizares}`}
           />
+          <SubTabButton
+            active={activeSubTab === 'rodapes'}
+            onClick={() => setActiveSubTab('rodapes')}
+            label="Rodapés"
+            badge={`${totalRodapes}`}
+          />
         </div>
 
         {/* TOOLBAR */}
@@ -429,6 +449,12 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                     <th className="px-6 py-3 font-medium text-center">Espessura</th>
                   </>
                 )}
+                {activeSubTab === 'rodapes' && (
+                  <>
+                    <th className="px-6 py-3 font-medium">Cor</th>
+                    <th className="px-6 py-3 font-medium text-center">Medida</th>
+                  </>
+                )}
 
                 <th className="px-6 py-3 font-medium text-right">Estoque</th>
                 <th className="px-6 py-3 font-medium text-center">Status</th>
@@ -496,6 +522,24 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
                 </tr>
               ))}
               
+              {activeSubTab === 'rodapes' && finalFilteredList.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
+                  <td className="px-6 py-4 font-mono text-xs text-gray-500">{item.id}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-2">
+                       <ColorIndicator color={item.cor} />
+                       <span className="font-medium text-gray-700">{item.cor}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center text-gray-600">{item.medida} mm</td>
+                  <td className="px-6 py-4 text-right font-semibold text-gray-900">{Number(item.estoque || 0).toLocaleString('pt-BR')}</td>
+                  <td className="px-6 py-4 text-center"><StatusBadge status={item.status} /></td>
+                  <td className="px-6 py-4 text-center print:hidden">
+                    <TableActions onEdit={() => handleEdit(item)} onDelete={() => handleDelete(item.id)} />
+                  </td>
+                </tr>
+              ))}
+              
               {finalFilteredList.length === 0 && (
                  <tr>
                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
@@ -523,11 +567,13 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
               if (activeSubTab === 'portas') setPortas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
               if (activeSubTab === 'aduelas') setAduelas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
               if (activeSubTab === 'alizares') setAlizares(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'rodapes') setRodapes(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
             } else {
               saveItem.id = `${activeSubTab.substring(0, 2).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
               if (activeSubTab === 'portas') setPortas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
               if (activeSubTab === 'aduelas') setAduelas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
               if (activeSubTab === 'alizares') setAlizares(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
+              if (activeSubTab === 'rodapes') setRodapes(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
             }
             setIsModalOpen(false);
           }}
@@ -549,6 +595,12 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
     }
     return false;
   });
+  const [isCustomMedida, setIsCustomMedida] = useState<boolean>(() => {
+    if (item && type === 'rodapes' && item.medida) {
+      return !MEDIDAS_RODAPE.includes(item.medida);
+    }
+    return false;
+  });
   const [isCustomCor, setIsCustomCor] = useState<boolean>(() => {
     if (item && item.cor && !CORES.includes(item.cor)) {
       return true;
@@ -567,6 +619,16 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
     } else {
       setIsCustomDim(false);
       setFormData({ ...formData, dimensao: e.target.value });
+    }
+  };
+
+  const handleMedidaSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === 'Outra') {
+      setIsCustomMedida(true);
+      setFormData({ ...formData, medida: '' });
+    } else {
+      setIsCustomMedida(false);
+      setFormData({ ...formData, medida: e.target.value });
     }
   };
 
@@ -601,7 +663,7 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
           <form onSubmit={handleSubmit} className="space-y-4">
             
             {/* Campos Específicos por Tipo */}
-            {(type === 'portas' || type === 'aduelas' || type === 'alizares') && (
+            {(type === 'portas' || type === 'aduelas' || type === 'alizares' || type === 'rodapes') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
                 <select value={isCustomCor ? 'Outra' : (formData.cor || '')} onChange={handleCorSelectChange} required={!isCustomCor} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
@@ -611,6 +673,20 @@ function RegistryModal({ isOpen, onClose, item, type, onSave }: any) {
                 </select>
                 {isCustomCor && (
                   <input type="text" name="cor" value={formData.cor || ''} onChange={handleChange} required placeholder="Ex: Azul Real" className="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+                )}
+              </div>
+            )}
+
+            {type === 'rodapes' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Medida</label>
+                <select value={isCustomMedida ? 'Outra' : (formData.medida || '')} onChange={handleMedidaSelectChange} required={!isCustomMedida} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10 bg-white">
+                  <option value="" disabled>Selecione...</option>
+                  {MEDIDAS_RODAPE.map(d => <option key={d} value={d}>{d}</option>)}
+                  <option value="Outra">Outra (Personalizada)</option>
+                </select>
+                {isCustomMedida && (
+                  <input type="text" name="medida" value={formData.medida || ''} onChange={handleChange} required placeholder="Ex: 80x15x2250" className="w-full p-2 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green outline-none h-10" />
                 )}
               </div>
             )}
