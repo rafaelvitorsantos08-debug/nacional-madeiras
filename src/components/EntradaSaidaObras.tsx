@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { Target, Plus, Trash2, X, Info } from 'lucide-react';
+import { Target, Plus, Trash2, X, Info, MessageSquare } from 'lucide-react';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR } from './EstoqueModule';
 
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
@@ -212,6 +212,34 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
         return it;
       })
     }));
+  };
+
+  const handleChangeComment = (itemId: string, type: 'entradas'|'saidas', cargaId: string, comment: string) => {
+    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const listField = `itens${abaCapitalized}`;
+    updateObra(obra => ({
+      ...obra,
+      [listField]: (obra[listField] || []).map((it: any) => {
+        if (it.id === itemId) {
+           const commentKey = `${type}_${cargaId}`;
+           const newComentarios = { ...(it.comentarios || {}) };
+           if (comment) {
+             newComentarios[commentKey] = comment;
+           } else {
+             delete newComentarios[commentKey];
+           }
+           return { ...it, comentarios: newComentarios };
+        }
+        return it;
+      })
+    }));
+  };
+
+  const handleCommentClick = (itemId: string, type: 'entradas'|'saidas', cargaId: string, currentComment: string) => {
+    const comment = window.prompt("Comentário da célula (deixe em branco para remover):", currentComment || '');
+    if (comment !== null) {
+      handleChangeComment(itemId, type, cargaId, comment);
+    }
   };
 
   const adicionarLinha = () => {
@@ -449,33 +477,57 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                       )}
 
                       {/* Entradas */}
-                      {cargasEntrada.map((c: any) => (
-                        <td key={c.id} className="p-0 border-r border-gray-300 dark:border-gray-700 bg-blue-50/30 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/50">
-                          <input 
-                            type="number"
-                            min="0"
-                            value={mapEntradas[c.id] || ''}
-                            onChange={e => handleChangeQty(item.id, 'entradas', c.id, e.target.value)}
-                            className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-bold text-blue-900 dark:text-blue-100"
-                            placeholder="-"
-                          />
-                        </td>
-                      ))}
+                      {cargasEntrada.map((c: any) => {
+                        const commentKey = `entradas_${c.id}`;
+                        const comment = item.comentarios?.[commentKey] || '';
+                        const hasComment = !!comment;
+                        return (
+                          <td key={c.id} className={cn("p-0 border-r border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-blue-50/30 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/50")}>
+                            <input 
+                              type="number"
+                              min="0"
+                              value={mapEntradas[c.id] || ''}
+                              onChange={e => handleChangeQty(item.id, 'entradas', c.id, e.target.value)}
+                              className={cn("w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 font-bold", hasComment ? "text-white placeholder-red-200" : "text-blue-900 dark:text-blue-100")}
+                              placeholder="-"
+                            />
+                            <button 
+                              onClick={() => handleCommentClick(item.id, 'entradas', c.id, comment)}
+                              className={cn("absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity", hasComment ? "text-white opacity-100" : "text-gray-400 hover:text-blue-600")}
+                              title={hasComment ? `Comentário: ${comment}` : "Adicionar Comentário"}
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                            </button>
+                          </td>
+                        );
+                      })}
                       <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
 
                       {/* Saídas */}
-                      {cargasSaida.map((c: any) => (
-                        <td key={c.id} className="p-0 border-r border-gray-300 dark:border-gray-700 bg-purple-50/30 dark:bg-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/50">
-                          <input 
-                            type="number"
-                            min="0"
-                            value={mapSaidas[c.id] || ''}
-                            onChange={e => handleChangeQty(item.id, 'saidas', c.id, e.target.value)}
-                            className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-bold text-purple-900 dark:text-purple-100"
-                            placeholder="-"
-                          />
-                        </td>
-                      ))}
+                      {cargasSaida.map((c: any) => {
+                        const commentKey = `saidas_${c.id}`;
+                        const comment = item.comentarios?.[commentKey] || '';
+                        const hasComment = !!comment;
+                        return (
+                          <td key={c.id} className={cn("p-0 border-r border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-purple-50/30 dark:bg-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/50")}>
+                            <input 
+                              type="number"
+                              min="0"
+                              value={mapSaidas[c.id] || ''}
+                              onChange={e => handleChangeQty(item.id, 'saidas', c.id, e.target.value)}
+                              className={cn("w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-bold", hasComment ? "text-white placeholder-red-200" : "text-purple-900 dark:text-purple-100")}
+                              placeholder="-"
+                            />
+                            <button 
+                              onClick={() => handleCommentClick(item.id, 'saidas', c.id, comment)}
+                              className={cn("absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity", hasComment ? "text-white opacity-100" : "text-gray-400 hover:text-purple-600")}
+                              title={hasComment ? `Comentário: ${comment}` : "Adicionar Comentário"}
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                            </button>
+                          </td>
+                        );
+                      })}
                       <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
 
                       {/* Saldo */}
