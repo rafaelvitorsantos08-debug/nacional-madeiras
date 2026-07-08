@@ -60,7 +60,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 
 // --- SUBMODULES ---
 import { EntradaSaidaObras } from './EntradaSaidaObras';
-import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR, ENCHIMENTOS_PORTA } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR, ENCHIMENTOS_PORTA, ABA_ALIZAR } from './EstoqueModule';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -1238,7 +1238,7 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
       </datalist>
       <datalist id="medida_alizar_list">
         {FACE_ALIZAR.flatMap(face => 
-          ['40', '50', '60', '70', '80'].flatMap(aba => 
+          ABA_ALIZAR.flatMap(aba => 
             ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
               COMPRIMENTOS_ALIZAR.map(comprimento => (
                 <option key={`${face}x${aba}x${espessura}x${comprimento}`} value={`${face}x${aba}x${espessura}x${comprimento}`} />

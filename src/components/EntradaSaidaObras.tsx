@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
 import { Target, Plus, Trash2, X, Info, MessageSquare } from 'lucide-react';
-import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR } from './EstoqueModule';
+import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR, ABA_ALIZAR } from './EstoqueModule';
 
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
@@ -651,7 +651,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
         )))}
       </datalist>
       <datalist id="medida_alizar_list">
-        {FACE_ALIZAR.flatMap(face => ['40', '50', '60', '70', '80'].flatMap(aba => 
+        {FACE_ALIZAR.flatMap(face => ABA_ALIZAR.flatMap(aba => 
             ESPESSURA_ALIZAR.filter(esp => esp === '10' || esp === '15').flatMap(espessura => 
               COMPRIMENTOS_ALIZAR.map(comprimento => (
                 <option key={`${face}x${aba}x${espessura}x${comprimento}`} value={`${face}x${aba}x${espessura}x${comprimento}`} />
