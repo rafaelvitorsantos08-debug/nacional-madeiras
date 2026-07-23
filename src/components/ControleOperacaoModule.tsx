@@ -550,10 +550,29 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
     'Almoxarife'
   ];
 
+  const COLABORADORES = [
+    'Timoteo',
+    'Fabio',
+    'Romildo',
+    'Marcelo',
+    'Eduardo',
+    'Marco',
+    'Adriano',
+    'Alexandre',
+    'Lucio',
+    'Jair',
+    'Francisco',
+    'Sergio',
+    'Juarez',
+    'Samuel',
+    'Julio'
+  ];
+
   const getDayEfetivoTotal = (dateStrKey: string) => {
     const dayData = operacaoData[dateStrKey] || {};
     let sum = 0;
     let hasSector = false;
+    let colabCount = 0;
     SETORES_EFETIVO.forEach(s => {
       const v = parseInt(dayData[`efetivo_${s}`] || '0');
       if (!isNaN(v)) {
@@ -562,7 +581,16 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
       if (dayData[`efetivo_${s}`]) hasSector = true;
     });
 
-    if (hasSector) return sum;
+    const nonWorkingStatuses = ['Falta', 'Atestado', 'Férias', 'Folga', 'Não trabalhou'];
+    COLABORADORES.forEach(c => {
+      const status = dayData[`efetivo_colab_${c}`];
+      if (status && !nonWorkingStatuses.includes(status)) {
+        colabCount++;
+        hasSector = true;
+      }
+    });
+
+    if (hasSector) return sum + colabCount;
     const old = parseInt(dayData.efetivo || '0');
     return isNaN(old) || old === 0 ? '' : old;
   };
@@ -762,25 +790,51 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm shadow-2xl">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
-              <h3 className="font-bold text-gray-800">
-                Efetivo em {modalEfetivoOpen.dateStr}
-              </h3>
+              <div className="flex flex-col">
+                <h3 className="font-bold text-gray-800">
+                  Efetivo em {modalEfetivoOpen.dateStr}
+                </h3>
+                <button
+                  onClick={() => {
+                    const updates = {};
+                    COLABORADORES.forEach(c => {
+                      updates[`efetivo_colab_${c}`] = 'Outros Serviços';
+                    });
+                    setOperacaoData(prev => ({
+                      ...prev,
+                      [modalEfetivoOpen.dateStrKey]: {
+                        ...(prev[modalEfetivoOpen.dateStrKey] || {}),
+                        ...updates
+                      }
+                    }));
+                  }}
+                  className="text-xs text-blue-600 hover:text-blue-800 text-left mt-1 underline"
+                >
+                  Aplicar "Outros Serviços" a todos
+                </button>
+              </div>
               <button onClick={() => setModalEfetivoOpen(null)} className="text-gray-500 hover:text-red-500 rounded p-1 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-4 flex-1 overflow-y-auto max-h-[60vh] space-y-3">
-              {SETORES_EFETIVO.map(s => (
-                <div key={s} className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-gray-700 w-2/3 line-clamp-1">{s}</label>
-                  <input 
-                    type="number"
-                    min="0"
-                    placeholder="Qtd"
-                    value={operacaoData[modalEfetivoOpen.dateStrKey]?.[`efetivo_${s}`] || ''}
-                    onChange={e => handleInputChange(modalEfetivoOpen.dateStrKey, `efetivo_${s}`, e.target.value)}
-                    className="w-20 p-2 border border-gray-300 rounded-lg text-center text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
+              {COLABORADORES.map(c => (
+                <div key={c} className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700 w-1/3 line-clamp-1">{c}</label>
+                  <select
+                    value={operacaoData[modalEfetivoOpen.dateStrKey]?.[`efetivo_colab_${c}`] || ''}
+                    onChange={e => handleInputChange(modalEfetivoOpen.dateStrKey, `efetivo_colab_${c}`, e.target.value)}
+                    className="w-2/3 p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  >
+                    <option value="">Não trabalhou</option>
+                    {SETORES_EFETIVO.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                    <option value="Falta">Falta</option>
+                    <option value="Atestado">Atestado</option>
+                    <option value="Férias">Férias</option>
+                    <option value="Folga">Folga</option>
+                  </select>
                 </div>
               ))}
             </div>
