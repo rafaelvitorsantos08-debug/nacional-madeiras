@@ -284,6 +284,15 @@ export function RelatoriosModule() {
   const [avariaFile, setAvariaFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (reportType === "avarias") {
+      const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
+      if (header.data !== today) {
+        setHeader((prev) => ({ ...prev, data: today }));
+      }
+    }
+  }, [reportType, header.data]);
+
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
   };
@@ -746,6 +755,11 @@ export function RelatoriosModule() {
                     Documento Gerado Via Sistema - Nacional Madeiras
                   </p>
                 </div>
+                {reportType === "avarias" && (
+                  <div>
+                    <img src="/logo.svg" alt="Nacional Madeiras Logo" className="h-16 object-contain" />
+                  </div>
+                )}
               </div>
 
               {!reportType.includes("usinagem") && (
