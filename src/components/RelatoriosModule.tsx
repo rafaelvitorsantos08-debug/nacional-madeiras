@@ -287,11 +287,9 @@ export function RelatoriosModule() {
   useEffect(() => {
     if (reportType === "avarias") {
       const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
-      if (header.data !== today) {
-        setHeader((prev) => ({ ...prev, data: today }));
-      }
+      setHeader((prev) => ({ ...prev, data: today }));
     }
-  }, [reportType, header.data]);
+  }, [reportType]);
 
   const handleHeaderChange = (field: keyof ReportHeader, value: string) => {
     setHeader((prev) => ({ ...prev, [field]: value }));
@@ -754,10 +752,14 @@ export function RelatoriosModule() {
                   <p className="text-sm mt-1">
                     Documento Gerado Via Sistema - Nacional Madeiras
                   </p>
+                  <p className="text-sm mt-1 font-bold">
+                    Data: {header.data ? header.data.split("-").reverse().join("/") : ""}
+                  </p>
                 </div>
                 {reportType === "avarias" && (
-                  <div>
-                    <img src="/logo.svg" alt="Nacional Madeiras Logo" className="h-16 object-contain" />
+                  <div className="flex flex-col items-end text-right">
+                    <h2 className="text-2xl font-black text-gray-800 tracking-tighter leading-none">Nacional Madeiras</h2>
+                    <span className="text-xl font-bold text-gray-500 uppercase tracking-widest mt-1">Kit Porta</span>
                   </div>
                 )}
               </div>
