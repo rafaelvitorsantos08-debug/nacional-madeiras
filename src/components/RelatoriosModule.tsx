@@ -10,7 +10,10 @@ import {
   ClipboardList,
   Upload,
   Image as ImageIcon,
-  Download
+  Download,
+  Pencil,
+  Square,
+  Circle
 } from "lucide-react";
 import {
   CORES,
@@ -31,6 +34,10 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [color, setColor] = useState("#ef4444"); // default red
   const [isDrawing, setIsDrawing] = useState(false);
+  const [tool, setTool] = useState("freehand");
+  const [lineWidth, setLineWidth] = useState(4);
+  const snapshotRef = useRef(null);
+  const startCoordsRef = useRef(null);
 
   useEffect(() => {
     if (!imageFile) return;
@@ -83,25 +90,58 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
     setIsDrawing(true);
     const coords = getCoordinates(e);
     if (!coords) return;
+    startCoordsRef.current = coords;
 
-    const ctx = canvasRef.current?.getContext("2d");
-    if (ctx) {
-      ctx.beginPath();
-      ctx.moveTo(coords.x, coords.y);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (canvas && ctx) {
+      snapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      if (tool === "freehand") {
+        ctx.beginPath();
+        ctx.moveTo(coords.x, coords.y);
+      }
     }
   };
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrawing) return;
     const coords = getCoordinates(e);
-    if (!coords) return;
+    if (!coords || !startCoordsRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
-    const ctx = canvasRef.current?.getContext("2d");
-    if (ctx) {
+    if (tool === "freehand") {
       ctx.strokeStyle = color;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = lineWidth;
       ctx.lineCap = "round";
       ctx.lineTo(coords.x, coords.y);
+      ctx.stroke();
+    } else {
+      if (snapshotRef.current) {
+        ctx.putImageData(snapshotRef.current, 0, 0);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+
+      const startX = startCoordsRef.current.x;
+      const startY = startCoordsRef.current.y;
+      const width = coords.x - startX;
+      const height = coords.y - startY;
+
+      ctx.beginPath();
+      if (tool === "rect") {
+        ctx.rect(startX, startY, width, height);
+      } else if (tool === "circle") {
+        ctx.ellipse(
+          startX + width / 2, 
+          startY + height / 2, 
+          Math.abs(width / 2), 
+          Math.abs(height / 2), 
+          0, 0, 2 * Math.PI
+        );
+      }
       ctx.stroke();
     }
   };
@@ -135,19 +175,30 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
 
   return (
     <div className="bg-white border text-left flex flex-col p-4 rounded-xl shadow-sm mb-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <h4 className="font-semibold text-gray-800">Demarcação na Foto</h4>
-        <div className="flex gap-2">
-          {["#ef4444", "#eab308", "#3b82f6", "#22c55e", "#000000"].map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c)}
-              className={`w-6 h-6 rounded-full border-2 ${
-                color === c ? "border-indigo-600 scale-110" : "border-gray-200"
-              }`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 border-r pr-4">
+             <button onClick={() => setTool('freehand')} className={`p-1.5 rounded ${tool === 'freehand' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`} title="Livre"><Pencil className="w-4 h-4" /></button>
+             <button onClick={() => setTool('rect')} className={`p-1.5 rounded ${tool === 'rect' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`} title="Retângulo"><Square className="w-4 h-4" /></button>
+             <button onClick={() => setTool('circle')} className={`p-1.5 rounded ${tool === 'circle' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`} title="Redondo"><Circle className="w-4 h-4" /></button>
+          </div>
+          <div className="flex items-center gap-2 border-r pr-4">
+             <span className="text-xs text-gray-500 font-medium">Espessura:</span>
+             <input type="range" min="1" max="10" value={lineWidth} onChange={(e) => setLineWidth(Number(e.target.value))} className="w-20" />
+          </div>
+          <div className="flex gap-2">
+            {["#ef4444", "#eab308", "#3b82f6", "#22c55e", "#000000"].map((c) => (
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`w-6 h-6 rounded-full border-2 ${
+                  color === c ? "border-indigo-600 scale-110" : "border-gray-200"
+                }`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
         </div>
       </div>
       <div className="overflow-x-auto bg-gray-50 flex justify-center border rounded-lg cursor-crosshair">
