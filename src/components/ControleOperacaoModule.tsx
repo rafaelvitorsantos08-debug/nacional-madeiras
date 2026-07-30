@@ -456,7 +456,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm flex-1 flex flex-col min-h-0">
           <div className="overflow-auto flex-1">
-            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]">
+            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
               <thead className="sticky top-0 z-10 bg-white shadow-sm shadow-gray-300">
                 <tr className="bg-gray-100 text-gray-700 border-b border-gray-300">
                   <th className="p-2 border-r border-gray-300 w-12 font-bold">D/S</th>

@@ -52,17 +52,15 @@ body {
   }
 
   table {
-    background-color: white !important;
+    /* background-color: white !important; */
   }
 
   th {
-    background-color: #f3f4f6 !important;
-    color: #000 !important;
+    /* background-color: #f3f4f6 !important; color: #000 !important; */
   }
 
   td, tr {
-    color: #000 !important;
-    background-color: transparent !important;
+    /* color: #000 !important; background-color: transparent !important; */
   }
 
   /* Make sure everything prints, remove scrollbars and fixed heights */
@@ -255,4 +253,11 @@ html.dark input, html.dark select, html.dark textarea {
 html.dark option {
   @apply !bg-gray-800 !text-white;
 }
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
