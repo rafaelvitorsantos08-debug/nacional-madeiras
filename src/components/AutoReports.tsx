@@ -920,6 +920,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                   <td colSpan={totalCols} className="p-0 border-0">
                     <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4 mt-2 print:border-black">
                        <div>
+                         <div className="flex flex-col items-start mb-2" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                           <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
+                           <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
+                         </div>
                          <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-4">RELATÓRIO DE MONTAGEM</h1>
                        </div>
                        <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">

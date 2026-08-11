@@ -421,8 +421,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
              </button>
           ))}
         </div>
-        <div className="hidden print:block text-xl font-bold text-gray-800 mt-2">
-          {MESES[selecionadoMes]} {selecionadoAno}
+        <div className="hidden print:block mb-4" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <div className="flex flex-col mb-4">
+            <span className="font-bold text-[#166534] text-2xl leading-tight uppercase print:text-[#166534]">Nacional Madeiras</span>
+            <span className="font-bold text-[#475569] text-sm tracking-widest uppercase mt-1 print:text-[#475569]">Kit Porta</span>
+          </div>
+          <div className="text-xl font-bold text-gray-800 mt-2">
+            Controle x Operação - {MESES[selecionadoMes]} {selecionadoAno}
+          </div>
         </div>
       </div>
 
@@ -770,8 +776,14 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
              </button>
           ))}
         </div>
-        <div className="hidden print:block text-xl font-bold text-gray-800 mt-2">
-          {MESES[selecionadoMes]} {selecionadoAno}
+        <div className="hidden print:block mb-4" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+          <div className="flex flex-col mb-4">
+            <span className="font-bold text-[#166534] text-2xl leading-tight uppercase print:text-[#166534]">Nacional Madeiras</span>
+            <span className="font-bold text-[#475569] text-sm tracking-widest uppercase mt-1 print:text-[#475569]">Kit Porta</span>
+          </div>
+          <div className="text-xl font-bold text-gray-800 mt-2">
+            Operação da Produção - {MESES[selecionadoMes]} {selecionadoAno}
+          </div>
         </div>
       </div>
 
@@ -1095,6 +1107,15 @@ function EntradaObras({ globalSearch = '' }: { globalSearch?: string }) {
             </div>
             
             <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
+              <div className="hidden print:block mb-4" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                 <div className="flex flex-col mb-4">
+                   <span className="font-bold text-[#166534] text-2xl leading-tight uppercase print:text-[#166534]">Nacional Madeiras</span>
+                   <span className="font-bold text-[#475569] text-sm tracking-widest uppercase mt-1 print:text-[#475569]">Kit Porta</span>
+                 </div>
+                 <div className="text-xl font-bold text-gray-800 mt-2">
+                   Entrada de Obras - {activeObra.nome}
+                 </div>
+              </div>
               <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
                 <div className="flex-1 overflow-auto">
                   <table className="w-full text-center text-sm border-collapse min-w-[1500px]">
@@ -1677,6 +1698,15 @@ function SaidasObras({ globalSearch = '' }: { globalSearch?: string }) {
             </div>
             
             <div className="flex-1 overflow-auto p-4 w-full">
+              <div className="hidden print:block mb-4" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                 <div className="flex flex-col mb-4">
+                   <span className="font-bold text-[#166534] text-2xl leading-tight uppercase print:text-[#166534]">Nacional Madeiras</span>
+                   <span className="font-bold text-[#475569] text-sm tracking-widest uppercase mt-1 print:text-[#475569]">Kit Porta</span>
+                 </div>
+                 <div className="text-xl font-bold text-gray-800 mt-2">
+                   Expedição - {activeObra.nome} ({activeCategoryTab.toUpperCase()})
+                 </div>
+              </div>
               <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto print:overflow-visible w-full">
                 <table className="w-full text-center text-sm border-collapse min-w-[600px]">
                   <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 sticky top-0 z-10 shadow-sm">

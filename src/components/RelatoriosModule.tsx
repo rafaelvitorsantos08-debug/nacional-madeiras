@@ -756,12 +756,10 @@ export function RelatoriosModule() {
                     Data: {header.data ? header.data.split("-").reverse().join("/") : ""}
                   </p>
                 </div>
-                {reportType === "avarias" && (
-                  <div className="flex flex-col items-end text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                    <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534]">Nacional Madeiras</h2>
+                <div className="flex flex-col items-end text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                    <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
                     <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
                   </div>
-                )}
               </div>
 
               {!reportType.includes("usinagem") && (
