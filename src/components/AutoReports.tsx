@@ -849,16 +849,44 @@ function renderAutoVergas(kits: any[]) {
   );
 }
 
+function PrintableTextarea() {
+  const [val, setVal] = React.useState('');
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [val]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={val}
+      onChange={(e) => setVal(e.target.value)}
+      className="w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500 overflow-hidden"
+      style={{ minHeight: '100px', resize: 'none' }}
+      placeholder="Digite aqui as observações..."
+    />
+  );
+}
 export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string, cliente?: string) {
-  // Group by Tipologia first
-  const byTipologia = new Map<string, any[]>();
+  // Group by Tipologia and Fechadura
+  const byTipologiaFech = new Map<string, any[]>();
   kits.forEach(k => {
     const tipo = k.tipologia || 'SEM TIPOLOGIA';
-    if (!byTipologia.has(tipo)) byTipologia.set(tipo, []);
-    byTipologia.get(tipo).push(k);
+    const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
+    const key = `${tipo}|||${fech}`;
+    if (!byTipologiaFech.has(key)) byTipologiaFech.set(key, []);
+    byTipologiaFech.get(key).push(k);
   });
 
-  const tipologias = Array.from(byTipologia.keys()).sort();
+  const tipologias = Array.from(byTipologiaFech.keys()).sort((a, b) => {
+    const [tipoA] = a.split('|||');
+    const [tipoB] = b.split('|||');
+    return tipoA.localeCompare(tipoB);
+  });
 
   return (
     <div className="space-y-8 print:space-y-0 print:block">
@@ -876,8 +904,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         `}
       </style>
 
-      {tipologias.map((tipo, idx) => {
-        const tipoKits = byTipologia.get(tipo) || [];
+      {tipologias.map((key, idx) => {
+        const [tipo] = key.split('|||');
+        const tipoKits = byTipologiaFech.get(key) || [];
         
         let showBits = false;
         let showCorrer = false;
@@ -1032,25 +1061,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
                   const rows = Array.from(grouped.values());
                   
-                  // Separa as linhas por fechadura para criar blocos distintos
-                  const rowsByFechadura = new Map();
-                  rows.forEach(r => {
-                    if (!rowsByFechadura.has(r.fechadura)) rowsByFechadura.set(r.fechadura, []);
-                    rowsByFechadura.get(r.fechadura).push(r);
-                  });
-                  
-                  const fechaduraGroups = Array.from(rowsByFechadura.values());
-
                   return (
                     <React.Fragment key={abIdx}>
-                      {fechaduraGroups.map((groupRows, gIdx) => (
-                        <React.Fragment key={gIdx}>
-                          {(abIdx > 0 || gIdx > 0) && (
-                            <tr className="border-0 bg-transparent h-6 break-inside-avoid">
-                               <td colSpan={totalCols} className="border-0"></td>
-                            </tr>
-                          )}
-                          {/* Abertura Header */}
+                      {abIdx > 0 && (
+                        <tr className="border-0 bg-transparent h-6 break-inside-avoid">
+                           <td colSpan={totalCols} className="border-0"></td>
+                        </tr>
+                      )}
+                      {/* Abertura Header */}
                           <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
                             <td colSpan={totalCols} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
                               <EditableText>{abertura}</EditableText>
@@ -1076,7 +1094,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                             <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
                           </tr>
                           {/* Linhas de Dados */}
-                          {groupRows.map((g, rIdx) => (
+                          {rows.map((g, rIdx) => (
                             <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 break-inside-avoid">
                               <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.qtd}</EditableText></td>
                               <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.folha}</EditableText></td>
@@ -1097,8 +1115,6 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                             </tr>
                           ))}
                         </React.Fragment>
-                      ))}
-                    </React.Fragment>
                   );
                 })}
               </tbody>
@@ -1106,11 +1122,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             
             <div className="mt-8 mb-2 break-inside-avoid w-full">
               <p className="text-xs font-bold uppercase text-gray-800 dark:text-gray-200 print:text-black mb-1">Observações Gerais:</p>
-              <div 
-                contentEditable 
-                suppressContentEditableWarning 
-                className="min-h-[100px] w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500"
-              />
+              <PrintableTextarea />
             </div>
           </div>
         );
