@@ -51,6 +51,9 @@ body {
     border-color: #000 !important;
   }
 
+  table, th, td, tr {
+    border-color: #000 !important;
+  }
   table {
     /* background-color: white !important; */
   }

@@ -31,22 +31,22 @@ export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente
 
 function TableLayout({ headers, rows }: { headers: string[], rows: (string | number)[][] }) {
   return (
-    <div className="border border-gray-300 dark:border-gray-600 print:border-transparent rounded overflow-x-auto shadow-sm print:shadow-none break-inside-avoid print:mt-4">
-      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
+    <div className="border border-gray-300 dark:border-gray-600 print:border-black print:border rounded overflow-x-auto shadow-sm print:shadow-none break-inside-avoid print:mt-4">
+      <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 print:divide-black text-[11px] sm:text-sm print:text-[16px] print:border-y print:border-black">
         <thead className="bg-[#0f172a] text-white print:bg-transparent print:text-black">
           <tr>
             {headers.map((h, i) => (
-              <th key={i} className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-transparent">
+              <th key={i} className="px-3 py-2 text-center font-semibold uppercase whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">
                 <EditableText>{h}</EditableText>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white dark:bg-gray-800 print:bg-transparent divide-y divide-gray-200 dark:divide-gray-700 print:divide-gray-300">
+        <tbody className="bg-white dark:bg-gray-800 print:bg-transparent divide-y divide-gray-200 dark:divide-gray-700 print:divide-black">
           {rows.map((row, idx) => (
             <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent">
               {row.map((cell, cIdx) => (
-                <td key={cIdx} className="px-3 py-2 text-center border-x border-gray-200 print:border-transparent font-medium text-gray-900 dark:text-gray-100 print:text-black">
+                <td key={cIdx} className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium text-gray-900 dark:text-gray-100 print:text-black">
                   <EditableText>{cell || '-'}</EditableText>
                 </td>
               ))}
@@ -251,21 +251,21 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
 
          return (
             <div key={groupKey} className="break-inside-avoid mb-6 print:mb-6 shadow-sm print:shadow-none bg-white" style={{ pageBreakInside: 'avoid' }}>
-              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-xs bg-white print:bg-white overflow-hidden" style={{ pageBreakInside: 'avoid' }}>
+              <table className="w-full border-collapse border border-black print:border-black print:border-solid text-[11px] sm:text-[14px] print:text-[16px] bg-white print:bg-white overflow-hidden" style={{ pageBreakInside: 'avoid' }}>
                 <thead>
                   {mode === 'portas' && (
                     <tr>
-                      <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] text-gray-900 dark:text-gray-100 print:text-black">
+                      <th colSpan={2} className="bg-gray-200 dark:bg-[#0f172a] print:bg-gray-200 border-b border-black print:border-black print:border-solid py-1 text-center font-bold uppercase text-[12px] print:text-[16px] text-gray-900 dark:text-gray-100 print:text-black">
                         <EditableText>{Array.from(groupData.caracteristicas).join(" / ") || "CARACTERÍSTICA PADRÃO"}</EditableText>
                       </th>
                     </tr>
                   )}
                   <tr>
-                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-r border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] print:text-[14px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <span className="font-semibold text-gray-500 uppercase mr-1">ACABAMENTO:</span>
                       <EditableText>{Array.from(groupData.acabamentos).join(" / ") || "-"}</EditableText>
                     </th>
-                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
+                    <th className="bg-gray-100 dark:bg-gray-800/50 print:bg-gray-100 border-b border-black print:border-black print:border-solid py-1 px-2 text-left uppercase font-bold text-[9px] print:text-[14px] w-1/2 text-gray-800 dark:text-gray-200 print:text-black">
                       <div className="flex flex-col gap-1">
                         <div>
                           <span className="font-semibold text-gray-500 uppercase mr-1">FECHADURA:</span>
@@ -299,7 +299,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                {l ? (
                                   l.type === 'header' ? (
                                     <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
+                                      <div className="flex-1 text-center font-bold text-[9px] print:text-[13px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
                                          <EditableText>{l.label}</EditableText>
                                       </div>
                                     </div>
@@ -324,7 +324,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
                                             <EditableText>{l.item.qtd}</EditableText>
                                           </div>
-                                          <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
+                                          <div className="font-bold text-[8.5px] print:text-[12px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
                                             <EditableText>{l.item.itemMeta ? String(l.item.itemMeta) : ''}</EditableText>
                                           </div>
                                         </div>
@@ -339,7 +339,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                {r ? (
                                   r.type === 'header' ? (
                                     <div className="flex bg-gray-50 dark:bg-gray-800/30 print:bg-gray-50 items-stretch w-full h-full">
-                                      <div className="flex-1 text-center font-bold text-[9px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
+                                      <div className="flex-1 text-center font-bold text-[9px] print:text-[13px] uppercase px-2 py-1.5 flex items-center justify-center text-gray-700 dark:text-gray-300 print:text-black">
                                          <EditableText>{r.label}</EditableText>
                                       </div>
                                     </div>
@@ -364,7 +364,7 @@ function renderUsinagem(kits: any[], mode: 'portas' | 'aduelas', responsavel?: s
                                           <div className="font-bold print:text-black text-gray-900 dark:text-gray-100 w-6 text-center shrink-0">
                                             <EditableText>{r.item.qtd}</EditableText>
                                           </div>
-                                          <div className="font-bold text-[8.5px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
+                                          <div className="font-bold text-[8.5px] print:text-[12px] uppercase print:text-black text-gray-600 dark:text-gray-400 flex-1 text-left whitespace-normal break-words leading-tight max-w-[140px]">
                                             <EditableText>{r.item.itemMeta ? String(r.item.itemMeta) : ''}</EditableText>
                                           </div>
                                         </div>
@@ -539,7 +539,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
              <EditableText>{caracteristica}</EditableText>
           </div>
           <div className="print:mt-2">
-            <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300" style={{ pageBreakInside: 'avoid' }}>
+            <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-[14px] print:text-[16px] print:border-y print:border-black" style={{ pageBreakInside: 'avoid' }}>
               <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                 <tr>
                   <th className="px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/3">
@@ -553,7 +553,7 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
+              <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
                 {items.map((k, idx2) => (
                   <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                     <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/3">
@@ -660,7 +660,7 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                   const hasMontantes = items.some(i => i.montantesMedida && i.montantesMedida !== '-');
                   return (
                     <div key={altura} className="rounded border border-gray-300 dark:border-slate-700 print:border-transparent overflow-hidden bg-white dark:bg-[#0f172a] shadow-sm print:shadow-none">
-                       <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300">
+                       <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-[14px] print:text-[16px] print:border-y print:border-black">
                           <thead className="bg-[#f8fafc] dark:bg-slate-800/50 print:bg-transparent">
                             <tr>
                               <th className={`px-4 py-3 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-700 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black ${hasMontantes ? 'w-1/3' : 'w-1/2'}`}>
@@ -676,30 +676,30 @@ function renderAutoAduelas(kits: any[], responsavel?: string, obra?: string) {
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
+                          <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
                             {items.map((k, idx2) => (
                               <tr key={idx2} className="hover:bg-gray-50 print:hover:bg-transparent">
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                   <div className="flex flex-col gap-1 items-center">
                                     <EditableText>{k.dimensao}</EditableText>
-                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.aLargura}x1000</EditableText></span>}
-                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.aLargura}x2000</EditableText></span>}
+                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] print:text-[14px] font-medium print:text-black"><EditableText>{k.aLargura}x1000</EditableText></span>}
+                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] print:text-[14px] font-medium print:text-black"><EditableText>{k.aLargura}x2000</EditableText></span>}
                                   </div>
                                 </td>
                                 {hasMontantes && (
                                   <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                     <div className="flex flex-col gap-1 items-center">
                                       <EditableText>{k.montantesMedida || '-'}</EditableText>
-                                      {k.vergas1000 > 0 && <span className="text-transparent text-[11px]">-</span>}
-                                      {k.vergas2000 > 0 && <span className="text-transparent text-[11px]">-</span>}
+                                      {k.vergas1000 > 0 && <span className="text-transparent text-[11px] print:text-[14px]">-</span>}
+                                      {k.vergas2000 > 0 && <span className="text-transparent text-[11px] print:text-[14px]">-</span>}
                                     </div>
                                   </td>
                                 )}
                                 <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
                                   <div className="flex flex-col gap-1 items-center">
                                     <EditableText>{k.qtdTotal}</EditableText>
-                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.vergas1000}</EditableText></span>}
-                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] font-medium"><EditableText>{k.vergas2000}</EditableText></span>}
+                                    {k.vergas1000 > 0 && <span className="text-gray-500 text-[11px] print:text-[14px] font-medium print:text-black"><EditableText>{k.vergas1000}</EditableText></span>}
+                                    {k.vergas2000 > 0 && <span className="text-gray-500 text-[11px] print:text-[14px] font-medium print:text-black"><EditableText>{k.vergas2000}</EditableText></span>}
                                   </div>
                                 </td>
                               </tr>
@@ -817,7 +817,7 @@ function renderAutoVergas(kits: any[]) {
                 <EditableText>{`Verga (Folha + 47mm): ${verga}`}</EditableText>
              </div>
              <div className="print:mt-0">
-               <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-gray-300 text-[11px] sm:text-sm print:border-y print:border-gray-300" style={{ pageBreakInside: 'avoid' }}>
+               <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-[14px] print:text-[16px] print:border-y print:border-black" style={{ pageBreakInside: 'avoid' }}>
                   <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
                     <tr>
                       <th className="px-4 py-2 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-1/2">
@@ -828,7 +828,7 @@ function renderAutoVergas(kits: any[]) {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-gray-300">
+                  <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
                     {aduelasList.map(([aLarg, qtd], idx2) => (
                       <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
                         <td className="px-4 py-3 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold w-1/2">
@@ -871,6 +871,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
       <style type="text/css">
         {`
           @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            table, th, td, tr {
+              border-color: #000000 !important;
+            }
             @page { size: landscape; }
             .montagem-page-break {
               page-break-after: always;
@@ -925,7 +933,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 {/* Print Header */}
                 <tr className="hidden print:table-row">
                   <td colSpan={totalCols} className="p-0 border-0">
-                    <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4 mt-2 print:border-black">
+                    <div className="flex justify-between items-start border-b-[2px] border-black pb-4 mb-4 mt-2 print:border-black">
                        <div>
                          <div className="flex flex-col items-start mb-2" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                            <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
@@ -933,7 +941,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                          </div>
                          <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-4">RELATÓRIO DE MONTAGEM</h1>
                        </div>
-                       <div className="text-right text-xs text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
+                       <div className="text-right text-[12px] print:text-[14px] text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
                          <div className="flex items-end mt-2">
                            <span className="font-bold mr-2 uppercase whitespace-nowrap">Data de Liberação:</span>
                            <span className="font-medium text-sm text-black print:text-black border-b border-black min-w-[80px] text-center inline-block">
@@ -949,16 +957,16 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                     {(obra || responsavel || cliente) && (
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         <div className="border border-gray-300 p-2">
-                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Cliente</p>
-                          <p className="font-medium text-lg print:text-black uppercase text-black">{cliente || "Não informado"}</p>
+                          <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
+                          <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{cliente || "Não informado"}</p>
                         </div>
                         <div className="border border-gray-300 p-2">
-                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Obra</p>
-                          <p className="font-medium text-lg print:text-black text-black">{obra || "Não informado"}</p>
+                          <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
+                          <p className="font-medium text-lg print:text-[20px] print:text-black text-black">{obra || "Não informado"}</p>
                         </div>
                         <div className="border border-gray-300 p-2">
-                          <p className="text-xs uppercase text-gray-600 font-bold print:text-gray-600">Responsável</p>
-                          <p className="font-medium text-lg print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
+                          <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
+                          <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
                         </div>
                       </div>
                     )}
@@ -968,13 +976,13 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 {/* Sub-Header / Tipo */}
                 <tr>
                    <td colSpan={totalCols} className="p-0 border-0">
-                      <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase mb-4 print:bg-transparent print:text-black">
+                      <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-2 text-center font-bold text-sm print:text-[18px] uppercase mb-4 print:bg-transparent print:text-black">
                         <EditableText>Relatório de Montagem - {tipo} {fech && fech !== 'SEM FECHADURA' ? `(${fech})` : ''}</EditableText>
                       </div>
                    </td>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent text-[11px] sm:text-sm print:text-sm">
+              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent text-[11px] sm:text-sm print:text-[16px]">
                 {aberturas.map((abertura, abIdx) => {
                   const abKits = byAbertura.get(abertura) || [];
                   
@@ -1047,49 +1055,49 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         </tr>
                       )}
                       {/* Abertura Header */}
-                          <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 w-full break-inside-avoid">
-                            <td colSpan={totalCols} className="px-3 py-2 text-center font-bold text-sm uppercase text-black dark:text-white print:text-black border-transparent print:border-transparent">
+                          <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 print:border-black w-full break-inside-avoid">
+                            <td colSpan={totalCols} className="px-3 py-2 text-center font-bold text-[14px] sm:text-[16px] print:text-[18px] uppercase text-black dark:text-white print:text-black print:border-black border-y">
                               <EditableText>{abertura}</EditableText>
                             </td>
                           </tr>
                           {/* Títulos do Bloco */}
-                          <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-gray-300 print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none">
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">QTD</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FOLHA DE PORTA</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CARACTERÍSTICAS</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">ACABAMENTO</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">INFO. ADUELA</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECH. GRID</th>
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">DOBRADIÇAS</th>
-                            {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">BITS</th>}
-                            {showCorrer && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CORRER</th>}
-                            {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">VENEZIANA</th>}
-                            {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">GRELHA</th>}
-                            {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">BANDEIRA</th>}
-                            {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">PIVOTANTE</th>}
-                            {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">FECHA FRESTA</th>}
-                            {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">COM VIDRO</th>}
-                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-gray-300">CONCLUÍDO</th>
+                          <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-black print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none">
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">ACABAMENTO</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">INFO. ADUELA</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECH. GRID</th>
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">DOBRADIÇAS</th>
+                            {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BITS</th>}
+                            {showCorrer && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CORRER</th>}
+                            {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">VENEZIANA</th>}
+                            {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">GRELHA</th>}
+                            {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BANDEIRA</th>}
+                            {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">PIVOTANTE</th>}
+                            {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECHA FRESTA</th>}
+                            {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">COM VIDRO</th>}
+                            <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CONCLUÍDO</th>
                           </tr>
                           {/* Linhas de Dados */}
                           {rows.map((g, rIdx) => (
-                            <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 break-inside-avoid">
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.qtd}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.folha}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.caracteristicas}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.acabamento}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.aduela}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.fechadura}</EditableText></td>
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.dobradica}</EditableText></td>
-                              {showBits && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.bitsQtde}</EditableText></td>}
-                              {showCorrer && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.correr}</EditableText></td>}
-                              {showVen && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.veneziana}</EditableText></td>}
-                              {showGre && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.grelha}</EditableText></td>}
-                              {showBand && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.bandeira}</EditableText></td>}
-                              {showPiv && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.pivotante}</EditableText></td>}
-                              {showFf && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.fechaFresta}</EditableText></td>}
-                              {showVid && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"><EditableText>{g.vidro}</EditableText></td>}
-                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-gray-300 font-medium"> </td>
+                            <tr key={rIdx} className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid">
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.qtd}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.folha}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.caracteristicas}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.acabamento}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.aduela}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.fechadura}</EditableText></td>
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.dobradica}</EditableText></td>
+                              {showBits && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.bitsQtde}</EditableText></td>}
+                              {showCorrer && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.correr}</EditableText></td>}
+                              {showVen && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.veneziana}</EditableText></td>}
+                              {showGre && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.grelha}</EditableText></td>}
+                              {showBand && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.bandeira}</EditableText></td>}
+                              {showPiv && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.pivotante}</EditableText></td>}
+                              {showFf && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.fechaFresta}</EditableText></td>}
+                              {showVid && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{g.vidro}</EditableText></td>}
+                              <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"> </td>
                             </tr>
                           ))}
                         </React.Fragment>
@@ -1161,7 +1169,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
 
   return (
     <div className="space-y-4 print:space-y-6">
-      <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
+      <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-2 text-center font-bold text-sm uppercase print:bg-transparent print:text-black">
         <EditableText>Relatório de Entrega</EditableText>
       </div>
       {(obra || responsavel || cliente) && (
