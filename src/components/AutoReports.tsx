@@ -1,15 +1,69 @@
 
 import React, { useMemo } from 'react';
 
-const EditableText = ({ children }: { children: React.ReactNode }) => (
-  <span 
-    contentEditable 
-    suppressContentEditableWarning 
-    className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
-  >
-    {children}
-  </span>
-);
+
+function useLocalState(key: string, initialValue: string) {
+  const [val, setVal] = React.useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch {
+      return initialValue;
+    }
+  });
+  const setValue = (value: string) => {
+    setVal(value);
+    window.localStorage.setItem(key, JSON.stringify(value));
+  };
+  return [val, setValue] as const;
+}
+
+const PersistentObservation = ({ id }: { id: string }) => {
+  const [val, setVal] = useLocalState(`nm_obs_${id}`, '');
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (ref.current && ref.current.innerHTML !== val) {
+      ref.current.innerHTML = val;
+    }
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={(e) => setVal(e.currentTarget.innerHTML)}
+      className="min-h-[100px] w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm print:text-[16px] text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500"
+    />
+  );
+};
+
+const EditableText = ({ children }: { children: React.ReactNode }) => {
+  const [val, setVal] = React.useState(children);
+  
+  React.useEffect(() => {
+    setVal(children);
+  }, [children]);
+
+  const onInput = (e: React.FormEvent<HTMLSpanElement>) => {
+    // Keep local state in sync so re-renders don't overwrite it
+    setVal(e.currentTarget.textContent);
+  };
+
+  return (
+    <span 
+      contentEditable 
+      suppressContentEditableWarning 
+      onInput={onInput}
+      onBlur={(e) => setVal(e.currentTarget.textContent)}
+      className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
+    >
+      {val}
+    </span>
+  );
+};
+
 
 export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente }: { kits: any[], reportType: string, responsavel?: string, obra?: string, cliente?: string }) {
   const content = useMemo(() => {
@@ -1108,11 +1162,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             
             <div className="mt-8 mb-2 break-inside-avoid w-full">
               <p className="text-xs font-bold uppercase text-gray-800 dark:text-gray-200 print:text-black mb-1">Observações Gerais:</p>
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                className="min-h-[100px] w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500"
-              />
+              <PersistentObservation id={"montagem_" + btoa(unescape(encodeURIComponent(key)))} />
             </div>
           </div>
         );
