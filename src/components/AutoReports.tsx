@@ -849,28 +849,6 @@ function renderAutoVergas(kits: any[]) {
   );
 }
 
-function PrintableTextarea() {
-  const [val, setVal] = React.useState('');
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-
-  React.useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
-    }
-  }, [val]);
-
-  return (
-    <textarea
-      ref={textareaRef}
-      value={val}
-      onChange={(e) => setVal(e.target.value)}
-      className="w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500 overflow-hidden"
-      style={{ minHeight: '100px', resize: 'none' }}
-      placeholder="Digite aqui as observações..."
-    />
-  );
-}
 export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string, cliente?: string) {
   // Group by Tipologia and Fechadura
   const byTipologiaFech = new Map<string, any[]>();
@@ -905,7 +883,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
       </style>
 
       {tipologias.map((key, idx) => {
-        const [tipo] = key.split('|||');
+        const [tipo, fech] = key.split('|||');
         const tipoKits = byTipologiaFech.get(key) || [];
         
         let showBits = false;
@@ -991,7 +969,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 <tr>
                    <td colSpan={totalCols} className="p-0 border-0">
                       <div className="bg-gray-200 dark:bg-slate-800 border-[1.5px] border-black print:border-black py-2 text-center font-bold text-sm uppercase mb-4 print:bg-transparent print:text-black">
-                        <EditableText>Relatório de Montagem - {tipo}</EditableText>
+                        <EditableText>Relatório de Montagem - {tipo} {fech && fech !== 'SEM FECHADURA' ? `(${fech})` : ''}</EditableText>
                       </div>
                    </td>
                 </tr>
@@ -1122,7 +1100,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             
             <div className="mt-8 mb-2 break-inside-avoid w-full">
               <p className="text-xs font-bold uppercase text-gray-800 dark:text-gray-200 print:text-black mb-1">Observações Gerais:</p>
-              <PrintableTextarea />
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                className="min-h-[100px] w-full border-[1.5px] border-gray-300 dark:border-gray-600 print:border-black p-2 outline-none rounded text-sm text-black dark:text-white print:text-black bg-white dark:bg-gray-800 print:bg-transparent focus:ring-1 focus:ring-gray-500"
+              />
             </div>
           </div>
         );
