@@ -557,51 +557,57 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   };
 
   return (
-    <div className="flex-1 flex max-h-[850px] overflow-hidden rounded-bl-xl rounded-br-xl">
-      {/* Sidebar de Obras */}
-      <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col h-full shrink-0">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col gap-2">
-          <h2 className="font-bold text-gray-700 dark:text-gray-200 text-sm tracking-wide uppercase">OBRAS</h2>
-          <button onClick={adicionarObra} className="flex justify-center items-center px-3 py-1.5 text-sm font-medium text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm">
-            <Plus className="w-4 h-4 mr-1"/> Nova Obra
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto w-full max-w-full">
-          {obrasList.length === 0 ? (
-            <div className="p-6 text-center text-gray-500 text-sm">Nenhuma obra cadastrada.</div>
-          ) : (
-            obrasList.map((obra: any) => (
-              <div 
-                key={obra.id} 
-                className={cn(
-                  "border-b border-gray-100 dark:border-gray-800 group transition-colors flex justify-between",
-                  selectedObraId === obra.id 
-                    ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500" 
-                    : "hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-l-transparent"
-                )}
+    <div className="flex-1 flex flex-col h-full bg-gray-50 dark:bg-gray-950 overflow-hidden rounded-bl-xl rounded-br-xl">
+      {/* Top Header Controls */}
+      <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shrink-0 flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
+            <div className="flex flex-col gap-1 flex-1 max-w-sm">
+              <label className="text-[11px] font-bold text-gray-500 uppercase">Selecionar Obra:</label>
+              <select 
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold focus:ring-2 focus:ring-brand-green outline-none transition-shadow"
+                value={selectedObraId || ''}
+                onChange={(e) => setSelectedObraId(e.target.value)}
               >
-                <div onClick={() => setSelectedObraId(obra.id)} className="flex-1 p-3 flex flex-col overflow-hidden cursor-pointer">
-                  <span className={cn("font-semibold truncate sm:whitespace-normal", selectedObraId === obra.id ? "text-blue-800 dark:text-blue-200" : "text-gray-700 dark:text-gray-300")}>{obra.nome}</span>
-                </div>
-                <button onClick={() => deletarObra(obra.id)} className="p-3 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))
+                {obrasList.length === 0 && <option value="" disabled>Nenhuma obra cadastrada</option>}
+                {obrasList.map(o => <option key={o.id} value={o.id}>{o.nome || 'Sem Nome'}</option>)}
+              </select>
+            </div>
+            <button onClick={adicionarObra} className="mt-5 flex justify-center items-center px-4 py-2 text-sm font-bold text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap">
+              <Plus className="w-4 h-4 mr-1"/> Nova Obra
+            </button>
+          </div>
+          {activeObra && (
+             <button onClick={() => deletarObra(activeObra.id)} className="mt-5 sm:mt-0 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-900/30 transition-colors flex items-center gap-1 whitespace-nowrap">
+                <Trash2 className="w-4 h-4" /> Excluir Obra
+             </button>
           )}
         </div>
+
+        {activeObra && (
+           <div className="flex items-center gap-3 bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100 dark:border-blue-900/30">
+             <Target className="w-5 h-5 text-blue-500 shrink-0" />
+             <input 
+                type="text" 
+                value={activeObra.nome}
+                onChange={(e) => {
+                   setObrasV6(prev => {
+                      const o = prev[activeObra.id];
+                      if (!o) return prev;
+                      return { ...prev, [activeObra.id]: { ...o, nome: e.target.value } };
+                   });
+                }}
+                className="text-xl font-bold text-gray-800 dark:text-gray-100 bg-transparent border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-blue-500 outline-none w-full px-1 py-1 transition-colors"
+                placeholder="Nome da Obra"
+             />
+           </div>
+        )}
       </div>
 
       {/* Conteúdo da Obra Selecionada */}
-      <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-950 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {activeObra ? (
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center shrink-0">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                 {activeObra.nome}
-              </h2>
-            </div>
-            
             {/* Abas dos Materiais */}
             <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex space-x-2 shrink-0">
               <button 
@@ -630,8 +636,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-8">
             <Target className="w-16 h-16 text-gray-300 mb-4" />
-            <h3 className="text-xl font-medium text-gray-600">Selecione uma Obra</h3>
-            <p className="mt-2 text-center max-w-sm">Para gerenciar entradas e saídas de materiais, selecione uma obra na lista lateral ou crie uma nova.</p>
+            <h3 className="text-xl font-medium text-gray-600">Selecione ou Crie uma Obra</h3>
+            <p className="mt-2 text-center max-w-sm">Utilize os controles na parte superior para gerenciar as obras.</p>
           </div>
         )}
       </div>
@@ -641,7 +647,6 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
           text-align-last: center;
         }
       `}</style>
-
       <datalist id="dimensoes_porta_list">
         {DIMENSOES_PORTA.map(op => <option key={op} value={op} />)}
       </datalist>
