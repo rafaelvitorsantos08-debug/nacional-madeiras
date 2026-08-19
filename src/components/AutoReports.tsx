@@ -1203,8 +1203,23 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
         // Group kits inside the block by Enchimento + Dimensao
         const dims = new Map<string, any[]>();
         blockKits.forEach(k => {
-          const enc = (k.enchimento || 'S/ ENCHIMENTO').toUpperCase();
-          const dim = k.dimensao || (k.largura && k.altura ? `${k.largura} x ${k.altura}` : 'S/ DIMENSÃO');
+          // 'caracteristica_da_porta' is mapped from CSV to k.caracteristicaPorta or k.caracteristica_da_porta
+          // Enchimento comes from this field
+          const rawEnc = k.caracteristicaPorta || k.caracteristica_da_porta || k.enchimento;
+          const enc = rawEnc ? rawEnc.toUpperCase() : 'S/ ENCHIMENTO';
+          
+          // Dimensao comes from folha_larg and folha_alt (mapped to k.folhaLarg e k.folhaAlt)
+          const rawLarg = k.folhaLarg || k.folha_larg || k.largura;
+          const rawAlt = k.folhaAlt || k.folha_alt || k.altura;
+          const rawDim = k.dimensao; // fallback
+          
+          let dim = 'S/ DIMENSÃO';
+          if (rawLarg && rawAlt) {
+             dim = `${rawLarg}x${rawAlt}`;
+          } else if (rawDim) {
+             dim = rawDim;
+          }
+          
           const dimKey = `${enc} || ${dim}`;
           if (!dims.has(dimKey)) dims.set(dimKey, []);
           dims.get(dimKey).push(k);
@@ -1214,11 +1229,38 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
 
         return (
           <div key={blocoName} style={blockIndex > 0 ? { pageBreakBefore: 'always' } : {}}>
-            {/* COVER PAGE */}
-            <div className="flex flex-col h-full min-h-[85vh] print:h-full print:min-h-[95vh] pt-12" style={{ pageBreakAfter: 'always' }}>
-              
+                        {/* COVER PAGE */}
+            <div className="flex flex-col h-full min-h-[85vh] print:h-full print:min-h-[95vh] pt-4" style={{ pageBreakAfter: 'always' }}>
+              {/* HEADER NATIVO DO SISTEMA INCLUÍDO NA CAPA */}
+              <div className="flex justify-between items-start mb-6 print:mb-8 border-b-2 border-gray-300 print:border-black pb-4">
+                <div className="flex flex-col">
+                  <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">RELATÓRIO DE ENTREGA</h2>
+                  <span className="text-sm font-semibold tracking-wide mt-1 text-[#475569] print:text-black">Documento Gerado Via Sistema - Nacional Madeiras</span>
+                  <span className="text-sm font-semibold tracking-wide text-[#475569] print:text-black">Data: {simpleDate}</span>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                   <h2 className="text-xl font-bold tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">NACIONAL MADEIRAS</h2>
+                   <span className="text-sm font-semibold tracking-wide mt-1 text-[#475569] print:text-[#475569] uppercase">KIT PORTA</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="border border-gray-300 print:border-black p-2">
+                  <div className="text-[10px] text-gray-500 uppercase font-bold">CLIENTE</div>
+                  <div className="text-sm font-bold uppercase"><EditableText>{cliente || '-'}</EditableText></div>
+                </div>
+                <div className="border border-gray-300 print:border-black p-2">
+                  <div className="text-[10px] text-gray-500 uppercase font-bold">OBRA</div>
+                  <div className="text-sm font-bold uppercase"><EditableText>{obra || '-'}</EditableText></div>
+                </div>
+                <div className="border border-gray-300 print:border-black p-2">
+                  <div className="text-[10px] text-gray-500 uppercase font-bold">RESPONSÁVEL</div>
+                  <div className="text-sm font-bold"><EditableText>Não informado</EditableText></div>
+                </div>
+              </div>
+
               {/* QUANTIDADE TOTAL HIGHLIGHT */}
-              <div className="flex flex-col mt-4 mb-6 print:mt-8 print:mb-10">
+              <div className="flex flex-col mt-2 mb-6 print:mt-4 print:mb-8">
                 <div className="text-xl print:text-2xl font-bold text-gray-800 print:text-black uppercase tracking-wide">
                   QUANTIDADE TOTAL: {totalBloco} KITS
                 </div>
@@ -1227,25 +1269,26 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
               {/* BLOCO HIGHLIGHT */}
               <div className="flex-1 flex flex-col items-center justify-center space-y-4 mb-4">
                  {(blocoName !== '0' && blocoName !== 'SEM BLOCO' && blocoName.trim() !== '') && (
-                   <h2 className="text-4xl print:text-5xl font-black uppercase text-gray-800 print:text-black border-[3px] border-gray-600 print:border-black px-10 py-6 shadow-sm print:shadow-none bg-[#1e293b] print:bg-transparent text-white print:text-black min-w-[180px] text-center">
+                   <h2 className="text-5xl print:text-6xl font-black uppercase text-gray-800 print:text-black border-[3px] border-gray-600 print:border-black px-12 py-8 shadow-sm print:shadow-none bg-white print:bg-transparent text-black print:text-black min-w-[200px] text-center">
                      <EditableText>{blocoName.toUpperCase().includes('BLOCO') ? blocoName : `BLOCO ${blocoName}`}</EditableText>
                    </h2>
                  )}
               </div>
 
-              {/* ASSINATURAS (ANCHORED AT BOTTOM) */}
+              {/* ASSINATURAS INVERTIDAS E NA CAPA */}
               <div className="mt-auto pt-16 pb-8 grid grid-cols-2 gap-16 text-center">
-                <div className="flex flex-col items-center">
-                  <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
-                  <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
-                </div>
+                {/* Nacional Madeiras primeiro (esquerda) */}
                 <div className="flex flex-col items-center">
                   <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
                   <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase">NACIONAL MADEIRAS</span>
                 </div>
+                {/* Obra segundo (direita) */}
+                <div className="flex flex-col items-center">
+                  <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
+                  <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
+                </div>
               </div>
             </div>
-
             {/* PAGES FOR DIMENSIONS */}
             <div style={{ pageBreakBefore: 'always' }}>
               {dimEntries.map(([dimKey, dimKits], dimIdx) => {
