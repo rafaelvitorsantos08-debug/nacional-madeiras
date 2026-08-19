@@ -1212,8 +1212,8 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
           const enc = rawEnc ? String(rawEnc).trim().toUpperCase() : 'S/ ENCHIMENTO';
           
           // Robust Dimensao check
-          let rawLarg = k.folhaLarg || k.folha_larg || k.largura || k['FOLHA LARG'] || k['folha larg'];
-          let rawAlt = k.folhaAlt || k.folha_alt || k.altura || k['FOLHA ALT'] || k['folha alt'];
+          let rawLarg = k.folhaLargura || k.folhaLarg || k.folha_larg || k.largura || k['FOLHA LARG'] || k['folha larg'];
+          let rawAlt = k.folhaAltura || k.folhaAlt || k.folha_alt || k.altura || k['FOLHA ALT'] || k['folha alt'];
           
           if (!rawLarg) {
              const largKey = Object.keys(k).find(key => key.toLowerCase().includes('folha larg'));
