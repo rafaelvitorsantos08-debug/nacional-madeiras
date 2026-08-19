@@ -1217,17 +1217,9 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
             {/* COVER PAGE */}
             <div className="flex flex-col min-h-[90vh] print:min-h-[100vh] print:h-[100vh] pt-12" style={{ pageBreakAfter: 'always' }}>
               
-              {/* CLIENTE INFO (Simplified) */}
-              <div className="flex flex-col gap-y-4 mb-10 print:mb-16 text-sm print:text-[16px] border-b-2 border-gray-300 print:border-black pb-6 max-w-lg">
-                <div className="flex pb-1">
-                  <span className="font-bold w-24 text-gray-700 print:text-black uppercase">CLIENTE:</span>
-                  <span className="flex-1 text-gray-800 print:text-black uppercase"><EditableText>{cliente || '-'}</EditableText></span>
-                </div>
-                <div className="flex pb-1">
-                  <span className="font-bold w-24 text-gray-700 print:text-black uppercase">OBRA:</span>
-                  <span className="flex-1 text-gray-800 print:text-black uppercase"><EditableText>{obra || '-'}</EditableText></span>
-                </div>
-                <div className="font-bold text-gray-800 print:text-black mt-2 uppercase">
+              {/* QUANTIDADE TOTAL HIGHLIGHT */}
+              <div className="flex flex-col mt-4 mb-6 print:mt-8 print:mb-10">
+                <div className="text-xl print:text-2xl font-bold text-gray-800 print:text-black uppercase tracking-wide">
                   QUANTIDADE TOTAL: {totalBloco} KITS
                 </div>
               </div>
