@@ -570,7 +570,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                 onChange={(e) => setSelectedObraId(e.target.value)}
               >
                 {obrasList.length === 0 && <option value="" disabled>Nenhuma obra cadastrada</option>}
-                {obrasList.map(o => <option key={o.id} value={o.id}>{o.nome || 'Sem Nome'}</option>)}
+                {obrasList.map((o: any) => <option key={o.id} value={o.id}>{o.nome || 'Sem Nome'}</option>)}
               </select>
             </div>
             <button onClick={adicionarObra} className="mt-5 flex justify-center items-center px-4 py-2 text-sm font-bold text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap">
