@@ -1203,15 +1203,28 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
         // Group kits inside the block by Enchimento + Dimensao
         const dims = new Map<string, any[]>();
         blockKits.forEach(k => {
-          // 'caracteristica_da_porta' is mapped from CSV to k.caracteristicaPorta or k.caracteristica_da_porta
-          // Enchimento comes from this field
-          const rawEnc = k.caracteristicaPorta || k.caracteristica_da_porta || k.enchimento;
-          const enc = rawEnc ? rawEnc.toUpperCase() : 'S/ ENCHIMENTO';
+          // Robust Enchimento check
+          let rawEnc = k.caracteristicaPorta || k.caracteristica_da_porta || k.enchimento || k['CARACTERISTICA DA PORTA'] || k['caracteristica da porta'];
+          if(!rawEnc) {
+             const encKey = Object.keys(k).find(key => key.toLowerCase().includes('caracteristica'));
+             if (encKey) rawEnc = k[encKey];
+          }
+          const enc = rawEnc ? String(rawEnc).trim().toUpperCase() : 'S/ ENCHIMENTO';
           
-          // Dimensao comes from folha_larg and folha_alt (mapped to k.folhaLarg e k.folhaAlt)
-          const rawLarg = k.folhaLarg || k.folha_larg || k.largura;
-          const rawAlt = k.folhaAlt || k.folha_alt || k.altura;
-          const rawDim = k.dimensao; // fallback
+          // Robust Dimensao check
+          let rawLarg = k.folhaLarg || k.folha_larg || k.largura || k['FOLHA LARG'] || k['folha larg'];
+          let rawAlt = k.folhaAlt || k.folha_alt || k.altura || k['FOLHA ALT'] || k['folha alt'];
+          
+          if (!rawLarg) {
+             const largKey = Object.keys(k).find(key => key.toLowerCase().includes('folha larg'));
+             if (largKey) rawLarg = k[largKey];
+          }
+          if (!rawAlt) {
+             const altKey = Object.keys(k).find(key => key.toLowerCase().includes('folha alt'));
+             if (altKey) rawAlt = k[altKey];
+          }
+          
+          let rawDim = k.dimensao; // fallback
           
           let dim = 'S/ DIMENSÃO';
           if (rawLarg && rawAlt) {
@@ -1230,7 +1243,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
         return (
           <div key={blocoName} style={blockIndex > 0 ? { pageBreakBefore: 'always' } : {}}>
                         {/* COVER PAGE */}
-            <div className="flex flex-col h-full min-h-[85vh] print:h-full print:min-h-[95vh] pt-4" style={{ pageBreakAfter: 'always' }}>
+            <div className="flex flex-col h-[90vh] print:h-[95vh] pt-4" style={{ pageBreakAfter: 'always' }}>
 
 
               {/* QUANTIDADE TOTAL HIGHLIGHT */}
