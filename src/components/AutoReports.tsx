@@ -1043,6 +1043,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
                   const aduelaInfo = [
                     firstKit.aduelaLargura && firstKit.aduelaAltura ? `${firstKit.aduelaLargura}x${firstKit.aduelaAltura}` : null,
+                    firstKit.acabamentoAduela ? firstKit.acabamentoAduela : null,
                     firstKit.montantesMedida ? `D${firstKit.montantesMedida}` : null,
                     firstKit.montantesFolgas ? `F${firstKit.montantesFolgas}` : null,
                     firstKit.qtdeLadosAduela ? `${firstKit.qtdeLadosAduela} lados` : null
@@ -1068,7 +1069,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         </td>
                       </tr>
                       {/* CABEÇALHO DAS COLUNAS */}
-                      <tr className="bg-[#0f172a] text-white print:bg-transparent print:border-y print:border-black print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none">
+                      <tr className="bg-[#0f172a] text-white print:bg-gray-100 print:border-y print:border-black print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
