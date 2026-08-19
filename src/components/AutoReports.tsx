@@ -939,6 +939,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             table, th, td, tr {
               border-color: #000000 !important;
             }
+            .text-black-print-important, .text-black-print-important th {
+              color: #000000 !important;
+            }
             @page { size: landscape; }
             .montagem-page-break {
               page-break-after: always;
@@ -1069,7 +1072,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                         </td>
                       </tr>
                       {/* CABEÇALHO DAS COLUNAS */}
-                      <tr className="bg-[#0f172a] text-white print:bg-gray-100 print:border-y print:border-black print:text-black font-semibold uppercase break-inside-avoid shadow-[0_1px_0_1px_#cbd5e1] print:shadow-none" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                      <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
                         <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
