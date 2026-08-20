@@ -94,7 +94,7 @@ export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente
     }
   }, [kits, reportType, responsavel, obra, cliente]);
 
-  const needsHeader = !['auto_portas', 'auto_montagem', 'auto_entrega'].includes(reportType);
+  const needsHeader = !['auto_portas', 'auto_montagem'].includes(reportType);
 
   return (
     <div className="mt-4">
@@ -1256,9 +1256,18 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                  )}
               </div>
 
-              {/* ASSINATURAS INVERTIDAS E NA CAPA */}
-              <div className="mt-auto pt-8 pb-8 flex flex-col space-y-12">
-                <div className="grid grid-cols-2 gap-16 text-center">
+              {/* DATA E ASSINATURAS (INVERTIDAS) */}
+              <div className="mt-auto pt-8 pb-8 flex flex-col space-y-20">
+                {/* DATA DE RECEBIMENTO */}
+                <div className="flex justify-center items-end text-xl print:text-2xl font-bold text-black">
+                  <span>RECEBIDO EM</span>
+                  <div className="border-b-[2px] border-black w-24 mx-4"></div>
+                  <span>DE</span>
+                  <div className="border-b-[2px] border-black w-64 mx-4"></div>
+                  <span>2026</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-16 text-center pt-8">
                   {/* Nacional Madeiras primeiro (esquerda) */}
                   <div className="flex flex-col items-center">
                     <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
@@ -1270,15 +1279,6 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                     <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
                   </div>
                 </div>
-                
-                {/* DATA DE RECEBIMENTO */}
-                <div className="flex justify-center items-end text-xl print:text-2xl font-bold text-black pt-8">
-                  <span>RECEBIDO EM</span>
-                  <div className="border-b-[2px] border-black w-24 mx-4"></div>
-                  <span>DE</span>
-                  <div className="border-b-[2px] border-black w-64 mx-4"></div>
-                  <span>2026</span>
-                </div>
               </div>
             </div>
             {/* PAGES FOR DIMENSIONS */}
@@ -1289,10 +1289,11 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                 // Group by Apto/Comodo within this dimension to sum quantities if identical
                 const subGrouped = new Map<string, any>();
                 dimKits.forEach(k => {
+                  const acabamento = k.acabamentoPorta || k.corFolha || '-';
                   const key = [
                     k.apto, k.comodo, k.abertura,
                     k.aduelaLargura, k.aduelaAltura, k.fechaduraTipo, k.fechaduraMarca,
-                    k.modelo, k.tipologia
+                    k.modelo, k.tipologia, acabamento
                   ].join('||');
                   
                   let stringQtdStr = String(k.qtdeFolhasPorKit || '1');
@@ -1311,6 +1312,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                       aduela: `${k.aduelaLargura || '-'} x ${k.aduelaAltura || '-'}`,
                       fechadura: (k.fechaduraTipo || k.fechaduraMarca) ? `${k.fechaduraTipo || ''} ${k.fechaduraMarca || ''}`.trim() : '-',
                       modelo: k.modelo || k.tipologia || '-',
+                      acabamento: acabamento,
                       qtd: validQty
                     });
                   }
@@ -1351,18 +1353,20 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                           <th className="border-r border-gray-400 print:border-black py-2 px-3 text-left font-bold text-gray-800 print:text-black">ABERTURA</th>
                           <th className="border-r border-gray-400 print:border-black py-2 px-3 text-left font-bold text-gray-800 print:text-black">ADUELA</th>
                           <th className="border-r border-gray-400 print:border-black py-2 px-3 text-left font-bold text-gray-800 print:text-black">FECHADURA</th>
-                          <th className="py-2 px-3 text-left font-bold text-gray-800 print:text-black">MODELO</th>
+                          <th className="border-r border-gray-400 print:border-black py-2 px-3 text-left font-bold text-gray-800 print:text-black">MODELO</th>
+                          <th className="py-2 px-3 text-left font-bold text-gray-800 print:text-black">ACABAMENTO</th>
                         </tr>
                       </thead>
                       <tbody className="print:bg-transparent">
                         {rows.map((r, i) => (
                           <tr key={i} className="border-b border-gray-300 print:border-black hover:bg-gray-50 print:hover:bg-transparent">
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.apto}</td>
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.comodo}</td>
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.abertura}</td>
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.aduela}</td>
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.fechadura}</td>
-                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.modelo}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.apto}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.comodo}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.abertura}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.aduela}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.fechadura}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black border-r border-gray-300 print:border-black">{r.modelo}</td>
+                            <td className="py-2 px-3 text-gray-700 print:text-black">{r.acabamento}</td>
                           </tr>
                         ))}
                       </tbody>
