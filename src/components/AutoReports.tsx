@@ -41,42 +41,40 @@ const PersistentObservation = ({ id }: { id: string }) => {
 
 const EditableText = ({ children }: { children: React.ReactNode }) => {
   const initialString = React.useMemo(() => {
-    if (Array.isArray(children)) {
-      return children.join('');
-    }
-    return String(children);
+    return Array.isArray(children) ? children.join('') : String(children);
   }, [children]);
 
-  const [val, setVal] = React.useState(initialString);
-  const [isEdited, setIsEdited] = React.useState(false);
+  const spanRef = React.useRef<HTMLSpanElement>(null);
+  
+  // Create a ref to store the text so we don't lose it on re-render
+  const textRef = React.useRef(initialString);
+  const isEdited = React.useRef(false);
 
   React.useEffect(() => {
-    if (!isEdited) {
-      setVal(initialString);
+    if (spanRef.current && !isEdited.current) {
+      if (spanRef.current.innerHTML !== initialString) {
+        spanRef.current.innerHTML = initialString;
+        textRef.current = initialString;
+      }
     }
-  }, [initialString, isEdited]);
+  }, [initialString]);
 
-  const onInput = (e: React.FormEvent<HTMLSpanElement>) => {
-    setIsEdited(true);
-    setVal(e.currentTarget.textContent || '');
-  };
-
-  const onBlur = (e: React.FocusEvent<HTMLSpanElement>) => {
-    setIsEdited(true);
-    setVal(e.currentTarget.textContent || '');
+  const handleInput = (e: React.FormEvent<HTMLSpanElement>) => {
+    isEdited.current = true;
+    textRef.current = e.currentTarget.innerHTML;
   };
 
   return (
     <span 
+      ref={spanRef}
       contentEditable 
       suppressContentEditableWarning 
-      onInput={onInput}
-      onBlur={onBlur}
+      onInput={handleInput}
+      onBlur={handleInput}
       className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
       style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
-    >
-      {val}
-    </span>
+      dangerouslySetInnerHTML={{ __html: textRef.current }}
+    />
   );
 };
 
@@ -96,7 +94,32 @@ export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente
     }
   }, [kits, reportType, responsavel, obra, cliente]);
 
-  return <div className="mt-4">{content}</div>;
+  const needsHeader = !['auto_portas', 'auto_montagem', 'auto_entrega'].includes(reportType);
+
+  return (
+    <div className="mt-4">
+      {needsHeader && (
+        <div className="hidden print:flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold uppercase tracking-tight">
+              Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
+            </h1>
+            <p className="text-sm print:text-[16px] mt-1">
+              Documento Gerado Via Sistema - Nacional Madeiras
+            </p>
+            <p className="text-sm print:text-[16px] mt-1 font-bold">
+              Data: {new Date().toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+          <div className="flex flex-col items-end text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+            <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
+            <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
+          </div>
+        </div>
+      )}
+      {content}
+    </div>
+  );
 }
 
 function TableLayout({ headers, rows }: { headers: string[], rows: (string | number)[][] }) {
@@ -1234,16 +1257,27 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
               </div>
 
               {/* ASSINATURAS INVERTIDAS E NA CAPA */}
-              <div className="mt-auto pt-16 pb-8 grid grid-cols-2 gap-16 text-center">
-                {/* Nacional Madeiras primeiro (esquerda) */}
-                <div className="flex flex-col items-center">
-                  <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
-                  <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase">NACIONAL MADEIRAS</span>
+              <div className="mt-auto pt-8 pb-8 flex flex-col space-y-12">
+                <div className="grid grid-cols-2 gap-16 text-center">
+                  {/* Nacional Madeiras primeiro (esquerda) */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
+                    <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase">NACIONAL MADEIRAS</span>
+                  </div>
+                  {/* Obra segundo (direita) */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
+                    <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
+                  </div>
                 </div>
-                {/* Obra segundo (direita) */}
-                <div className="flex flex-col items-center">
-                  <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
-                  <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
+                
+                {/* DATA DE RECEBIMENTO */}
+                <div className="flex justify-center items-end text-xl print:text-2xl font-bold text-black pt-8">
+                  <span>RECEBIDO EM</span>
+                  <div className="border-b-[2px] border-black w-24 mx-4"></div>
+                  <span>DE</span>
+                  <div className="border-b-[2px] border-black w-64 mx-4"></div>
+                  <span>2026</span>
                 </div>
               </div>
             </div>
@@ -1298,7 +1332,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                       <div className="border border-gray-400 print:border-black px-4 py-1 font-bold text-gray-800 print:text-black uppercase text-sm print:text-[16px] mr-8">
                         {enc}
                       </div>
-                      <div className="border border-gray-400 print:border-black rounded-full px-6 py-1 font-bold text-gray-800 print:text-black uppercase text-sm print:text-[16px]">
+                      <div className="border border-gray-400 print:border-black px-4 py-1 font-bold text-gray-800 print:text-black uppercase text-sm print:text-[16px]">
                         {dim}
                       </div>
                     </div>

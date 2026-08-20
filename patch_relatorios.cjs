@@ -1,17 +1,37 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/components/RelatoriosModule.tsx', 'utf8');
+const filePath = 'src/components/RelatoriosModule.tsx';
+let content = fs.readFileSync(filePath, 'utf-8');
 
-// For the main table
-code = code.replace(/<table className="w-full border-collapse border border-black text-left mb-8">/g, 
-'<table className="w-full border-collapse border-[2px] border-black text-left mb-8 print:text-[16px]">');
+// 1. Remove print:hidden from the main container
+content = content.replace(
+  '<div className="max-w-5xl mx-auto space-y-6 print:hidden">',
+  '<div className="max-w-5xl mx-auto space-y-6">'
+);
 
-// Make header thicker in print
-code = code.replace(/<tr className="bg-gray-100">/g, 
-'<tr className="bg-gray-100 print:border-b-2 print:border-black">');
+// 2. Wrap the header form in a print:hidden div
+content = content.replace(
+  '<div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">\n            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">',
+  '<div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm print:hidden">\n            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">'
+);
 
-// For all cells in this manual report, make border thicker in print (e.g., border-2 in print doesn't exist, we could use print:border-[1.5px])
-code = code.replace(/border border-black/g, 'border border-black print:border-[1.5px] print:border-black');
+// 3. Make the auto reports title hidden in print
+content = content.replace(
+  '<h3 className="text-lg font-semibold text-gray-800 mb-4 text-transform: capitalize">',
+  '<h3 className="text-lg font-semibold text-gray-800 mb-4 text-transform: capitalize print:hidden">'
+);
 
-// Specifically handle the AutoReportsViewer part. It's already handled in AutoReports.tsx
+// 4. Remove the background and border of the auto reports container in print
+content = content.replace(
+  '<div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">\n            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-transform: capitalize print:hidden">',
+  '<div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm print:border-none print:shadow-none print:bg-transparent print:p-0">\n            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-transform: capitalize print:hidden">'
+);
 
-fs.writeFileSync('src/components/RelatoriosModule.tsx', code);
+// 5. Hide the avarias or items inputs in print
+content = content.replace(
+  '{reportType === "avarias" && (',
+  '<div className="print:hidden">\n            {reportType === "avarias" && ('
+);
+content = content.replace(
+  '{!isAutoReport(reportType) && items.length > 0 && (',
+  '{!isAutoReport(reportType) && items.length > 0 && ('
+); // wait, that doesn't close the div. 

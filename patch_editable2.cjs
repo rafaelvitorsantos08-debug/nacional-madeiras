@@ -2,7 +2,7 @@ const fs = require('fs');
 const filePath = 'src/components/AutoReports.tsx';
 let content = fs.readFileSync(filePath, 'utf-8');
 
-const targetRegex = /const EditableText = React\.memo\(\(\{\s*children[\s\S]*?return prevStr === nextStr;\s*}\);/;
+const targetRegex = /const EditableText = \(\{\s*children\s*\}\s*:\s*\{\s*children\s*:\s*React\.ReactNode\s*\}\)\s*=>\s*\{[\s\S]*?return \([\s\S]*?<\/span>\s*\);\s*\};/;
 
 const newStr = `const EditableText = ({ children }: { children: React.ReactNode }) => {
   const initialString = React.useMemo(() => {
@@ -10,23 +10,18 @@ const newStr = `const EditableText = ({ children }: { children: React.ReactNode 
   }, [children]);
 
   const spanRef = React.useRef<HTMLSpanElement>(null);
-  
-  // Create a ref to store the text so we don't lose it on re-render
-  const textRef = React.useRef(initialString);
   const isEdited = React.useRef(false);
 
   React.useEffect(() => {
     if (spanRef.current && !isEdited.current) {
-      if (spanRef.current.innerHTML !== initialString) {
-        spanRef.current.innerHTML = initialString;
-        textRef.current = initialString;
+      if (spanRef.current.textContent !== initialString) {
+        spanRef.current.textContent = initialString;
       }
     }
   }, [initialString]);
 
-  const handleInput = (e: React.FormEvent<HTMLSpanElement>) => {
+  const handleInput = () => {
     isEdited.current = true;
-    textRef.current = e.currentTarget.innerHTML;
   };
 
   return (
@@ -38,7 +33,7 @@ const newStr = `const EditableText = ({ children }: { children: React.ReactNode 
       onBlur={handleInput}
       className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
       style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
-      dangerouslySetInnerHTML={{ __html: textRef.current }}
+      dangerouslySetInnerHTML={{ __html: initialString }}
     />
   );
 };`;
@@ -46,7 +41,7 @@ const newStr = `const EditableText = ({ children }: { children: React.ReactNode 
 if (targetRegex.test(content)) {
   content = content.replace(targetRegex, newStr);
   fs.writeFileSync(filePath, content);
-  console.log("Patched EditableText to robust version!");
+  console.log("Patched EditableText to robust version 2!");
 } else {
   console.log("Could not find EditableText");
 }
