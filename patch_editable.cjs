@@ -1,7 +1,8 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/components/AutoReports.tsx', 'utf8');
+const filePath = 'src/components/AutoReports.tsx';
+let content = fs.readFileSync(filePath, 'utf-8');
 
-const newEditable = `const EditableText = ({ children }: { children: React.ReactNode }) => {
+const targetStr = `const EditableText = ({ children }: { children: React.ReactNode }) => {
   const [val, setVal] = React.useState(children);
   
   React.useEffect(() => {
@@ -26,6 +27,44 @@ const newEditable = `const EditableText = ({ children }: { children: React.React
   );
 };`;
 
-code = code.replace(/const EditableText = \(\{ children \}: \{ children: React\.ReactNode \}\) => \{[\s\S]*?<\/span>\s*\);\s*\};/, newEditable);
+const newStr = `const EditableText = ({ children }: { children: React.ReactNode }) => {
+  const [val, setVal] = React.useState(children);
+  const [edited, setEdited] = React.useState(false);
+  
+  React.useEffect(() => {
+    if (!edited) {
+      setVal(children);
+    }
+  }, [children, edited]);
 
-fs.writeFileSync('src/components/AutoReports.tsx', code);
+  const onInput = (e: React.FormEvent<HTMLSpanElement>) => {
+    setEdited(true);
+    setVal(e.currentTarget.textContent);
+  };
+  
+  const onBlur = (e: React.FocusEvent<HTMLSpanElement>) => {
+    setEdited(true);
+    setVal(e.currentTarget.textContent);
+  };
+
+  return (
+    <span 
+      contentEditable 
+      suppressContentEditableWarning 
+      onInput={onInput}
+      onBlur={onBlur}
+      className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
+      style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+    >
+      {val}
+    </span>
+  );
+};`;
+
+if (content.includes(targetStr)) {
+  content = content.replace(targetStr, newStr);
+  fs.writeFileSync(filePath, content);
+  console.log("Patched EditableText");
+} else {
+  console.log("Could not find EditableText");
+}
