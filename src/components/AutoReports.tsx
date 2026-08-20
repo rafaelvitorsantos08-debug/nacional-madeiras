@@ -40,36 +40,33 @@ const PersistentObservation = ({ id }: { id: string }) => {
 };
 
 const EditableText = ({ children }: { children: React.ReactNode }) => {
-  const [val, setVal] = React.useState(children);
+  const spanRef = React.useRef<HTMLSpanElement>(null);
+  const lastValue = React.useRef(String(children));
   const [edited, setEdited] = React.useState(false);
-  
+
   React.useEffect(() => {
-    if (!edited) {
-      setVal(children);
+    if (!edited && spanRef.current && String(children) !== lastValue.current) {
+      lastValue.current = String(children);
+      spanRef.current.textContent = String(children);
     }
   }, [children, edited]);
 
-  const onInput = (e: React.FormEvent<HTMLSpanElement>) => {
+  const handleInput = (e: React.FormEvent<HTMLSpanElement>) => {
     setEdited(true);
-    setVal(e.currentTarget.textContent);
-  };
-  
-  const onBlur = (e: React.FocusEvent<HTMLSpanElement>) => {
-    setEdited(true);
-    setVal(e.currentTarget.textContent);
+    lastValue.current = e.currentTarget.textContent || '';
   };
 
   return (
     <span 
+      ref={spanRef}
       contentEditable 
       suppressContentEditableWarning 
-      onInput={onInput}
-      onBlur={onBlur}
+      onInput={handleInput}
+      onBlur={handleInput}
       className="outline-none inline-block w-full focus:bg-black/5 dark:focus:bg-white/5 rounded px-1 transition-colors min-h-[1em]"
       style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
-    >
-      {val}
-    </span>
+      dangerouslySetInnerHTML={{ __html: lastValue.current }}
+    />
   );
 };
 
