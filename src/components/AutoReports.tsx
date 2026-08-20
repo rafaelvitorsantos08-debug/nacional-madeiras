@@ -1073,22 +1073,22 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                       </tr>
                       {/* CABEÇALHO DAS COLUNAS */}
                       <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">ACABAMENTO</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">INFO. ADUELA</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECH. GRID</th>
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">DOBRADIÇAS</th>
-                        {showBits && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BITS</th>}
-                        {showCorrer && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CORRER</th>}
-                        {showVen && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">VENEZIANA</th>}
-                        {showGre && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">GRELHA</th>}
-                        {showBand && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BANDEIRA</th>}
-                        {showPiv && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">PIVOTANTE</th>}
-                        {showFf && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECHA FRESTA</th>}
-                        {showVid && <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">COM VIDRO</th>}
-                        <th className="px-3 py-2 text-center whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CONCLUÍDO</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">ACABAMENTO</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">INFO. ADUELA</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECH. GRID</th>
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">DOBRADIÇAS</th>
+                        {showBits && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BITS</th>}
+                        {showCorrer && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CORRER</th>}
+                        {showVen && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">VENEZIANA</th>}
+                        {showGre && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">GRELHA</th>}
+                        {showBand && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BANDEIRA</th>}
+                        {showPiv && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">PIVOTANTE</th>}
+                        {showFf && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECHA FRESTA</th>}
+                        {showVid && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">COM VIDRO</th>}
+                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CONCLUÍDO</th>
                       </tr>
                       {/* DADOS (UMA LINHA POR ABERTURA) */}
                       <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid">
@@ -1287,9 +1287,11 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                       </div>
                     </div>
                     
-                    <div className="text-xl print:text-2xl font-bold uppercase text-gray-500 print:text-gray-700 italic mb-2 ml-2">
-                      <EditableText>{blocoName}</EditableText>
-                    </div>
+                    {(blocoName !== '0' && blocoName !== 'SEM BLOCO' && blocoName.trim() !== '') && (
+                      <div className="text-xl print:text-2xl font-bold uppercase text-gray-500 print:text-gray-700 italic mb-2 ml-2">
+                        <EditableText>{blocoName}</EditableText>
+                      </div>
+                    )}
 
                     <table className="min-w-full border-collapse border border-gray-400 print:border-black text-[12px] sm:text-sm print:text-[16px] print:border-black">
                       <thead className="bg-gray-200 print:bg-transparent border-b-2 border-gray-400 print:border-black">
