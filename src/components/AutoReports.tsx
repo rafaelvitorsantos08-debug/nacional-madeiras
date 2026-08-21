@@ -79,7 +79,23 @@ const EditableText = ({ children }: { children: React.ReactNode }) => {
 };
 
 
-export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente }: { kits: any[], reportType: string, responsavel?: string, obra?: string, cliente?: string }) {
+export function AutoReportsViewer({ 
+  kits, 
+  reportType, 
+  responsavel, 
+  obra, 
+  cliente,
+  observacoes,
+  onObservacoesChange
+}: { 
+  kits: any[], 
+  reportType: string, 
+  responsavel?: string, 
+  obra?: string, 
+  cliente?: string,
+  observacoes?: string,
+  onObservacoesChange?: (val: string) => void
+}) {
   const content = useMemo(() => {
     switch (reportType) {
       case 'auto_portas': return renderAutoPortas(kits, responsavel, obra);
@@ -88,11 +104,11 @@ export function AutoReportsViewer({ kits, reportType, responsavel, obra, cliente
       case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
       case 'auto_usinagem_aduelas': return renderUsinagem(kits, 'aduelas', responsavel, obra);
       case 'auto_vergas': return renderAutoVergas(kits); // Same here
-      case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra, cliente);
+      case 'auto_montagem': return renderAutoMontagem(kits, responsavel, obra, cliente, observacoes, onObservacoesChange);
       case 'auto_entrega': return renderAutoEntrega(kits, responsavel, obra, cliente);
       default: return null;
     }
-  }, [kits, reportType, responsavel, obra, cliente]);
+  }, [kits, reportType, responsavel, obra, cliente, observacoes, onObservacoesChange]);
 
   const needsHeader = !['auto_portas', 'auto_montagem'].includes(reportType);
 
@@ -942,7 +958,7 @@ function renderAutoVergas(kits: any[]) {
   );
 }
 
-export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string, cliente?: string) {
+export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: string, cliente?: string, observacoes?: string, onObservacoesChange?: (val: string) => void) {
   // Group by absolutely every distinguishing feature except apto, pavto, coluna, comodo, and abertura
   const byUniqueFeature = new Map<string, any[]>();
   
@@ -1159,7 +1175,12 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             
             <div className="mt-4 print:mt-6 break-inside-avoid w-full">
               <h3 className="text-sm print:text-sm font-bold text-gray-800 dark:text-gray-200 print:text-black mb-2 uppercase">Observações Gerais:</h3>
-              <div className="border border-gray-300 dark:border-gray-700 print:border-black rounded-sm h-32 w-full"></div>
+              <textarea 
+                className="border border-gray-300 dark:border-gray-700 print:border-black print:border-[2px] rounded-sm h-32 w-full p-3 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
+                value={observacoes || ''}
+                onChange={(e) => onObservacoesChange && onObservacoesChange(e.target.value)}
+                placeholder="Digite as observações gerais aqui..."
+              />
             </div>
           </div>
         );

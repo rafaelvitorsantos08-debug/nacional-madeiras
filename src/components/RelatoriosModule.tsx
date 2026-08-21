@@ -571,7 +571,15 @@ export function RelatoriosModule() {
             </h3>
 
             {isAutoReport(reportType) && (
-              <AutoReportsViewer kits={kits} reportType={reportType} responsavel={header.responsavel} obra={header.obra} cliente={header.cliente} />
+              <AutoReportsViewer 
+                kits={kits} 
+                reportType={reportType} 
+                responsavel={header.responsavel} 
+                obra={header.obra} 
+                cliente={header.cliente} 
+                observacoes={header.observacoes}
+                onObservacoesChange={(val) => handleHeaderChange('observacoes', val)}
+              />
             )}
 
             {reportType === "avarias" && (
