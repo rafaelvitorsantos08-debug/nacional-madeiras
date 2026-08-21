@@ -448,14 +448,14 @@ export function RelatoriosModule() {
       
       <div className="flex-1 overflow-y-auto p-4 md:p-6 print:p-0 print:bg-white print:overflow-visible">
         {/* ALERTA */}
-        <div className="max-w-5xl mx-auto mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm print:hidden">
+        <div className="w-full max-w-[1400px] mx-auto mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm print:hidden">
           <div className="text-amber-800 text-sm print:text-[16px] font-medium whitespace-pre-wrap">
             ⚠️ <strong>Atenção:</strong> kits com montantes e kits camarão com quantidade de folhas ímpares, adicionar a abertura manualmente.
           </div>
         </div>
 
         {/* Formulário Não-Impresso */}
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="w-full max-w-[1400px] mx-auto space-y-6 print:max-w-none print:w-full print:mx-0 print:space-y-0">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm print:hidden">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <ClipboardList className="w-5 h-5 mr-2 text-gray-500" />
@@ -565,7 +565,7 @@ export function RelatoriosModule() {
             </div>
           </div>
 
-          <div className={`bg-white p-6 rounded-xl border border-gray-200 shadow-sm ${isAutoReport(reportType) ? "print:border-none print:shadow-none print:p-0 print:bg-transparent" : "print:hidden"}`}>
+          <div className={`bg-white p-6 rounded-xl border border-gray-200 shadow-sm overflow-x-auto print:overflow-visible ${isAutoReport(reportType) ? "print:border-none print:shadow-none print:p-0 print:bg-transparent print:w-full print:mx-0" : "print:hidden"}`}>
             <h3 className="text-lg font-semibold text-gray-800 mb-4 capitalize print:hidden">
               {isAutoReport(reportType) ? `Relatório: ${reportType.replace("auto_", "").replace(/_/g, " ")}` : `Adicionar Itens (${reportType})`}
             </h3>

@@ -981,7 +981,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             .text-black-print-important, .text-black-print-important th {
               color: #000000 !important;
             }
-            @page { size: landscape; }
+            @page { 
+              size: landscape; 
+              margin: 1cm;
+            }
             .montagem-page-break {
               page-break-after: always;
             }
@@ -1020,7 +1023,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         const sortedAberturas = Array.from(byAbertura.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
         return (
-          <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col gap-6 bg-white p-6 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent">
+          <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col gap-6 bg-white p-6 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
             
             {/* CABEÇALHO DO RELATÓRIO (SEMPRE VISÍVEL AGORA) */}
             <div className="flex justify-between items-start border-b-[2px] border-black pb-4 mb-2 print:border-black">
