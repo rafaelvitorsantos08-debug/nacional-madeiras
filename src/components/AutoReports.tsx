@@ -1051,10 +1051,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             }
             @page { 
               size: landscape; 
-              margin: 1cm;
+              margin: 0;
             }
             .montagem-page-break {
               page-break-after: always;
+              padding: 1cm !important;
             }
             .montagem-page-break:last-child {
               page-break-after: auto;
