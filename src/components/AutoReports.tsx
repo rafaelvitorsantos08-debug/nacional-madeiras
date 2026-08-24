@@ -1197,7 +1197,6 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 className="border border-gray-300 dark:border-gray-700 print:border-black print:border-[2px] rounded-sm h-32 w-full p-3 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
                 value={observacoes || ''}
                 onChange={(e) => onObservacoesChange && onObservacoesChange(e.target.value)}
-                placeholder="Digite as observações gerais aqui..."
               />
             </div>
           </div>
