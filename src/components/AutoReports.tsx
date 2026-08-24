@@ -1228,7 +1228,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             <div className="mt-4 print:mt-6 break-inside-avoid w-full">
               <h3 className="text-sm print:text-sm font-bold text-gray-800 dark:text-gray-200 print:text-black mb-2 uppercase">Observações Gerais:</h3>
               <LocalTextarea 
-                className="border border-gray-300 dark:border-gray-700 print:border-black print:border-[2px] rounded-sm h-32 w-full p-3 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
+                className="outline-none h-32 w-full p-0 mt-1 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
                 initialValue={observacoes || ''}
               />
             </div>
