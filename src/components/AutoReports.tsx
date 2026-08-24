@@ -78,6 +78,27 @@ const EditableText = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+const LocalTextarea = ({ initialValue, className }: { initialValue?: string, className?: string }) => {
+  const [val, setVal] = React.useState(initialValue || '');
+  const isEdited = React.useRef(false);
+
+  React.useEffect(() => {
+    if (initialValue && !isEdited.current) {
+      setVal(initialValue);
+    }
+  }, [initialValue]);
+  
+  return (
+    <textarea
+      className={className}
+      value={val}
+      onChange={(e) => {
+        setVal(e.target.value);
+        isEdited.current = true;
+      }}
+    />
+  );
+};
 
 export function AutoReportsViewer({ 
   kits, 
@@ -114,6 +135,19 @@ export function AutoReportsViewer({
 
   return (
     <div className="mt-4">
+      <style type="text/css">
+        {`
+          @media print {
+            .font-bold, .font-black, h1, h2, h3, h4, th, strong, b {
+              font-weight: 700 !important;
+              -webkit-text-stroke: 0.5px currentColor !important;
+            }
+            .text-black, .print\\:text-black {
+              color: #000000 !important;
+            }
+          }
+        `}
+      </style>
       {needsHeader && (
         <div className="hidden print:flex flex-col border-b-2 border-black pb-4 mb-6">
           <div className="flex justify-between items-start mb-4">
@@ -1193,10 +1227,9 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             
             <div className="mt-4 print:mt-6 break-inside-avoid w-full">
               <h3 className="text-sm print:text-sm font-bold text-gray-800 dark:text-gray-200 print:text-black mb-2 uppercase">Observações Gerais:</h3>
-              <textarea 
+              <LocalTextarea 
                 className="border border-gray-300 dark:border-gray-700 print:border-black print:border-[2px] rounded-sm h-32 w-full p-3 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
-                value={observacoes || ''}
-                onChange={(e) => onObservacoesChange && onObservacoesChange(e.target.value)}
+                initialValue={observacoes || ''}
               />
             </div>
           </div>
