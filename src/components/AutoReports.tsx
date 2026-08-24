@@ -110,27 +110,45 @@ export function AutoReportsViewer({
     }
   }, [kits, reportType, responsavel, obra, cliente, observacoes, onObservacoesChange]);
 
-  const needsHeader = !['auto_portas', 'auto_montagem'].includes(reportType);
+  const needsHeader = reportType !== 'auto_montagem';
 
   return (
     <div className="mt-4">
       {needsHeader && (
-        <div className="hidden print:flex justify-between items-start border-b-2 border-black pb-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold uppercase tracking-tight">
-              Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
-            </h1>
-            <p className="text-sm print:text-[16px] mt-1">
-              Documento Gerado Via Sistema - Nacional Madeiras
-            </p>
-            <p className="text-sm print:text-[16px] mt-1 font-bold">
-              Data: {new Date().toLocaleDateString('pt-BR')}
-            </p>
+        <div className="hidden print:flex flex-col border-b-2 border-black pb-4 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold uppercase tracking-tight text-black">
+                Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
+              </h1>
+              <p className="text-sm print:text-[16px] mt-1 text-black">
+                Documento Gerado Via Sistema - Nacional Madeiras
+              </p>
+              <p className="text-sm print:text-[16px] mt-1 font-bold text-black">
+                Data: {new Date().toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+            <div className="flex flex-col items-end text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+              <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
+              <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
+            </div>
           </div>
-          <div className="flex flex-col items-end text-right" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-            <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
-            <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
-          </div>
+          {(obra || responsavel || cliente) && (
+            <div className="grid grid-cols-3 gap-4 w-full">
+              <div className="border border-gray-300 p-2">
+                <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
+                <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{cliente || "Não informado"}</p>
+              </div>
+              <div className="border border-gray-300 p-2">
+                <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
+                <p className="font-medium text-lg print:text-[20px] print:text-black text-black">{obra || "Não informado"}</p>
+              </div>
+              <div className="border border-gray-300 p-2">
+                <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
+                <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {content}
