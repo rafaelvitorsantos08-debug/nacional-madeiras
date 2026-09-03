@@ -16,6 +16,7 @@ import { CalendarioModule } from './components/CalendarioModule';
 import { ConferenciaModule } from './components/ConferenciaModule';
 
 import { LancamentosRelatoriosModule } from './components/LancamentosRelatoriosModule';
+import { HistoricoModule } from './components/HistoricoModule';
 import { EtiquetasModule } from './components/EtiquetasModule';
 
 // --- MOCK DATA ---
@@ -429,6 +430,7 @@ export default function App() {
           <NavItem icon={<Box />} label="Controle x Operação" active={activeTab === 'controle_operacao'} isOpen={sidebarOpen} onClick={() => setActiveTab('controle_operacao')} />
           <NavItem icon={<ClipboardCheck />} label="Lançamentos" active={activeTab === 'lancamentos'} isOpen={sidebarOpen} onClick={() => setActiveTab('lancamentos')} />
           <NavItem icon={<FileText />} label="Relatórios" active={activeTab === 'relatorios'} isOpen={sidebarOpen} onClick={() => setActiveTab('relatorios')} />
+          <NavItem icon={<FileText />} label="Histórico" active={activeTab === 'historico'} isOpen={sidebarOpen} onClick={() => setActiveTab('historico')} />
           <NavItem icon={<Tags />} label="Etiquetas" active={activeTab === 'etiquetas'} isOpen={sidebarOpen} onClick={() => setActiveTab('etiquetas')} />
           <NavItem icon={<Calendar />} label="Calendário" active={activeTab === 'calendario'} isOpen={sidebarOpen} onClick={() => setActiveTab('calendario')} />
           
@@ -765,6 +767,9 @@ export default function App() {
           )}
           {activeTab === 'relatorios' && (
             <RelatoriosModule />
+          )}
+          {activeTab === 'historico' && (
+            <HistoricoModule />
           )}
           {activeTab === 'calendario' && (
             <CalendarioModule />

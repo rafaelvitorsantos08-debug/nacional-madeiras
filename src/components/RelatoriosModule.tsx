@@ -276,12 +276,46 @@ export function RelatoriosModule() {
   });
 
   const [items, setItems] = useLocalStorage<any[]>("nm_active_relatorio_items", []);
-  const [kits] = useLocalStorage<any[]>("nacional_madeiras_kits_v6", []);
+  const [kits, setKits] = useLocalStorage<any[]>("nacional_madeiras_kits_v6", []);
+  const [historicoEntregas, setHistoricoEntregas] = useLocalStorage<any[]>('nm_historico_entregas_v1', []);
+  const [selectedBloco, setSelectedBloco] = useState<string>("TODOS");
 
   // Current item being added
   const [currentItem, setCurrentItem] = useLocalStorage<any>("nm_active_relatorio_current_item", { quantidade: 1 });
   const [isCustomCor, setIsCustomCor] = useState(false);
   const [avariaFile, setAvariaFile] = useState<File | null>(null);
+
+  const availableBlocos = React.useMemo(() => {
+    const blocos = new Set<string>();
+    kits.forEach(k => blocos.add(k.bloco || 'SEM BLOCO'));
+    return Array.from(blocos).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+  }, [kits]);
+
+  const filteredKits = React.useMemo(() => {
+    if (selectedBloco === "TODOS") return kits;
+    return kits.filter(k => (k.bloco || 'SEM BLOCO') === selectedBloco);
+  }, [kits, selectedBloco]);
+
+  const handleFinalizarEntrega = () => {
+    if (filteredKits.length === 0) return alert('Nenhum kit selecionado.');
+    if (window.confirm(`Deseja realmente finalizar a entrega de ${filteredKits.length} kits (Bloco: ${selectedBloco})? Eles serão movidos para o Histórico.`)) {
+      const novaEntrega = {
+        id: Date.now().toString(),
+        dataEntrega: new Date().toISOString(),
+        responsavel: header.responsavel,
+        obra: header.obra,
+        blocos: selectedBloco === "TODOS" ? availableBlocos : [selectedBloco],
+        kits: filteredKits
+      };
+      setHistoricoEntregas([...historicoEntregas, novaEntrega]);
+      // Remove from main list
+      const idsToRemove = new Set(filteredKits.map(k => k.id));
+      setKits(kits.filter(k => !idsToRemove.has(k.id)));
+      alert('Entrega finalizada e movida para o histórico com sucesso!');
+      setSelectedBloco("TODOS");
+    }
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -487,6 +521,23 @@ export function RelatoriosModule() {
                     <option value="avarias">Relatório de Avarias</option>
                 </select>
               </div>
+              {isAutoReport(reportType) && (
+                <div className="print:hidden">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Filtrar por Bloco
+                  </label>
+                  <select
+                    value={selectedBloco}
+                    onChange={(e) => setSelectedBloco(e.target.value)}
+                    className="w-full rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  >
+                    <option value="TODOS">Todos os Blocos</option>
+                    {availableBlocos.map(b => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-sm print:text-[16px] font-medium text-gray-700 mb-1">
                   Data
@@ -570,9 +621,20 @@ export function RelatoriosModule() {
               {isAutoReport(reportType) ? `Relatório: ${reportType.replace("auto_", "").replace(/_/g, " ")}` : `Adicionar Itens (${reportType})`}
             </h3>
 
+            {isAutoReport(reportType) && reportType === "auto_entrega" && (
+              <div className="mb-4 flex justify-end print:hidden">
+                <button
+                  onClick={handleFinalizarEntrega}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium shadow-sm transition-colors"
+                >
+                  <FileText className="w-5 h-5" />
+                  Finalizar Entrega e Salvar no Histórico
+                </button>
+              </div>
+            )}
             {isAutoReport(reportType) && (
               <AutoReportsViewer 
-                kits={kits} 
+                kits={filteredKits} 
                 reportType={reportType} 
                 responsavel={header.responsavel} 
                 obra={header.obra} 
