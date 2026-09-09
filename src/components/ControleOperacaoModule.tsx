@@ -50,9 +50,9 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
       </div>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
-        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
-        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras globalSearch={globalSearch} />}
+        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} />}
+        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} />}
+        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras />}
       </div>
     </div>
   );
@@ -132,12 +132,23 @@ const handleTableKeyDown = (
   }
 };
 
-function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
+function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
+  const [localSearch, setLocalSearch] = useState('');
+  const [historicoDescricoes, setHistoricoDescricoes] = useState<string[]>([]);
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
+  
+  useEffect(() => {
+    const descriptions = new Set<string>();
+    Object.values(monthlyData).forEach((row: any) => {
+      if (row.e1_desc) descriptions.add(row.e1_desc);
+      if (row.e2_desc) descriptions.add(row.e2_desc);
+    });
+    setHistoricoDescricoes(Array.from(descriptions).sort());
+  }, [monthlyData]);
 
   useEffect(() => {
     const hasMerged = localStorage.getItem('nm_merged_april_2026');
@@ -277,8 +288,8 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     const isE2 = field.startsWith('e2_');
     const descField = isE1 ? 'e1_desc' : (isE2 ? 'e2_desc' : null);
 
-    if (globalSearch && descField) {
-      const searchLower = globalSearch.toLowerCase();
+    if (localSearch && descField) {
+      const searchLower = localSearch.trim().toLowerCase();
       const maxDate = new Date(selecionadoAno, selecionadoMes + 1, 0);
       const maxDateStr = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
       
@@ -287,7 +298,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         if (dateStr > maxDateStr) continue;
         
         const descVal = (rowData as any)?.[descField] || '';
-        if (descVal.toString().toLowerCase().includes(searchLower)) {
+        if (descVal.toString().trim().toLowerCase() === searchLower) {
           const val = parseInt((rowData as any)?.[field] || '0', 10);
           total += (isNaN(val) ? 0 : val);
         }
@@ -342,7 +353,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
     // Highlight if search matches description
-    const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.toLowerCase());
+    const isMatched = localSearch && val && val.toString().trim().toLowerCase() === localSearch.trim().toLowerCase();
 
     return (
       <input
@@ -351,6 +362,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         data-module="saidas"
         data-row={row.day}
         data-col={colIdx}
+        list={(field === 'e1_desc' || field === 'e2_desc') ? 'saidas_desc_list' : undefined}
         onChange={(e) => handleInputChange(row.dateStrKey, field, e.target.value)}
         onKeyDown={(e) => handleTableKeyDown(e, row.day, colIdx, 'saidas', daysCount, 13)}
         style={{ fieldSizing: 'content', minWidth: '100%' } as any}
@@ -392,6 +404,13 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
              <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
            </h2>
            <div className="flex items-center gap-2">
+             <input
+               type="text"
+               placeholder="Pesquisa exata..."
+               value={localSearch}
+               onChange={(e) => setLocalSearch(e.target.value)}
+               className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-green/20 outline-none print:hidden w-48"
+             />
              <select 
                value={selecionadoAno} 
                onChange={(e) => setSelecionadoAno(Number(e.target.value))}
@@ -525,11 +544,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
           </div>
         </div>
       </div>
+      <datalist id="saidas_desc_list">
+        {historicoDescricoes.map(desc => <option key={desc} value={desc} />)}
+      </datalist>
     </div>
   )
 }
 
-function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
+function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // 0-indexed
   

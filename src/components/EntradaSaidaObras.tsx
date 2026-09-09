@@ -3,7 +3,8 @@ import { cn } from '../lib/utils';
 import { Target, Plus, Trash2, X, Info, MessageSquare } from 'lucide-react';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR, ABA_ALIZAR } from './EstoqueModule';
 
-export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
+export function EntradaSaidaObras() {
+  const [localSearch, setLocalSearch] = React.useState('');
   const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
   const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
@@ -82,15 +83,15 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
   const obrasList = Object.values(obrasV6 || {})
     .filter((obra: any) => {
-       if (!globalSearch) return true;
-       const searchLower = globalSearch.toLowerCase();
-       const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
+       if (!localSearch) return true;
+       const searchLower = localSearch.trim().toLowerCase();
+       const inNome = (obra.nome || '').trim().toLowerCase() === searchLower;
        const inItens = ['itensFolhas', 'itensAduelas', 'itensAlizares'].some(k => 
          (obra[k] || []).some((i: any) => 
-           (i.dimensao || '').toLowerCase().includes(searchLower) ||
-           (i.cor || '').toLowerCase().includes(searchLower) ||
-           (i.medidaAduela || '').toLowerCase().includes(searchLower) ||
-           (i.medidaAlizar || '').toLowerCase().includes(searchLower)
+           (i.dimensao || '').trim().toLowerCase() === searchLower ||
+           (i.cor || '').trim().toLowerCase() === searchLower ||
+           (i.medidaAduela || '').trim().toLowerCase() === searchLower ||
+           (i.medidaAlizar || '').trim().toLowerCase() === searchLower
          )
        );
        return inNome || inItens;
@@ -562,6 +563,16 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
       <div className="p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shrink-0 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1 w-full sm:w-auto">
+            <div className="flex flex-col gap-1 w-48 shrink-0">
+              <label className="text-[11px] font-bold text-gray-500 uppercase">Busca Exata:</label>
+              <input
+                type="text"
+                placeholder="Pesquisar..."
+                value={localSearch}
+                onChange={e => setLocalSearch(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-brand-green outline-none transition-shadow"
+              />
+            </div>
             <div className="flex flex-col gap-1 flex-1 max-w-sm">
               <label className="text-[11px] font-bold text-gray-500 uppercase">Selecionar Obra:</label>
               <select 
