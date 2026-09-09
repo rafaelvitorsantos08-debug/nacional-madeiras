@@ -84,13 +84,14 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     .filter((obra: any) => {
        if (!globalSearch) return true;
        const searchLower = globalSearch.trim().toLowerCase();
-       const inNome = (obra.nome || '').trim().toLowerCase() === searchLower;
+       const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
        const inItens = ['itensFolhas', 'itensAduelas', 'itensAlizares'].some(k => 
          (obra[k] || []).some((i: any) => 
-           (i.dimensao || '').trim().toLowerCase() === searchLower ||
-           (i.cor || '').trim().toLowerCase() === searchLower ||
-           (i.medidaAduela || '').trim().toLowerCase() === searchLower ||
-           (i.medidaAlizar || '').trim().toLowerCase() === searchLower
+           (i.dimensao || '').toLowerCase().includes(searchLower) ||
+           (i.cor || '').toLowerCase().includes(searchLower) ||
+           (i.medidaAduela || '').toLowerCase().includes(searchLower) ||
+           (i.medidaAlizar || '').toLowerCase().includes(searchLower) ||
+           (i.descricao && i.descricao.toLowerCase().includes(searchLower))
          )
        );
        return inNome || inItens;

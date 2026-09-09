@@ -289,6 +289,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
     if (globalSearch && descField) {
       const searchLower = globalSearch.trim().toLowerCase();
+      // When searching globally, sum everything up to the selected month's end date
       const maxDate = new Date(selecionadoAno, selecionadoMes + 1, 0);
       const maxDateStr = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
       
@@ -297,7 +298,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         if (dateStr > maxDateStr) continue;
         
         const descVal = (rowData as any)?.[descField] || '';
-        if (descVal.toString().trim().toLowerCase() === searchLower) {
+        if (descVal.toString().toLowerCase().includes(searchLower)) {
           const val = parseInt((rowData as any)?.[field] || '0', 10);
           total += (isNaN(val) ? 0 : val);
         }
@@ -352,7 +353,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
     // Highlight if search matches description
-    const isMatched = globalSearch && val && val.toString().trim().toLowerCase() === globalSearch.trim().toLowerCase();
+    const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.trim().toLowerCase());
 
     return (
       <input

@@ -209,6 +209,8 @@ export default function App() {
            if (item.status === 'Crítico') alertas++;
         });
 
+        const searchLower = globalSearch.trim().toLowerCase();
+
         const saidas = getLs('nm_controle_saidas', {});
         let countSaidas = 0;
         const currentMonthIndex = new Date().getMonth();
@@ -219,9 +221,17 @@ export default function App() {
           if (parts.length === 3) {
             const m = parseInt(parts[1]) - 1;
             const y = parseInt(parts[0]);
-            if (m === currentMonthIndex && y === currentYearStats) {
-              const row = saidas[dateStr];
-              countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+            const row = saidas[dateStr];
+            
+            if (searchLower) {
+              const matchE1 = row.e1_desc && row.e1_desc.toString().trim().toLowerCase().includes(searchLower);
+              const matchE2 = row.e2_desc && row.e2_desc.toString().trim().toLowerCase().includes(searchLower);
+              if (matchE1) countSaidas += (parseInt(row.e1_kits) || 0);
+              if (matchE2) countSaidas += (parseInt(row.e2_kits) || 0);
+            } else {
+              if (m === currentMonthIndex && y === currentYearStats) {
+                countSaidas += (parseInt(row.e1_kits) || 0) + (parseInt(row.e2_kits) || 0);
+              }
             }
           }
         });
@@ -235,18 +245,52 @@ export default function App() {
             const y = parseInt(parts[0]);
             if (m === currentMonthIndex && y === currentYearStats) {
               const row = operacao[dateStr];
-              countOp += (parseInt(row.quantidade) || 0);
+              // Operation does not have specific descriptions to search by standard, but we'll sum if not searching, or keep as is.
+              // Wait, operation doesn't have descriptions in the grid. We will just show current month or 0 if searching.
+              if (!searchLower) {
+                countOp += (parseInt(row.quantidade) || 0);
+              }
             }
           }
         });
 
-        const obrasObj = getLs('nm_entrada_obras_v4', {});
+        // Use V6 data structure for Obras if available, fallback to V4
+        const obrasObj = getLs('nm_entrada_obras_v6', getLs('nm_entrada_obras_v4', {}));
         let countObras = 0;
         Object.values(obrasObj || {}).forEach((o: any) => {
-          const itens = o?.itens || [];
-          itens.forEach((i: any) => {
-            countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
-          });
+          const nomeMatch = o.nome && o.nome.toString().trim().toLowerCase().includes(searchLower);
+          
+          if (searchLower && !nomeMatch) {
+            // Also check items
+            let itemMatch = false;
+            ['itensFolhas', 'itensAduelas', 'itensAlizares', 'itens'].forEach(k => {
+               (o[k] || []).forEach((i: any) => {
+                  if ((i.dimensao && i.dimensao.toLowerCase().includes(searchLower)) ||
+                      (i.cor && i.cor.toLowerCase().includes(searchLower)) ||
+                      (i.descricao && i.descricao.toLowerCase().includes(searchLower))) {
+                      itemMatch = true;
+                  }
+               });
+            });
+            if (!itemMatch) return; // Skip if no match
+          }
+          
+          if (o.itensFolhas || o.itensAduelas || o.itensAlizares) {
+             // V6 format
+             ['itensFolhas', 'itensAduelas', 'itensAlizares'].forEach(k => {
+               (o[k] || []).forEach((i: any) => {
+                  let saidas = 0;
+                  Object.values(i.saidas || {}).forEach(v => { saidas += parseInt(v as string) || 0; });
+                  countObras += saidas;
+               });
+             });
+          } else {
+             // V4 fallback
+             const itens = o?.itens || [];
+             itens.forEach((i: any) => {
+               countObras += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+             });
+          }
         });
 
         setDashboardStats({
