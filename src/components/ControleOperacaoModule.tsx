@@ -50,9 +50,9 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
       </div>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} />}
-        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} />}
-        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras />}
+        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
+        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
+        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras globalSearch={globalSearch} />}
       </div>
     </div>
   );
@@ -132,8 +132,7 @@ const handleTableKeyDown = (
   }
 };
 
-function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
-  const [localSearch, setLocalSearch] = useState('');
+function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
   const [historicoDescricoes, setHistoricoDescricoes] = useState<string[]>([]);
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
@@ -288,8 +287,8 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
     const isE2 = field.startsWith('e2_');
     const descField = isE1 ? 'e1_desc' : (isE2 ? 'e2_desc' : null);
 
-    if (localSearch && descField) {
-      const searchLower = localSearch.trim().toLowerCase();
+    if (globalSearch && descField) {
+      const searchLower = globalSearch.trim().toLowerCase();
       const maxDate = new Date(selecionadoAno, selecionadoMes + 1, 0);
       const maxDateStr = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
       
@@ -353,7 +352,7 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
     // Highlight if search matches description
-    const isMatched = localSearch && val && val.toString().trim().toLowerCase() === localSearch.trim().toLowerCase();
+    const isMatched = globalSearch && val && val.toString().trim().toLowerCase() === globalSearch.trim().toLowerCase();
 
     return (
       <input
@@ -404,13 +403,7 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
              <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
            </h2>
            <div className="flex items-center gap-2">
-             <input
-               type="text"
-               placeholder="Pesquisa exata..."
-               value={localSearch}
-               onChange={(e) => setLocalSearch(e.target.value)}
-               className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-green/20 outline-none print:hidden w-48"
-             />
+             
              <select 
                value={selecionadoAno} 
                onChange={(e) => setSelecionadoAno(Number(e.target.value))}
@@ -551,7 +544,7 @@ function ControleSaidas({ initialMonth }: { initialMonth?: number }) {
   )
 }
 
-function OperacaoProducao({ initialMonth }: { initialMonth?: number }) {
+function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
   const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
   const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // 0-indexed
   
