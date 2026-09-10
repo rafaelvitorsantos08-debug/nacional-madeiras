@@ -134,10 +134,22 @@ export function AutoReportsViewer({
   const needsHeader = reportType !== 'auto_montagem';
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 relative">
+      
       <style type="text/css">
         {`
           @media print {
+            @page {
+              margin-bottom: 1.5cm;
+              @bottom-right {
+                
+              content: "Página " counter(page) " de " counter(pages);
+              font-family: Arial, sans-serif;
+              font-size: 10pt;
+              color: #374151;
+            
+              }
+            }
             .font-bold, .font-black, h1, h2, h3, h4, th, strong, b {
               font-weight: 700 !important;
               -webkit-text-stroke: 0.5px currentColor !important;
@@ -1312,7 +1324,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
         return (
           <div key={blocoName} style={blockIndex > 0 ? { pageBreakBefore: 'always' } : {}}>
                         {/* COVER PAGE */}
-            <div className="flex flex-col h-[60vh] print:h-[60vh] pt-4" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid' }}>
+            <div className="flex flex-col min-h-[85vh] print:min-h-[90vh] pt-4" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid' }}>
 
 
               {/* QUANTIDADE TOTAL HIGHLIGHT */}
@@ -1339,7 +1351,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                   <div className="border-b-[2px] border-black w-24 mx-4"></div>
                   <span>DE</span>
                   <div className="border-b-[2px] border-black w-64 mx-4"></div>
-                  <span>2026</span>
+                  <span>{new Date().getFullYear()}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-16 text-center pt-8">
