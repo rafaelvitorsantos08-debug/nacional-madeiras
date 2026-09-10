@@ -1324,7 +1324,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
         return (
           <div key={blocoName} style={blockIndex > 0 ? { pageBreakBefore: 'always' } : {}}>
                         {/* COVER PAGE */}
-            <div className="flex flex-col min-h-[85vh] print:min-h-[90vh] pt-4" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid' }}>
+            <div className="flex flex-col min-h-[70vh] print:min-h-[70vh] pt-4" style={{ pageBreakAfter: 'always', pageBreakInside: 'avoid' }}>
 
 
               {/* QUANTIDADE TOTAL HIGHLIGHT */}
