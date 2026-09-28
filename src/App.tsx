@@ -45,18 +45,12 @@ const ULTIMAS_SAIDAS = [
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, loginWithGoogle, logout } from './lib/firebase';
 import { forceSyncAllToCloud } from './components/EstoqueModule';
+import { restoreTodayAndConsistentRecords } from './lib/dataConsistency';
+import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 
-// Create a backup of local storage to prevent data loss when syncing
+// Run data restoration and consistency check immediately on app load
 if (typeof window !== 'undefined') {
-  for (let i = 0; i < window.localStorage.length; i++) {
-    const key = window.localStorage.key(i);
-    if (key && key.startsWith('nm_') && !key.startsWith('nm_backup_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
-       const val = window.localStorage.getItem(key);
-       if (val) {
-         window.localStorage.setItem('nm_backup_' + key, val);
-       }
-    }
-  }
+  restoreTodayAndConsistentRecords();
 }
 
 export default function App() {
@@ -108,11 +102,13 @@ export default function App() {
   // Registering these hooks at the root so Firebase onSnapshot runs in the background and updates the Dashboard live
   useLocalStorage('nm_controle_saidas', {});
   useLocalStorage('nm_operacao_producao', {});
+  useLocalStorage('nm_entrada_obras_v6', {});
   useLocalStorage('nm_entrada_obras_v4', {});
   useLocalStorage('nm_operacao_efetivo_total', {});
   useLocalStorage('nm_ferragens_obras_list_v5', []);
   useLocalStorage('nm_ferragens_obras_data_v5', {});
   useLocalStorage('nm_ferragens_history_v5', []);
+  useLocalStorage('nacional_madeiras_kits_v6', []);
 
   const inventoryReal = [
     ...(Array.isArray(portas) ? portas : []).map((p: any) => ({
@@ -337,53 +333,133 @@ export default function App() {
         const eLogs: any[] = [];
         const sLogs: any[] = [];
 
+        // 1. Process Obras (V6 format with fallback to V4)
         Object.values(obrasObj || {}).forEach((o: any) => {
-          let itemsCount = 0;
-          (o?.itens || []).forEach((i: any) => {
-            itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
-          });
-          if (itemsCount > 0 && o?.data) {
-            eLogs.push({
-              id: o.id,
-              timestamp: new Date(o.data).getTime(),
-              item: `Materiais Recebidos`,
-              data: new Date(o.data).toLocaleDateString('pt-BR'),
-              qtd: itemsCount,
-              fornecedor: o.nome
-            })
+          if (o.itensFolhas || o.itensAduelas || o.itensAlizares) {
+            // V6 format - Entradas
+            const cargasEntradaAll = [
+              ...(o.cargasEntradaFolhas || []).map((c: any) => ({ ...c, tipo: 'Folhas', listKey: 'itensFolhas' })),
+              ...(o.cargasEntradaAduelas || []).map((c: any) => ({ ...c, tipo: 'Aduelas', listKey: 'itensAduelas' })),
+              ...(o.cargasEntradaAlizares || []).map((c: any) => ({ ...c, tipo: 'Alizares', listKey: 'itensAlizares' })),
+            ];
+
+            cargasEntradaAll.forEach((c: any) => {
+              const list = o[c.listKey] || [];
+              let totalCarga = 0;
+              list.forEach((it: any) => {
+                totalCarga += (parseInt(it.entradas?.[c.id]) || 0);
+              });
+
+              if (totalCarga > 0) {
+                const dateVal = c.data || todayStr;
+                eLogs.push({
+                  id: `e_${o.id}_${c.id}`,
+                  timestamp: new Date(dateVal + 'T12:00:00Z').getTime(),
+                  item: `${c.nome} (${c.tipo})`,
+                  data: dateVal.split('-').reverse().join('/'),
+                  qtd: totalCarga,
+                  fornecedor: o.nome || 'Obra'
+                });
+              }
+            });
+
+            // V6 format - Saídas
+            const cargasSaidaAll = [
+              ...(o.cargasSaidaFolhas || []).map((c: any) => ({ ...c, tipo: 'Folhas', listKey: 'itensFolhas' })),
+              ...(o.cargasSaidaAduelas || []).map((c: any) => ({ ...c, tipo: 'Aduelas', listKey: 'itensAduelas' })),
+              ...(o.cargasSaidaAlizares || []).map((c: any) => ({ ...c, tipo: 'Alizares', listKey: 'itensAlizares' })),
+            ];
+
+            cargasSaidaAll.forEach((c: any) => {
+              const list = o[c.listKey] || [];
+              let totalCarga = 0;
+              list.forEach((it: any) => {
+                totalCarga += (parseInt(it.saidas?.[c.id]) || 0);
+              });
+
+              if (totalCarga > 0) {
+                const dateVal = c.data || todayStr;
+                sLogs.push({
+                  id: `s_${o.id}_${c.id}`,
+                  timestamp: new Date(dateVal + 'T12:00:00Z').getTime(),
+                  item: `${c.nome} (${c.tipo})`,
+                  data: dateVal.split('-').reverse().join('/'),
+                  qtd: totalCarga,
+                  fornecedor: o.nome || 'Obra'
+                });
+              }
+            });
+          } else {
+            // V4 fallback
+            let itemsCount = 0;
+            (o?.itens || []).forEach((i: any) => {
+              itemsCount += (parseInt(i.folhas) || 0) + (parseInt(i.aduelas) || 0) + (parseInt(i.alizares) || 0);
+            });
+            if (itemsCount > 0 && o?.data) {
+              eLogs.push({
+                id: o.id,
+                timestamp: new Date(o.data).getTime(),
+                item: `Materiais Recebidos`,
+                data: new Date(o.data).toLocaleDateString('pt-BR'),
+                qtd: itemsCount,
+                fornecedor: o.nome
+              });
+            }
           }
         });
 
+        // 2. Process Controle de Saídas
         Object.keys(saidas || {}).forEach(dateStr => {
           const row = saidas[dateStr];
           if (!row) return;
-          let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0);
+          let total = (parseInt(row.e1_kits) || 0) + (parseInt(row.e1_alizares) || 0) + (parseInt(row.e1_folhas) || 0) + (parseInt(row.e1_aduelas) || 0);
           if (total > 0) {
              sLogs.push({
                id: dateStr + '-1',
                timestamp: new Date(dateStr + 'T12:00:00Z').getTime(), 
-               item: 'Materiais Enviados',
+               item: 'Expedição de Materiais (Kits)',
                data: dateStr.split('-').reverse().join('/'),
                qtd: total,
                fornecedor: row.e1_desc || 'Obra'
-             })
+             });
           }
-          let total2 = (parseInt(row.e2_kits) || 0) + (parseInt(row.e2_alizares) || 0) + (parseInt(row.e2_folhas) || 0);
+          let total2 = (parseInt(row.e2_kits) || 0) + (parseInt(row.e2_alizares) || 0) + (parseInt(row.e2_folhas) || 0) + (parseInt(row.e2_aduelas) || 0);
           if (total2 > 0) {
              sLogs.push({
                id: dateStr + '-2',
                timestamp: new Date(dateStr + 'T12:00:00Z').getTime(),
-               item: 'Materiais Enviados',
+               item: 'Expedição de Materiais (Kits)',
                data: dateStr.split('-').reverse().join('/'),
                qtd: total2,
                fornecedor: row.e2_desc || 'Obra'
-             })
+             });
+          }
+        });
+
+        // 3. Process Ferragens Movements (Entradas & Saídas)
+        const ferragensHist = getLs('nm_ferragens_history_v5', []);
+        (Array.isArray(ferragensHist) ? ferragensHist : []).forEach((mov: any) => {
+          if (!mov || !mov.amount) return;
+          const dateVal = mov.date || todayStr;
+          const logEntry = {
+            id: `ferr_${mov.id}`,
+            timestamp: new Date(dateVal + 'T12:00:00Z').getTime(),
+            item: `Ferragem: ${mov.itemModelo || 'Item'}`,
+            data: dateVal.split('-').reverse().join('/'),
+            qtd: mov.amount,
+            fornecedor: mov.obraId || (mov.type === 'saida' ? mov.destination || 'Saída' : 'Entrada')
+          };
+
+          if (mov.type === 'entrada') {
+            eLogs.push(logEntry);
+          } else {
+            sLogs.push(logEntry);
           }
         });
 
         setRecentLogs({
-          entradas: eLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
-          saidas: sLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10),
+          entradas: eLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 15),
+          saidas: sLogs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 15),
         });
 
       } catch (e) {
@@ -516,6 +592,18 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => {
+                const res = restoreTodayAndConsistentRecords();
+                window.dispatchEvent(new Event('local-storage-sync'));
+                alert(`Consistência de Dados Verificada!\n\n${res.details.length > 0 ? res.details.join('\n') : 'Todos os registros de hoje e meses anteriores estão preservados e consistentes na nuvem e no dispositivo.'}`);
+              }}
+              className="flex items-center space-x-1.5 text-xs text-brand-green bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors font-semibold shadow-sm"
+              title="Garante que todos os registros feitos hoje e de dias anteriores permaneçam consistentes e nunca sumam"
+            >
+              <ShieldCheck className="w-4 h-4 text-brand-green" />
+              <span className="hidden sm:inline-block">Dados Seguros</span>
+            </button>
             <button onClick={() => window.print()} className="flex items-center space-x-2 text-gray-500 hover:text-brand-green hover:bg-green-50 px-3 py-2 rounded-lg transition-colors font-medium">
               <Printer className="w-5 h-5" />
               <span className="hidden md:inline-block">Imprimir</span>

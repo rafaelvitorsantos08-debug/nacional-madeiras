@@ -5,8 +5,8 @@ import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_POR
 
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
-  const [selectedObraId, setSelectedObraId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'folhas' | 'aduelas' | 'alizares'>('folhas');
+  const [selectedObraId, setSelectedObraId] = useLocalStorage<string>('nm_selected_obra_id', '');
+  const [activeTab, setActiveTab] = useLocalStorage<'folhas' | 'aduelas' | 'alizares'>('nm_active_tab_obras', 'folhas');
 
   // Migration from v4 to v6
   useEffect(() => {
@@ -99,10 +99,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     .sort((a: any, b: any) => (a.nome || '').localeCompare(b.nome || ''));
 
   useEffect(() => {
-    if (!selectedObraId && obrasList.length > 0) {
+    if ((!selectedObraId || !obrasV6[selectedObraId]) && obrasList.length > 0) {
       setSelectedObraId((obrasList[0] as any).id);
     }
-  }, [obrasList.length, selectedObraId]);
+  }, [obrasList.length, selectedObraId, obrasV6]);
 
   const activeObra = selectedObraId ? obrasV6[selectedObraId] : null;
 

@@ -34,13 +34,13 @@ function getStatusBadge(estoque: number) {
 
 export function FerragensModule({ globalSearch }: { globalSearch: string }) {
   const [obrasList, setObrasList] = useLocalStorage<string[]>('nm_ferragens_obras_list_v5', []);
-  const [selectedObra, setSelectedObra] = useState<string>(obrasList[0] || '');
+  const [selectedObra, setSelectedObra] = useLocalStorage<string>('nm_selected_obra_ferragens', obrasList[0] || '');
   
   // Keep selectedObra valid if list changes
   useEffect(() => {
     if (!selectedObra && obrasList.length > 0) {
       setSelectedObra(obrasList[0]);
-    } else if (selectedObra && !obrasList.includes(selectedObra)) {
+    } else if (selectedObra && obrasList.length > 0 && !obrasList.includes(selectedObra)) {
       setSelectedObra(obrasList[0] || '');
     }
   }, [obrasList, selectedObra]);

@@ -134,8 +134,14 @@ const handleTableKeyDown = (
 
 function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
   const [historicoDescricoes, setHistoricoDescricoes] = useState<string[]>([]);
-  const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // Default to current month
+  const [selecionadoAno, setSelecionadoAno] = useLocalStorage('nm_selected_saidas_year', new Date().getFullYear());
+  const [selecionadoMes, setSelecionadoMes] = useLocalStorage('nm_selected_saidas_month', initialMonth ?? new Date().getMonth());
+  
+  useEffect(() => {
+    if (initialMonth !== undefined) {
+      setSelecionadoMes(initialMonth);
+    }
+  }, [initialMonth]);
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});

@@ -73,13 +73,31 @@ export const forceSyncAllToCloud = async () => {
 };
 
 import { subscribeToSync, pushToFirestore } from '../lib/firestoreSync';
+import { mergeDataSafely } from '../lib/dataConsistency';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      const vaultItem = window.localStorage.getItem('nm_safe_vault_' + key);
+      
+      if (item) {
+        const parsed = JSON.parse(item);
+        if (vaultItem) {
+          try {
+            const parsedVault = JSON.parse(vaultItem);
+            return mergeDataSafely(key, parsed, parsedVault);
+          } catch {}
+        }
+        return parsed;
+      }
+      if (vaultItem) {
+        try {
+          return JSON.parse(vaultItem);
+        } catch {}
+      }
+      return initialValue;
     } catch (error) {
       console.error(error);
       return initialValue;
@@ -118,19 +136,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   useEffect(() => {
     const unsubscribeSync = subscribeToSync(key, (val) => {
-      if (typeof window !== "undefined" && window.localStorage.getItem(key + '_dirty') === 'true') {
-        pushToFirestore(key, storedValue);
-        window.localStorage.removeItem(key + '_dirty');
-        return;
-      }
-
       setStoredValue(prev => {
         if (JSON.stringify(prev) === JSON.stringify(val)) {
           return prev;
-        }
-        if (typeof window !== "undefined") {
-           window.localStorage.setItem(key, JSON.stringify(val));
-           window.dispatchEvent(new Event('local-storage-sync'));
         }
         return val;
       });
@@ -147,20 +155,17 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         const valueToStore = value instanceof Function ? value(prev) : value;
         
         if (typeof window !== "undefined") {
-          window.localStorage.setItem(key, JSON.stringify(valueToStore));
-          if (JSON.stringify(prev) !== JSON.stringify(valueToStore)) {
+          const stringified = JSON.stringify(valueToStore);
+          window.localStorage.setItem(key, stringified);
+          window.localStorage.setItem('nm_safe_vault_' + key, stringified);
+          
+          if (JSON.stringify(prev) !== stringified) {
             window.dispatchEvent(new Event('local-storage-sync'));
           }
         }
         
-        if (auth.currentUser && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
-          if (typeof window !== "undefined") {
-            window.localStorage.setItem(key + '_dirty', 'true');
-          }
+        if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
           pushToFirestore(key, valueToStore);
-          if (typeof window !== "undefined") {
-            window.localStorage.removeItem(key + '_dirty');
-          }
         }
 
         return valueToStore;
