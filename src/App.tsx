@@ -523,7 +523,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen print:min-h-0 bg-gray-50 flex flex-col md:flex-row print:block font-sans">
+    <div className="min-h-screen md:h-screen md:overflow-hidden print:min-h-0 print:h-auto bg-gray-50 flex flex-col md:flex-row print:block font-sans">
       
       {/* SIDEBAR */}
       <aside className={cn(
@@ -543,7 +543,7 @@ export default function App() {
              <Menu className="w-5 h-5" />
            </button>
         </div>
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-4rem)]">
           <NavItem icon={<LayoutDashboard />} label="Dashboard" active={activeTab === 'dashboard'} isOpen={sidebarOpen} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<Package />} label="Estoque" active={activeTab === 'estoque'} isOpen={sidebarOpen} onClick={() => setActiveTab('estoque')} />
           <NavItem icon={<Wrench />} label="Ferragens" active={activeTab === 'ferragens'} isOpen={sidebarOpen} onClick={() => setActiveTab('ferragens')} />
@@ -646,7 +646,7 @@ export default function App() {
         {/* DASHBOARD CONTENT */}
         <div className={cn(
           "flex-1 p-4 md:p-6 lg:p-8 print:p-0",
-          activeTab === 'controle_operacao' ? "flex flex-col min-h-0 overflow-hidden pb-0 md:pb-0 lg:pb-0 px-0 md:px-0 lg:px-0 pt-0 print:overflow-visible print:min-h-0 print:block" : "overflow-auto print:overflow-visible print:block print:min-h-0"
+          activeTab === 'controle_operacao' ? "flex flex-col min-h-0 h-full overflow-hidden pb-0 md:pb-0 lg:pb-0 px-0 md:px-0 lg:px-0 pt-0 print:overflow-visible print:min-h-0 print:block" : "overflow-auto print:overflow-visible print:block print:min-h-0"
         )}>
           
           {!user && (

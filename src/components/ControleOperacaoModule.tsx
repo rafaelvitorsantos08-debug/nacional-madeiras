@@ -12,8 +12,8 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
   }, [initialTab]);
 
   return (
-    <div className="animate-in fade-in duration-300 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
+    <div className="animate-in fade-in duration-300 h-full flex flex-col min-h-0">
+      <div className="flex justify-between items-center mb-4 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Controle x Operação</h1>
           <p className="text-sm text-gray-500 mt-1">Gerencie a saída de materiais e acompanhe o efetivo da produção.</p>
@@ -49,7 +49,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+      <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
         {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
         {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras globalSearch={globalSearch} />}
@@ -601,77 +601,77 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
         {/* TABLE SCROLL CONTAINER WITH FROZEN COLUMN HEADERS */}
         <div className="flex-1 overflow-auto p-4 pt-2">
-          <div className="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
-            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1250px]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
+          <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
+            <table className="w-full text-center text-xs whitespace-nowrap border-separate border-spacing-0 min-w-[1250px]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
               <thead className="sticky top-0 z-30 shadow-md">
                 {/* TIER 1 HEADER */}
-                <tr className="border-b border-gray-300">
-                  <th rowSpan={2} className="sticky top-0 left-0 z-40 p-2.5 border-r border-gray-400 bg-gray-800 text-white w-12 font-bold shadow-xs">
+                <tr>
+                  <th rowSpan={2} className="sticky top-0 z-30 p-2.5 border-r border-b border-gray-400 bg-gray-800 text-white w-14 font-bold shadow-xs">
                     D/S
                   </th>
-                  <th rowSpan={2} className="sticky top-0 left-12 z-40 p-2.5 border-r border-gray-400 bg-gray-800 text-white w-24 font-bold shadow-xs">
+                  <th rowSpan={2} className="sticky top-0 z-30 p-2.5 border-r border-b border-gray-400 bg-gray-800 text-white w-24 font-bold shadow-xs">
                     DATA
                   </th>
                   {/* ENTREGA 1 GROUP BANNER */}
-                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-r border-orange-700 bg-orange-600 text-white font-bold tracking-wider text-sm uppercase shadow-xs">
+                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-r border-b border-orange-700 bg-orange-600 text-white font-bold tracking-wider text-sm uppercase shadow-xs h-9">
                     ENTREGA 1
                   </th>
                   {/* ENTREGA 2 GROUP BANNER */}
-                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-green-800 bg-green-700 text-white font-bold tracking-wider text-sm uppercase shadow-xs">
+                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-b border-green-800 bg-green-700 text-white font-bold tracking-wider text-sm uppercase shadow-xs h-9">
                     ENTREGA 2
                   </th>
                 </tr>
                 {/* TIER 2 HEADER: COLUMN NAMES */}
-                <tr className="border-b border-gray-300">
+                <tr>
                   {/* ENTREGA 1 SUBCOLUMNS */}
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white min-w-[160px] font-bold">DESCRIÇÃO / OBRA</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">KITS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">ALIZARES</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">FOLHAS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">ADUELAS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">RODAPÉS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">PAINÉIS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white min-w-[160px] font-bold h-9">DESCRIÇÃO / OBRA</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">KITS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">ALIZARES</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">FOLHAS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">ADUELAS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">RODAPÉS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-orange-600 bg-orange-500 text-white w-20 font-bold h-9">PAINÉIS</th>
                   {/* ENTREGA 2 SUBCOLUMNS */}
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white min-w-[160px] font-bold">DESCRIÇÃO / OBRA</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">KITS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">ALIZARES</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">FOLHAS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
-                  <th className="sticky top-[35px] z-30 p-2 border-green-700 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white min-w-[160px] font-bold h-9">DESCRIÇÃO / OBRA</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">KITS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">ALIZARES</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">FOLHAS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">ADUELAS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-r border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">RODAPÉS</th>
+                  <th className="sticky top-[36px] z-30 p-2 border-b border-green-700 bg-green-600 text-white w-20 font-bold h-9">PAINÉIS</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.dateStrKey} className="border-b border-gray-200 hover:bg-gray-50/70 transition-colors">
-                    <td className="sticky left-0 z-10 p-1.5 border-r border-gray-300 bg-gray-700 text-white font-semibold">{row.ds}</td>
-                    <td className="sticky left-12 z-10 p-1.5 border-r border-gray-300 bg-white font-bold text-gray-800 shadow-xs">{row.dateStrDisplay}</td>
+                    <td className="p-1.5 border-r border-b border-gray-300 bg-gray-700 text-white font-semibold text-center">{row.ds}</td>
+                    <td className="p-1.5 border-r border-b border-gray-300 bg-white font-bold text-gray-800 text-center">{row.dateStrDisplay}</td>
                     {row.isWeekend ? (
                       <>
-                        <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
+                        <td colSpan={7} className="p-1.5 border-r border-b border-gray-300 bg-red-600 text-white font-bold tracking-wider text-center">
                            {row.isSabado ? 'SÁBADO' : 'DOMINGO'}
                         </td>
-                        <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
+                        <td colSpan={7} className="p-1.5 border-b border-gray-300 bg-red-600 text-white font-bold tracking-wider text-center">
                            {row.isSabado ? 'SÁBADO' : 'DOMINGO'}
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="p-0 border-r border-gray-300 bg-orange-100/80">{renderInput(row, 'e1_desc', 0, 'text-center font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_kits', 1)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_alizares', 2)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_folhas', 3)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_aduelas', 4)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_rodapes', 5)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_paineis', 6)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-100/80">{renderInput(row, 'e1_desc', 0, 'text-center font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_kits', 1)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_alizares', 2)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_folhas', 3)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_aduelas', 4)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_rodapes', 5)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_paineis', 6)}</td>
                         
-                        <td className="p-0 border-r border-gray-300 bg-green-100/80">{renderInput(row, 'e2_desc', 7, 'text-center font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_kits', 8)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_alizares', 9)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_folhas', 10)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_aduelas', 11)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_rodapes', 12)}</td>
-                        <td className="p-0 border-transparent bg-green-50/80">{renderInput(row, 'e2_paineis', 13)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-100/80">{renderInput(row, 'e2_desc', 7, 'text-center font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_kits', 8)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_alizares', 9)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_folhas', 10)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_aduelas', 11)}</td>
+                        <td className="p-0 border-r border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_rodapes', 12)}</td>
+                        <td className="p-0 border-b border-gray-300 bg-green-50/80">{renderInput(row, 'e2_paineis', 13)}</td>
                       </>
                     )}
                   </tr>
