@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { Package, Truck, Target, Plus, Download, Home, Trash2, X, FileText, History, Info, MessageSquareQuote, Settings, UserPlus } from 'lucide-react';
+import { Package, Truck, Target, Plus, Download, Home, Trash2, X, FileText, History, Info, MessageSquareQuote, Settings, UserPlus, MessageSquare, Save } from 'lucide-react';
 
 const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
@@ -154,6 +154,78 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     });
     setHistoricoDescricoes(Array.from(descriptions).sort());
   }, [monthlyData]);
+
+  const FIELD_LABELS: Record<string, string> = {
+    'e1_desc': 'Entrega 1 - Descrição / Obra',
+    'e1_kits': 'Entrega 1 - Kits',
+    'e1_alizares': 'Entrega 1 - Alizares',
+    'e1_folhas': 'Entrega 1 - Folhas',
+    'e1_aduelas': 'Entrega 1 - Aduelas',
+    'e1_rodapes': 'Entrega 1 - Rodapés',
+    'e1_paineis': 'Entrega 1 - Painéis',
+    'e2_desc': 'Entrega 2 - Descrição / Obra',
+    'e2_kits': 'Entrega 2 - Kits',
+    'e2_alizares': 'Entrega 2 - Alizares',
+    'e2_folhas': 'Entrega 2 - Folhas',
+    'e2_aduelas': 'Entrega 2 - Aduelas',
+    'e2_rodapes': 'Entrega 2 - Rodapés',
+    'e2_paineis': 'Entrega 2 - Painéis',
+  };
+
+  const [activeComment, setActiveComment] = useState<{
+    dateStrKey: string;
+    dateStrDisplay: string;
+    dayDs: string;
+    field: string;
+    currentValue: string;
+    comment: string;
+  } | null>(null);
+  const [commentDraft, setCommentDraft] = useState('');
+
+  const handleOpenComment = (row: any, field: string) => {
+    const comm = monthlyData[row.dateStrKey]?.[`comm_${field}`] || '';
+    const currentVal = monthlyData[row.dateStrKey]?.[field] || '';
+    setActiveComment({
+      dateStrKey: row.dateStrKey,
+      dateStrDisplay: row.dateStrDisplay,
+      dayDs: row.ds,
+      field,
+      currentValue: currentVal,
+      comment: comm
+    });
+    setCommentDraft(comm);
+  };
+
+  const handleSaveComment = () => {
+    if (!activeComment) return;
+    const trimmed = commentDraft.trim();
+    setMonthlyData(prev => {
+      const dayData = { ...(prev[activeComment.dateStrKey] || {}) };
+      if (trimmed) {
+        dayData[`comm_${activeComment.field}`] = trimmed;
+      } else {
+        delete dayData[`comm_${activeComment.field}`];
+      }
+      return {
+        ...prev,
+        [activeComment.dateStrKey]: dayData
+      };
+    });
+    setActiveComment(null);
+  };
+
+  const handleDeleteComment = () => {
+    if (!activeComment) return;
+    setMonthlyData(prev => {
+      const dayData = { ...(prev[activeComment.dateStrKey] || {}) };
+      delete dayData[`comm_${activeComment.field}`];
+      return {
+        ...prev,
+        [activeComment.dateStrKey]: dayData
+      };
+    });
+    setActiveComment(null);
+  };
 
   useEffect(() => {
     const hasMerged = localStorage.getItem('nm_merged_april_2026');
@@ -360,24 +432,64 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     
     // Highlight if search matches description
     const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.trim().toLowerCase());
+    const comment = monthlyData[row.dateStrKey]?.[`comm_${field}`] || '';
+    const hasComment = !!comment;
 
     return (
-      <input
-        type="text"
-        value={val}
-        data-module="saidas"
-        data-row={row.day}
-        data-col={colIdx}
-        list={(field === 'e1_desc' || field === 'e2_desc') ? 'saidas_desc_list' : undefined}
-        onChange={(e) => handleInputChange(row.dateStrKey, field, e.target.value)}
-        onKeyDown={(e) => handleTableKeyDown(e, row.day, colIdx, 'saidas', daysCount, 13)}
-        style={{ fieldSizing: 'content', minWidth: '100%' } as any}
-        className={cn(
-          "w-full h-full min-h-[28px] px-1 bg-transparent text-center border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
-          className,
-          isMatched ? "bg-yellow-200 text-yellow-900 font-bold" : ""
+      <div className="relative group w-full h-full min-h-[30px] flex items-center justify-center">
+        <input
+          type="text"
+          value={val}
+          data-module="saidas"
+          data-row={row.day}
+          data-col={colIdx}
+          list={(field === 'e1_desc' || field === 'e2_desc') ? 'saidas_desc_list' : undefined}
+          onChange={(e) => handleInputChange(row.dateStrKey, field, e.target.value)}
+          onKeyDown={(e) => handleTableKeyDown(e, row.day, colIdx, 'saidas', daysCount, 13)}
+          style={{ fieldSizing: 'content', minWidth: '100%' } as any}
+          className={cn(
+            "w-full h-full min-h-[28px] px-1 bg-transparent text-center border-none outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500",
+            className,
+            isMatched ? "bg-yellow-200 text-yellow-900 font-bold" : "",
+            hasComment ? "font-semibold" : ""
+          )}
+          title={hasComment ? `💬 Comentário: ${comment}` : undefined}
+        />
+
+        {/* Comment indicator / button */}
+        {hasComment ? (
+          <>
+            {/* Red top-right corner marker (Excel style) */}
+            <div 
+              className="absolute top-0 right-0 w-0 h-0 border-t-[8px] border-t-red-600 border-l-[8px] border-l-transparent pointer-events-none z-10" 
+              title={`Comentário: ${comment}`}
+            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenComment(row, field);
+              }}
+              className="absolute top-0 right-0 p-0.5 text-red-600 hover:text-red-800 bg-white/80 rounded-bl opacity-80 group-hover:opacity-100 transition-opacity z-10"
+              title={`Ver/Editar comentário: ${comment}`}
+            >
+              <MessageSquare className="w-2.5 h-2.5 fill-red-600 text-red-600" />
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenComment(row, field);
+            }}
+            className="absolute top-0 right-0 p-0.5 text-gray-400 hover:text-blue-600 bg-white/60 rounded-bl opacity-0 group-hover:opacity-100 transition-opacity z-10 print:hidden"
+            title="Adicionar comentário nesta célula"
+          >
+            <MessageSquare className="w-2.5 h-2.5" />
+          </button>
         )}
-      />
+      </div>
     );
   };
 
@@ -387,7 +499,11 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     
     rows.forEach(row => {
       const rowData = monthlyData[row.dateStrKey] || {};
-      const val = (f: string) => `"${rowData[f] || ''}"`;
+      const val = (f: string) => {
+        const v = rowData[f] || '';
+        const c = rowData['comm_' + f];
+        return c ? `"${v} [Obs: ${c.replace(/"/g, '""')}]"` : `"${v}"`;
+      };
       
       csvContent += `${row.ds},${row.dateStrDisplay},${val('e1_desc')},${val('e1_kits')},${val('e1_alizares')},${val('e1_folhas')},${val('e1_aduelas')},${val('e1_rodapes')},${val('e1_paineis')},${val('e2_desc')},${val('e2_kits')},${val('e2_alizares')},${val('e2_folhas')},${val('e2_aduelas')},${val('e2_rodapes')},${val('e2_paineis')}\n`;
     });
@@ -403,14 +519,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <div className="p-4 border-b border-gray-200 bg-white shadow-sm z-10 shrink-0">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      {/* FROZEN TOP CONTROLS: Month Navigation, Year, Export */}
+      <div className="p-4 border-b border-gray-200 bg-white shadow-sm z-20 shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
            <h2 className="font-semibold text-gray-800 flex items-center text-lg">
              <Truck className="w-5 h-5 mr-2 text-brand-green" /> Materiais Enviados (Saídas)
            </h2>
            <div className="flex items-center gap-2">
-             
              <select 
                value={selecionadoAno} 
                onChange={(e) => setSelecionadoAno(Number(e.target.value))}
@@ -451,90 +567,111 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
-        <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-3 shrink-0">
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Kits</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_kits') + sumCol('e2_kits') || 0}</span>
-          </div>
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Alizares</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_alizares') + sumCol('e2_alizares') || 0}</span>
-          </div>
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Folhas</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_folhas') + sumCol('e2_folhas') || 0}</span>
-          </div>
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Aduelas</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_aduelas') + sumCol('e2_aduelas') || 0}</span>
-          </div>
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Rodapés</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_rodapes') + sumCol('e2_rodapes') || 0}</span>
-          </div>
-          <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-            <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Painéis</span>
-            <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_paineis') + sumCol('e2_paineis') || 0}</span>
+      {/* MAIN CONTENT AREA WITH FROZEN DASHBOARDS AND FROZEN TABLE HEADERS */}
+      <div className="flex-1 flex flex-col min-h-0 bg-gray-50 overflow-hidden">
+        {/* FROZEN DASHBOARDS BAR - Always visible at top */}
+        <div className="shrink-0 p-4 pb-3 bg-gray-50 border-b border-gray-200/80 z-20 shadow-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Kits</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_kits') + sumCol('e2_kits') || 0}</span>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Alizares</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_alizares') + sumCol('e2_alizares') || 0}</span>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Folhas</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_folhas') + sumCol('e2_folhas') || 0}</span>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Aduelas</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_aduelas') + sumCol('e2_aduelas') || 0}</span>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Rodapés</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_rodapes') + sumCol('e2_rodapes') || 0}</span>
+            </div>
+            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Painéis</span>
+              <span className="text-xl sm:text-2xl font-bold text-brand-green">{sumCol('e1_paineis') + sumCol('e2_paineis') || 0}</span>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm flex-1 flex flex-col min-h-0">
-          <div className="overflow-auto flex-1">
-            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1200px]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
-              <thead className="sticky top-0 z-10 bg-white shadow-sm shadow-gray-300">
-                <tr className="bg-gray-100 text-gray-700 border-b border-gray-300">
-                  <th className="p-2 border-r border-gray-300 w-12 font-bold">D/S</th>
-                  <th className="p-2 border-r border-gray-300 w-24 font-bold">DATA</th>
-                  {/* ENTREGA 1 */}
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white min-w-[150px] font-bold">ENTREGA 1</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">KITS</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">ALIZARES</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">FOLHAS</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">ADUELAS</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">RODAPÉS</th>
-                  <th className="p-2 border-r border-gray-300 bg-orange-500 text-white w-20 font-bold">PAINÉIS</th>
-                  {/* ENTREGA 2 */}
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white min-w-[150px] font-bold">ENTREGA 2</th>
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">KITS</th>
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ALIZARES</th>
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">FOLHAS</th>
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
-                  <th className="p-2 border-r border-gray-300 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
-                  <th className="p-2 border-gray-300 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
+        {/* TABLE SCROLL CONTAINER WITH FROZEN COLUMN HEADERS */}
+        <div className="flex-1 overflow-auto p-4 pt-2">
+          <div className="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
+            <table className="w-full text-center text-xs whitespace-nowrap border-collapse min-w-[1250px]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
+              <thead className="sticky top-0 z-30 shadow-md">
+                {/* TIER 1 HEADER */}
+                <tr className="border-b border-gray-300">
+                  <th rowSpan={2} className="sticky top-0 left-0 z-40 p-2.5 border-r border-gray-400 bg-gray-800 text-white w-12 font-bold shadow-xs">
+                    D/S
+                  </th>
+                  <th rowSpan={2} className="sticky top-0 left-12 z-40 p-2.5 border-r border-gray-400 bg-gray-800 text-white w-24 font-bold shadow-xs">
+                    DATA
+                  </th>
+                  {/* ENTREGA 1 GROUP BANNER */}
+                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-r border-orange-700 bg-orange-600 text-white font-bold tracking-wider text-sm uppercase shadow-xs">
+                    ENTREGA 1
+                  </th>
+                  {/* ENTREGA 2 GROUP BANNER */}
+                  <th colSpan={7} className="sticky top-0 z-30 p-2 border-green-800 bg-green-700 text-white font-bold tracking-wider text-sm uppercase shadow-xs">
+                    ENTREGA 2
+                  </th>
+                </tr>
+                {/* TIER 2 HEADER: COLUMN NAMES */}
+                <tr className="border-b border-gray-300">
+                  {/* ENTREGA 1 SUBCOLUMNS */}
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white min-w-[160px] font-bold">DESCRIÇÃO / OBRA</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">KITS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">ALIZARES</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">FOLHAS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">ADUELAS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">RODAPÉS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-orange-600 bg-orange-500 text-white w-20 font-bold">PAINÉIS</th>
+                  {/* ENTREGA 2 SUBCOLUMNS */}
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white min-w-[160px] font-bold">DESCRIÇÃO / OBRA</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">KITS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">ALIZARES</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">FOLHAS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">ADUELAS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-r border-green-700 bg-green-600 text-white w-20 font-bold">RODAPÉS</th>
+                  <th className="sticky top-[35px] z-30 p-2 border-green-700 bg-green-600 text-white w-20 font-bold">PAINÉIS</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.dateStrKey} className="border-b border-gray-200">
-                    <td className="p-1.5 border-r border-gray-300 bg-gray-600 text-white font-medium">{row.ds}</td>
-                    <td className="p-1.5 border-r border-gray-300 bg-white font-medium text-gray-700">{row.dateStrDisplay}</td>
+                  <tr key={row.dateStrKey} className="border-b border-gray-200 hover:bg-gray-50/70 transition-colors">
+                    <td className="sticky left-0 z-10 p-1.5 border-r border-gray-300 bg-gray-700 text-white font-semibold">{row.ds}</td>
+                    <td className="sticky left-12 z-10 p-1.5 border-r border-gray-300 bg-white font-bold text-gray-800 shadow-xs">{row.dateStrDisplay}</td>
                     {row.isWeekend ? (
                       <>
                         <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
-                           {row.isSabado ? 'SABADO' : 'DOMINGO'}
+                           {row.isSabado ? 'SÁBADO' : 'DOMINGO'}
                         </td>
                         <td colSpan={7} className="p-1.5 border-r border-gray-300 bg-red-600 text-white font-bold tracking-wider">
-                           {row.isSabado ? 'SABADO' : 'DOMINGO'}
+                           {row.isSabado ? 'SÁBADO' : 'DOMINGO'}
                         </td>
                       </>
                     ) : (
                       <>
-                        <td className="p-0 border-r border-gray-300 bg-orange-100">{renderInput(row, 'e1_desc', 0, 'text-center font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_kits', 1)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_alizares', 2)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_folhas', 3)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_aduelas', 4)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_rodapes', 5)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-orange-50">{renderInput(row, 'e1_paineis', 6)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-100/80">{renderInput(row, 'e1_desc', 0, 'text-center font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_kits', 1)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_alizares', 2)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_folhas', 3)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_aduelas', 4)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_rodapes', 5)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-orange-50/80">{renderInput(row, 'e1_paineis', 6)}</td>
                         
-                        <td className="p-0 border-r border-gray-300 bg-green-100">{renderInput(row, 'e2_desc', 7, 'text-center font-medium text-gray-800')}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_kits', 8)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_alizares', 9)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_folhas', 10)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_aduelas', 11)}</td>
-                        <td className="p-0 border-r border-gray-300 bg-green-50">{renderInput(row, 'e2_rodapes', 12)}</td>
-                        <td className="p-0 border-transparent bg-green-50">{renderInput(row, 'e2_paineis', 13)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-100/80">{renderInput(row, 'e2_desc', 7, 'text-center font-medium text-gray-800')}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_kits', 8)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_alizares', 9)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_folhas', 10)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_aduelas', 11)}</td>
+                        <td className="p-0 border-r border-gray-300 bg-green-50/80">{renderInput(row, 'e2_rodapes', 12)}</td>
+                        <td className="p-0 border-transparent bg-green-50/80">{renderInput(row, 'e2_paineis', 13)}</td>
                       </>
                     )}
                   </tr>
@@ -544,11 +681,103 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
           </div>
         </div>
       </div>
+
+      {/* CELL COMMENT MODAL */}
+      {activeComment && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col animate-in zoom-in-95">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-brand-green/10 text-brand-green rounded-lg">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">Comentário na Célula</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {activeComment.dateStrDisplay} ({activeComment.dayDs}) &bull; {FIELD_LABELS[activeComment.field] || activeComment.field}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveComment(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {activeComment.currentValue && (
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg p-2.5 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between">
+                  <span className="font-medium">Valor preenchido na célula:</span>
+                  <span className="font-bold bg-white dark:bg-gray-900 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-700">{activeComment.currentValue}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-1.5">
+                  Informações Adicionais / Observações:
+                </label>
+                <textarea
+                  autoFocus
+                  rows={5}
+                  value={commentDraft}
+                  onChange={(e) => setCommentDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      handleSaveComment();
+                    } else if (e.key === 'Escape') {
+                      setActiveComment(null);
+                    }
+                  }}
+                  placeholder="Ex: Motorista Carlos, saída autorizada pelo supervisor, pendente confirmação de entrega do restante dos itens, nota fiscal nº 4390..."
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-brand-green outline-none resize-none shadow-inner"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Dica: Pressione <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 border rounded text-[10px]">Ctrl</kbd> + <kbd className="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 border rounded text-[10px]">Enter</kbd> para salvar rapidamente.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <div>
+                {activeComment.comment && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteComment}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Excluir Comentário
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveComment(null)}
+                  className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveComment}
+                  className="px-4 py-2 text-xs font-bold text-white bg-brand-green hover:bg-green-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                >
+                  <Save className="w-3.5 h-3.5" /> Salvar Comentário
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <datalist id="saidas_desc_list">
         {historicoDescricoes.map(desc => <option key={desc} value={desc} />)}
       </datalist>
     </div>
-  )
+  );
 }
 
 function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
