@@ -329,33 +329,51 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     return (
       <div className="flex-1 overflow-auto bg-gray-50 p-4 w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto w-full">
-          <table className="w-full text-center text-sm border-collapse min-w-max">
-            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 sticky top-0 z-10 shadow-sm">
+          <table className="w-full text-center text-sm border-separate border-spacing-0 min-w-max">
+            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 sticky top-0 z-20 shadow-sm">
               <tr>
-                <th colSpan={specHeaders.length} className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold bg-gray-100 dark:bg-gray-800">
-                  ESPECIFICAÇÕES
+                {/* Frozen Specification Header: Dimensao / Medida Aduela / Face Medida Alizar */}
+                <th 
+                  rowSpan={2} 
+                  className={cn(
+                    "sticky left-0 top-0 z-30 p-2.5 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-xs shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] align-middle",
+                    activeTab === 'folhas' ? "w-[180px] min-w-[180px]" : "w-[240px] min-w-[240px]"
+                  )}
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <span>{specHeaders[0]}</span>
+                    <span className="text-[10px] font-normal text-gray-500 dark:text-gray-400 mt-0.5">(Fixado)</span>
+                  </div>
                 </th>
-                <th colSpan={cargasEntrada.length + 1} className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold bg-blue-50 text-blue-800 dark:bg-blue-900/60 dark:text-blue-100">
+                {specHeaders.length > 1 && (
+                  <th colSpan={specHeaders.length - 1} className="p-3 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-gray-100 dark:bg-gray-800">
+                    ESPECIFICAÇÕES
+                  </th>
+                )}
+                <th colSpan={cargasEntrada.length + 1} className="p-3 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-blue-50 text-blue-800 dark:bg-blue-900/60 dark:text-blue-100">
                   ENTRADAS (CARGAS)
                 </th>
-                <th colSpan={cargasSaida.length + 1} className="p-3 border-r border-gray-300 dark:border-gray-700 font-bold bg-purple-50 text-purple-800 dark:bg-purple-900/60 dark:text-purple-100">
+                <th colSpan={cargasSaida.length + 1} className="p-3 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-purple-50 text-purple-800 dark:bg-purple-900/60 dark:text-purple-100">
                   SAÍDAS (PRODUÇÃO)
                 </th>
-                <th className="p-3 font-bold bg-gray-100 border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-100">
-                  SALDO
+                <th rowSpan={2} className="p-3 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100 align-middle">
+                  <div className="flex flex-col items-center justify-center">
+                    <span>RESTOU</span>
+                    <span className="mt-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {getTotalSaldo(currentItens)}</span>
+                  </div>
                 </th>
-                <th className="p-3 font-bold bg-gray-100 dark:bg-gray-800 w-12">
+                <th rowSpan={2} className="p-3 border-b border-gray-300 dark:border-gray-700 font-bold bg-gray-100 dark:bg-gray-800 w-12 align-middle">
                   AÇÕES
                 </th>
               </tr>
               <tr className="border-t border-gray-200 dark:border-gray-700">
-                {specHeaders.map(h => <th key={h} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs">{h}</th>)}
+                {specHeaders.slice(1).map(h => <th key={h} className="p-2 border-r border-b border-gray-300 dark:border-gray-700 font-bold text-xs bg-gray-100 dark:bg-gray-800">{h}</th>)}
                 
                 {/* Entradas */}
                 {cargasEntrada.map((c: any) => {
                   const total = getTotalForColumn(currentItens, 'entradas', c.id);
                   return (
-                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-blue-50/50 dark:bg-blue-900/40 w-[100px] relative group">
+                  <th key={c.id} className="p-2 border-r border-b border-gray-300 dark:border-gray-700 font-bold text-xs bg-blue-50/50 dark:bg-blue-900/40 w-[100px] relative group">
                     <button onClick={() => removerColuna('Entrada', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 z-10" title="Excluir Coluna">
                        <X className="w-3 h-3"/>
                     </button>
@@ -366,7 +384,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                     </div>
                   </th>
                 )})}
-                <th className="p-2 border-r border-gray-300 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/40">
+                <th className="p-2 border-r border-b border-gray-300 dark:border-gray-700 bg-blue-50/50 dark:bg-blue-900/40">
                   <button onClick={() => adicionarColuna('Entrada', abaCapitalized)} className="flex flex-col items-center justify-center w-full h-full text-blue-600 hover:text-blue-800 transition-colors" title="Adicionar nova carga">
                     <Plus className="w-4 h-4"/>
                     <span className="text-[10px]">Carga</span>
@@ -377,7 +395,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                 {cargasSaida.map((c: any) => {
                   const total = getTotalForColumn(currentItens, 'saidas', c.id);
                   return (
-                  <th key={c.id} className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs bg-purple-50/50 dark:bg-purple-900/40 w-[100px] relative group">
+                  <th key={c.id} className="p-2 border-r border-b border-gray-300 dark:border-gray-700 font-bold text-xs bg-purple-50/50 dark:bg-purple-900/40 w-[100px] relative group">
                     <button onClick={() => removerColuna('Saida', abaCapitalized, c.id)} className="absolute top-1 right-1 text-red-500 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 z-10" title="Excluir Coluna">
                        <X className="w-3 h-3"/>
                     </button>
@@ -388,26 +406,18 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                     </div>
                   </th>
                 )})}
-                <th className="p-2 border-r border-gray-300 dark:border-gray-700 bg-purple-50/50 dark:bg-purple-900/40">
+                <th className="p-2 border-r border-b border-gray-300 dark:border-gray-700 bg-purple-50/50 dark:bg-purple-900/40">
                   <button onClick={() => adicionarColuna('Saida', abaCapitalized)} className="flex flex-col items-center justify-center w-full h-full text-purple-600 hover:text-purple-800 transition-colors" title="Adicionar nova saída">
                     <Plus className="w-4 h-4"/>
                     <span className="text-[10px]">Saída</span>
                   </button>
                 </th>
-
-                <th className="p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-xs">
-                  <div className="flex flex-col items-center justify-center">
-                    <span>RESTOU</span>
-                    <span className="mt-1 bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {getTotalSaldo(currentItens)}</span>
-                  </div>
-                </th>
-                <th className="p-2"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {currentItens.length === 0 ? (
                 <tr>
-                  <td colSpan={specHeaders.length + cargasEntrada.length + cargasSaida.length + 4} className="p-8 text-center text-gray-500">
+                  <td colSpan={specHeaders.length + cargasEntrada.length + cargasSaida.length + 4} className="p-8 text-center text-gray-500 border-b border-gray-300 dark:border-gray-700">
                     Nenhum item cadastrado.
                   </td>
                 </tr>
@@ -425,22 +435,22 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group h-[48px]">
                       {activeTab === 'folhas' && (
                         <>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
-                            <input type="text" list="dimensoes_porta_list" value={item.dimensao || ''} onChange={e => handleChangeItemField(item.id, 'dimensao', e.target.value)} placeholder="Dimensão" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-medium text-gray-800 dark:text-gray-100 text-sm" />
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 sticky left-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] w-[180px] min-w-[180px]">
+                            <input type="text" list="dimensoes_porta_list" value={item.dimensao || ''} onChange={e => handleChangeItemField(item.id, 'dimensao', e.target.value)} placeholder="Dimensão" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-bold text-gray-900 dark:text-gray-100 text-sm" />
                           </td>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 relative">
                             <select value={item.cor || ''} onChange={e => handleChangeItemField(item.id, 'cor', e.target.value)} className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green text-sm text-gray-800 dark:text-gray-100 appearance-none text-center-select">
                               <option value="">Selecione...</option>
                               {CORES.map(op => <option key={op} value={op}>{op}</option>)}
                             </select>
                           </td>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 relative">
                             <select value={item.enchimento || ''} onChange={e => handleChangeItemField(item.id, 'enchimento', e.target.value)} className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green text-sm text-gray-800 dark:text-gray-100 appearance-none text-center-select">
                               <option value="">Selecione...</option>
                               {ENCHIMENTOS_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
                             </select>
                           </td>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 relative">
                             <select value={item.modelo || ''} onChange={e => handleChangeItemField(item.id, 'modelo', e.target.value)} className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green text-sm text-gray-800 dark:text-gray-100 appearance-none text-center-select">
                               <option value="">Selecione...</option>
                               {MODELOS_PORTA.map(op => <option key={op} value={op}>{op}</option>)}
@@ -451,10 +461,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                       
                       {activeTab === 'aduelas' && (
                         <>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative w-[250px]">
-                            <input type="text" list="medida_aduela_list" value={item.medidaAduela || ''} onChange={e => handleChangeItemField(item.id, 'medidaAduela', e.target.value)} placeholder="Medida Aduela" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-medium text-gray-800 dark:text-gray-100 text-sm" />
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 sticky left-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] w-[240px] min-w-[240px]">
+                            <input type="text" list="medida_aduela_list" value={item.medidaAduela || ''} onChange={e => handleChangeItemField(item.id, 'medidaAduela', e.target.value)} placeholder="Medida Aduela" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 font-bold text-gray-900 dark:text-gray-100 text-sm" />
                           </td>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 relative">
                             <select value={item.cor || ''} onChange={e => handleChangeItemField(item.id, 'cor', e.target.value)} className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 text-sm text-gray-800 dark:text-gray-100 appearance-none text-center-select">
                               <option value="">Selecione...</option>
                               {CORES.map(op => <option key={op} value={op}>{op}</option>)}
@@ -465,10 +475,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                       
                       {activeTab === 'alizares' && (
                         <>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative w-[250px]">
-                            <input type="text" list="medida_alizar_list" value={item.medidaAlizar || ''} onChange={e => handleChangeItemField(item.id, 'medidaAlizar', e.target.value)} placeholder="Face/Medida" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-medium text-gray-800 dark:text-gray-100 text-sm" />
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 sticky left-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] w-[240px] min-w-[240px]">
+                            <input type="text" list="medida_alizar_list" value={item.medidaAlizar || ''} onChange={e => handleChangeItemField(item.id, 'medidaAlizar', e.target.value)} placeholder="Face/Medida" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 font-bold text-gray-900 dark:text-gray-100 text-sm" />
                           </td>
-                          <td className="p-0 border-r border-gray-300 dark:border-gray-700 relative">
+                          <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 relative">
                             <select value={item.cor || ''} onChange={e => handleChangeItemField(item.id, 'cor', e.target.value)} className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 text-sm text-gray-800 dark:text-gray-100 appearance-none text-center-select">
                               <option value="">Selecione...</option>
                               {CORES.map(op => <option key={op} value={op}>{op}</option>)}
@@ -483,7 +493,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                         const comment = item.comentarios?.[commentKey] || '';
                         const hasComment = !!comment;
                         return (
-                          <td key={c.id} className={cn("p-0 border-r border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-blue-50/30 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/50")}>
+                          <td key={c.id} className={cn("p-0 border-r border-b border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-blue-50/30 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/50")}>
                             <input 
                               type="number"
                               min="0"
@@ -502,7 +512,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                           </td>
                         );
                       })}
-                      <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
+                      <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
 
                       {/* Saídas */}
                       {cargasSaida.map((c: any) => {
@@ -510,7 +520,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                         const comment = item.comentarios?.[commentKey] || '';
                         const hasComment = !!comment;
                         return (
-                          <td key={c.id} className={cn("p-0 border-r border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-purple-50/30 dark:bg-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/50")}>
+                          <td key={c.id} className={cn("p-0 border-r border-b border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-purple-50/30 dark:bg-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/50")}>
                             <input 
                               type="number"
                               min="0"
@@ -529,14 +539,14 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                           </td>
                         );
                       })}
-                      <td className="p-0 border-r border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
+                      <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 bg-gray-100/30"></td>
 
                       {/* Saldo */}
-                      <td className={cn("p-2 border-r border-gray-300 dark:border-gray-700 font-bold text-base text-center", saldo < 0 ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-900 dark:text-gray-100")}>
+                      <td className={cn("p-2 border-r border-b border-gray-300 dark:border-gray-700 font-bold text-base text-center", saldo < 0 ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-gray-900 dark:text-gray-100")}>
                         {saldo}
                       </td>
 
-                      <td className="p-2 text-center">
+                      <td className="p-2 border-b border-gray-300 dark:border-gray-700 text-center">
                         <button onClick={() => deletarLinha(item.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Remover linha">
                           <Trash2 className="w-4 h-4" />
                         </button>
