@@ -1363,7 +1363,7 @@ export function renderAutoEntrega(kits: any[], responsavel?: string, obra?: stri
                   {/* Obra segundo (direita) */}
                   <div className="flex flex-col items-center">
                     <div className="w-full border-b-[2px] border-black print:border-black mb-2"></div>
-                    <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>{obra || 'Nome da Obra'}</EditableText></span>
+                    <span className="font-bold text-gray-800 print:text-black text-lg print:text-xl uppercase"><EditableText>OBRA</EditableText></span>
                   </div>
                 </div>
               </div>

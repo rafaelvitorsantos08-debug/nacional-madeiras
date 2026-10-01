@@ -461,7 +461,16 @@ export function RelatoriosModule() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {isAutoReport(reportType) && reportType === "auto_entrega" && (
+            <button
+              onClick={handleFinalizarEntrega}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              Finalizar Entrega e Salvar no Histórico
+            </button>
+          )}
           <button
             onClick={handleExport}
             className="px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 font-medium rounded-lg shadow-sm transition-colors flex items-center"
@@ -621,17 +630,6 @@ export function RelatoriosModule() {
               {isAutoReport(reportType) ? `Relatório: ${reportType.replace("auto_", "").replace(/_/g, " ")}` : `Adicionar Itens (${reportType})`}
             </h3>
 
-            {isAutoReport(reportType) && reportType === "auto_entrega" && (
-              <div className="mb-4 flex justify-end print:hidden">
-                <button
-                  onClick={handleFinalizarEntrega}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium shadow-sm transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
-                  Finalizar Entrega e Salvar no Histórico
-                </button>
-              </div>
-            )}
             {isAutoReport(reportType) && (
               <AutoReportsViewer 
                 kits={filteredKits} 
