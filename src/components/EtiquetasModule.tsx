@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from './EstoqueModule';
-import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram, Download } from 'lucide-react';
+import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -92,7 +92,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     cliente: "",
     obra: "",
   });
-  
+  const [showPreview, setShowPreview] = useState(true);
   
   const [selectedRelatorio, setSelectedRelatorio] = useState<string>('');
 
@@ -402,64 +402,111 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
         </div>
 
         {/* LADO DIREITO: Fila de Impressão e Configs */}
-        <div className="w-full md:w-96 lg:w-[400px] flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-bold text-gray-800 flex items-center justify-between">
-              Fila de Impressão
-              <span className="bg-brand-green text-white px-2 py-0.5 rounded text-xs">{labelsToPrint.length} etq</span>
+        <div className="w-full md:w-96 lg:w-[420px] flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-0">
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0 flex items-center justify-between">
+            <h2 className="font-bold text-gray-800 flex items-center gap-2">
+              <Printer className="w-4 h-4 text-brand-green" />
+              <span>Fila de Impressão</span>
+              <span className="bg-brand-green text-white px-2 py-0.5 rounded text-xs font-bold">{labelsToPrint.length} etq</span>
             </h2>
+            {fila.length > 0 && (
+              <button 
+                onClick={clearFila} 
+                className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline flex items-center gap-1 transition-colors"
+                title="Limpar Fila"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Limpar
+              </button>
+            )}
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {fila.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 space-y-4">
-                <Printer className="w-12 h-12 opacity-20" />
-                <p className="text-sm text-center">Fila vazia.<br/>Clique nos kits para adicionar.</p>
+          {/* Painel rolável único e contínuo para evitar sobreposição */}
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+            
+            {/* Seção 1: Itens da Fila com rolagem própria */}
+            <div className="space-y-2">
+              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex justify-between items-center">
+                <span>Itens na Fila ({fila.length})</span>
+                {fila.length > 2 && <span className="text-[10px] text-gray-400 font-normal">Role para conferir</span>}
               </div>
-            ) : (
-              <div className="space-y-3">
-                {fila.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded flex items-center justify-between p-2">
-                    <div className="flex-1 truncate pr-2">
-                      <div className="text-sm font-bold text-gray-800 truncate">{item.kit.bloco} - {item.kit.apto}</div>
-                      <div className="text-xs text-gray-500 truncate">{item.kit.comodo} | {getPortaDimensao(item.kit)}</div>
+              
+              {fila.length === 0 ? (
+                <div className="py-7 flex flex-col items-center justify-center text-gray-400 space-y-2 border border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+                  <Printer className="w-8 h-8 opacity-25" />
+                  <p className="text-xs text-center leading-relaxed">Fila vazia.<br/>Clique nos kits à esquerda para adicionar.</p>
+                </div>
+              ) : (
+                <div className="max-h-48 overflow-y-auto space-y-2 pr-1 border border-gray-200/70 rounded-lg p-1.5 bg-gray-50/40 divide-y divide-gray-100">
+                  {fila.map((item) => (
+                    <div key={item.id} className="border border-gray-200 rounded-lg flex items-center justify-between p-2 bg-white shadow-xs pt-2">
+                      <div className="flex-1 truncate pr-2">
+                        <div className="text-sm font-bold text-gray-800 truncate">{item.kit.bloco} - {item.kit.apto}</div>
+                        <div className="text-xs text-gray-500 truncate">{item.kit.comodo} | {getPortaDimensao(item.kit)}</div>
+                      </div>
+                      <div className="flex items-center space-x-1 border border-gray-200 rounded-md p-0.5 bg-gray-50 flex-shrink-0">
+                        <button onClick={() => updateQtd(item.id, -1)} className="p-1 hover:bg-gray-200 rounded text-gray-600 transition-colors"><Minus className="w-3 h-3" /></button>
+                        <span className="w-6 text-center font-bold text-xs text-gray-800">{item.qtd}</span>
+                        <button onClick={() => updateQtd(item.id, 1)} className="p-1 hover:bg-gray-200 rounded text-gray-600 transition-colors"><Plus className="w-3 h-3" /></button>
+                      </div>
+                      <button onClick={() => removeFila(item.id)} className="ml-1.5 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0" title="Remover item">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <div className="flex items-center space-x-1 border border-gray-200 rounded-md p-0.5 bg-gray-50">
-                      <button onClick={() => updateQtd(item.id, -1)} className="p-1 hover:bg-gray-200 rounded text-gray-600"><Minus className="w-3 h-3" /></button>
-                      <span className="w-6 text-center font-bold text-sm text-gray-800">{item.qtd}</span>
-                      <button onClick={() => updateQtd(item.id, 1)} className="p-1 hover:bg-gray-200 rounded text-gray-600"><Plus className="w-3 h-3" /></button>
-                    </div>
-                    <button onClick={() => removeFila(item.id)} className="ml-2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"><X className="w-4 h-4" /></button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-4">
+            {/* Seção 2: Pré-visualização com rolagem (scroll) dedicada para nunca sobrepor */}
             {fila.length > 0 && (
-              <div className="bg-white p-2.5 rounded-lg border border-gray-300 shadow-xs">
-                <div className="text-[11px] font-bold text-gray-700 uppercase mb-1.5 flex items-center justify-between">
-                  <span>Pré-visualização da Etiqueta:</span>
-                  <span className="text-[9.5px] text-green-700 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200">+10% Fonte Aplicada</span>
-                </div>
-                <div 
-                  className="border border-dashed border-gray-400 bg-white rounded overflow-hidden shadow-xs mx-auto"
-                  style={{
-                    width: '100%',
-                    maxWidth: '360px',
-                    aspectRatio: formato.id === '6180' ? '66.7/25.4' : '101.6/50.8'
-                  }}
+              <div className="bg-white rounded-lg border border-gray-200 shadow-xs overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="w-full px-3 py-2 bg-gray-50 hover:bg-gray-100 flex items-center justify-between border-b border-gray-200 text-left transition-colors"
                 >
-                  <LabelInnerContent kit={fila[0].kit} formato={formato} header={header} />
-                </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold text-gray-700 uppercase">Pré-visualização da Etiqueta</span>
+                    <span className="text-[9.5px] text-green-700 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200">Cabeçalho -5%</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-gray-500 text-xs font-medium">
+                    <span>{showPreview ? 'Recolher' : 'Expandir'}</span>
+                    {showPreview ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </div>
+                </button>
+                
+                {showPreview && (
+                  <div className="p-2.5 bg-gray-50/50">
+                    <div className="text-[10px] text-gray-500 mb-1.5 flex justify-between items-center">
+                      <span className="font-semibold truncate">Item 1: {fila[0].kit.bloco} - {fila[0].kit.apto}</span>
+                      <span className="text-gray-400 flex-shrink-0 ml-1">{formato.name.split('(')[0]}</span>
+                    </div>
+                    {/* Janela de preview com rolagem scroll dedicada */}
+                    <div className="max-h-[195px] overflow-auto border border-dashed border-gray-300 rounded-md bg-white p-1.5 shadow-inner flex justify-center items-center">
+                      <div 
+                        style={{
+                          width: '100%',
+                          maxWidth: '340px',
+                          minWidth: '240px',
+                          aspectRatio: formato.id === '6180' ? '66.7/25.4' : '101.6/50.8'
+                        }}
+                      >
+                        <LabelInnerContent kit={fila[0].kit} formato={formato} header={header} />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
+            {/* Seção 3: Configuração do Formato */}
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-600 flex items-center gap-1"><Settings className="w-3 h-3" /> Formato Pimaco</label>
+              <label className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                <Settings className="w-3.5 h-3.5" /> Formato Pimaco
+              </label>
               <select 
-                className="w-full text-sm border-gray-300 rounded-md focus:ring-brand-green focus:border-brand-green"
+                className="w-full text-sm border-gray-300 rounded-md focus:ring-brand-green focus:border-brand-green bg-white p-2 border outline-none"
                 value={formato.id}
                 onChange={e => setFormato(FORMATOS_PIMACO.find(f => f.id === e.target.value) || FORMATOS_PIMACO[0])}
               >
@@ -467,11 +514,12 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               </select>
             </div>
             
-            <div className="flex flex-col space-y-2">
+            {/* Seção 4: Ações e Botões */}
+            <div className="flex flex-col space-y-2 pt-1">
               <button 
                 onClick={exportarRelatorioEntrega}
                 disabled={fila.length === 0}
-                className="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
+                className="w-full px-4 py-2 bg-indigo-600 text-white font-bold rounded shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2 text-sm"
               >
                 <Download className="w-4 h-4" /> <span>Exportar Relatório Entregas (.doc)</span>
               </button>
@@ -480,23 +528,26 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                 <button 
                   onClick={clearFila}
                   disabled={fila.length === 0}
-                  className="px-3 py-2 border border-gray-300 rounded text-gray-600 font-medium text-sm hover:bg-gray-100 disabled:opacity-50 transition-colors flex items-center justify-center" title="Limpar Fila"
+                  className="px-3 py-2 border border-gray-300 rounded text-gray-600 font-medium text-sm hover:bg-gray-100 disabled:opacity-50 transition-colors flex items-center justify-center" 
+                  title="Limpar Fila"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={handlePrint}
                   disabled={labelsToPrint.length === 0}
-                  className="flex-1 px-4 py-2 bg-brand-green text-white font-bold rounded shadow-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2"
+                  className="flex-1 px-4 py-2.5 bg-brand-green text-white font-bold rounded shadow-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2 text-sm"
                 >
                   <Printer className="w-4 h-4" /> <span>Imprimir Etiquetas</span>
                 </button>
               </div>
             </div>
             
-            <div className="bg-yellow-50 text-yellow-800 text-xs p-3 rounded-md border border-yellow-200 mt-2">
-              <strong>Atenção para impressão:</strong> Na tela de opções do navegador, mude as <strong>Margens para "Nenhuma"</strong> (ou Nenhuma / Customizada com 0) e <strong>Escala (Scale) para "Padrão" ou "100%"</strong>, e desmarque Cabeçalhos e Rodapés.
+            {/* Aviso de Impressão */}
+            <div className="bg-yellow-50 text-yellow-800 text-[11px] leading-tight p-2.5 rounded-md border border-yellow-200">
+              <strong>Dica de impressão:</strong> Na tela do navegador, defina <strong>Margens: Nenhuma</strong> (ou 0), <strong>Escala: 100%</strong> e desmarque Cabeçalhos e Rodapés.
             </div>
+
           </div>
         </div>
       </div>
@@ -580,27 +631,27 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
   if (isSmall) {
     return (
-      <div className="w-full h-full p-2 flex flex-col justify-center text-black" style={{ color: '#000000' }}>
-        <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-1">
+      <div className="w-full h-full p-1.5 flex flex-col justify-center text-black" style={{ color: '#000000' }}>
+        <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-0.5">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '11px', fontWeight: 900, color: '#15803d' }}>
+            <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '10.45px', fontWeight: 900, color: '#15803d' }}>
               Nacional Madeiras
             </div>
-            <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '9px', fontWeight: 900, color: '#000000' }}>
+            <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '8.55px', fontWeight: 900, color: '#000000' }}>
               Kit Porta
             </div>
             {(header?.cliente || header?.obra) && (
-              <div className="uppercase leading-tight mb-0.5" style={{ fontSize: '8.5px', fontWeight: 800, color: '#000000' }}>
+              <div className="uppercase leading-tight mb-0.5" style={{ fontSize: '8.05px', fontWeight: 800, color: '#000000' }}>
                 {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
               </div>
             )}
-            <div className="uppercase leading-none truncate" style={{ fontSize: '11px', fontWeight: 900, color: '#000000' }}>
-              {kit.bloco}-{kit.apto} <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#000000' }}>({kit.comodo} - {kit.tipologia})</span>
+            <div className="uppercase leading-none truncate" style={{ fontSize: '10.45px', fontWeight: 900, color: '#000000' }}>
+              {kit.bloco}-{kit.apto} <span style={{ fontSize: '9.0px', fontWeight: 700, color: '#000000' }}>({kit.comodo} - {kit.tipologia})</span>
             </div>
-            <div className="mt-0.5 truncate uppercase" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>{kit.abertura}</div>
+            <div className="mt-0.5 truncate uppercase" style={{ fontSize: '9.0px', fontWeight: 900, color: '#000000' }}>{kit.abertura}</div>
           </div>
           <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
-            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={false} />
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={24} level="M" includeMargin={false} />
             <div className="flex items-center gap-0.5 mt-0.5">
               <svg width="6" height="6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial_small)" />
@@ -615,7 +666,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                   </radialGradient>
                 </defs>
               </svg>
-              <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '4.5px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
+              <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '4.25px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
             </div>
           </div>
         </div>
@@ -636,35 +687,35 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
   // Padrão Médio/Grande (6182, 6183, 6187)
   return (
-    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-2" style={{ color: '#000000' }}>
-      <div className="flex justify-between items-start border-b-[2px] border-black pb-1 mb-1 shrink-0">
+    <div className="w-full h-full p-1.5 pl-2.5 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-1" style={{ color: '#000000' }}>
+      <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-0.5 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
-          <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '16px', fontWeight: 900, color: '#15803d' }}>
+          <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '15.2px', fontWeight: 900, color: '#15803d' }}>
             Nacional Madeiras
           </div>
-          <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '13px', fontWeight: 900, color: '#000000' }}>
+          <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '12.35px', fontWeight: 900, color: '#000000' }}>
             Kit Porta
           </div>
           {(header?.cliente || header?.obra) && (
-             <div className="uppercase mt-0.5 leading-tight" style={{ fontSize: '11px', fontWeight: 800, color: '#000000' }}>
+             <div className="uppercase mt-0.5 leading-tight" style={{ fontSize: '10.45px', fontWeight: 800, color: '#000000' }}>
                {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span style={{ margin: '0 3px', fontWeight: 900 }}>|</span>} {header.obra && `OBRA: ${header.obra}`}
              </div>
           )}
-          <div className="uppercase mt-1 leading-none flex items-center flex-wrap" style={{ fontSize: '15px', fontWeight: 900, color: '#000000' }}>
+          <div className="uppercase mt-0.5 leading-none flex items-center flex-wrap" style={{ fontSize: '14.25px', fontWeight: 900, color: '#000000' }}>
             BLOCO: {kit.bloco} <span style={{ margin: '0 4px', fontWeight: 900, color: '#000000' }}>|</span> APTO: {kit.apto}
           </div>
-          <div className="uppercase mt-1 leading-none" style={{ fontSize: '14px', fontWeight: 900, color: '#000000' }}>
-            {kit.abertura} <span style={{ fontSize: '12px', fontWeight: 700, color: '#000000', marginLeft: '4px' }}>({kit.comodo} - {kit.tipologia})</span>
+          <div className="uppercase mt-0.5 leading-none" style={{ fontSize: '13.3px', fontWeight: 900, color: '#000000' }}>
+            {kit.abertura} <span style={{ fontSize: '11.4px', fontWeight: 700, color: '#000000', marginLeft: '4px' }}>({kit.comodo} - {kit.tipologia})</span>
           </div>
         </div>
         <div className="flex-shrink-0 pt-0 flex flex-col items-center">
           <QRCodeSVG 
             value="https://www.instagram.com/nacionalmadeirasltda/" 
-            size={46} 
+            size={42} 
             level="M" 
             includeMargin={false}
           />
-          <div className="flex items-center gap-1 mt-1">
+          <div className="flex items-center gap-1 mt-0.5">
             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial)" />
               <path d="M12 6.8c-2.87 0-5.2 2.33-5.2 5.2s2.33 5.2 5.2 5.2 5.2-2.33 5.2-5.2-2.33-5.2-5.2-5.2zm0 8.5c-1.82 0-3.3-1.48-3.3-3.3s1.48-3.3 3.3-3.3 3.3 1.48 3.3 3.3-1.48 3.3-3.3 3.3zm5.3-7.55c-.52 0-.95-.43-.95-.95s.43-.95.95-.95.95.43.95.95-.43.95-.95.95z" fill="#fff" />
@@ -678,7 +729,7 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                 </radialGradient>
               </defs>
             </svg>
-            <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '6px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
+            <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '5.7px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
           </div>
         </div>
       </div>
