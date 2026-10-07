@@ -437,6 +437,25 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           </div>
 
           <div className="p-4 border-t border-gray-200 bg-gray-50 space-y-4">
+            {fila.length > 0 && (
+              <div className="bg-white p-2.5 rounded-lg border border-gray-300 shadow-xs">
+                <div className="text-[11px] font-bold text-gray-700 uppercase mb-1.5 flex items-center justify-between">
+                  <span>Pré-visualização da Etiqueta:</span>
+                  <span className="text-[9.5px] text-green-700 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200">+10% Fonte Aplicada</span>
+                </div>
+                <div 
+                  className="border border-dashed border-gray-400 bg-white rounded overflow-hidden shadow-xs mx-auto"
+                  style={{
+                    width: '100%',
+                    maxWidth: '360px',
+                    aspectRatio: formato.id === '6180' ? '66.7/25.4' : '101.6/50.8'
+                  }}
+                >
+                  <LabelInnerContent kit={fila[0].kit} formato={formato} header={header} />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-600 flex items-center gap-1"><Settings className="w-3 h-3" /> Formato Pimaco</label>
               <select 
@@ -561,21 +580,21 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
   if (isSmall) {
     return (
-      <div className="w-full h-full p-2 flex flex-col justify-center text-black">
+      <div className="w-full h-full p-2 flex flex-col justify-center text-black" style={{ color: '#000000' }}>
         <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-1">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="font-black text-[9.5px] uppercase leading-none mb-0.5 text-[#15803d] print:text-[#15803d] tracking-tight">
-              Nacional Madeiras <span className="font-black text-black">KIT PORTA</span>
+            <div className="uppercase leading-none mb-0.5 tracking-tight" style={{ fontSize: '11px', fontWeight: 900, color: '#15803d' }}>
+              Nacional Madeiras <span style={{ fontSize: '10px', fontWeight: 900, color: '#000000' }}>KIT PORTA</span>
             </div>
             {(header?.cliente || header?.obra) && (
-              <div className="font-extrabold text-[7.5px] uppercase leading-tight mb-0.5 text-black">
+              <div className="uppercase leading-tight mb-0.5" style={{ fontSize: '8.5px', fontWeight: 800, color: '#000000' }}>
                 {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
               </div>
             )}
-            <div className="font-black text-[9.5px] uppercase leading-none truncate text-black">
-              {kit.bloco}-{kit.apto} <span className="font-bold text-black">({kit.comodo} - {kit.tipologia})</span>
+            <div className="uppercase leading-none truncate" style={{ fontSize: '11px', fontWeight: 900, color: '#000000' }}>
+              {kit.bloco}-{kit.apto} <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#000000' }}>({kit.comodo} - {kit.tipologia})</span>
             </div>
-            <div className="font-black text-[8.5px] mt-0.5 truncate uppercase text-black">{kit.abertura}</div>
+            <div className="mt-0.5 truncate uppercase" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>{kit.abertura}</div>
           </div>
           <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
             <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={false} />
@@ -593,20 +612,20 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                   </radialGradient>
                 </defs>
               </svg>
-              <span className="text-[4px] font-black uppercase whitespace-nowrap text-black tracking-tighter">Visite nossa página no Instagram</span>
+              <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '4.5px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[7.5px] font-mono leading-tight px-1 uppercase text-black">
-          <div className="truncate"><span className="font-black text-black">Fech:</span> <span className="font-bold text-black">{kit.fechaduraMarca}</span></div>
-          <div className="truncate text-right"><span className="font-black text-black">Grid:</span> <span className="font-bold text-black">{kit.fechaduraGrid}</span></div>
+        <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 font-mono leading-tight px-1 uppercase" style={{ fontSize: '8.5px', color: '#000000' }}>
+          <div className="truncate"><span style={{ fontWeight: 900, color: '#000000' }}>Fech:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{kit.fechaduraMarca}</span></div>
+          <div className="truncate text-right"><span style={{ fontWeight: 900, color: '#000000' }}>Grid:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{kit.fechaduraGrid}</span></div>
           
-          <div className="truncate"><span className="font-black text-black">Dob:</span> <span className="font-bold text-black">{kit.dobradicaMedida}</span></div>
-          <div className="truncate text-right"><span className="font-black text-black">Ad Acab:</span> <span className="font-bold text-black">{kit.acabamentoAduela}</span></div>
+          <div className="truncate"><span style={{ fontWeight: 900, color: '#000000' }}>Dob:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{kit.dobradicaMedida}</span></div>
+          <div className="truncate text-right"><span style={{ fontWeight: 900, color: '#000000' }}>Ad Acab:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{kit.acabamentoAduela}</span></div>
           
-          <div className="truncate"><span className="font-black text-black">Pta:</span> <span className="font-bold text-black">{getPortaDimensao(kit)} {kit.caracteristicaPorta}</span></div>
-          <div className="truncate text-right"><span className="font-black text-black">Ad:</span> <span className="font-bold text-black">{kit.aduelaLargura}x{kit.aduelaAltura}</span></div>
+          <div className="truncate"><span style={{ fontWeight: 900, color: '#000000' }}>Pta:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{getPortaDimensao(kit)} {kit.caracteristicaPorta}</span></div>
+          <div className="truncate text-right"><span style={{ fontWeight: 900, color: '#000000' }}>Ad:</span> <span style={{ fontWeight: 700, color: '#000000' }}>{kit.aduelaLargura}x{kit.aduelaAltura}</span></div>
         </div>
       </div>
     );
@@ -614,22 +633,22 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
   // Padrão Médio/Grande (6182, 6183, 6187)
   return (
-    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-2.5 text-black">
+    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-2" style={{ color: '#000000' }}>
       <div className="flex justify-between items-start border-b-[2px] border-black pb-1 mb-1 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
-          <div className="font-black text-[14px] uppercase leading-none mb-1 tracking-tight text-[#15803d] print:text-[#15803d]">
-            Nacional Madeiras <span className="font-black text-black tracking-normal ml-0.5">Kit Porta</span>
+          <div className="uppercase leading-none mb-1 tracking-tight" style={{ fontSize: '16px', fontWeight: 900, color: '#15803d' }}>
+            Nacional Madeiras <span style={{ fontSize: '14px', fontWeight: 900, color: '#000000', marginLeft: '2px' }}>Kit Porta</span>
           </div>
           {(header?.cliente || header?.obra) && (
-             <div className="font-extrabold text-[9.5px] uppercase mt-0.5 leading-tight text-black">
-               {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5 font-black">|</span>} {header.obra && `OBRA: ${header.obra}`}
+             <div className="uppercase mt-0.5 leading-tight" style={{ fontSize: '11px', fontWeight: 800, color: '#000000' }}>
+               {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span style={{ margin: '0 3px', fontWeight: 900 }}>|</span>} {header.obra && `OBRA: ${header.obra}`}
              </div>
           )}
-          <div className="font-black text-[13px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
-            BLOCO: {kit.bloco} <span className="mx-1 text-black font-black">|</span> APTO: {kit.apto}
+          <div className="uppercase mt-1 leading-none flex items-center flex-wrap" style={{ fontSize: '15px', fontWeight: 900, color: '#000000' }}>
+            BLOCO: {kit.bloco} <span style={{ margin: '0 4px', fontWeight: 900, color: '#000000' }}>|</span> APTO: {kit.apto}
           </div>
-          <div className="font-black text-[12.5px] uppercase mt-1 leading-none text-black">
-            {kit.abertura} <span className="font-bold text-[11px] text-black ml-1">({kit.comodo} - {kit.tipologia})</span>
+          <div className="uppercase mt-1 leading-none" style={{ fontSize: '14px', fontWeight: 900, color: '#000000' }}>
+            {kit.abertura} <span style={{ fontSize: '12px', fontWeight: 700, color: '#000000', marginLeft: '4px' }}>({kit.comodo} - {kit.tipologia})</span>
           </div>
         </div>
         <div className="flex-shrink-0 pt-0 flex flex-col items-center">
@@ -653,40 +672,40 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                 </radialGradient>
               </defs>
             </svg>
-            <span className="text-[5px] font-black uppercase whitespace-nowrap text-black tracking-tighter">Visite nossa página no Instagram</span>
+            <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '6px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
           </div>
         </div>
       </div>
       
-      <div className="flex flex-col gap-y-1 text-[10px] font-mono leading-tight uppercase font-bold pl-0.5 mt-0.5 shrink-0 text-black">
+      <div className="flex flex-col gap-y-1 font-mono leading-tight uppercase pl-0.5 mt-0.5 shrink-0" style={{ color: '#000000' }}>
         <div className="grid grid-cols-5 gap-x-1">
           <div className="col-span-2">
-            <span className="text-black font-black block text-[8px] mb-[-1px]">Fech. Marca:</span>
-            <span className="text-[11px] font-bold text-black truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo === 'WC' ? 'BANHEIRO' : kit.fechaduraTipo === 'INT' ? 'INTERNA' : kit.fechaduraTipo === 'EXT' ? 'EXTERNA' : kit.fechaduraTipo}</span>
+            <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Fech. Marca:</span>
+            <span className="truncate block" style={{ fontSize: '12.5px', fontWeight: 700, color: '#000000' }}>{kit.fechaduraMarca} - {kit.fechaduraTipo === 'WC' ? 'BANHEIRO' : kit.fechaduraTipo === 'INT' ? 'INTERNA' : kit.fechaduraTipo === 'EXT' ? 'EXTERNA' : kit.fechaduraTipo}</span>
           </div>
           <div className="col-span-1 border-l-[1.5px] border-black pl-1">
-            <span className="text-black font-black block text-[8px] mb-[-1px]">Fech. Grid:</span>
-            <span className="text-[11px] font-bold text-black truncate block">{kit.fechaduraGrid}</span>
+            <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Fech. Grid:</span>
+            <span className="truncate block" style={{ fontSize: '12.5px', fontWeight: 700, color: '#000000' }}>{kit.fechaduraGrid}</span>
           </div>
           <div className="col-span-2 border-l-[1.5px] border-black pl-1">
-            <span className="text-black font-black block text-[8px] mb-[-1px]">Dobradiça Medida:</span>
-            <span className="text-[11px] font-bold text-black truncate block">{kit.dobradicaMedida}</span>
+            <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Dobradiça Medida:</span>
+            <span className="truncate block" style={{ fontSize: '12.5px', fontWeight: 700, color: '#000000' }}>{kit.dobradicaMedida}</span>
           </div>
         </div>
         
         <div className="border-t-[1.5px] border-black pt-1 mt-0.5">
-          <span className="text-black font-black block text-[8px] mb-[-1px]">Folha Porta:</span>
-          <span className="text-[10.5px] font-bold text-black leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
+          <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Folha Porta:</span>
+          <span className="leading-tight block" style={{ fontSize: '12px', fontWeight: 700, color: '#000000' }}>{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-x-1 border-t-[1.5px] border-black pt-1 mt-0.5">
           <div>
-            <span className="text-black font-black block text-[8px] mb-[-1px]">Aduela:</span>
-            <span className="text-[11px] font-bold text-black truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+            <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Aduela:</span>
+            <span className="truncate block" style={{ fontSize: '12.5px', fontWeight: 700, color: '#000000' }}>{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
           </div>
           <div className="border-l-[1.5px] border-black pl-1">
-            <span className="text-black font-black block text-[8px] mb-[-1px]">Acab. Aduela:</span>
-            <span className="text-[10.5px] font-bold text-black truncate block">{kit.acabamentoAduela}</span>
+            <span className="block mb-[-1px]" style={{ fontSize: '9.5px', fontWeight: 900, color: '#000000' }}>Acab. Aduela:</span>
+            <span className="truncate block" style={{ fontSize: '12px', fontWeight: 700, color: '#000000' }}>{kit.acabamentoAduela}</span>
           </div>
         </div>
       </div>
