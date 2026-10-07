@@ -492,7 +492,20 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
             background: white !important;
+            color: #000000 !important;
+            -webkit-font-smoothing: antialiased !important;
+            text-rendering: geometricPrecision !important;
+          }
+          @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .text-black {
+              color: #000000 !important;
+            }
           }
         `}} />
         
@@ -548,19 +561,21 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
 
   if (isSmall) {
     return (
-      <div className="w-full h-full p-2 flex flex-col justify-center">
-        <div className="flex justify-between items-start border-b border-black pb-0.5 mb-1">
+      <div className="w-full h-full p-2 flex flex-col justify-center text-black">
+        <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-1">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="font-extrabold text-[8px] uppercase leading-none mb-0.5 text-brand-green">Nacional Madeiras <span className="font-medium text-gray-600">KIT PORTA</span></div>
+            <div className="font-black text-[9.5px] uppercase leading-none mb-0.5 text-[#15803d] print:text-[#15803d] tracking-tight">
+              Nacional Madeiras <span className="font-black text-black">KIT PORTA</span>
+            </div>
             {(header?.cliente || header?.obra) && (
-              <div className="font-bold text-[6px] uppercase leading-tight mb-0.5 text-gray-600">
+              <div className="font-extrabold text-[7.5px] uppercase leading-tight mb-0.5 text-black">
                 {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && '| '} {header.obra && `OBRA: ${header.obra}`}
               </div>
             )}
-            <div className="font-bold text-[8px] uppercase leading-none truncate">
-              {kit.bloco}-{kit.apto} <span className="font-normal">({kit.comodo} - {kit.tipologia})</span>
+            <div className="font-black text-[9.5px] uppercase leading-none truncate text-black">
+              {kit.bloco}-{kit.apto} <span className="font-bold text-black">({kit.comodo} - {kit.tipologia})</span>
             </div>
-            <div className="font-bold text-[7px] mt-0.5 truncate uppercase">{kit.abertura}</div>
+            <div className="font-black text-[8.5px] mt-0.5 truncate uppercase text-black">{kit.abertura}</div>
           </div>
           <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
             <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={26} level="M" includeMargin={false} />
@@ -578,45 +593,43 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                   </radialGradient>
                 </defs>
               </svg>
-              <span className="text-[3.5px] font-bold uppercase whitespace-nowrap text-gray-800 tracking-tighter">Visite nossa página no Instagram</span>
+              <span className="text-[4px] font-black uppercase whitespace-nowrap text-black tracking-tighter">Visite nossa página no Instagram</span>
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[6.5px] font-mono leading-tight px-1 uppercase">
-          <div className="truncate"><span className="font-bold">Fech:</span> {kit.fechaduraMarca}</div>
-          <div className="truncate text-right"><span className="font-bold">Grid:</span> {kit.fechaduraGrid}</div>
+        <div className="grid grid-cols-2 gap-x-1 gap-y-0.5 text-[7.5px] font-mono leading-tight px-1 uppercase text-black">
+          <div className="truncate"><span className="font-black text-black">Fech:</span> <span className="font-bold text-black">{kit.fechaduraMarca}</span></div>
+          <div className="truncate text-right"><span className="font-black text-black">Grid:</span> <span className="font-bold text-black">{kit.fechaduraGrid}</span></div>
           
-          <div className="truncate"><span className="font-bold">Dob:</span> {kit.dobradicaMedida}</div>
-          <div className="truncate text-right"><span className="font-bold">Ad Acab:</span> {kit.acabamentoAduela}</div>
+          <div className="truncate"><span className="font-black text-black">Dob:</span> <span className="font-bold text-black">{kit.dobradicaMedida}</span></div>
+          <div className="truncate text-right"><span className="font-black text-black">Ad Acab:</span> <span className="font-bold text-black">{kit.acabamentoAduela}</span></div>
           
-          <div className="truncate"><span className="font-bold">Pta:</span> {getPortaDimensao(kit)} {kit.caracteristicaPorta}</div>
-          <div className="truncate text-right"><span className="font-bold">Ad:</span> {kit.aduelaLargura}x{kit.aduelaAltura}</div>
+          <div className="truncate"><span className="font-black text-black">Pta:</span> <span className="font-bold text-black">{getPortaDimensao(kit)} {kit.caracteristicaPorta}</span></div>
+          <div className="truncate text-right"><span className="font-black text-black">Ad:</span> <span className="font-bold text-black">{kit.aduelaLargura}x{kit.aduelaAltura}</span></div>
         </div>
       </div>
     );
   }
 
-  // Padrão Médio/Grande (6182, 6183)
-  const INSTAGRAM_LOGO_DATA_URI = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' overflow='visible' fill='black'%3E%3Cpath d='M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z'/%3E%3C/svg%3E";
-
+  // Padrão Médio/Grande (6182, 6183, 6187)
   return (
-    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-3">
-      <div className="flex justify-between items-start border-b-[1.5px] border-black pb-1 mb-1 shrink-0">
+    <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-2.5 text-black">
+      <div className="flex justify-between items-start border-b-[2px] border-black pb-1 mb-1 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
-          <div className="font-extrabold text-[12px] uppercase leading-[0.9] mb-1 tracking-tight text-brand-green">
-            Nacional Madeiras <span className="font-medium text-gray-600 tracking-normal">Kit Porta</span>
+          <div className="font-black text-[14px] uppercase leading-none mb-1 tracking-tight text-[#15803d] print:text-[#15803d]">
+            Nacional Madeiras <span className="font-black text-black tracking-normal ml-0.5">Kit Porta</span>
           </div>
           {(header?.cliente || header?.obra) && (
-             <div className="font-bold text-[8px] uppercase mt-0.5 leading-tight text-gray-600">
-               {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5">|</span>} {header.obra && `OBRA: ${header.obra}`}
+             <div className="font-extrabold text-[9.5px] uppercase mt-0.5 leading-tight text-black">
+               {header.cliente && `CLIENTE: ${header.cliente}`} {header.cliente && header.obra && <span className="mx-0.5 font-black">|</span>} {header.obra && `OBRA: ${header.obra}`}
              </div>
           )}
-          <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
-            BLOCO: {kit.bloco} <span className="mx-1 text-gray-400">|</span> APTO: {kit.apto}
+          <div className="font-black text-[13px] uppercase mt-1 leading-none text-black flex items-center flex-wrap">
+            BLOCO: {kit.bloco} <span className="mx-1 text-black font-black">|</span> APTO: {kit.apto}
           </div>
-          <div className="font-bold text-[11px] uppercase mt-1 leading-none text-black">
-            {kit.abertura} <span className="font-semibold text-[10px] text-gray-700 ml-1">({kit.comodo} - {kit.tipologia})</span>
+          <div className="font-black text-[12.5px] uppercase mt-1 leading-none text-black">
+            {kit.abertura} <span className="font-bold text-[11px] text-black ml-1">({kit.comodo} - {kit.tipologia})</span>
           </div>
         </div>
         <div className="flex-shrink-0 pt-0 flex flex-col items-center">
@@ -640,40 +653,40 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
                 </radialGradient>
               </defs>
             </svg>
-            <span className="text-[4.5px] font-bold uppercase whitespace-nowrap text-gray-800 tracking-tighter">Visite nossa página no Instagram</span>
+            <span className="text-[5px] font-black uppercase whitespace-nowrap text-black tracking-tighter">Visite nossa página no Instagram</span>
           </div>
         </div>
       </div>
       
-      <div className="flex flex-col gap-y-1 text-[9px] font-mono leading-tight uppercase font-semibold pl-0.5 mt-0.5 shrink-0">
+      <div className="flex flex-col gap-y-1 text-[10px] font-mono leading-tight uppercase font-bold pl-0.5 mt-0.5 shrink-0 text-black">
         <div className="grid grid-cols-5 gap-x-1">
           <div className="col-span-2">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Marca:</span>
-            <span className="text-[10px] truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo === 'WC' ? 'BANHEIRO' : kit.fechaduraTipo === 'INT' ? 'INTERNA' : kit.fechaduraTipo === 'EXT' ? 'EXTERNA' : kit.fechaduraTipo}</span>
+            <span className="text-black font-black block text-[8px] mb-[-1px]">Fech. Marca:</span>
+            <span className="text-[11px] font-bold text-black truncate block">{kit.fechaduraMarca} - {kit.fechaduraTipo === 'WC' ? 'BANHEIRO' : kit.fechaduraTipo === 'INT' ? 'INTERNA' : kit.fechaduraTipo === 'EXT' ? 'EXTERNA' : kit.fechaduraTipo}</span>
           </div>
-          <div className="col-span-1 border-l border-gray-300 pl-1">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Fech. Grid:</span>
-            <span className="text-[10px] truncate block">{kit.fechaduraGrid}</span>
+          <div className="col-span-1 border-l-[1.5px] border-black pl-1">
+            <span className="text-black font-black block text-[8px] mb-[-1px]">Fech. Grid:</span>
+            <span className="text-[11px] font-bold text-black truncate block">{kit.fechaduraGrid}</span>
           </div>
-          <div className="col-span-2 border-l border-gray-300 pl-1">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Dobradiça Medida:</span>
-            <span className="text-[10px] truncate block">{kit.dobradicaMedida}</span>
+          <div className="col-span-2 border-l-[1.5px] border-black pl-1">
+            <span className="text-black font-black block text-[8px] mb-[-1px]">Dobradiça Medida:</span>
+            <span className="text-[11px] font-bold text-black truncate block">{kit.dobradicaMedida}</span>
           </div>
         </div>
         
-        <div className="border-t border-gray-200 pt-1 mt-0.5">
-          <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Folha Porta:</span>
-          <span className="text-[9px] leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
+        <div className="border-t-[1.5px] border-black pt-1 mt-0.5">
+          <span className="text-black font-black block text-[8px] mb-[-1px]">Folha Porta:</span>
+          <span className="text-[10.5px] font-bold text-black leading-tight block">{getPortaDimensao(kit)} {kit.acabamentoPorta} {kit.caracteristicaPorta}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-1 border-t border-gray-200 pt-1 mt-0.5">
+        <div className="grid grid-cols-2 gap-x-1 border-t-[1.5px] border-black pt-1 mt-0.5">
           <div>
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Aduela:</span>
-            <span className="text-[10px] truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
+            <span className="text-black font-black block text-[8px] mb-[-1px]">Aduela:</span>
+            <span className="text-[11px] font-bold text-black truncate block">{kit.aduelaLargura}x{kit.aduelaAltura} ({kit.regulagem})</span>
           </div>
-          <div className="border-l border-gray-300 pl-1">
-            <span className="text-gray-500 font-bold block text-[7px] mb-[-1px]">Acab. Aduela:</span>
-            <span className="text-[9px] truncate block">{kit.acabamentoAduela}</span>
+          <div className="border-l-[1.5px] border-black pl-1">
+            <span className="text-black font-black block text-[8px] mb-[-1px]">Acab. Aduela:</span>
+            <span className="text-[10.5px] font-bold text-black truncate block">{kit.acabamentoAduela}</span>
           </div>
         </div>
       </div>
