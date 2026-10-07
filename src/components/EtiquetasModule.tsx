@@ -583,8 +583,11 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
       <div className="w-full h-full p-2 flex flex-col justify-center text-black" style={{ color: '#000000' }}>
         <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-1">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="uppercase leading-none mb-0.5 tracking-tight" style={{ fontSize: '11px', fontWeight: 900, color: '#15803d' }}>
-              Nacional Madeiras <span style={{ fontSize: '10px', fontWeight: 900, color: '#000000' }}>KIT PORTA</span>
+            <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '11px', fontWeight: 900, color: '#15803d' }}>
+              Nacional Madeiras
+            </div>
+            <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '9px', fontWeight: 900, color: '#000000' }}>
+              Kit Porta
             </div>
             {(header?.cliente || header?.obra) && (
               <div className="uppercase leading-tight mb-0.5" style={{ fontSize: '8.5px', fontWeight: 800, color: '#000000' }}>
@@ -636,8 +639,11 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
     <div className="w-full h-full p-2 pl-3 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-2" style={{ color: '#000000' }}>
       <div className="flex justify-between items-start border-b-[2px] border-black pb-1 mb-1 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5 mt-0.5">
-          <div className="uppercase leading-none mb-1 tracking-tight" style={{ fontSize: '16px', fontWeight: 900, color: '#15803d' }}>
-            Nacional Madeiras <span style={{ fontSize: '14px', fontWeight: 900, color: '#000000', marginLeft: '2px' }}>Kit Porta</span>
+          <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '16px', fontWeight: 900, color: '#15803d' }}>
+            Nacional Madeiras
+          </div>
+          <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '13px', fontWeight: 900, color: '#000000' }}>
+            Kit Porta
           </div>
           {(header?.cliente || header?.obra) && (
              <div className="uppercase mt-0.5 leading-tight" style={{ fontSize: '11px', fontWeight: 800, color: '#000000' }}>
