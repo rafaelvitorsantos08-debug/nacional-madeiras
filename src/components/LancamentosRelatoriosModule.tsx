@@ -3,7 +3,7 @@ import { useLocalStorage } from './EstoqueModule';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Plus, Trash2, Copy, Save, FileSpreadsheet, Download, FileText, MessageSquareQuote } from 'lucide-react';
+import { Plus, Trash2, Copy, Save, FileSpreadsheet, Download, FileText, MessageSquareQuote, Settings, Edit2, Check, X, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
 
 import { cn } from '../lib/utils';
 
@@ -74,7 +74,22 @@ const INITIAL_KITS: KitLancamento[] = [
   {"bloco":"1","apto":"308","pavimento":"3","coluna":"8","comodo":"SUITE 2","tipologia":"PM2","folhaLargura":"720","folhaAltura":"2100","qtdeFolhasPorKit":"1","acabamentoPorta":"BRANCO","caracteristicaPorta":"SARRAFEADA","abertura":"DIREITA","aduelaLargura":"150","aduelaAltura":"2110","regulagem":"REG 70","acabamentoAduela":"PET MDF BRA+BOR+REG","fechaduraMarca":"LA FONTE","fechaduraGrid":"55","fechaduraTipo":"INT","dobradicaMarca":"LA FONTE","dobradicaMedida":"3 x 2,5","qtdeLadosAduela":"3","montantesMedida":"","montantesFolgas":"","bitsQtde":"","bitsFaces":"","camarao":false,"correr":false,"pivotante":false,"veneziana":false,"grelha":false,"bandeira":false,"chapa":false,"vidro":false,"fechaFresta":false,"kitDuplo":false,"observacao":"","id":"kit-11"}
 ];
 
-const EditableCell = ({ value, onChange, className = "", type = "text", options = [] }: { value: any, onChange: (v: any) => void, className?: string, type?: "text" | "number" | "boolean" | "select", options?: string[] }) => {
+export const DEFAULT_COMODOS = [
+  "BANHEIRO",
+  "BANH. SOCIAL",
+  "BANH. SUITE",
+  "ENTRADA",
+  "QUARTO",
+  "COZINHA",
+  "ELETRICA",
+  "LIXEIRA",
+  "SALA",
+  "SUITE",
+  "SUITE 2",
+  "ESPECIAIS"
+];
+
+const EditableCell = ({ value, onChange, className = "", type = "text", options = [], list }: { value: any, onChange: (v: any) => void, className?: string, type?: "text" | "number" | "boolean" | "select", options?: string[], list?: string }) => {
   const safeClassName = className.replace(/\bw-\S+/g, '');
   
   if (type === "boolean") {
@@ -97,6 +112,7 @@ const EditableCell = ({ value, onChange, className = "", type = "text", options 
         type={type === "number" ? "number" : "text"}
         value={value || ''} 
         onChange={e => onChange(e.target.value)}
+        list={list}
         className="absolute inset-0 w-full h-full bg-transparent text-center outline-none focus:ring-1 focus:ring-emerald-500 rounded px-1"
       />
     </div>
@@ -119,6 +135,73 @@ export function LancamentosRelatoriosModule() {
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
+
+  const [comodoOptions, setComodoOptions] = useLocalStorage<string[]>('nacional_madeiras_comodo_options_v1', DEFAULT_COMODOS);
+  const [showComodoModal, setShowComodoModal] = useState(false);
+  const [newComodoInput, setNewComodoInput] = useState('');
+  const [editingComodoIndex, setEditingComodoIndex] = useState<number | null>(null);
+  const [editingComodoValue, setEditingComodoValue] = useState('');
+
+  const handleAddNewComodo = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = newComodoInput.trim().toUpperCase();
+    if (!trimmed) return;
+    if (comodoOptions.includes(trimmed)) {
+      alert('Este cômodo já está na lista!');
+      return;
+    }
+    const updated = [...comodoOptions, trimmed];
+    setComodoOptions(updated);
+    setNewComodoInput('');
+    setForm(prev => ({ ...prev, comodo: trimmed }));
+  };
+
+  const handleStartEditComodo = (index: number) => {
+    setEditingComodoIndex(index);
+    setEditingComodoValue(comodoOptions[index]);
+  };
+
+  const handleSaveEditComodo = (index: number) => {
+    const trimmed = editingComodoValue.trim().toUpperCase();
+    if (!trimmed) return;
+    const oldVal = comodoOptions[index];
+    const updated = [...comodoOptions];
+    updated[index] = trimmed;
+    setComodoOptions(updated);
+    setEditingComodoIndex(null);
+    setEditingComodoValue('');
+
+    if (form.comodo === oldVal) {
+      setForm(prev => ({ ...prev, comodo: trimmed }));
+    }
+  };
+
+  const handleDeleteComodo = (index: number) => {
+    const itemToDelete = comodoOptions[index];
+    if (window.confirm(`Deseja remover "${itemToDelete}" da lista pré-definida?`)) {
+      const updated = comodoOptions.filter((_, i) => i !== index);
+      setComodoOptions(updated);
+      if (form.comodo === itemToDelete) {
+        setForm(prev => ({ ...prev, comodo: '' }));
+      }
+    }
+  };
+
+  const handleMoveComodo = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= comodoOptions.length) return;
+    const updated = [...comodoOptions];
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    setComodoOptions(updated);
+  };
+
+  const handleResetComodos = () => {
+    if (window.confirm('Deseja restaurar a lista padrão original de cômodos?')) {
+      setComodoOptions(DEFAULT_COMODOS);
+    }
+  };
 
   const clearAllKits = () => {
     if (window.confirm('Tem certeza que deseja excluir todos os kits? Esta ação não pode ser desfeita.')) {
@@ -329,21 +412,54 @@ export function LancamentosRelatoriosModule() {
                 <input type="text" name="coluna" value={form.coluna} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Cômodo</label>
-                <select name="comodo" value={form.comodo} onChange={handleInputChange} className="w-full p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-gray-800">
-                  <option value="BANHEIRO">Banheiro</option>
-                  <option value="BANH. SOCIAL">Banh. Social</option>
-                  <option value="BANH. SUITE">Banh. Suíte</option>
-                  <option value="ENTRADA">Entrada</option>
-                  <option value="QUARTO">Quarto</option>
-                  <option value="COZINHA">Cozinha</option>
-                  <option value="ELETRICA">Elétrica</option>
-                  <option value="LIXEIRA">Lixeira</option>
-                  <option value="SALA">Sala</option>
-                  <option value="SUITE">Suíte</option>
-                  <option value="SUITE 2">Suíte 2</option>
-                  <option value="ESPECIAIS">Especiais</option>
-                </select>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-300">
+                    Cômodo
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowComodoModal(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                    title="Editar lista pré-definida de cômodos"
+                  >
+                    <Settings className="w-3 h-3" />
+                    <span>Editar Lista</span>
+                  </button>
+                </div>
+                <div className="flex gap-1.5">
+                  <select 
+                    name="comodo" 
+                    value={form.comodo} 
+                    onChange={(e) => {
+                      if (e.target.value === '__MANAGE__') {
+                        setShowComodoModal(true);
+                      } else {
+                        handleInputChange(e);
+                      }
+                    }} 
+                    className="flex-1 p-2 border border-blue-200 rounded text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium"
+                  >
+                    <option value="">Selecione o cômodo...</option>
+                    {comodoOptions.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                    {form.comodo && !comodoOptions.includes(form.comodo) && (
+                      <option value={form.comodo}>{form.comodo} (Atual)</option>
+                    )}
+                    <option disabled value="">──────────────</option>
+                    <option value="__MANAGE__" className="font-semibold text-blue-600">
+                      ⚙️ Gerenciar / Editar Lista...
+                    </option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowComodoModal(true)}
+                    className="px-2.5 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 rounded transition-colors flex items-center justify-center shrink-0"
+                    title="Adicionar ou editar cômodos pré-definidos"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -538,6 +654,216 @@ export function LancamentosRelatoriosModule() {
         </div>
       )}
 
+      {/* DATALIST PARA AUTOCOMPLETE DE CÔMODOS NA TABELA */}
+      <datalist id="comodos-datalist">
+        {comodoOptions.map(c => (
+          <option key={c} value={c} />
+        ))}
+      </datalist>
+
+      {/* MODAL GERENCIAR LISTA DE CÔMODOS */}
+      {showComodoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg flex flex-col max-h-[90vh]">
+            {/* Cabeçalho do Modal */}
+            <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/50 rounded-t-xl">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg">
+                  <Settings className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                    Editar Lista de Cômodos
+                  </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Gerencie os cômodos pré-definidos para preenchimento rápido
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowComodoModal(false);
+                  setEditingComodoIndex(null);
+                }} 
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Corpo do Modal */}
+            <div className="p-4 overflow-y-auto flex-1 space-y-4">
+              {/* Adicionar novo cômodo */}
+              <div className="p-3 bg-blue-50/40 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                <label className="block text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider mb-1.5">
+                  Adicionar Novo Cômodo
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newComodoInput}
+                    onChange={(e) => setNewComodoInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddNewComodo();
+                      }
+                    }}
+                    placeholder="Ex: VARANDA, LAVABO, DEPÓSITO..."
+                    className="flex-1 p-2 text-sm uppercase border border-blue-200 dark:border-blue-800 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddNewComodo()}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-colors shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Adicionar</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista dos cômodos cadastrados */}
+              <div>
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                    Cômodos na Lista ({comodoOptions.length})
+                  </span>
+                  <span className="text-[11px] text-gray-400">
+                    Use as setas para ordenar ou o lápis para renomear
+                  </span>
+                </div>
+
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700 max-h-72 overflow-y-auto bg-white dark:bg-gray-800">
+                  {comodoOptions.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      Nenhum cômodo cadastrado. Digite um nome acima para adicionar.
+                    </div>
+                  ) : (
+                    comodoOptions.map((opt, index) => {
+                      const isEditing = editingComodoIndex === index;
+                      return (
+                        <div 
+                          key={`${opt}-${index}`}
+                          className="flex items-center justify-between p-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          {isEditing ? (
+                            <div className="flex items-center gap-2 flex-1 mr-2">
+                              <input
+                                type="text"
+                                value={editingComodoValue}
+                                onChange={(e) => setEditingComodoValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSaveEditComodo(index);
+                                  } else if (e.key === 'Escape') {
+                                    setEditingComodoIndex(null);
+                                  }
+                                }}
+                                className="flex-1 p-1.5 text-sm uppercase border border-blue-500 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 outline-none font-bold"
+                                autoFocus
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEditComodo(index)}
+                                className="p-1.5 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
+                                title="Confirmar alteração"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingComodoIndex(null)}
+                                className="p-1.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 transition-colors"
+                                title="Cancelar"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-xs font-mono text-gray-400 w-6 text-right font-medium">
+                                  {index + 1}.
+                                </span>
+                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                  {opt}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveComodo(index, 'up')}
+                                  disabled={index === 0}
+                                  className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-25 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                  title="Mover para cima"
+                                >
+                                  <ArrowUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveComodo(index, 'down')}
+                                  disabled={index === comodoOptions.length - 1}
+                                  className="p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:opacity-25 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                  title="Mover para baixo"
+                                >
+                                  <ArrowDown className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEditComodo(index)}
+                                  className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors ml-1"
+                                  title="Editar este cômodo"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteComodo(index)}
+                                  className="p-1 text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                                  title="Excluir este cômodo"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className="border-t border-gray-100 dark:border-gray-700 p-4 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-b-xl">
+              <button
+                type="button"
+                onClick={handleResetComodos}
+                className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                title="Restaurar a lista padrão de fábrica"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Restaurar Padrão</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowComodoModal(false);
+                  setEditingComodoIndex(null);
+                }}
+                className="px-5 py-2 bg-gray-900 hover:bg-black dark:bg-gray-700 dark:hover:bg-gray-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors"
+              >
+                Concluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TABELA DE VISUALIZAÇÃO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
          <div className="p-4 border-b border-gray-100 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
@@ -604,7 +930,7 @@ export function LancamentosRelatoriosModule() {
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-bold text-center"><EditableCell value={kit.apto} onChange={v => updateKit(kit.id, "apto", v)} className="w-16 font-bold" /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell value={kit.pavimento} onChange={v => updateKit(kit.id, "pavimento", v)} className="w-12" /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center"><EditableCell value={kit.coluna} onChange={v => updateKit(kit.id, "coluna", v)} className="w-12" /></td>
-                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-medium"><EditableCell value={kit.comodo} onChange={v => updateKit(kit.id, "comodo", v)} className="w-32 text-left font-medium" /></td>
+                        <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-medium"><EditableCell value={kit.comodo} onChange={v => updateKit(kit.id, "comodo", v)} list="comodos-datalist" className="w-32 text-left font-medium" /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 font-bold text-center text-xs"><EditableCell value={kit.tipologia} onChange={v => updateKit(kit.id, "tipologia", v)} className="w-20 font-bold" /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs"><EditableCell value={kit.folhaLargura} onChange={v => updateKit(kit.id, "folhaLargura", v)} className="w-16 font-mono" /></td>
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center font-mono text-xs"><EditableCell value={kit.folhaAltura} onChange={v => updateKit(kit.id, "folhaAltura", v)} className="w-16 font-mono" /></td>
