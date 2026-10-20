@@ -5,7 +5,8 @@ import {
 import { 
   Search, Bell, Menu, 
   Package, ArrowDownToLine, ArrowUpFromLine, AlertTriangle,
-  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar, ClipboardCheck, Tags
+  LayoutDashboard, Box, FileText, Settings, LogOut, ChevronRight, X, Home, HardHat, Download, Printer, Wrench, Calendar, ClipboardCheck, Tags,
+  TrendingUp, ArrowRight, Truck
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { EstoqueModule, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, useLocalStorage } from './components/EstoqueModule';
@@ -183,6 +184,21 @@ export default function App() {
 
   const [chartData, setChartData] = useState(CHART_DATA);
   const [recentLogs, setRecentLogs] = useState<{entradas: any[], saidas: any[]}>({entradas: [], saidas: []});
+  const [saidasYtdStats, setSaidasYtdStats] = useState({
+    totalKitsYtd: 0,
+    mediaMensal: 0,
+    mediaDiariaUteis: 0,
+    mediaPorDiaComSaida: 0,
+    diasComSaida: 0,
+    diasUteisTotais: 0,
+    mesesDecorridos: 1,
+    melhorMesNome: '',
+    melhorMesKits: 0,
+    kitsMesAtual: 0,
+    percentualComparadoMedia: 0,
+    anoReferencia: new Date().getFullYear(),
+    dataHojeStr: new Date().toLocaleDateString('pt-BR'),
+  });
 
   useEffect(() => {
     const calculateStats = () => {
@@ -329,6 +345,87 @@ export default function App() {
 
         const currentMonth = new Date().getMonth();
         setChartData(newChartData.slice(0, currentMonth + 1));
+
+        // Process Controle de Saídas YTD statistics (Média de Kits Montados do início do ano até a data presente)
+        const now = new Date();
+        const currentDate = now.getDate();
+        const todayEndOfDay = new Date(currentYear, currentMonth, currentDate, 23, 59, 59).getTime();
+
+        // Contagem de dias úteis (segunda a sexta) do início do ano até hoje
+        let diasUteisAno = 0;
+        const curDay = new Date(currentYear, 0, 1);
+        while (curDay <= now) {
+          const dow = curDay.getDay();
+          if (dow !== 0 && dow !== 6) {
+            diasUteisAno++;
+          }
+          curDay.setDate(curDay.getDate() + 1);
+        }
+        if (diasUteisAno === 0) diasUteisAno = 1;
+
+        let totalKitsYtd = 0;
+        let diasComSaida = 0;
+        const monthlyKitsYear: number[] = new Array(12).fill(0);
+
+        Object.keys(saidas || {}).forEach(dateStr => {
+          const parts = dateStr.split('-');
+          if (parts.length === 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            if (y === currentYear) {
+              const itemTime = new Date(y, m, d, 12, 0, 0).getTime();
+              if (itemTime <= todayEndOfDay) {
+                const row = saidas[dateStr];
+                const dayKits = (parseInt(row?.e1_kits, 10) || 0) + (parseInt(row?.e2_kits, 10) || 0);
+                if (dayKits > 0) {
+                  totalKitsYtd += dayKits;
+                  diasComSaida++;
+                  if (m >= 0 && m < 12) {
+                    monthlyKitsYear[m] += dayKits;
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        const mesesDecorridos = currentMonth + 1;
+        const mediaMensal = mesesDecorridos > 0 ? Math.round(totalKitsYtd / mesesDecorridos) : 0;
+        const mediaDiariaUteis = diasUteisAno > 0 ? Math.round((totalKitsYtd / diasUteisAno) * 10) / 10 : 0;
+        const mediaPorDiaComSaida = diasComSaida > 0 ? Math.round((totalKitsYtd / diasComSaida) * 10) / 10 : 0;
+
+        const mesesNomesCompletos = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        let melhorMesIdx = 0;
+        let melhorMesKits = 0;
+        for (let i = 0; i < mesesDecorridos; i++) {
+          if (monthlyKitsYear[i] > melhorMesKits) {
+            melhorMesKits = monthlyKitsYear[i];
+            melhorMesIdx = i;
+          }
+        }
+
+        const kitsMesAtual = monthlyKitsYear[currentMonth] || 0;
+        let percentualComparadoMedia = 0;
+        if (mediaMensal > 0) {
+          percentualComparadoMedia = Math.round(((kitsMesAtual - mediaMensal) / mediaMensal) * 100);
+        }
+
+        setSaidasYtdStats({
+          totalKitsYtd,
+          mediaMensal,
+          mediaDiariaUteis,
+          mediaPorDiaComSaida,
+          diasComSaida,
+          diasUteisTotais: diasUteisAno,
+          mesesDecorridos,
+          melhorMesNome: mesesNomesCompletos[melhorMesIdx] || 'Janeiro',
+          melhorMesKits,
+          kitsMesAtual,
+          percentualComparadoMedia,
+          anoReferencia: currentYear,
+          dataHojeStr: now.toLocaleDateString('pt-BR'),
+        });
 
         const eLogs: any[] = [];
         const sLogs: any[] = [];
@@ -746,23 +843,142 @@ export default function App() {
           {/* MAIN CHARTS & LISTS */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* CHART */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-              <h2 className="text-md font-semibold text-gray-800 mb-6">Tendência de Movimentação</h2>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
-                    <Tooltip 
-                      cursor={{fill: '#F3F4F6'}}
-                      contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
-                    />
-                    <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
-                    <Bar dataKey="entradas" name="Entrada de Obra (Kits)" fill="var(--color-brand-green)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                    <Bar dataKey="saidas" name="Saída (Kits)" fill="#9CA3AF" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
+            <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                  <div>
+                    <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100">Tendência de Movimentação</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Entradas de obras vs. saídas de kits montados no ano ({saidasYtdStats.anoReferencia})</p>
+                  </div>
+                  <button 
+                    onClick={() => { setActiveTab('controle_operacao'); setActiveControleTab('saidas'); }}
+                    className="inline-flex items-center text-xs font-semibold text-brand-green hover:underline gap-1 self-start sm:self-auto group"
+                    title="Acessar Controle de Saídas"
+                  >
+                    <span>Ver Controle de Saída</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                </div>
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 12}} />
+                      <Tooltip 
+                        cursor={{fill: '#F3F4F6'}}
+                        contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                      />
+                      <Legend iconType="circle" wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
+                      <Bar dataKey="entradas" name="Entrada de Obra (Kits)" fill="var(--color-brand-green)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      <Bar dataKey="saidas" name="Saída (Kits)" fill="#9CA3AF" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* PAINEL DE MÉDIA DE KITS MONTADOS (YTD - CONTROLE DE SAÍDA) */}
+              <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                          Média de Kits Montados (Início do Ano até a Data Presente)
+                        </h3>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          Aba Controle de Saída
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Acumulado e médias calculadas de 01/01/{saidasYtdStats.anoReferencia} até hoje ({saidasYtdStats.dataHojeStr})
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => { setActiveTab('controle_operacao'); setActiveControleTab('saidas'); }}
+                    className="text-xs font-semibold text-brand-green hover:underline flex items-center gap-1 self-start sm:self-auto py-1 px-2.5 rounded-md hover:bg-brand-green/10 transition-colors"
+                  >
+                    <span>Ir para Controle de Saída</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Card 1: Média Mensal */}
+                  <div className="p-3.5 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/60 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Média Mensal</span>
+                      <span className="text-[10px] font-semibold text-brand-green bg-brand-green/10 dark:bg-brand-green/20 px-1.5 py-0.5 rounded">
+                        {saidasYtdStats.mesesDecorridos} {saidasYtdStats.mesesDecorridos === 1 ? 'mês' : 'meses'}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        {saidasYtdStats.mediaMensal.toLocaleString('pt-BR')}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">kits/mês</span>
+                    </div>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                      Média de Jan até {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][new Date().getMonth()]}
+                    </span>
+                  </div>
+
+                  {/* Card 2: Média Diária Útil */}
+                  <div className="p-3.5 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/60 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Média Diária Útil</span>
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Seg a Sex</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        {saidasYtdStats.mediaDiariaUteis.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">kits/dia</span>
+                    </div>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                      Em {saidasYtdStats.diasUteisTotais} dias úteis no ano
+                    </span>
+                  </div>
+
+                  {/* Card 3: Média por Expedição (Dias com Saída) */}
+                  <div className="p-3.5 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/60 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Média por Expedição</span>
+                      <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Dias Ativos</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        {saidasYtdStats.mediaPorDiaComSaida.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">kits/remessa</span>
+                    </div>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                      {saidasYtdStats.diasComSaida} dias com envio no ano
+                    </span>
+                  </div>
+
+                  {/* Card 4: Total Acumulado no Ano (YTD) */}
+                  <div className="p-3.5 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/60 flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Total Expedido (Ano)</span>
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase">YTD</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight">
+                        {saidasYtdStats.totalKitsYtd.toLocaleString('pt-BR')}
+                      </span>
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400">kits</span>
+                    </div>
+                    <span className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-1">
+                      {saidasYtdStats.melhorMesNome ? `Pico: ${saidasYtdStats.melhorMesNome} (${saidasYtdStats.melhorMesKits.toLocaleString('pt-BR')})` : `01/01 a ${saidasYtdStats.dataHojeStr}`}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
