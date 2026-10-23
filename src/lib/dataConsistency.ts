@@ -13,11 +13,67 @@ export interface RecoveryResult {
 /**
  * Safely merges two values (local and remote/backup) without data loss.
  */
-export function mergeDataSafely(key: string, localVal: any, incomingVal: any): any {
+export function mergeDataSafely(key: string, localVal: any, incomingVal: any, incomingIsAuthoritative: boolean = false): any {
   if (localVal === undefined || localVal === null) return incomingVal;
   if (incomingVal === undefined || incomingVal === null) return localVal;
 
-  // Case 1: Arrays (e.g. movements history, kits list, obras list)
+  const isStockKey = key === 'nm_portas' || key === 'nm_aduelas' || key === 'nm_alizares' || key === 'nm_rodapes' ||
+                     key.endsWith('portas') || key.endsWith('aduelas') || key.endsWith('alizares') || key.endsWith('rodapes');
+
+  // Case 1: Stock collections (Folhas de Porta, Aduelas, Alizares, Rodapés)
+  if (isStockKey && Array.isArray(incomingVal)) {
+    if (!Array.isArray(localVal) || localVal.length === 0) {
+      return incomingVal;
+    }
+    if (incomingVal.length === 0 && !incomingIsAuthoritative) {
+      return localVal;
+    }
+
+    // Map of incoming cloud items
+    const incMap = new Map<string, any>();
+    for (const item of incomingVal) {
+      if (item && item.id) {
+        incMap.set(String(item.id), item);
+      }
+    }
+
+    if (incomingIsAuthoritative) {
+      // Remote snapshot from Firestore: this is the company-wide truth
+      // Only keep local value if local was edited strictly more recently (uncommitted in-flight edit)
+      for (const locItem of localVal) {
+        if (locItem && locItem.id) {
+          const idStr = String(locItem.id);
+          const incItem = incMap.get(idStr);
+          if (incItem) {
+            const locTime = Number(locItem.updatedAt || 0);
+            const incTime = Number(incItem.updatedAt || 0);
+            if (locTime > incTime && locTime > 0) {
+              incMap.set(idStr, locItem);
+            }
+          }
+        }
+      }
+      return Array.from(incMap.values());
+    } else {
+      // Vault/backup fallback merge
+      for (const locItem of localVal) {
+        if (locItem && locItem.id) {
+          const idStr = String(locItem.id);
+          const incItem = incMap.get(idStr);
+          if (incItem) {
+            const locTime = Number(locItem.updatedAt || 0);
+            const incTime = Number(incItem.updatedAt || 0);
+            incMap.set(idStr, locTime >= incTime ? { ...incItem, ...locItem } : { ...locItem, ...incItem });
+          } else {
+            incMap.set(idStr, locItem);
+          }
+        }
+      }
+      return Array.from(incMap.values());
+    }
+  }
+
+  // Case 2: General Arrays (e.g. movements history, kits list, obras list)
   if (Array.isArray(localVal) && Array.isArray(incomingVal)) {
     // If array items have 'id', merge and deduplicate by id
     const hasIds = localVal.some(i => i && typeof i === 'object' && i.id) || 
@@ -33,15 +89,26 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any): a
           map.set(JSON.stringify(item), item);
         }
       }
-      // Overwrite/merge with local (prefer local if newer or more complete)
+      // Overwrite/merge with local
       for (const item of localVal) {
         if (item && item.id) {
           const idStr = String(item.id);
           const existing = map.get(idStr);
           if (existing) {
-            map.set(idStr, { ...existing, ...item });
+            const locTime = Number(item.updatedAt || 0);
+            const incTime = Number(existing.updatedAt || 0);
+            if (locTime > 0 && incTime > 0) {
+              map.set(idStr, locTime >= incTime ? { ...existing, ...item } : { ...item, ...existing });
+            } else if (incomingIsAuthoritative) {
+              // Remote snapshot is authoritative over stale local
+              map.set(idStr, { ...item, ...existing });
+            } else {
+              map.set(idStr, { ...existing, ...item });
+            }
           } else {
-            map.set(idStr, item);
+            if (!incomingIsAuthoritative) {
+              map.set(idStr, item);
+            }
           }
         } else {
           map.set(JSON.stringify(item), item);

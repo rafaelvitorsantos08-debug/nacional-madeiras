@@ -102,9 +102,28 @@
         "userId": { "type": "string" }
       },
       "required": ["id", "obraId", "itemId", "type", "amount", "date", "userId"]
+    },
+    "CompanyStock": {
+      "title": "Company Stock",
+      "description": "Unified company stock synchronized in real time across all machines",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "portas": { "type": "array" },
+        "aduelas": { "type": "array" },
+        "alizares": { "type": "array" },
+        "rodapes": { "type": "array" },
+        "updatedAt": { "type": "number" },
+        "updatedBy": { "type": "string" }
+      },
+      "required": ["id"]
     }
   },
   "firestore": {
+    "/company_stock/{docId}": {
+      "schema": { "$ref": "#/entities/CompanyStock" },
+      "description": "Shared unified company stock across all machines"
+    },
     "/portas/{itemId}": {
       "schema": { "$ref": "#/entities/Porta" },
       "description": "Portas"

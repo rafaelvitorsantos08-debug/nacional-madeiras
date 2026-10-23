@@ -17,6 +17,10 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    match /company_stock/{docId} {
+      allow read, write: if isSignedIn() && isValidId(docId);
+    }
+
     match /portas/{itemId} {
       allow read, delete: if isSignedIn() && isOwner(resource.data.userId);
       allow create: if isSignedIn() && isValidId(itemId) && request.resource.data.userId == request.auth.uid;

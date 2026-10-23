@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X } from 'lucide-react';
+import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X, RefreshCw, Wifi, CheckCircle2, ShieldCheck, Laptop } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export const CORES = ['Freijó Médio', 'Branco Pinhal', 'Branco Max', 'Preto', 'Cinza Grafite', 'Primer', 'Nogal Mel', 'Currupixá', 'Basic', 'Branco Neve'];
@@ -65,14 +65,26 @@ export const forceSyncAllToCloud = async () => {
   }
   try {
     await setDoc(doc(db, 'user_configs', auth.currentUser.uid), dataToSync, { merge: true });
-    alert("Sincronização concluída! Seus dados desta máquina agora estão na nuvem e aparecerão em seus outros dispositivos.");
+    
+    // Also push company stock for all machines
+    const stockPayload: Record<string, any> = {
+      updatedAt: Date.now(),
+      updatedBy: auth.currentUser.displayName || auth.currentUser.email || 'Usuário'
+    };
+    if (dataToSync['nm_portas']) stockPayload.portas = dataToSync['nm_portas'];
+    if (dataToSync['nm_aduelas']) stockPayload.aduelas = dataToSync['nm_aduelas'];
+    if (dataToSync['nm_alizares']) stockPayload.alizares = dataToSync['nm_alizares'];
+    if (dataToSync['nm_rodapes']) stockPayload.rodapes = dataToSync['nm_rodapes'];
+    await setDoc(doc(db, 'company_stock', 'geral'), stockPayload, { merge: true });
+
+    alert("Sincronização concluída! Seus dados desta máquina agora estão na nuvem e aparecerão em tempo real em todas as outras máquinas.");
   } catch (e: any) {
     console.error(e);
     alert("Erro ao sincronizar: " + e.message);
   }
 };
 
-import { subscribeToSync, pushToFirestore } from '../lib/firestoreSync';
+import { subscribeToSync, pushToFirestore, pushStockDirectlyToFirestore } from '../lib/firestoreSync';
 import { mergeDataSafely } from '../lib/dataConsistency';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
@@ -193,12 +205,67 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('Todos');
 
+  const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    const handleStockSynced = (e: any) => {
+      const detail = e.detail;
+      const timeStr = new Date(detail?.updatedAt || Date.now()).toLocaleTimeString('pt-BR');
+      setSyncStatusMsg(`Estoque sincronizado em tempo real com outras máquinas (${timeStr})`);
+      setTimeout(() => {
+        setSyncStatusMsg(null);
+      }, 5000);
+    };
+
+    window.addEventListener('nm-stock-synced', handleStockSynced);
+    return () => window.removeEventListener('nm-stock-synced', handleStockSynced);
+  }, []);
+
+  const uniquePortas = Array.isArray(portas) ? Array.from(new Map(portas.map(item => [item.id, item])).values()) : [];
+  const uniqueAduelas = Array.isArray(aduelas) ? Array.from(new Map(aduelas.map(item => [item.id, item])).values()) : [];
+  const uniqueAlizares = Array.isArray(alizares) ? Array.from(new Map(alizares.map(item => [item.id, item])).values()) : [];
+  const uniqueRodapes = Array.isArray(rodapes) ? Array.from(new Map(rodapes.map(item => [item.id, item])).values()) : [];
+
+  const handleForceStockSync = async () => {
+    setIsSyncing(true);
+    try {
+      await pushStockDirectlyToFirestore('portas', uniquePortas);
+      await pushStockDirectlyToFirestore('aduelas', uniqueAduelas);
+      await pushStockDirectlyToFirestore('alizares', uniqueAlizares);
+      await pushStockDirectlyToFirestore('rodapes', uniqueRodapes);
+      setSyncStatusMsg('Sincronização forçada com sucesso! Registro compartilhado em tempo real.');
+      setTimeout(() => setSyncStatusMsg(null), 4000);
+    } catch (err: any) {
+      console.error(err);
+      alert('Erro na sincronização: ' + (err.message || 'Falha ao sincronizar'));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja apagar este registro?')) {
-      if (activeSubTab === 'portas') setPortas(prev => prev.filter(item => item.id !== id));
-      if (activeSubTab === 'aduelas') setAduelas(prev => prev.filter(item => item.id !== id));
-      if (activeSubTab === 'alizares') setAlizares(prev => prev.filter(item => item.id !== id));
-      if (activeSubTab === 'rodapes') setRodapes(prev => prev.filter(item => item.id !== id));
+      if (activeSubTab === 'portas') {
+        const nextList = uniquePortas.filter(item => item.id !== id);
+        setPortas(nextList);
+        pushStockDirectlyToFirestore('portas', nextList);
+      }
+      if (activeSubTab === 'aduelas') {
+        const nextList = uniqueAduelas.filter(item => item.id !== id);
+        setAduelas(nextList);
+        pushStockDirectlyToFirestore('aduelas', nextList);
+      }
+      if (activeSubTab === 'alizares') {
+        const nextList = uniqueAlizares.filter(item => item.id !== id);
+        setAlizares(nextList);
+        pushStockDirectlyToFirestore('alizares', nextList);
+      }
+      if (activeSubTab === 'rodapes') {
+        const nextList = uniqueRodapes.filter(item => item.id !== id);
+        setRodapes(nextList);
+        pushStockDirectlyToFirestore('rodapes', nextList);
+      }
     }
   };
 
@@ -212,22 +279,17 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
     setIsModalOpen(true);
   };
 
-  const uniquePortas = Array.isArray(portas) ? Array.from(new Map(portas.map(item => [item.id, item])).values()) : [];
-  const uniqueAduelas = Array.isArray(aduelas) ? Array.from(new Map(aduelas.map(item => [item.id, item])).values()) : [];
-  const uniqueAlizares = Array.isArray(alizares) ? Array.from(new Map(alizares.map(item => [item.id, item])).values()) : [];
-  const uniqueRodapes = Array.isArray(rodapes) ? Array.from(new Map(rodapes.map(item => [item.id, item])).values()) : [];
-
   useEffect(() => {
-    if (Array.isArray(portas) && portas.length !== uniquePortas.length) {
+    if (Array.isArray(portas) && new Set(portas.map((i: any) => i?.id)).size !== portas.length) {
       setPortas(uniquePortas);
     }
-    if (Array.isArray(aduelas) && aduelas.length !== uniqueAduelas.length) {
+    if (Array.isArray(aduelas) && new Set(aduelas.map((i: any) => i?.id)).size !== aduelas.length) {
       setAduelas(uniqueAduelas);
     }
-    if (Array.isArray(alizares) && alizares.length !== uniqueAlizares.length) {
+    if (Array.isArray(alizares) && new Set(alizares.map((i: any) => i?.id)).size !== alizares.length) {
       setAlizares(uniqueAlizares);
     }
-    if (Array.isArray(rodapes) && rodapes.length !== uniqueRodapes.length) {
+    if (Array.isArray(rodapes) && new Set(rodapes.map((i: any) => i?.id)).size !== rodapes.length) {
       setRodapes(uniqueRodapes);
     }
   }, [portas, aduelas, alizares, rodapes]);
@@ -334,10 +396,52 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
 
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Componentes e Peças</h1>
-        <p className="text-sm text-gray-500 mt-1">Gerencie o estoque detalhado de folhas, aduelas e alizares.</p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Componentes e Peças</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie o estoque detalhado de folhas, aduelas, alizares e rodapés com registro unificado.</p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 print:hidden">
+          {auth.currentUser ? (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-xs font-semibold shadow-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <Laptop className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Multi-Máquinas Conectadas (Tempo Real)</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-medium">
+              <Wifi className="w-3.5 h-3.5 text-amber-600" />
+              <span>Modo Local — Faça login para sincronizar</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleForceStockSync}
+            disabled={isSyncing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-xs font-semibold text-gray-700 shadow-sm transition-colors active:scale-95 disabled:opacity-50"
+            title="Garante que todas as alterações feitas aqui ou em outras máquinas sejam atualizadas simultaneamente"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5 text-brand-green", isSyncing && "animate-spin")} />
+            <span>{isSyncing ? "Sincronizando..." : "Atualizar Nuvem"}</span>
+          </button>
+        </div>
       </div>
+
+      {syncStatusMsg && (
+        <div className="mb-4 p-3 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{syncStatusMsg}</span>
+          </div>
+          <button onClick={() => setSyncStatusMsg(null)} className="text-emerald-700 hover:text-emerald-900 p-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
         {/* SUBTABS */}
@@ -566,19 +670,52 @@ export function EstoqueModule({ globalSearch = '' }: { globalSearch?: string }) 
           onSave={(newItem) => {
             const estoqueNum = Number(newItem.estoque || 0);
             const getStatus = (estoque: number) => estoque > 50 ? 'OK' : (estoque > 20 ? 'Atenção' : 'Crítico');
-            const saveItem = { ...newItem, estoque: estoqueNum, status: getStatus(estoqueNum) };
+            const now = Date.now();
+            const saveItem = { ...newItem, estoque: estoqueNum, status: getStatus(estoqueNum), updatedAt: now };
 
             if (editingItem) {
-              if (activeSubTab === 'portas') setPortas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
-              if (activeSubTab === 'aduelas') setAduelas(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
-              if (activeSubTab === 'alizares') setAlizares(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
-              if (activeSubTab === 'rodapes') setRodapes(prev => (Array.isArray(prev) ? prev : []).map((i: any) => i.id === editingItem.id ? saveItem : i));
+              if (activeSubTab === 'portas') {
+                const nextList = uniquePortas.map((i: any) => i.id === editingItem.id ? saveItem : i);
+                setPortas(nextList);
+                pushStockDirectlyToFirestore('portas', nextList);
+              }
+              if (activeSubTab === 'aduelas') {
+                const nextList = uniqueAduelas.map((i: any) => i.id === editingItem.id ? saveItem : i);
+                setAduelas(nextList);
+                pushStockDirectlyToFirestore('aduelas', nextList);
+              }
+              if (activeSubTab === 'alizares') {
+                const nextList = uniqueAlizares.map((i: any) => i.id === editingItem.id ? saveItem : i);
+                setAlizares(nextList);
+                pushStockDirectlyToFirestore('alizares', nextList);
+              }
+              if (activeSubTab === 'rodapes') {
+                const nextList = uniqueRodapes.map((i: any) => i.id === editingItem.id ? saveItem : i);
+                setRodapes(nextList);
+                pushStockDirectlyToFirestore('rodapes', nextList);
+              }
             } else {
               saveItem.id = `${activeSubTab.substring(0, 2).toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
-              if (activeSubTab === 'portas') setPortas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
-              if (activeSubTab === 'aduelas') setAduelas(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
-              if (activeSubTab === 'alizares') setAlizares(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
-              if (activeSubTab === 'rodapes') setRodapes(prev => [...(Array.isArray(prev) ? prev : []), saveItem]);
+              if (activeSubTab === 'portas') {
+                const nextList = [...uniquePortas, saveItem];
+                setPortas(nextList);
+                pushStockDirectlyToFirestore('portas', nextList);
+              }
+              if (activeSubTab === 'aduelas') {
+                const nextList = [...uniqueAduelas, saveItem];
+                setAduelas(nextList);
+                pushStockDirectlyToFirestore('aduelas', nextList);
+              }
+              if (activeSubTab === 'alizares') {
+                const nextList = [...uniqueAlizares, saveItem];
+                setAlizares(nextList);
+                pushStockDirectlyToFirestore('alizares', nextList);
+              }
+              if (activeSubTab === 'rodapes') {
+                const nextList = [...uniqueRodapes, saveItem];
+                setRodapes(nextList);
+                pushStockDirectlyToFirestore('rodapes', nextList);
+              }
             }
             setIsModalOpen(false);
           }}
