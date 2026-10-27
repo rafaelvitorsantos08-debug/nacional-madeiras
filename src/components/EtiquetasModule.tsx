@@ -84,16 +84,31 @@ const getPortaDimensao = (kit: any) => {
   return `${w}x${h}`;
 };
 
-// Helpers para identificação de relatório
+// Helpers para identificação de relatório (1:1 com as páginas do Relatório de Montagem)
 export const getKitReportKey = (k: any) => {
   const tipo = k.tipologia || 'SEM TIPOLOGIA';
-  const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
-  return `${tipo}|||${fech}`;
+  return [
+    tipo, k.aduelaLargura, k.aduelaAltura, k.acabamentoAduela,
+    k.folhaLargura, k.folhaAltura, k.acabamentoPorta, k.caracteristicaPorta, k.corFolha,
+    k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid,
+    k.dobradicaMarca, k.dobradicaMedida, k.qtdeDobradicas,
+    k.qtdeLadosAduela, k.montantesMedida, k.montantesFolgas,
+    k.bitsQtde, !!k.correr, !!k.veneziana, !!k.grelha, !!k.bandeira, !!k.pivotante, !!k.fechaFresta, !!k.vidro
+  ].join('|||');
 };
 
-export const formatReportName = (key: string) => {
-  const [tipo, fech] = key.split('|||');
-  return `${tipo}${fech && fech !== 'SEM FECHADURA' ? ` (${fech})` : ''}`;
+export const formatReportName = (key: string, sampleKit?: any, reportIndex?: number) => {
+  const k = sampleKit || {};
+  const tipo = k.tipologia || key.split('|||')[0] || 'SEM TIPOLOGIA';
+  const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ');
+  
+  const aduelaDim = k.aduelaLargura && k.aduelaAltura ? `${k.aduelaLargura}x${k.aduelaAltura}` : (k.aduelaLargura || '');
+  const aduelaAcab = k.acabamentoAduela ? ` - ${k.acabamentoAduela}` : '';
+  const aduelaPart = aduelaDim ? ` • Aduela ${aduelaDim}${aduelaAcab}` : '';
+  const fechPart = fech ? ` (${fech})` : '';
+  
+  const indexStr = reportIndex !== undefined ? `[Relatório ${reportIndex + 1}] ` : '';
+  return `${indexStr}${tipo}${fechPart}${aduelaPart}`;
 };
 
 export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }) {
@@ -112,27 +127,44 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reportModalSearch, setReportModalSearch] = useState<string>('');
 
+  // Agrupamento 1:1 idêntico ao renderAutoMontagem de AutoReports.tsx
   const relatoriosDetails = useMemo(() => {
-    const map = new Map<string, { count: number; kits: any[] }>();
+    const map = new Map<string, { count: number; kits: any[]; sampleKit: any; index: number; direitaCount: number; esquerdaCount: number }>();
     const safeKits = Array.isArray(kits) ? kits : [];
+    let groupIndex = 0;
+
     safeKits.forEach(k => {
       const key = getKitReportKey(k);
-      if (!map.has(key)) map.set(key, { count: 0, kits: [] });
+      if (!map.has(key)) {
+        map.set(key, { count: 0, kits: [], sampleKit: k, index: groupIndex++, direitaCount: 0, esquerdaCount: 0 });
+      }
       const entry = map.get(key)!;
       entry.count += 1;
       entry.kits.push(k);
+      const ab = (k.abertura || '').toUpperCase();
+      if (ab.includes('DIR')) entry.direitaCount += 1;
+      else if (ab.includes('ESQ')) entry.esquerdaCount += 1;
     });
-    return Array.from(map.entries()).sort((a, b) => {
-      const [tipoA] = a[0].split('|||');
-      const [tipoB] = b[0].split('|||');
-      return tipoA.localeCompare(tipoB);
+
+    // Ordenar os kits internamente: DIREITA primeiro, depois ESQUERDA (igual à tabela do relatório)
+    return Array.from(map.entries()).map(([key, data]) => {
+      const sortedKits = [...data.kits].sort((a, b) => {
+        const abA = a.abertura || '';
+        const abB = b.abertura || '';
+        if (abA !== abB) return abA.localeCompare(abB);
+        const aptoA = String(a.apto || '');
+        const aptoB = String(b.apto || '');
+        return aptoA.localeCompare(aptoB, undefined, { numeric: true });
+      });
+
+      return [key, { ...data, kits: sortedKits }] as [string, typeof data];
     });
   }, [kits]);
 
   const filteredModalReports = useMemo(() => {
     if (!reportModalSearch.trim()) return relatoriosDetails;
     const q = reportModalSearch.toLowerCase();
-    return relatoriosDetails.filter(([key]) => formatReportName(key).toLowerCase().includes(q));
+    return relatoriosDetails.filter(([key, data]) => formatReportName(key, data.sampleKit, data.index).toLowerCase().includes(q));
   }, [relatoriosDetails, reportModalSearch]);
 
   const relatorios = useMemo(() => {
@@ -144,12 +176,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     let result = safeKits;
 
     if (selectedRelatorio) {
-      result = result.filter(k => {
-        const tipo = k.tipologia || 'SEM TIPOLOGIA';
-        const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
-        const key = `${tipo}|||${fech}`;
-        return key === selectedRelatorio;
-      });
+      result = result.filter(k => getKitReportKey(k) === selectedRelatorio);
     }
 
     if (!globalSearch.trim()) return result;
@@ -251,42 +278,62 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   }, [fila]);
 
   // Dividir as etiquetas em páginas baseadas no formato selecionado e se é separado por relatório
-  const pages = useMemo(() => {
+  const pages: {
+    labels: any[];
+    reportIndex: number;
+    totalReports: number;
+    reportTitle: string;
+    sheetIndex: number;
+    totalSheets: number;
+  }[] = useMemo(() => {
     // 1. Relatório único específico selecionado para impressão direta
     if (printTarget?.mode === 'single_report' && printTarget.reportKey) {
-      const safeKits = Array.isArray(kits) ? kits : [];
-      const reportKits = safeKits.filter(k => getKitReportKey(k) === printTarget.reportKey);
-      const list = [...reportKits];
-      const paginated: any[][] = [];
+      const match = relatoriosDetails.find(([key]) => key === printTarget.reportKey);
+      if (!match) return [];
+      const [key, data] = match;
+      const list = [...data.kits];
+      const paginated = [];
+      const totalSheets = Math.ceil(list.length / formato.labelsPerPage) || 1;
+      let sheetNum = 1;
+      const title = formatReportName(key, data.sampleKit, data.index);
+
       while (list.length > 0) {
-        paginated.push(list.splice(0, formato.labelsPerPage));
+        paginated.push({
+          labels: list.splice(0, formato.labelsPerPage),
+          reportIndex: data.index,
+          totalReports: relatoriosDetails.length,
+          reportTitle: title,
+          sheetIndex: sheetNum++,
+          totalSheets
+        });
       }
       return paginated;
     }
 
-    // 2. Todos os relatórios do sistema (iniciando cada relatório em uma nova folha física)
+    // 2. Todos os relatórios do sistema (na MESMA sequência do Relatório de Montagem)
     if (printTarget?.mode === 'all_reports') {
-      const safeKits = Array.isArray(kits) ? kits : [];
-      const byReport = new Map<string, any[]>();
-      safeKits.forEach(k => {
-        const key = getKitReportKey(k);
-        if (!byReport.has(key)) byReport.set(key, []);
-        byReport.get(key)!.push(k);
-      });
+      const paginated = [];
+      relatoriosDetails.forEach(([key, data]) => {
+        const list = [...data.kits];
+        const totalSheets = Math.ceil(list.length / formato.labelsPerPage) || 1;
+        let sheetNum = 1;
+        const title = formatReportName(key, data.sampleKit, data.index);
 
-      const paginated: any[][] = [];
-      const sortedKeys = Array.from(byReport.keys()).sort();
-      sortedKeys.forEach(key => {
-        const reportKits = byReport.get(key)!;
-        const list = [...reportKits];
         while (list.length > 0) {
-          paginated.push(list.splice(0, formato.labelsPerPage));
+          paginated.push({
+            labels: list.splice(0, formato.labelsPerPage),
+            reportIndex: data.index,
+            totalReports: relatoriosDetails.length,
+            reportTitle: title,
+            sheetIndex: sheetNum++,
+            totalSheets
+          });
         }
       });
       return paginated;
     }
 
-    // 3. Fila de impressão: se separateByReport estiver ativo, separa cada relatório em folhas distintas
+    // 3. Fila de impressão: se separateByReport estiver ativo, separa cada relatório em folhas distintas na sequência
     if (separateByReport) {
       const byReport = new Map<string, any[]>();
       labelsToPrint.forEach(k => {
@@ -295,26 +342,56 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
         byReport.get(key)!.push(k);
       });
 
-      const paginated: any[][] = [];
-      const sortedKeys = Array.from(byReport.keys()).sort();
-      sortedKeys.forEach(key => {
-        const reportKits = byReport.get(key)!;
-        const list = [...reportKits];
-        while (list.length > 0) {
-          paginated.push(list.splice(0, formato.labelsPerPage));
+      const paginated = [];
+      relatoriosDetails.forEach(([key, data]) => {
+        if (byReport.has(key)) {
+          const reportKits = byReport.get(key)!;
+          reportKits.sort((a, b) => {
+            const abA = a.abertura || '';
+            const abB = b.abertura || '';
+            if (abA !== abB) return abA.localeCompare(abB);
+            const aptoA = String(a.apto || '');
+            const aptoB = String(b.apto || '');
+            return aptoA.localeCompare(aptoB, undefined, { numeric: true });
+          });
+
+          const list = [...reportKits];
+          const totalSheets = Math.ceil(list.length / formato.labelsPerPage) || 1;
+          let sheetNum = 1;
+          const title = formatReportName(key, data.sampleKit, data.index);
+
+          while (list.length > 0) {
+            paginated.push({
+              labels: list.splice(0, formato.labelsPerPage),
+              reportIndex: data.index,
+              totalReports: relatoriosDetails.length,
+              reportTitle: title,
+              sheetIndex: sheetNum++,
+              totalSheets
+            });
+          }
         }
       });
       return paginated;
     } else {
       // Modo contínuo (aproveita todos os espaços da folha)
       const list = [...labelsToPrint];
-      const paginated: any[][] = [];
+      const paginated = [];
+      const totalSheets = Math.ceil(list.length / formato.labelsPerPage) || 1;
+      let sheetNum = 1;
       while (list.length > 0) {
-        paginated.push(list.splice(0, formato.labelsPerPage));
+        paginated.push({
+          labels: list.splice(0, formato.labelsPerPage),
+          reportIndex: 0,
+          totalReports: 1,
+          reportTitle: 'Fila Contínua',
+          sheetIndex: sheetNum++,
+          totalSheets
+        });
       }
       return paginated;
     }
-  }, [labelsToPrint, formato, printTarget, separateByReport, kits]);
+  }, [labelsToPrint, formato, printTarget, separateByReport, kits, relatoriosDetails]);
 
   const exportarRelatorioEntrega = () => {
     const grouped = new Map<string, any>();
@@ -467,7 +544,9 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           </div>
           <div className="px-4 py-3 bg-white border-b border-gray-200">
              <div className="flex items-center justify-between mb-1">
-               <label className="text-[11px] font-bold text-gray-500 uppercase block">Filtrar por Relatório (Tipologia + Fechadura)</label>
+               <label className="text-[11px] font-bold text-gray-500 uppercase block">
+                 Filtrar por Relatório (Tipologia + Aduela + Fechadura)
+               </label>
                {selectedRelatorio && (
                  <span className="text-[10px] font-bold text-brand-green bg-green-50 px-2 py-0.5 rounded border border-green-200">
                    {filteredKits.length} kits
@@ -478,12 +557,12 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                <select 
                  value={selectedRelatorio} 
                  onChange={e => setSelectedRelatorio(e.target.value)}
-                 className="flex-1 w-full border border-gray-300 rounded p-1.5 text-sm outline-none focus:border-brand-green bg-white text-gray-800"
+                 className="flex-1 w-full border border-gray-300 rounded p-1.5 text-xs outline-none focus:border-brand-green bg-white text-gray-800"
                >
-                 <option value="">Todos os Kits ({kits.length})</option>
+                 <option value="">Todos os Relatórios ({relatoriosDetails.length} relatórios / {kits.length} kits)</option>
                  {relatoriosDetails.map(([key, data]) => (
                    <option key={key} value={key}>
-                     {formatReportName(key)} ({data.count} kits)
+                     {formatReportName(key, data.sampleKit, data.index)} — {data.count} kits ({data.direitaCount}D / {data.esquerdaCount}E)
                    </option>
                  ))}
                </select>
@@ -743,7 +822,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           }
         `}} />
         
-        {pages.map((pageLabels, pageIndex) => (
+        {pages.map((page, pageIndex) => (
           <div 
             key={pageIndex} 
             className="box-border"
@@ -755,7 +834,36 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               overflow: 'hidden'
             }}
           >
-            {pageLabels.map((kit, i) => {
+            {/* Indicador superior na margem descartável da folha Pimaco para facilitar o grampeamento no relatório */}
+            {page.reportTitle && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '2.5mm',
+                  left: `${formato.marginLeft}mm`,
+                  width: `${formato.pageWidth - (formato.marginLeft * 2)}mm`,
+                  fontSize: '8px',
+                  fontWeight: 900,
+                  color: '#000000',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '0.5px solid #000000',
+                  paddingBottom: '1px',
+                  lineHeight: 1
+                }}
+              >
+                <span className="truncate pr-2 font-mono">
+                  {page.reportTitle}
+                </span>
+                <span className="whitespace-nowrap font-mono text-[7.5px] font-bold">
+                  FOLHA {page.sheetIndex}/{page.totalSheets} ({page.labels.length} ETIQUETAS)
+                </span>
+              </div>
+            )}
+
+            {page.labels.map((kit, i) => {
               const row = Math.floor(i / formato.cols);
               const col = i % formato.cols;
               const top = formato.marginTop + (row * (formato.labelHeight + formato.gapY));
@@ -849,7 +957,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                     type="text"
                     value={reportModalSearch}
                     onChange={e => setReportModalSearch(e.target.value)}
-                    placeholder="Buscar relatório por tipologia ou fechadura..."
+                    placeholder="Buscar relatório por tipologia, aduela ou fechadura..."
                     className="w-full pl-9 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg outline-none focus:border-brand-green bg-white text-gray-800"
                   />
                 </div>
@@ -864,11 +972,11 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                         <div key={key} className="pt-1.5 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 hover:bg-white rounded-lg transition-colors">
                           <div className="min-w-0 flex-1">
                             <h5 className="font-bold text-xs text-gray-900 truncate">
-                              {formatReportName(key)}
+                              {formatReportName(key, data.sampleKit, data.index)}
                             </h5>
                             <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500">
-                              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                                {data.count} kits
+                              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                {data.count} kits ({data.direitaCount} Dir / {data.esquerdaCount} Esq)
                               </span>
                               <span>•</span>
                               <span>{sheets} {sheets === 1 ? 'folha' : 'folhas'} ({formato.name.split('(')[0]})</span>
