@@ -1098,10 +1098,17 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
 
         // Group internally by Abertura (e.g. DIREITA, ESQUERDA)
         const byAbertura = new Map<string, any[]>();
+        let reportTotalKits = 0;
         groupKits.forEach(k => {
           const ab = k.abertura || 'SEM ABERTURA';
           if (!byAbertura.has(ab)) byAbertura.set(ab, []);
           byAbertura.get(ab).push(k);
+
+          let stringQtdStr = String(k.qtdeFolhasPorKit || '1');
+          if (k.quantidade) stringQtdStr = String(k.quantidade);
+          if (k.qtde) stringQtdStr = String(k.qtde);
+          const q = parseInt(stringQtdStr, 10);
+          reportTotalKits += isNaN(q) ? 1 : q;
         });
         
         const sortedAberturas = Array.from(byAbertura.entries()).sort((a, b) => a[0].localeCompare(b[0]));
@@ -1293,6 +1300,11 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
               })}
             </div>
             
+            {/* QUANTIDADE TOTAL DE KITS DO RELATÓRIO */}
+            <div className="mt-2 print:mt-1 text-left font-bold text-xs print:text-[13px] text-gray-900 dark:text-gray-100 print:text-black uppercase break-inside-avoid">
+              TOTAL: <span className="font-black text-sm print:text-[15px] ml-1"><EditableText>{reportTotalKits}</EditableText></span>
+            </div>
+
             <div className="mt-2 print:mt-1 break-inside-avoid w-full">
               <h3 className="text-xs print:text-[11px] font-bold text-gray-800 dark:text-gray-200 print:text-black uppercase">
                 Observações Gerais:
