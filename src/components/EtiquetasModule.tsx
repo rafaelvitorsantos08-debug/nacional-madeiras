@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from './EstoqueModule';
-import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { Printer, Search, Plus, Minus, X, Trash2, Settings, Instagram, Download, ChevronDown, ChevronUp, Layers, FileText, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -84,6 +84,18 @@ const getPortaDimensao = (kit: any) => {
   return `${w}x${h}`;
 };
 
+// Helpers para identificação de relatório
+export const getKitReportKey = (k: any) => {
+  const tipo = k.tipologia || 'SEM TIPOLOGIA';
+  const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
+  return `${tipo}|||${fech}`;
+};
+
+export const formatReportName = (key: string) => {
+  const [tipo, fech] = key.split('|||');
+  return `${tipo}${fech && fech !== 'SEM FECHADURA' ? ` (${fech})` : ''}`;
+};
+
 export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }) {
   const [kits] = useLocalStorage<any[]>('nacional_madeiras_kits_v6', []);
   const [fila, setFila] = useState<{kit: any; qtd: number; id: string}[]>([]);
@@ -95,23 +107,37 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   const [showPreview, setShowPreview] = useState(true);
   
   const [selectedRelatorio, setSelectedRelatorio] = useState<string>('');
+  const [separateByReport, setSeparateByReport] = useState<boolean>(true);
+  const [printTarget, setPrintTarget] = useState<{ mode: 'fila' | 'single_report' | 'all_reports'; reportKey?: string } | null>(null);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reportModalSearch, setReportModalSearch] = useState<string>('');
 
-  const relatorios = useMemo(() => {
-    const byTipologiaFech = new Map<string, any[]>();
+  const relatoriosDetails = useMemo(() => {
+    const map = new Map<string, { count: number; kits: any[] }>();
     const safeKits = Array.isArray(kits) ? kits : [];
     safeKits.forEach(k => {
-      const tipo = k.tipologia || 'SEM TIPOLOGIA';
-      const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
-      const key = `${tipo}|||${fech}`;
-      if (!byTipologiaFech.has(key)) byTipologiaFech.set(key, []);
-      byTipologiaFech.get(key).push(k);
+      const key = getKitReportKey(k);
+      if (!map.has(key)) map.set(key, { count: 0, kits: [] });
+      const entry = map.get(key)!;
+      entry.count += 1;
+      entry.kits.push(k);
     });
-    return Array.from(byTipologiaFech.keys()).sort((a, b) => {
-      const [tipoA] = a.split('|||');
-      const [tipoB] = b.split('|||');
+    return Array.from(map.entries()).sort((a, b) => {
+      const [tipoA] = a[0].split('|||');
+      const [tipoB] = b[0].split('|||');
       return tipoA.localeCompare(tipoB);
     });
   }, [kits]);
+
+  const filteredModalReports = useMemo(() => {
+    if (!reportModalSearch.trim()) return relatoriosDetails;
+    const q = reportModalSearch.toLowerCase();
+    return relatoriosDetails.filter(([key]) => formatReportName(key).toLowerCase().includes(q));
+  }, [relatoriosDetails, reportModalSearch]);
+
+  const relatorios = useMemo(() => {
+    return relatoriosDetails.map(([key]) => key);
+  }, [relatoriosDetails]);
 
   const filteredKits = useMemo(() => {
     const safeKits = Array.isArray(kits) ? kits : [];
@@ -182,11 +208,38 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     });
   };
 
-  const handlePrint = () => {
-    window.print();
+  const addReportToFila = (reportKey: string) => {
+    const safeKits = Array.isArray(kits) ? kits : [];
+    const reportKits = safeKits.filter(k => getKitReportKey(k) === reportKey);
+    setFila(prev => {
+      const newFila = [...prev];
+      reportKits.forEach(kit => {
+        const existsIndex = newFila.findIndex(i => i.kit?.id === kit.id);
+        if (existsIndex >= 0) {
+          newFila[existsIndex] = { ...newFila[existsIndex], qtd: newFila[existsIndex].qtd + 1 };
+        } else {
+          newFila.push({ kit, qtd: 1, id: Math.random().toString(36).substring(2, 9) });
+        }
+      });
+      return newFila;
+    });
   };
 
-  // Gerar o array final de etiquetas a serem impressas
+  const executePrint = (mode: 'fila' | 'single_report' | 'all_reports', reportKey?: string) => {
+    setPrintTarget({ mode, reportKey });
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        setPrintTarget(null);
+      }, 700);
+    }, 150);
+  };
+
+  const handlePrint = () => {
+    executePrint('fila');
+  };
+
+  // Gerar o array final de etiquetas a serem impressas da fila
   const labelsToPrint = useMemo(() => {
     const arr: any[] = [];
     fila.forEach(item => {
@@ -197,15 +250,71 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     return arr;
   }, [fila]);
 
-  // Dividir as etiquetas em páginas baseadas no formato selecionado
+  // Dividir as etiquetas em páginas baseadas no formato selecionado e se é separado por relatório
   const pages = useMemo(() => {
-    const list = [...labelsToPrint];
-    const paginated = [];
-    while (list.length > 0) {
-      paginated.push(list.splice(0, formato.labelsPerPage));
+    // 1. Relatório único específico selecionado para impressão direta
+    if (printTarget?.mode === 'single_report' && printTarget.reportKey) {
+      const safeKits = Array.isArray(kits) ? kits : [];
+      const reportKits = safeKits.filter(k => getKitReportKey(k) === printTarget.reportKey);
+      const list = [...reportKits];
+      const paginated: any[][] = [];
+      while (list.length > 0) {
+        paginated.push(list.splice(0, formato.labelsPerPage));
+      }
+      return paginated;
     }
-    return paginated;
-  }, [labelsToPrint, formato]);
+
+    // 2. Todos os relatórios do sistema (iniciando cada relatório em uma nova folha física)
+    if (printTarget?.mode === 'all_reports') {
+      const safeKits = Array.isArray(kits) ? kits : [];
+      const byReport = new Map<string, any[]>();
+      safeKits.forEach(k => {
+        const key = getKitReportKey(k);
+        if (!byReport.has(key)) byReport.set(key, []);
+        byReport.get(key)!.push(k);
+      });
+
+      const paginated: any[][] = [];
+      const sortedKeys = Array.from(byReport.keys()).sort();
+      sortedKeys.forEach(key => {
+        const reportKits = byReport.get(key)!;
+        const list = [...reportKits];
+        while (list.length > 0) {
+          paginated.push(list.splice(0, formato.labelsPerPage));
+        }
+      });
+      return paginated;
+    }
+
+    // 3. Fila de impressão: se separateByReport estiver ativo, separa cada relatório em folhas distintas
+    if (separateByReport) {
+      const byReport = new Map<string, any[]>();
+      labelsToPrint.forEach(k => {
+        const key = getKitReportKey(k);
+        if (!byReport.has(key)) byReport.set(key, []);
+        byReport.get(key)!.push(k);
+      });
+
+      const paginated: any[][] = [];
+      const sortedKeys = Array.from(byReport.keys()).sort();
+      sortedKeys.forEach(key => {
+        const reportKits = byReport.get(key)!;
+        const list = [...reportKits];
+        while (list.length > 0) {
+          paginated.push(list.splice(0, formato.labelsPerPage));
+        }
+      });
+      return paginated;
+    } else {
+      // Modo contínuo (aproveita todos os espaços da folha)
+      const list = [...labelsToPrint];
+      const paginated: any[][] = [];
+      while (list.length > 0) {
+        paginated.push(list.splice(0, formato.labelsPerPage));
+      }
+      return paginated;
+    }
+  }, [labelsToPrint, formato, printTarget, separateByReport, kits]);
 
   const exportarRelatorioEntrega = () => {
     const grouped = new Map<string, any>();
@@ -357,22 +466,50 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             </div>
           </div>
           <div className="px-4 py-3 bg-white border-b border-gray-200">
-             <label className="text-[11px] font-bold text-gray-500 uppercase mb-1 block">Filtrar por Relatório (Tipologia + Fechadura)</label>
-             <select 
-               value={selectedRelatorio} 
-               onChange={e => setSelectedRelatorio(e.target.value)}
-               className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none focus:border-brand-green bg-white text-gray-800"
-             >
-               <option value="">Todos os Kits</option>
-               {relatorios.map(key => {
-                 const [tipo, fech] = key.split('|||');
-                 return (
+             <div className="flex items-center justify-between mb-1">
+               <label className="text-[11px] font-bold text-gray-500 uppercase block">Filtrar por Relatório (Tipologia + Fechadura)</label>
+               {selectedRelatorio && (
+                 <span className="text-[10px] font-bold text-brand-green bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                   {filteredKits.length} kits
+                 </span>
+               )}
+             </div>
+             <div className="flex flex-col sm:flex-row gap-2 items-center">
+               <select 
+                 value={selectedRelatorio} 
+                 onChange={e => setSelectedRelatorio(e.target.value)}
+                 className="flex-1 w-full border border-gray-300 rounded p-1.5 text-sm outline-none focus:border-brand-green bg-white text-gray-800"
+               >
+                 <option value="">Todos os Kits ({kits.length})</option>
+                 {relatoriosDetails.map(([key, data]) => (
                    <option key={key} value={key}>
-                     {tipo} {fech && fech !== 'SEM FECHADURA' ? `(${fech})` : ''}
+                     {formatReportName(key)} ({data.count} kits)
                    </option>
-                 )
-               })}
-             </select>
+                 ))}
+               </select>
+
+               {selectedRelatorio ? (
+                 <button
+                   type="button"
+                   onClick={() => executePrint('single_report', selectedRelatorio)}
+                   className="w-full sm:w-auto px-3 py-1.5 bg-brand-green hover:bg-green-700 text-white font-bold rounded shadow-xs text-xs flex items-center justify-center gap-1.5 whitespace-nowrap transition-colors"
+                   title="Imprimir etiquetas exclusivamente deste relatório"
+                 >
+                   <Printer className="w-3.5 h-3.5" />
+                   <span>Imprimir Este Relatório</span>
+                 </button>
+               ) : (
+                 <button
+                   type="button"
+                   onClick={() => setShowReportModal(true)}
+                   className="w-full sm:w-auto px-3 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded shadow-xs text-xs flex items-center justify-center gap-1.5 whitespace-nowrap transition-colors"
+                   title="Ver e imprimir relatórios individualmente"
+                 >
+                   <Layers className="w-3.5 h-3.5" />
+                   <span>Imprimir por Relatório</span>
+                 </button>
+               )}
+             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {filteredKits.length === 0 ? (
@@ -516,6 +653,32 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             
             {/* Seção 4: Ações e Botões */}
             <div className="flex flex-col space-y-2 pt-1">
+              {/* Checkbox para separar por relatório na fila */}
+              <label className="flex items-start gap-2.5 text-xs font-semibold text-gray-800 cursor-pointer bg-green-50/70 p-2.5 rounded-lg border border-green-200 hover:bg-green-100/60 transition-colors">
+                <input 
+                  type="checkbox" 
+                  checked={separateByReport} 
+                  onChange={e => setSeparateByReport(e.target.checked)}
+                  className="w-4 h-4 text-brand-green rounded border-gray-300 focus:ring-brand-green cursor-pointer mt-0.5 shrink-0"
+                />
+                <div className="flex-1">
+                  <span className="block font-bold text-gray-900 leading-tight">Separar páginas por relatório</span>
+                  <span className="block text-[10.5px] text-gray-600 font-normal leading-tight mt-0.5">
+                    Cada relatório começa em uma nova folha física, sem misturar etiquetas no mesmo papel.
+                  </span>
+                </div>
+              </label>
+
+              {/* Botão de Destaque: Imprimir por Relatório */}
+              <button 
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className="w-full px-4 py-2.5 bg-emerald-800 text-white font-bold rounded shadow-sm hover:bg-emerald-900 transition-colors flex items-center justify-center space-x-2 text-sm"
+              >
+                <Layers className="w-4 h-4" /> 
+                <span>Opções de Impressão por Relatório</span>
+              </button>
+
               <button 
                 onClick={exportarRelatorioEntrega}
                 disabled={fila.length === 0}
@@ -538,7 +701,8 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                   disabled={labelsToPrint.length === 0}
                   className="flex-1 px-4 py-2.5 bg-brand-green text-white font-bold rounded shadow-sm hover:bg-green-700 disabled:opacity-50 transition-colors flex items-center justify-center space-x-2 text-sm"
                 >
-                  <Printer className="w-4 h-4" /> <span>Imprimir Etiquetas</span>
+                  <Printer className="w-4 h-4" /> 
+                  <span>Imprimir Etiquetas ({pages.length} fls)</span>
                 </button>
               </div>
             </div>
@@ -619,6 +783,144 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
           <div className="p-10 text-center font-bold">Nenhuma etiqueta na fila (este texto só aparece se você tentar imprimir com a fila vazia).</div>
         )}
       </div>
+
+      {/* MODAL: OPÇÕES DE IMPRESSÃO POR RELATÓRIO */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+            {/* Modal Header */}
+            <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-emerald-100 text-emerald-800 rounded-lg">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-base">Impressão de Etiquetas por Relatório</h3>
+                  <p className="text-xs text-gray-500">Cada relatório terá suas etiquetas impressas em folhas separadas.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowReportModal(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 overflow-y-auto space-y-4 flex-1">
+              {/* Card de Destaque: Imprimir todos os relatórios do sistema */}
+              <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div>
+                  <h4 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-emerald-700" />
+                    Imprimir Todos os Relatórios Cadastrados
+                  </h4>
+                  <p className="text-xs text-emerald-800 mt-0.5 leading-relaxed">
+                    {kits.length} kits em {relatoriosDetails.length} relatórios diferentes. Cada relatório começará automaticamente em uma nova folha física Pimaco, sem misturar etiquetas.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReportModal(false);
+                    executePrint('all_reports');
+                  }}
+                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg shadow-sm text-xs flex items-center gap-1.5 whitespace-nowrap transition-colors shrink-0 cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir Todos ({relatoriosDetails.length})</span>
+                </button>
+              </div>
+
+              {/* Seletor / Lista de relatórios individuais */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                    Ou selecione um relatório específico para imprimir:
+                  </label>
+                  <span className="text-xs text-gray-500 font-semibold">{filteredModalReports.length} relatórios</span>
+                </div>
+                
+                {/* Campo de busca no modal */}
+                <div className="relative mb-2">
+                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={reportModalSearch}
+                    onChange={e => setReportModalSearch(e.target.value)}
+                    placeholder="Buscar relatório por tipologia ou fechadura..."
+                    className="w-full pl-9 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg outline-none focus:border-brand-green bg-white text-gray-800"
+                  />
+                </div>
+
+                <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1 border border-gray-200 rounded-lg p-2 bg-gray-50/50 divide-y divide-gray-100">
+                  {filteredModalReports.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-gray-400">Nenhum relatório encontrado.</div>
+                  ) : (
+                    filteredModalReports.map(([key, data]) => {
+                      const sheets = Math.ceil(data.count / formato.labelsPerPage);
+                      return (
+                        <div key={key} className="pt-1.5 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 hover:bg-white rounded-lg transition-colors">
+                          <div className="min-w-0 flex-1">
+                            <h5 className="font-bold text-xs text-gray-900 truncate">
+                              {formatReportName(key)}
+                            </h5>
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500">
+                              <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                {data.count} kits
+                              </span>
+                              <span>•</span>
+                              <span>{sheets} {sheets === 1 ? 'folha' : 'folhas'} ({formato.name.split('(')[0]})</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                addReportToFila(key);
+                              }}
+                              className="px-2.5 py-1.5 border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold rounded text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                              title="Adicionar kits deste relatório à fila de impressão"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Fila</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowReportModal(false);
+                                executePrint('single_report', key);
+                              }}
+                              className="px-3 py-1.5 bg-brand-green hover:bg-green-700 text-white font-bold rounded text-xs transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                              title="Imprimir etiquetas exclusivamente deste relatório"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              <span>Imprimir Relatório</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+              <span className="text-[11px] text-gray-500">Formato atual: <strong>{formato.name}</strong></span>
+              <button
+                type="button"
+                onClick={() => setShowReportModal(false)}
+                className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

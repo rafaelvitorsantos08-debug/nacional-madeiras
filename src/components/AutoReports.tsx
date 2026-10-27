@@ -1301,8 +1301,15 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             </div>
             
             {/* QUANTIDADE TOTAL DE KITS DO RELATÓRIO */}
-            <div className="mt-2 print:mt-1 text-left font-bold text-xs print:text-[13px] text-gray-900 dark:text-gray-100 print:text-black uppercase break-inside-avoid">
-              TOTAL: <span className="font-black text-sm print:text-[15px] ml-1"><EditableText>{reportTotalKits}</EditableText></span>
+            <div className="mt-2 print:mt-1 flex flex-row items-baseline gap-1 text-left font-bold text-xs print:text-[13px] text-gray-900 dark:text-gray-100 print:text-black uppercase break-inside-avoid">
+              <span className="whitespace-nowrap">TOTAL:</span>
+              <span
+                contentEditable
+                suppressContentEditableWarning
+                className="font-black text-sm print:text-[15px] whitespace-nowrap outline-none px-1 rounded hover:bg-black/5 focus:bg-black/5 print:hover:bg-transparent"
+              >
+                {reportTotalKits}
+              </span>
             </div>
 
             <div className="mt-2 print:mt-1 break-inside-avoid w-full">
