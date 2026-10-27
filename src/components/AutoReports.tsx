@@ -1263,14 +1263,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                     <table className="w-full border-collapse border border-black text-center text-[11px] sm:text-[12px] print:text-[11px] table-fixed">
                       <thead>
                         <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[6%]">QTD</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[11%]">FOLHA DE PORTA</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[10%]">CARACTERÍSTICAS</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[9%]">ACABAMENTO</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[26%]">INFO. ADUELA</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[14%]">FECH. GRID</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[14%]">DOBRADIÇAS</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] whitespace-nowrap w-[10%]">CONCLUÍDO</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[5%]">QTD</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[11%]">FOLHA DE PORTA</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[13%]">CARACTERÍSTICAS</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[9%]">ACABAMENTO</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[25%]">INFO. ADUELA</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[13%]">FECH. GRID</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[13%]">DOBRADIÇAS</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] whitespace-nowrap w-[11%]">CONCLUÍDO</th>
                         </tr>
                       </thead>
                       <tbody>
