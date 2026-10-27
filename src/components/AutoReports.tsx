@@ -1086,6 +1086,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             th, td {
               word-break: break-word !important;
               overflow-wrap: break-word !important;
+              overflow: hidden !important;
             }
           }
         `}
@@ -1270,14 +1271,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                     <table className="w-full border-collapse border border-black text-center text-[11px] sm:text-[12px] print:text-[11px] table-fixed">
                       <thead>
                         <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[5%]">QTD</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[11%]">FOLHA DE PORTA</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[13%]">CARACTERÍSTICAS</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[9%]">ACABAMENTO</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[25%]">INFO. ADUELA</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[13%]">FECH. GRID</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] w-[13%]">DOBRADIÇAS</th>
-                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] whitespace-nowrap w-[11%]">CONCLUÍDO</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] w-[4.5%]">QTD</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10px] whitespace-nowrap w-[11%]">FOLHA DE PORTA</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10px] whitespace-nowrap w-[12%]">CARACTERÍSTICAS</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10px] whitespace-nowrap w-[8.5%]">ACABAMENTO</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] w-[21.5%]">INFO. ADUELA</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[16%]">FECH. GRID</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[14%]">DOBRADIÇAS</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[10.5px] whitespace-nowrap w-[12.5%]">CONCLUÍDO</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1285,12 +1286,16 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                           <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-bold text-[13px] print:text-[15px] bg-white print:bg-transparent">
                             <EditableText>{totalQtd}</EditableText>
                           </td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{leafSizeStr}</EditableText></td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{caracteristicas}</EditableText></td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{acabPorta}</EditableText></td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{aduelaInfo}</EditableText></td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{fech || '-'}</EditableText></td>
-                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{dob}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10px]"><EditableText>{leafSizeStr}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10px]"><EditableText>{caracteristicas}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10px]"><EditableText>{acabPorta}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10px] print:text-[10px] leading-snug"><EditableText>{aduelaInfo}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10px] print:text-[9.5px] leading-tight">
+                            <div className="w-full overflow-hidden break-words"><EditableText>{fech || '-'}</EditableText></div>
+                          </td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10px] print:text-[9.5px] leading-tight">
+                            <div className="w-full overflow-hidden break-words"><EditableText>{dob}</EditableText></div>
+                          </td>
                           <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium"></td>
                         </tr>
                       </tbody>
