@@ -1063,10 +1063,12 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             }
             @page { 
               size: landscape; 
-              margin: 8mm;
+              margin: 6mm 8mm;
             }
             .montagem-page-break {
               page-break-after: always;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
               padding: 0 !important;
               margin: 0 !important;
               box-sizing: border-box !important;
@@ -1079,6 +1081,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             table {
               width: 100% !important;
               table-layout: fixed !important;
+              border-collapse: collapse !important;
             }
             th, td {
               word-break: break-word !important;
@@ -1104,25 +1107,25 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         const sortedAberturas = Array.from(byAbertura.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
         return (
-          <div key={idx} className="montagem-page-break print:w-full print:py-2 flex flex-col gap-4 bg-white p-6 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
+          <div key={idx} className="montagem-page-break print:w-full print:py-1 flex flex-col gap-2.5 bg-white p-4 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
             
             {/* CABEÇALHO DO RELATÓRIO (IDENTIDADE NACIONAL MADEIRAS) */}
-            <div className="flex justify-between items-start border-b-[2px] border-black pb-3 mb-1 print:border-black">
+            <div className="flex justify-between items-start border-b-[2px] border-black pb-2 mb-1 print:border-black">
                <div>
-                 <div className="flex flex-col items-start mb-1" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                   <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
-                   <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
+                 <div className="flex flex-col items-start" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                   <h2 className="text-xl print:text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
+                   <span className="text-sm print:text-base font-bold uppercase tracking-widest mt-0.5 text-[#475569] print:text-[#475569]">Kit Porta</span>
                  </div>
-                 <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-2">RELATÓRIO DE MONTAGEM</h1>
+                 <h1 className="text-2xl print:text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-1">RELATÓRIO DE MONTAGEM</h1>
                </div>
-               <div className="text-right text-[12px] print:text-[14px] text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
-                 <div className="flex items-end mt-2">
-                   <span className="font-bold mr-2 uppercase whitespace-nowrap">Data de Liberação:</span>
-                   <span className="font-medium text-sm text-black print:text-black border-b border-black min-w-[80px] text-center inline-block">
+               <div className="text-right text-[11px] print:text-[13px] text-black print:text-black flex flex-row items-end gap-5 border-b-2 border-transparent">
+                 <div className="flex items-end mt-1">
+                   <span className="font-bold mr-1.5 uppercase whitespace-nowrap">Data de Liberação:</span>
+                   <span className="font-medium text-xs print:text-sm text-black print:text-black border-b border-black min-w-[75px] text-center inline-block">
                      {new Date().toLocaleDateString('pt-BR')}
                    </span>
                  </div>
-                 <div className="flex items-end mt-2 whitespace-nowrap">
+                 <div className="flex items-end mt-1 whitespace-nowrap">
                    <span className="font-bold mr-1 uppercase">Previsão de Entrega:</span>
                    <div className="border-b border-black w-24 h-4"></div>
                  </div>
@@ -1130,29 +1133,29 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             </div>
             
             {(obra || responsavel || cliente) && (
-              <div className="grid grid-cols-3 gap-4 mb-1">
-                <div className="border border-gray-300 print:border-black p-2">
-                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
-                  <p className="font-medium text-lg print:text-[18px] print:text-black uppercase text-black">{cliente || "Não informado"}</p>
+              <div className="grid grid-cols-3 gap-3 mb-1">
+                <div className="border border-gray-300 print:border-black p-1.5">
+                  <p className="text-[10px] print:text-[11px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
+                  <p className="font-medium text-base print:text-[16px] print:text-black uppercase text-black leading-tight">{cliente || "Não informado"}</p>
                 </div>
-                <div className="border border-gray-300 print:border-black p-2">
-                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
-                  <p className="font-medium text-lg print:text-[18px] print:text-black text-black">{obra || "Não informado"}</p>
+                <div className="border border-gray-300 print:border-black p-1.5">
+                  <p className="text-[10px] print:text-[11px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
+                  <p className="font-medium text-base print:text-[16px] print:text-black text-black leading-tight">{obra || "Não informado"}</p>
                 </div>
-                <div className="border border-gray-300 print:border-black p-2">
-                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
-                  <p className="font-medium text-lg print:text-[18px] print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
+                <div className="border border-gray-300 print:border-black p-1.5">
+                  <p className="text-[10px] print:text-[11px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
+                  <p className="font-medium text-base print:text-[16px] print:text-black uppercase text-black leading-tight">{responsavel || "Não informado"}</p>
                 </div>
               </div>
             )}
 
             {/* BARRA DE TÍTULO DA TIPOLOGIA / ESPECIFICAÇÃO */}
-            <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-2 text-center font-bold text-sm print:text-[17px] uppercase print:bg-transparent print:text-black">
+            <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-1.5 text-center font-bold text-xs print:text-[15px] uppercase print:bg-transparent print:text-black">
               <EditableText>Relatório de Montagem - {tipo} {fech !== 'SEM FECHADURA' ? `(${fech})` : ''}</EditableText>
             </div>
 
-            {/* BLOCOS POR ABERTURA (DIREITA / ESQUERDA) COM ITENS A PARTIR DE "B. QTD" SEPARADOS ACIMA */}
-            <div className="space-y-4 print:space-y-4">
+            {/* BLOCOS POR ABERTURA (DIREITA / ESQUERDA) */}
+            <div className="space-y-3 print:space-y-2.5">
               {sortedAberturas.map(([abertura, abKits], abIdx) => {
                 let totalQtd = 0;
                 abKits.forEach(k => {
@@ -1184,12 +1187,12 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                     leafSizeStr = `${sampleKit.folhaLargura} x ${sampleKit.folhaAltura || '-'} (${folhaQtd}x ${dividedWidth} x ${sampleKit.folhaAltura || '-'})`;
                 }
 
-                // ITENS A PARTIR DE "B. QTD" DA PLANILHA DE LANÇAMENTO
+                // ITENS DE COMPLEMENTO (A PARTIR DE "B. QTD") - APENAS OS QUE FORAM PREENCHIDOS
                 const rawBitsQtd = sampleKit.bitsQtde || abKits.find(k => k.bitsQtde)?.bitsQtde || '';
-                const bitsQtde = rawBitsQtd && rawBitsQtd !== '-' && rawBitsQtd !== '0' ? String(rawBitsQtd) : '';
+                const bitsQtde = rawBitsQtd && rawBitsQtd !== '-' && rawBitsQtd !== '0' ? String(rawBitsQtd).trim() : '';
                 
                 const rawBitsFaces = sampleKit.bitsFaces || abKits.find(k => k.bitsFaces)?.bitsFaces || '';
-                const bitsFaces = rawBitsFaces && rawBitsFaces !== '-' && rawBitsFaces !== '0' ? String(rawBitsFaces) : '';
+                const bitsFaces = rawBitsFaces && rawBitsFaces !== '-' && rawBitsFaces !== '0' ? String(rawBitsFaces).trim() : '';
 
                 const camarao = Boolean(abKits.some(k => k.camarao) || sampleKit.camarao);
                 const correr = Boolean(abKits.some(k => k.correr) || sampleKit.correr);
@@ -1201,121 +1204,87 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                 const vidro = Boolean(abKits.some(k => k.vidro) || sampleKit.vidro);
                 const fechaFresta = Boolean(abKits.some(k => k.fechaFresta) || sampleKit.fechaFresta);
 
-                const activeItemsList: string[] = [];
-                if (bitsQtde) activeItemsList.push(`BITS: ${bitsQtde}${bitsFaces ? ` (${bitsFaces}F)` : ''}`);
-                if (camarao) activeItemsList.push('CAMARÃO');
-                if (correr) activeItemsList.push('CORRER');
-                if (pivotante) activeItemsList.push('PIVOTANTE');
-                if (veneziana) activeItemsList.push('VENEZIANA');
-                if (grelha) activeItemsList.push('GRELHA');
-                if (bandeira) activeItemsList.push('BANDEIRA');
-                if (chapa) activeItemsList.push('CHAPA');
-                if (vidro) activeItemsList.push('COM VIDRO');
-                if (fechaFresta) activeItemsList.push('FECHA FRESTA');
+                const activeComplements: { label: string; value: string }[] = [];
+                if (bitsQtde) activeComplements.push({ label: 'B. QTD', value: bitsQtde });
+                if (bitsFaces) activeComplements.push({ label: 'B. FACES', value: bitsFaces });
+                if (camarao) activeComplements.push({ label: 'CAMARÃO', value: 'SIM' });
+                if (correr) activeComplements.push({ label: 'CORRER', value: 'SIM' });
+                if (pivotante) activeComplements.push({ label: 'PIVOTANTE', value: 'SIM' });
+                if (veneziana) activeComplements.push({ label: 'VENEZIANA', value: 'SIM' });
+                if (grelha) activeComplements.push({ label: 'GRELHA', value: 'SIM' });
+                if (bandeira) activeComplements.push({ label: 'BANDEIRA', value: 'SIM' });
+                if (chapa) activeComplements.push({ label: 'CHAPA', value: 'SIM' });
+                if (vidro) activeComplements.push({ label: 'COM VIDRO', value: 'SIM' });
+                if (fechaFresta) activeComplements.push({ label: 'FECHA FRESTA', value: 'SIM' });
 
                 return (
                   <div key={abertura} className="break-inside-avoid">
                     {/* TÍTULO DO BLOCO (DIREITA / ESQUERDA) */}
-                    <div className="text-center font-bold text-[15px] sm:text-[16px] print:text-[17px] uppercase tracking-wide text-black mb-1.5 mt-2">
+                    <div className="text-center font-bold text-sm print:text-[15px] uppercase tracking-wide text-black mb-1 mt-1">
                       <EditableText>{abertura}</EditableText>
                     </div>
 
-                    {/* ITENS DA PLANILHA A PARTIR DE "B. QTD" SEPARADOS ACIMA DO BLOCO */}
-                    <div className="border border-black bg-white print:bg-transparent mb-1.5 overflow-hidden">
-                      <div className="bg-gray-100 print:bg-gray-200 px-3 py-1 border-b border-black flex justify-between items-center text-[10px] sm:text-[11px] print:text-[11px] font-bold uppercase tracking-wider text-black">
-                        <span>ITENS A PARTIR DE "B. QTD" — {abertura}</span>
-                        {activeItemsList.length > 0 ? (
-                          <span className="text-[#166534] print:text-black font-extrabold text-[10px] print:text-[11px]">
-                            ATIVO(S): {activeItemsList.join(' • ')}
-                          </span>
-                        ) : (
-                          <span className="text-gray-500 print:text-gray-700 font-normal text-[10px] print:text-[11px]">
-                            NENHUM ITEM ADICIONAL
-                          </span>
-                        )}
+                    {/* BARRA DE COMPLEMENTO - SÓ APARECE SE HOUVER PREENCHIMENTO E SÓ COM OS ITENS PREENCHIDOS */}
+                    {activeComplements.length > 0 && (
+                      <div className="border border-black bg-white print:bg-transparent mb-1 overflow-hidden">
+                        <div className="bg-gray-100 print:bg-gray-200 px-3 py-0.5 border-b border-black text-[10px] print:text-[11px] font-bold uppercase tracking-wider text-black text-center">
+                          COMPLEMENTO
+                        </div>
+                        <table className="w-full border-collapse text-center text-[10px] sm:text-[11px] print:text-[11px] table-fixed">
+                          <thead>
+                            <tr className="bg-gray-50 print:bg-gray-100 text-black font-bold uppercase border-b border-black">
+                              {activeComplements.map((item, cIdx) => (
+                                <th 
+                                  key={cIdx} 
+                                  className={`p-1 font-bold text-center border-black ${cIdx < activeComplements.length - 1 ? 'border-r' : ''}`}
+                                >
+                                  {item.label}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="text-black font-semibold">
+                              {activeComplements.map((item, cIdx) => (
+                                <td 
+                                  key={cIdx} 
+                                  className={`p-1 text-center font-bold text-black border-black ${cIdx < activeComplements.length - 1 ? 'border-r' : ''}`}
+                                >
+                                  <EditableText>{item.value}</EditableText>
+                                </td>
+                              ))}
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
-                      <table className="w-full border-collapse text-center text-[10px] sm:text-[11px] print:text-[11px] table-fixed">
-                        <thead>
-                          <tr className="bg-gray-50 print:bg-gray-100 text-black font-bold uppercase border-b border-black">
-                            <th className="border-r border-black p-1 w-[9%]">B. QTD</th>
-                            <th className="border-r border-black p-1 w-[9%]">B. FACES</th>
-                            <th className="border-r border-black p-1 w-[9%]">CAM</th>
-                            <th className="border-r border-black p-1 w-[9%]">CORRER</th>
-                            <th className="border-r border-black p-1 w-[9%]">PIV</th>
-                            <th className="border-r border-black p-1 w-[9%]">C/VEN</th>
-                            <th className="border-r border-black p-1 w-[9%]">C/GRE</th>
-                            <th className="border-r border-black p-1 w-[9%]">C/BAND</th>
-                            <th className="border-r border-black p-1 w-[9%]">C/CHAPA</th>
-                            <th className="border-r border-black p-1 w-[9%]">C/VID</th>
-                            <th className="p-1 w-[10%]">C/FF</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="text-black font-semibold">
-                            <td className={`border-r border-black p-1 ${bitsQtde ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-black'}`}>
-                              <EditableText>{bitsQtde || '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${bitsFaces ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-black'}`}>
-                              <EditableText>{bitsFaces || '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${camarao ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{camarao ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${correr ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{correr ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${pivotante ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{pivotante ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${veneziana ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{veneziana ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${grelha ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{grelha ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${bandeira ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{bandeira ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${chapa ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{chapa ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`border-r border-black p-1 ${vidro ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{vidro ? 'SIM' : '-'}</EditableText>
-                            </td>
-                            <td className={`p-1 ${fechaFresta ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
-                              <EditableText>{fechaFresta ? 'SIM' : '-'}</EditableText>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                    )}
 
-                    {/* TABELA PRINCIPAL DE ESPECIFICAÇÕES DO BLOCO (QTD SEMPRE VISÍVEL) */}
-                    <table className="w-full border-collapse border border-black text-center text-[11px] sm:text-[13px] print:text-[14px] table-fixed">
+                    {/* TABELA PRINCIPAL DE ESPECIFICAÇÕES DO BLOCO (SEM COLISÃO DE TEXTO E QTD 100% VISÍVEL) */}
+                    <table className="w-full border-collapse border border-black text-center text-[11px] sm:text-[12px] print:text-[11px] table-fixed">
                       <thead>
                         <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[8%]">QTD</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[13%]">FOLHA DE PORTA</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[13%]">CARACTERÍSTICAS</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[11%]">ACABAMENTO</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[24%]">INFO. ADUELA</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[14%]">FECH. GRID</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[10%]">DOBRADIÇAS</th>
-                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[7%]">CONCLUÍDO</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[6%]">QTD</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[11%]">FOLHA DE PORTA</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[10%]">CARACTERÍSTICAS</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[9%]">ACABAMENTO</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[28%]">INFO. ADUELA</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[16%]">FECH. GRID</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[14%]">DOBRADIÇAS</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[6%]">CONCLUÍDO</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid">
-                          <td className="border border-black px-2 py-2.5 text-center font-bold text-[14px] print:text-[17px] bg-white print:bg-transparent">
+                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid leading-tight">
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-bold text-[13px] print:text-[15px] bg-white print:bg-transparent">
                             <EditableText>{totalQtd}</EditableText>
                           </td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{leafSizeStr}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{caracteristicas}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{acabPorta}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{aduelaInfo}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{fech || '-'}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{dob}</EditableText></td>
-                          <td className="border border-black px-2 py-2.5 text-center font-medium"></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{leafSizeStr}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{caracteristicas}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words"><EditableText>{acabPorta}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{aduelaInfo}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{fech || '-'}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium overflow-hidden break-words text-[10.5px] print:text-[10.5px]"><EditableText>{dob}</EditableText></td>
+                          <td className="border border-black px-1.5 py-1.5 print:py-1 text-center font-medium"></td>
                         </tr>
                       </tbody>
                     </table>
@@ -1324,10 +1293,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
               })}
             </div>
             
-            <div className="mt-4 print:mt-6 break-inside-avoid w-full">
-              <h3 className="text-sm print:text-sm font-bold text-gray-800 dark:text-gray-200 print:text-black mb-2 uppercase">Observações Gerais:</h3>
+            <div className="mt-2 print:mt-1 break-inside-avoid w-full">
+              <h3 className="text-xs print:text-[11px] font-bold text-gray-800 dark:text-gray-200 print:text-black mb-0.5 uppercase">Observações Gerais:</h3>
               <LocalTextarea 
-                className="outline-none h-32 w-full p-0 mt-1 text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent"
+                className="outline-none h-16 print:h-12 w-full p-1 border border-gray-300 print:border-black text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent text-xs leading-normal"
                 initialValue={observacoes || ''}
               />
             </div>
