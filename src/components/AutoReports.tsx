@@ -1063,14 +1063,26 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             }
             @page { 
               size: landscape; 
-              margin: 0;
+              margin: 8mm;
             }
             .montagem-page-break {
               page-break-after: always;
-              padding: 1cm !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              box-sizing: border-box !important;
+              width: 100% !important;
+              max-width: 100% !important;
             }
             .montagem-page-break:last-child {
               page-break-after: auto;
+            }
+            table {
+              width: 100% !important;
+              table-layout: fixed !important;
+            }
+            th, td {
+              word-break: break-word !important;
+              overflow-wrap: break-word !important;
             }
           }
         `}
@@ -1080,20 +1092,8 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         const firstKit = groupKits[0];
         const tipo = firstKit.tipologia || 'SEM TIPOLOGIA';
         const fech = [firstKit.fechaduraTipo, firstKit.fechaduraMarca, firstKit.fechaduraGrid && `GRID ${firstKit.fechaduraGrid}`].filter(Boolean).join(' / ') || 'SEM FECHADURA';
-        
-        let showBits = false, showCorrer = false, showVen = false, showGre = false, showBand = false, showPiv = false, showFf = false, showVid = false;
-        if (firstKit.bitsQtde && firstKit.bitsQtde !== '-' && firstKit.bitsQtde !== '0') showBits = true;
-        if (firstKit.correr) showCorrer = true;
-        if (firstKit.veneziana) showVen = true;
-        if (firstKit.grelha) showGre = true;
-        if (firstKit.bandeira) showBand = true;
-        if (firstKit.pivotante) showPiv = true;
-        if (firstKit.fechaFresta) showFf = true;
-        if (firstKit.vidro) showVid = true;
 
-        const totalCols = 8 + (showBits ? 1 : 0) + (showCorrer ? 1 : 0) + (showVen ? 1 : 0) + (showGre ? 1 : 0) + (showBand ? 1 : 0) + (showPiv ? 1 : 0) + (showFf ? 1 : 0) + (showVid ? 1 : 0);
-
-        // Group internally by Abertura
+        // Group internally by Abertura (e.g. DIREITA, ESQUERDA)
         const byAbertura = new Map<string, any[]>();
         groupKits.forEach(k => {
           const ab = k.abertura || 'SEM ABERTURA';
@@ -1104,16 +1104,16 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         const sortedAberturas = Array.from(byAbertura.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
         return (
-          <div key={idx} className="montagem-page-break print:w-full print:py-4 flex flex-col gap-6 bg-white p-6 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
+          <div key={idx} className="montagem-page-break print:w-full print:py-2 flex flex-col gap-4 bg-white p-6 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
             
-            {/* CABEÇALHO DO RELATÓRIO (SEMPRE VISÍVEL AGORA) */}
-            <div className="flex justify-between items-start border-b-[2px] border-black pb-4 mb-2 print:border-black">
+            {/* CABEÇALHO DO RELATÓRIO (IDENTIDADE NACIONAL MADEIRAS) */}
+            <div className="flex justify-between items-start border-b-[2px] border-black pb-3 mb-1 print:border-black">
                <div>
-                 <div className="flex flex-col items-start mb-2" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                 <div className="flex flex-col items-start mb-1" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                    <h2 className="text-2xl font-black tracking-tighter leading-none text-[#166534] print:text-[#166534] uppercase">Nacional Madeiras</h2>
                    <span className="text-xl font-bold uppercase tracking-widest mt-1 text-[#475569] print:text-[#475569]">Kit Porta</span>
                  </div>
-                 <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-4">RELATÓRIO DE MONTAGEM</h1>
+                 <h1 className="text-3xl font-bold uppercase tracking-tight text-black print:text-black mt-2">RELATÓRIO DE MONTAGEM</h1>
                </div>
                <div className="text-right text-[12px] print:text-[14px] text-black print:text-black flex flex-row items-end gap-6 border-b-2 border-transparent">
                  <div className="flex items-end mt-2">
@@ -1130,113 +1130,199 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             </div>
             
             {(obra || responsavel || cliente) && (
-              <div className="grid grid-cols-3 gap-4 mb-2">
-                <div className="border border-gray-300 p-2">
-                  <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
-                  <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{cliente || "Não informado"}</p>
+              <div className="grid grid-cols-3 gap-4 mb-1">
+                <div className="border border-gray-300 print:border-black p-2">
+                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Cliente</p>
+                  <p className="font-medium text-lg print:text-[18px] print:text-black uppercase text-black">{cliente || "Não informado"}</p>
                 </div>
-                <div className="border border-gray-300 p-2">
-                  <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
-                  <p className="font-medium text-lg print:text-[20px] print:text-black text-black">{obra || "Não informado"}</p>
+                <div className="border border-gray-300 print:border-black p-2">
+                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Obra</p>
+                  <p className="font-medium text-lg print:text-[18px] print:text-black text-black">{obra || "Não informado"}</p>
                 </div>
-                <div className="border border-gray-300 p-2">
-                  <p className="text-[12px] print:text-[14px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
-                  <p className="font-medium text-lg print:text-[20px] print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
+                <div className="border border-gray-300 print:border-black p-2">
+                  <p className="text-[11px] print:text-[12px] uppercase text-gray-600 font-bold print:text-black">Responsável</p>
+                  <p className="font-medium text-lg print:text-[18px] print:text-black uppercase text-black">{responsavel || "Não informado"}</p>
                 </div>
               </div>
             )}
 
-            <table className="min-w-full border-collapse mt-2">
-              <thead className="print:table-header-group">
-                <tr>
-                   <td colSpan={totalCols} className="p-0 border-0">
-                      <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-2 text-center font-bold text-sm print:text-[18px] uppercase mb-4 print:bg-transparent print:text-black">
-                        <EditableText>Relatório de Montagem - {tipo} {fech !== 'SEM FECHADURA' ? `(${fech})` : ''}</EditableText>
+            {/* BARRA DE TÍTULO DA TIPOLOGIA / ESPECIFICAÇÃO */}
+            <div className="bg-gray-200 dark:bg-slate-800 border-[2px] border-black print:border-black py-2 text-center font-bold text-sm print:text-[17px] uppercase print:bg-transparent print:text-black">
+              <EditableText>Relatório de Montagem - {tipo} {fech !== 'SEM FECHADURA' ? `(${fech})` : ''}</EditableText>
+            </div>
+
+            {/* BLOCOS POR ABERTURA (DIREITA / ESQUERDA) COM ITENS A PARTIR DE "B. QTD" SEPARADOS ACIMA */}
+            <div className="space-y-4 print:space-y-4">
+              {sortedAberturas.map(([abertura, abKits], abIdx) => {
+                let totalQtd = 0;
+                abKits.forEach(k => {
+                  let stringQtdStr = String(k.qtdeFolhasPorKit || '1');
+                  if (k.quantidade) stringQtdStr = String(k.quantidade);
+                  if (k.qtde) stringQtdStr = String(k.qtde);
+                  const q = parseInt(stringQtdStr, 10);
+                  totalQtd += isNaN(q) ? 1 : q;
+                });
+
+                const sampleKit = abKits[0] || firstKit;
+
+                const aduelaInfo = [
+                  sampleKit.aduelaLargura && sampleKit.aduelaAltura ? `${sampleKit.aduelaLargura}x${sampleKit.aduelaAltura}` : null,
+                  sampleKit.acabamentoAduela ? sampleKit.acabamentoAduela : null,
+                  sampleKit.montantesMedida ? `D${sampleKit.montantesMedida}` : null,
+                  sampleKit.montantesFolgas ? `F${sampleKit.montantesFolgas}` : null,
+                  sampleKit.qtdeLadosAduela ? `${sampleKit.qtdeLadosAduela} lados` : null
+                ].filter(Boolean).join(' - ') || '-';
+
+                const dob = [sampleKit.dobradicaMarca, sampleKit.dobradicaMedida, sampleKit.qtdeDobradicas && `${sampleKit.qtdeDobradicas}un`].filter(Boolean).join(' / ') || '-';
+                const acabPorta = sampleKit.acabamentoPorta || sampleKit.corFolha || '-';
+                const caracteristicas = sampleKit.caracteristicaPorta || '-';
+
+                let leafSizeStr = `${sampleKit.folhaLargura || '-'} x ${sampleKit.folhaAltura || '-'}`;
+                const folhaQtd = parseInt(String(sampleKit.qtdeFolhasPorKit || '1'), 10);
+                if (!isNaN(folhaQtd) && folhaQtd > 1 && sampleKit.folhaLargura && !isNaN(parseInt(sampleKit.folhaLargura, 10))) {
+                    const dividedWidth = parseInt(sampleKit.folhaLargura, 10) / folhaQtd;
+                    leafSizeStr = `${sampleKit.folhaLargura} x ${sampleKit.folhaAltura || '-'} (${folhaQtd}x ${dividedWidth} x ${sampleKit.folhaAltura || '-'})`;
+                }
+
+                // ITENS A PARTIR DE "B. QTD" DA PLANILHA DE LANÇAMENTO
+                const rawBitsQtd = sampleKit.bitsQtde || abKits.find(k => k.bitsQtde)?.bitsQtde || '';
+                const bitsQtde = rawBitsQtd && rawBitsQtd !== '-' && rawBitsQtd !== '0' ? String(rawBitsQtd) : '';
+                
+                const rawBitsFaces = sampleKit.bitsFaces || abKits.find(k => k.bitsFaces)?.bitsFaces || '';
+                const bitsFaces = rawBitsFaces && rawBitsFaces !== '-' && rawBitsFaces !== '0' ? String(rawBitsFaces) : '';
+
+                const camarao = Boolean(abKits.some(k => k.camarao) || sampleKit.camarao);
+                const correr = Boolean(abKits.some(k => k.correr) || sampleKit.correr);
+                const pivotante = Boolean(abKits.some(k => k.pivotante) || sampleKit.pivotante);
+                const veneziana = Boolean(abKits.some(k => k.veneziana) || sampleKit.veneziana);
+                const grelha = Boolean(abKits.some(k => k.grelha) || sampleKit.grelha);
+                const bandeira = Boolean(abKits.some(k => k.bandeira) || sampleKit.bandeira);
+                const chapa = Boolean(abKits.some(k => k.chapa) || sampleKit.chapa);
+                const vidro = Boolean(abKits.some(k => k.vidro) || sampleKit.vidro);
+                const fechaFresta = Boolean(abKits.some(k => k.fechaFresta) || sampleKit.fechaFresta);
+
+                const activeItemsList: string[] = [];
+                if (bitsQtde) activeItemsList.push(`BITS: ${bitsQtde}${bitsFaces ? ` (${bitsFaces}F)` : ''}`);
+                if (camarao) activeItemsList.push('CAMARÃO');
+                if (correr) activeItemsList.push('CORRER');
+                if (pivotante) activeItemsList.push('PIVOTANTE');
+                if (veneziana) activeItemsList.push('VENEZIANA');
+                if (grelha) activeItemsList.push('GRELHA');
+                if (bandeira) activeItemsList.push('BANDEIRA');
+                if (chapa) activeItemsList.push('CHAPA');
+                if (vidro) activeItemsList.push('COM VIDRO');
+                if (fechaFresta) activeItemsList.push('FECHA FRESTA');
+
+                return (
+                  <div key={abertura} className="break-inside-avoid">
+                    {/* TÍTULO DO BLOCO (DIREITA / ESQUERDA) */}
+                    <div className="text-center font-bold text-[15px] sm:text-[16px] print:text-[17px] uppercase tracking-wide text-black mb-1.5 mt-2">
+                      <EditableText>{abertura}</EditableText>
+                    </div>
+
+                    {/* ITENS DA PLANILHA A PARTIR DE "B. QTD" SEPARADOS ACIMA DO BLOCO */}
+                    <div className="border border-black bg-white print:bg-transparent mb-1.5 overflow-hidden">
+                      <div className="bg-gray-100 print:bg-gray-200 px-3 py-1 border-b border-black flex justify-between items-center text-[10px] sm:text-[11px] print:text-[11px] font-bold uppercase tracking-wider text-black">
+                        <span>ITENS A PARTIR DE "B. QTD" — {abertura}</span>
+                        {activeItemsList.length > 0 ? (
+                          <span className="text-[#166534] print:text-black font-extrabold text-[10px] print:text-[11px]">
+                            ATIVO(S): {activeItemsList.join(' • ')}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 print:text-gray-700 font-normal text-[10px] print:text-[11px]">
+                            NENHUM ITEM ADICIONAL
+                          </span>
+                        )}
                       </div>
-                   </td>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 print:bg-transparent text-[11px] sm:text-sm print:text-[16px]">
-                {sortedAberturas.map(([abertura, abKits], abIdx) => {
-                  let totalQtd = 0;
-                  abKits.forEach(k => {
-                    let stringQtdStr = String(k.qtdeFolhasPorKit || '1');
-                    if (k.quantidade) stringQtdStr = String(k.quantidade);
-                    if (k.qtde) stringQtdStr = String(k.qtde);
-                    const q = parseInt(stringQtdStr, 10);
-                    totalQtd += isNaN(q) ? 1 : q;
-                  });
+                      <table className="w-full border-collapse text-center text-[10px] sm:text-[11px] print:text-[11px] table-fixed">
+                        <thead>
+                          <tr className="bg-gray-50 print:bg-gray-100 text-black font-bold uppercase border-b border-black">
+                            <th className="border-r border-black p-1 w-[9%]">B. QTD</th>
+                            <th className="border-r border-black p-1 w-[9%]">B. FACES</th>
+                            <th className="border-r border-black p-1 w-[9%]">CAM</th>
+                            <th className="border-r border-black p-1 w-[9%]">CORRER</th>
+                            <th className="border-r border-black p-1 w-[9%]">PIV</th>
+                            <th className="border-r border-black p-1 w-[9%]">C/VEN</th>
+                            <th className="border-r border-black p-1 w-[9%]">C/GRE</th>
+                            <th className="border-r border-black p-1 w-[9%]">C/BAND</th>
+                            <th className="border-r border-black p-1 w-[9%]">C/CHAPA</th>
+                            <th className="border-r border-black p-1 w-[9%]">C/VID</th>
+                            <th className="p-1 w-[10%]">C/FF</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="text-black font-semibold">
+                            <td className={`border-r border-black p-1 ${bitsQtde ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-black'}`}>
+                              <EditableText>{bitsQtde || '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${bitsFaces ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-black'}`}>
+                              <EditableText>{bitsFaces || '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${camarao ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{camarao ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${correr ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{correr ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${pivotante ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{pivotante ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${veneziana ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{veneziana ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${grelha ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{grelha ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${bandeira ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{bandeira ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${chapa ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{chapa ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`border-r border-black p-1 ${vidro ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{vidro ? 'SIM' : '-'}</EditableText>
+                            </td>
+                            <td className={`p-1 ${fechaFresta ? 'font-black bg-emerald-100/60 print:bg-gray-200 text-black' : 'text-gray-400 print:text-gray-500'}`}>
+                              <EditableText>{fechaFresta ? 'SIM' : '-'}</EditableText>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
 
-                  const aduelaInfo = [
-                    firstKit.aduelaLargura && firstKit.aduelaAltura ? `${firstKit.aduelaLargura}x${firstKit.aduelaAltura}` : null,
-                    firstKit.acabamentoAduela ? firstKit.acabamentoAduela : null,
-                    firstKit.montantesMedida ? `D${firstKit.montantesMedida}` : null,
-                    firstKit.montantesFolgas ? `F${firstKit.montantesFolgas}` : null,
-                    firstKit.qtdeLadosAduela ? `${firstKit.qtdeLadosAduela} lados` : null
-                  ].filter(Boolean).join(' - ') || '-';
-
-                  const dob = [firstKit.dobradicaMarca, firstKit.dobradicaMedida, firstKit.qtdeDobradicas && `${firstKit.qtdeDobradicas}un`].filter(Boolean).join(' / ') || '-';
-                  const acabPorta = firstKit.acabamentoPorta || firstKit.corFolha || '-';
-                  const caracteristicas = firstKit.caracteristicaPorta || '-';
-
-                  let leafSizeStr = `${firstKit.folhaLargura || '-'} x ${firstKit.folhaAltura || '-'}`;
-                  const folhaQtd = parseInt(String(firstKit.qtdeFolhasPorKit || '1'), 10);
-                  if (!isNaN(folhaQtd) && folhaQtd > 1 && firstKit.folhaLargura && !isNaN(parseInt(firstKit.folhaLargura, 10))) {
-                      const dividedWidth = parseInt(firstKit.folhaLargura, 10) / folhaQtd;
-                      leafSizeStr = `${firstKit.folhaLargura} x ${firstKit.folhaAltura || '-'} (${folhaQtd}x ${dividedWidth} x ${firstKit.folhaAltura || '-'})`;
-                  }
-
-                  return (
-                    <React.Fragment key={abertura}>
-                      {/* TITULO DA ABERTURA (ESQUERDA / DIREITA) */}
-                      <tr className="bg-gray-50 dark:bg-gray-700 print:bg-transparent border-t border-gray-300 print:border-black w-full break-inside-avoid">
-                        <td colSpan={totalCols} className="px-3 py-2 text-center font-bold text-[14px] sm:text-[16px] print:text-[18px] uppercase text-black dark:text-white print:text-black print:border-black border-y">
-                          <EditableText>{abertura}</EditableText>
-                        </td>
-                      </tr>
-                      {/* CABEÇALHO DAS COLUNAS */}
-                      <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">QTD</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FOLHA DE PORTA</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CARACTERÍSTICAS</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">ACABAMENTO</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">INFO. ADUELA</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECH. GRID</th>
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">DOBRADIÇAS</th>
-                        {showBits && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BITS</th>}
-                        {showCorrer && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CORRER</th>}
-                        {showVen && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">VENEZIANA</th>}
-                        {showGre && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">GRELHA</th>}
-                        {showBand && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">BANDEIRA</th>}
-                        {showPiv && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">PIVOTANTE</th>}
-                        {showFf && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">FECHA FRESTA</th>}
-                        {showVid && <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">COM VIDRO</th>}
-                        <th className="px-3 py-2 text-center align-middle whitespace-nowrap border-x border-[#1e293b] print:border-black print:text-[14px]">CONCLUÍDO</th>
-                      </tr>
-                      {/* DADOS (UMA LINHA POR ABERTURA) */}
-                      <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid">
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{totalQtd}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{leafSizeStr}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{caracteristicas}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{acabPorta}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{aduelaInfo}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{fech || '-'}</EditableText></td>
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{dob}</EditableText></td>
-                        {showBits && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>{firstKit.bitsQtde}</EditableText></td>}
-                        {showCorrer && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>CORRER</EditableText></td>}
-                        {showVen && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>VENEZIANA</EditableText></td>}
-                        {showGre && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>GRELHA</EditableText></td>}
-                        {showBand && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>BANDEIRA</EditableText></td>}
-                        {showPiv && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>PIVOTANTE</EditableText></td>}
-                        {showFf && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>FECHA FRESTA</EditableText></td>}
-                        {showVid && <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"><EditableText>COM VIDRO</EditableText></td>}
-                        <td className="px-3 py-2 text-center border-x border-gray-200 print:border-black font-medium"></td>
-                      </tr>
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
+                    {/* TABELA PRINCIPAL DE ESPECIFICAÇÕES DO BLOCO (QTD SEMPRE VISÍVEL) */}
+                    <table className="w-full border-collapse border border-black text-center text-[11px] sm:text-[13px] print:text-[14px] table-fixed">
+                      <thead>
+                        <tr className="bg-[#0f172a] text-white print:bg-gray-200 print:border-y print:border-black font-semibold uppercase break-inside-avoid print:shadow-none text-black-print-important">
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[8%]">QTD</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[13%]">FOLHA DE PORTA</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[13%]">CARACTERÍSTICAS</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[11%]">ACABAMENTO</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[24%]">INFO. ADUELA</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[14%]">FECH. GRID</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[10%]">DOBRADIÇAS</th>
+                          <th className="border border-black px-2 py-2 text-center align-middle font-bold print:text-[14px] w-[7%]">CONCLUÍDO</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 print:hover:bg-transparent text-gray-900 dark:text-gray-100 print:text-black border-b border-gray-300 print:border-black break-inside-avoid">
+                          <td className="border border-black px-2 py-2.5 text-center font-bold text-[14px] print:text-[17px] bg-white print:bg-transparent">
+                            <EditableText>{totalQtd}</EditableText>
+                          </td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{leafSizeStr}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{caracteristicas}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{acabPorta}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{aduelaInfo}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{fech || '-'}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"><EditableText>{dob}</EditableText></td>
+                          <td className="border border-black px-2 py-2.5 text-center font-medium"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
             
             <div className="mt-4 print:mt-6 break-inside-avoid w-full">
               <h3 className="text-sm print:text-sm font-bold text-gray-800 dark:text-gray-200 print:text-black mb-2 uppercase">Observações Gerais:</h3>
