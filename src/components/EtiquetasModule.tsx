@@ -839,26 +839,29 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               <div 
                 style={{
                   position: 'absolute',
-                  top: '2.5mm',
-                  left: `${formato.marginLeft}mm`,
-                  width: `${formato.pageWidth - (formato.marginLeft * 2)}mm`,
-                  fontSize: '8px',
+                  top: `${formato.marginTop >= 15 ? 7.0 : (formato.marginTop >= 11 ? 5.8 : 4.5)}mm`,
+                  left: '6mm',
+                  right: '6mm',
+                  fontSize: '8.5px',
                   fontWeight: 900,
                   color: '#000000',
                   textTransform: 'uppercase',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  borderBottom: '0.5px solid #000000',
-                  paddingBottom: '1px',
-                  lineHeight: 1
+                  borderBottom: '1px solid #000000',
+                  paddingBottom: '1.5px',
+                  lineHeight: '1.2',
+                  zIndex: 99,
+                  WebkitPrintColorAdjust: 'exact',
+                  printColorAdjust: 'exact'
                 }}
               >
-                <span className="truncate pr-2 font-mono">
+                <span className="truncate pr-2 font-mono font-black" style={{ color: '#000000' }}>
                   {page.reportTitle}
                 </span>
-                <span className="whitespace-nowrap font-mono text-[7.5px] font-bold">
-                  FOLHA {page.sheetIndex}/{page.totalSheets} ({page.labels.length} ETIQUETAS)
+                <span className="whitespace-nowrap font-mono text-[8px] font-black" style={{ color: '#000000' }}>
+                  FOLHA {page.sheetIndex}/{page.totalSheets} ({page.labels.length} ETQ)
                 </span>
               </div>
             )}
