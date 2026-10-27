@@ -1046,7 +1046,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
   const uniqueGroups = Array.from(byUniqueFeature.entries());
 
   return (
-    <div className="space-y-8 print:space-y-0 print:block">
+    <div className="space-y-8 print:space-y-0 print:block print:w-full print:mx-auto">
       <style type="text/css">
         {`
           @media print {
@@ -1063,17 +1063,17 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             }
             @page { 
               size: landscape; 
-              margin: 6mm 8mm;
+              margin: 6mm 10mm;
             }
             .montagem-page-break {
               page-break-after: always;
               page-break-inside: avoid !important;
               break-inside: avoid !important;
               padding: 0 !important;
-              margin: 0 !important;
+              margin: 0 auto !important;
               box-sizing: border-box !important;
               width: 100% !important;
-              max-width: 100% !important;
+              max-width: 275mm !important;
             }
             .montagem-page-break:last-child {
               page-break-after: auto;
@@ -1107,7 +1107,7 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
         const sortedAberturas = Array.from(byAbertura.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
         return (
-          <div key={idx} className="montagem-page-break print:w-full print:py-1 flex flex-col gap-2.5 bg-white p-4 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent print:mx-0">
+          <div key={idx} className="montagem-page-break print:w-full print:max-w-[275mm] print:mx-auto print:py-1 flex flex-col gap-2.5 bg-white p-4 shadow-sm rounded-md print:shadow-none print:p-0 print:bg-transparent">
             
             {/* CABEÇALHO DO RELATÓRIO (IDENTIDADE NACIONAL MADEIRAS) */}
             <div className="flex justify-between items-start border-b-[2px] border-black pb-2 mb-1 print:border-black">
@@ -1267,10 +1267,10 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
                           <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[11%]">FOLHA DE PORTA</th>
                           <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[10%]">CARACTERÍSTICAS</th>
                           <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[9%]">ACABAMENTO</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[28%]">INFO. ADUELA</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[16%]">FECH. GRID</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[26%]">INFO. ADUELA</th>
+                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[14%]">FECH. GRID</th>
                           <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[14%]">DOBRADIÇAS</th>
-                          <th className="border border-black px-1.5 py-1.5 print:py-1 text-center align-middle font-bold print:text-[12px] w-[6%]">CONCLUÍDO</th>
+                          <th className="border border-black px-1 py-1.5 print:py-1 text-center align-middle font-bold print:text-[11px] whitespace-nowrap w-[10%]">CONCLUÍDO</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1294,11 +1294,14 @@ export function renderAutoMontagem(kits: any[], responsavel?: string, obra?: str
             </div>
             
             <div className="mt-2 print:mt-1 break-inside-avoid w-full">
-              <h3 className="text-xs print:text-[11px] font-bold text-gray-800 dark:text-gray-200 print:text-black mb-0.5 uppercase">Observações Gerais:</h3>
-              <LocalTextarea 
-                className="outline-none h-16 print:h-12 w-full p-1 border border-gray-300 print:border-black text-red-600 print:text-red-600 font-bold print:font-bold resize-none bg-transparent text-xs leading-normal"
-                initialValue={observacoes || ''}
-              />
+              <h3 className="text-xs print:text-[11px] font-bold text-gray-800 dark:text-gray-200 print:text-black uppercase">
+                Observações Gerais:
+              </h3>
+              {observacoes && (
+                <p className="text-xs print:text-[11px] font-bold text-red-600 print:text-red-600 mt-0.5 whitespace-pre-wrap">
+                  <EditableText>{observacoes}</EditableText>
+                </p>
+              )}
             </div>
           </div>
         );
