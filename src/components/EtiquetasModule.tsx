@@ -120,6 +120,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
     obra: "",
   });
   const [showPreview, setShowPreview] = useState(true);
+  const [verticalOffset, setVerticalOffset] = useLocalStorage<number>('nm_etiqueta_vertical_offset_mm', 3.0);
   
   const [selectedRelatorio, setSelectedRelatorio] = useState<string>('');
   const [separateByReport, setSeparateByReport] = useState<boolean>(true);
@@ -708,7 +709,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                           aspectRatio: formato.id === '6180' ? '66.7/25.4' : '101.6/50.8'
                         }}
                       >
-                        <LabelInnerContent kit={fila[0].kit} formato={formato} header={header} />
+                        <LabelInnerContent kit={fila[0].kit} formato={formato} header={header} verticalOffset={verticalOffset} />
                       </div>
                     </div>
                   </div>
@@ -728,6 +729,46 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
               >
                 {FORMATOS_PIMACO.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
+            </div>
+
+            {/* Seção: Deslocamento Vertical (Descer 3mm) */}
+            <div className="space-y-1.5 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex justify-between items-center text-xs font-bold text-gray-700">
+                <span className="flex items-center gap-1">Deslocamento Vertical (Topo):</span>
+                <span className="font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded text-[11px] font-black">
+                  +{verticalOffset.toFixed(1)} mm
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVerticalOffset(prev => Math.max(0, +(prev - 0.5).toFixed(1)))}
+                  className="px-2 py-1 bg-white hover:bg-gray-100 text-gray-700 rounded border border-gray-300 font-bold text-xs shadow-xs"
+                  title="Diminuir 0.5mm"
+                >
+                  -0.5mm
+                </button>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="6" 
+                  step="0.5"
+                  value={verticalOffset}
+                  onChange={e => setVerticalOffset(parseFloat(e.target.value))}
+                  className="flex-1 accent-emerald-700 cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => setVerticalOffset(prev => Math.min(8, +(prev + 0.5).toFixed(1)))}
+                  className="px-2 py-1 bg-white hover:bg-gray-100 text-gray-700 rounded border border-gray-300 font-bold text-xs shadow-xs"
+                  title="Aumentar 0.5mm"
+                >
+                  +0.5mm
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-500 leading-tight">
+                Definido em <strong>+3.0 mm</strong> para descer o conteúdo e enquadrar perfeitamente as primeiras etiquetas.
+              </p>
             </div>
             
             {/* Seção 4: Ações e Botões */}
@@ -883,7 +924,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                     height: `${formato.labelHeight}mm`,
                   }}
                 >
-                  <LabelInnerContent kit={kit} formato={formato} header={header} />
+                  <LabelInnerContent kit={kit} formato={formato} header={header} verticalOffset={verticalOffset} />
                 </div>
               );
             })}
@@ -1035,7 +1076,17 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
   );
 }
 
-function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; header: any }) {
+function LabelInnerContent({ 
+  kit, 
+  formato, 
+  header, 
+  verticalOffset = 3.0 
+}: { 
+  kit: any; 
+  formato: any; 
+  header: any; 
+  verticalOffset?: number; 
+}) {
   // Ajustar o layout interno com base no tamanho da etiqueta.
   // Etiquetas menores (6180) precisam de fonte menor e menos informações.
   
@@ -1098,8 +1149,12 @@ function LabelInnerContent({ kit, formato, header }: { kit: any; formato: any; h
   }
 
   // Padrão Médio/Grande (6182, 6183, 6187)
+  const padTop = 0.5 + (verticalOffset ?? 3.0);
   return (
-    <div className="w-full h-full p-1 pl-2 flex flex-col justify-start overflow-hidden font-sans tracking-tight pt-0.5 pb-0.5" style={{ color: '#000000' }}>
+    <div 
+      className="w-full h-full p-1 pl-2 flex flex-col justify-start overflow-hidden font-sans tracking-tight pb-0.5" 
+      style={{ color: '#000000', paddingTop: `${padTop}mm` }}
+    >
       <div className="flex justify-between items-start border-b border-black pb-0.5 mb-0.5 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5">
           <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '13px', fontWeight: 900, color: '#15803d' }}>
