@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { cn } from "../lib/utils";
 import {
   Printer,
   FileText,
@@ -238,7 +239,20 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   );
 };
 
-type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares" | "auto_montagem" | "auto_entrega";
+type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_correr" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares" | "auto_montagem" | "auto_entrega";
+
+const REPORT_TABS: { id: ReportType; label: string; isCorrer?: boolean }[] = [
+  { id: "auto_portas", label: "Folhas de Porta" },
+  { id: "auto_correr", label: "CORRER", isCorrer: true },
+  { id: "auto_aduelas", label: "Aduelas" },
+  { id: "auto_alizares", label: "Alizares" },
+  { id: "auto_usinagem_portas", label: "Usin. Portas" },
+  { id: "auto_usinagem_aduelas", label: "Usin. Aduelas" },
+  { id: "auto_vergas", label: "Vergas" },
+  { id: "auto_montagem", label: "Montagem" },
+  { id: "auto_entrega", label: "Entrega" },
+  { id: "avarias", label: "Avarias" },
+];
 
 export function getCategoriaComodo(comodo: string): string {
   const c = comodo.toUpperCase();
@@ -295,6 +309,10 @@ export function RelatoriosModule() {
     if (selectedBloco === "TODOS") return kits;
     return kits.filter(k => (k.bloco || 'SEM BLOCO') === selectedBloco);
   }, [kits, selectedBloco]);
+
+  const correrKitsCount = React.useMemo(() => {
+    return kits.filter(k => !!k.correr || String(k.abertura || '').toUpperCase().includes('CORRER') || String(k.tipologia || '').toUpperCase().includes('CORRER')).length;
+  }, [kits]);
 
   const handleFinalizarEntrega = () => {
     if (filteredKits.length === 0) return alert('Nenhum kit selecionado.');
@@ -500,6 +518,47 @@ export function RelatoriosModule() {
         {/* Formulário Não-Impresso */}
         <div className="w-full max-w-[1400px] mx-auto space-y-6 print:max-w-none print:w-full print:mx-0 print:space-y-0">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm print:hidden">
+            {/* Visual Navigation Tabs */}
+            <div className="mb-5 pb-3 border-b border-gray-100">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Abas de Relatórios:</div>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                {REPORT_TABS.map((tab) => {
+                  const isActive = reportType === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setReportType(tab.id);
+                        setItems([]);
+                        setCurrentItem({ quantidade: 1 });
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 shrink-0 border cursor-pointer",
+                        isActive
+                          ? tab.isCorrer
+                            ? "bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-300"
+                            : "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                          : tab.isCorrer
+                            ? "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 font-bold"
+                            : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                      )}
+                    >
+                      <span>{tab.label}</span>
+                      {tab.isCorrer && (
+                        <span className={cn(
+                          "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
+                          isActive ? "bg-amber-700 text-amber-100" : "bg-amber-200 text-amber-900"
+                        )}>
+                          {correrKitsCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               <ClipboardList className="w-5 h-5 mr-2 text-gray-500" />
               Cabeçalho do Relatório
@@ -518,8 +577,8 @@ export function RelatoriosModule() {
                   }}
                   className="w-full rounded-md border-gray-300 bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm print:text-[16px]"
                 >
-                  
                     <option value="auto_portas">Relatório de Folhas de Porta</option>
+                    <option value="auto_correr">Portas de Correr (CORRER)</option>
                     <option value="auto_aduelas">Relatório de Aduelas</option>
                     <option value="auto_alizares">Relatório de Alizares</option>
                     <option value="auto_usinagem_portas">Usinagem de Portas</option>

@@ -135,6 +135,21 @@ export function LancamentosRelatoriosModule() {
   const [form, setForm] = useState<Omit<KitLancamento, 'id'>>(INITIAL_FORM);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
+  const [tableFilterTab, setTableFilterTab] = useState<'todos' | 'correr' | 'giro'>('todos');
+
+  const totalCorrerCount = React.useMemo(() => {
+    return kits.filter(k => !!k.correr || String(k.abertura || '').toUpperCase().includes('CORRER') || String(k.tipologia || '').toUpperCase().includes('CORRER')).length;
+  }, [kits]);
+
+  const displayedKits = React.useMemo(() => {
+    if (tableFilterTab === 'correr') {
+      return kits.filter(k => !!k.correr || String(k.abertura || '').toUpperCase().includes('CORRER') || String(k.tipologia || '').toUpperCase().includes('CORRER'));
+    }
+    if (tableFilterTab === 'giro') {
+      return kits.filter(k => !k.correr && !String(k.abertura || '').toUpperCase().includes('CORRER') && !String(k.tipologia || '').toUpperCase().includes('CORRER'));
+    }
+    return kits;
+  }, [kits, tableFilterTab]);
 
   const [comodoOptions, setComodoOptions] = useLocalStorage<string[]>('nacional_madeiras_comodo_options_v1', DEFAULT_COMODOS);
   const [showComodoModal, setShowComodoModal] = useState(false);
@@ -866,16 +881,65 @@ export function LancamentosRelatoriosModule() {
 
       {/* TABELA DE VISUALIZAÇÃO */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-         <div className="p-4 border-b border-gray-100 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
-              <FileSpreadsheet className="w-5 h-5 mr-2 text-gray-500" />
-              Kits Cadastrados
-            </h2>
-                       <div className="flex items-center space-x-2">
+         <div className="p-4 border-b border-gray-100 bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+                <FileSpreadsheet className="w-5 h-5 mr-2 text-gray-500" />
+                Kits Cadastrados
+              </h2>
+
+              {/* TABS DE FILTRO: TODOS / CORRER / GIRO */}
+              <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 p-0.5 bg-gray-200/60 dark:bg-gray-800 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setTableFilterTab('todos')}
+                  className={cn(
+                    "px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer",
+                    tableFilterTab === 'todos'
+                      ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+                  )}
+                >
+                  Todos ({kits.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTableFilterTab('correr')}
+                  className={cn(
+                    "px-3 py-1 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 cursor-pointer",
+                    tableFilterTab === 'correr'
+                      ? "bg-amber-600 text-white shadow-sm ring-1 ring-amber-400 font-bold"
+                      : "text-amber-900 dark:text-amber-400 hover:bg-amber-100/60 font-semibold"
+                  )}
+                >
+                  <span>CORRER</span>
+                  <span className={cn(
+                    "text-[10px] px-1.5 py-0.2 rounded-full font-bold",
+                    tableFilterTab === 'correr' ? "bg-amber-700 text-white" : "bg-amber-200 text-amber-900"
+                  )}>
+                    {totalCorrerCount}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTableFilterTab('giro')}
+                  className={cn(
+                    "px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer",
+                    tableFilterTab === 'giro'
+                      ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+                  )}
+                >
+                  Giro ({kits.length - totalCorrerCount})
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
               <button 
                 type="button"
                 onClick={exportToPDF}
-                className="flex items-center text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/50 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 title="Exportar como PDF"
               >
                 <FileText className="w-4 h-4 mr-2" />
@@ -884,7 +948,7 @@ export function LancamentosRelatoriosModule() {
               <button 
                 type="button"
                 onClick={exportToExcel}
-                className="flex items-center text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-800/50 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-800/50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 title="Exportar como Excel (XLSX)"
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -893,14 +957,14 @@ export function LancamentosRelatoriosModule() {
               <button
                 type="button"
                 onClick={clearAllKits}
-                className="flex items-center text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/50 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-800/50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
                 title="Excluir todos os kits"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Limpar Tudo
               </button>
               <div className="text-sm text-gray-500 ml-2">
-                 {kits.length} registro(s)
+                 {displayedKits.length} de {kits.length} registro(s)
               </div>
             </div>
          </div>
@@ -914,7 +978,13 @@ export function LancamentosRelatoriosModule() {
                   </tr>
                </thead>
                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {kits.map(kit => (
+                  {displayedKits.length === 0 ? (
+                    <tr>
+                      <td colSpan={37} className="p-8 text-center text-gray-500 bg-white dark:bg-gray-800">
+                        Nenhum kit encontrado para o filtro selecionado ({tableFilterTab === 'correr' ? 'CORRER' : tableFilterTab === 'giro' ? 'Giro' : 'Todos'}).
+                      </td>
+                    </tr>
+                  ) : displayedKits.map(kit => (
                      <tr key={kit.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800">
                         <td className="p-2 border-r border-gray-200 dark:border-gray-700 text-center">
                            <div className="flex justify-center space-x-2">

@@ -120,6 +120,7 @@ export function AutoReportsViewer({
   const content = useMemo(() => {
     switch (reportType) {
       case 'auto_portas': return renderAutoPortas(kits, responsavel, obra);
+      case 'auto_correr': return renderAutoCorrer(kits, responsavel, obra);
       case 'auto_aduelas': return renderAutoAduelas(kits, responsavel, obra);
       case 'auto_alizares': return renderAutoAlizares(kits); // Alizares may need it too if it takes it, but currently it doesn't.
       case 'auto_usinagem_portas': return renderUsinagem(kits, 'portas', responsavel, obra);
@@ -165,7 +166,10 @@ export function AutoReportsViewer({
           <div className="flex justify-between items-start mb-4">
             <div>
               <h1 className="text-3xl font-bold uppercase tracking-tight text-black">
-                Relatório de {reportType.replace("auto_", "").replace(/_/g, " ")}
+                {reportType === 'auto_correr' 
+                  ? 'Relatório de Portas de Correr (CORRER)' 
+                  : `Relatório de ${reportType.replace("auto_", "").replace(/_/g, " ")}`
+                }
               </h1>
               <p className="text-sm print:text-[16px] mt-1 text-black">
                 Documento Gerado Via Sistema - Nacional Madeiras
@@ -762,6 +766,202 @@ function renderAutoPortas(kits: any[], responsavel?: string, obra?: string) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function renderAutoCorrer(kits: any[], responsavel?: string, obra?: string) {
+  const correrKits = kits.filter(k => 
+    !!k.correr || 
+    String(k.abertura || '').toUpperCase().includes('CORRER') ||
+    String(k.tipologia || '').toUpperCase().includes('CORRER')
+  );
+
+  if (correrKits.length === 0) {
+    return (
+      <div className="text-center p-8 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 shadow-sm print:border-none print:shadow-none">
+        <div className="text-base font-bold text-gray-800 dark:text-gray-100 mb-1 uppercase tracking-tight">
+          Nenhuma porta de correr cadastrada
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+          Marque a coluna <strong>CORRER</strong> na planilha de lançamentos ou defina a abertura como <strong>CORRER</strong> para gerar este relatório automaticamente.
+        </p>
+      </div>
+    );
+  }
+
+  // Agrupar por Característica da Porta (SOLIDA, SARRAFEADA, HONEY, etc.)
+  const grouped = new Map<string, Array<{
+    dimensao: string;
+    acabamento: string;
+    tipologia: string;
+    comodos: string[];
+    aduelaInfo: string;
+    fechaduraInfo: string;
+    extrasStr: string;
+    qtdTotal: number;
+  }>>();
+
+  let totalGeralCorrer = 0;
+
+  correrKits.forEach(k => {
+    const fLargura = k.folhaLargura;
+    const fAltura = k.folhaAltura;
+    if (!fLargura || !fAltura || fLargura === '-' || fAltura === '-') return;
+
+    const fQtd = parseInt(k.qtdeFolhasPorKit || '1', 10) || 1;
+    const isMultiFolhas = fQtd > 1;
+    let dimensao = `${fLargura}x${fAltura}`;
+    if (isMultiFolhas && String(fLargura).match(/^\d+$/)) {
+      const divisor = parseInt(fLargura, 10) / fQtd;
+      dimensao = `${fLargura}x${fAltura} (${fQtd}x ${divisor}x${fAltura})`;
+    } else if (isMultiFolhas) {
+      dimensao = `${fLargura}x${fAltura} (${fQtd} folhas)`;
+    }
+
+    const caracteristica = (k.caracteristicaPorta || k.modelo || 'HONEY').toUpperCase();
+    const acabamento = (k.acabamentoPorta || '-').toUpperCase();
+    const tipologia = (k.tipologia || '-').toUpperCase();
+    const comodo = (k.comodo || '').toUpperCase();
+
+    const aduelaDim = k.aduelaLargura && k.aduelaAltura ? `${k.aduelaLargura}x${k.aduelaAltura}` : (k.aduelaLargura || '');
+    const aduelaAcab = k.acabamentoAduela ? ` - ${k.acabamentoAduela}` : '';
+    const aduelaReg = k.regulagem ? ` (${k.regulagem})` : '';
+    const aduelaInfo = aduelaDim ? `${aduelaDim}${aduelaReg}${aduelaAcab}` : '-';
+
+    const fech = [k.fechaduraTipo, k.fechaduraMarca, k.fechaduraGrid && `GRID ${k.fechaduraGrid}`].filter(Boolean).join(' / ') || '-';
+
+    const extras = [];
+    if (k.bitsQtde && k.bitsQtde !== '-' && k.bitsQtde !== '0') extras.push(`${k.bitsQtde} bits`);
+    if (k.veneziana) extras.push('Veneziana');
+    if (k.grelha) extras.push('Grelha');
+    if (k.bandeira) extras.push('Bandeira');
+    if (k.pivotante) extras.push('Pivotante');
+    if (k.fechaFresta) extras.push('Fecha Fresta');
+    if (k.vidro) extras.push('Vidro');
+    if (k.chapa) extras.push('Chapa');
+    if (k.camarao) extras.push('Camarão');
+    const extrasStr = extras.length > 0 ? extras.join(', ') : '';
+
+    let kitCount = 1;
+    if ((k as any).quantidade) kitCount = parseInt((k as any).quantidade, 10) || 1;
+    if ((k as any).qtde) kitCount = parseInt((k as any).qtde, 10) || 1;
+    totalGeralCorrer += kitCount;
+
+    if (!grouped.has(caracteristica)) {
+      grouped.set(caracteristica, []);
+    }
+
+    const items = grouped.get(caracteristica)!;
+    const existing = items.find(i => 
+      i.dimensao === dimensao &&
+      i.acabamento === acabamento &&
+      i.tipologia === tipologia &&
+      i.aduelaInfo === aduelaInfo &&
+      i.fechaduraInfo === fech &&
+      i.extrasStr === extrasStr
+    );
+
+    if (existing) {
+      existing.qtdTotal += kitCount;
+      if (comodo && !existing.comodos.includes(comodo)) existing.comodos.push(comodo);
+    } else {
+      items.push({
+        dimensao,
+        acabamento,
+        tipologia,
+        comodos: comodo ? [comodo] : [],
+        aduelaInfo,
+        fechaduraInfo: fech,
+        extrasStr,
+        qtdTotal: kitCount
+      });
+    }
+  });
+
+  return (
+    <div className="block">
+      <div className="mb-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 p-3 rounded-lg flex items-center justify-between print:hidden">
+        <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-100 font-bold text-sm">
+          <span>Relatório de Portas de Correr (CORRER)</span>
+        </div>
+        <span className="text-xs bg-emerald-700 text-white font-bold px-2.5 py-1 rounded-full shadow-xs">
+          Total: {totalGeralCorrer} {totalGeralCorrer === 1 ? 'kit de correr' : 'kits de correr'}
+        </span>
+      </div>
+
+      {Array.from(grouped.entries()).map(([caracteristica, items], idx) => {
+        const subtotalGrupo = items.reduce((acc, curr) => acc + curr.qtdTotal, 0);
+        return (
+          <div key={idx} className="rounded border border-gray-300 dark:border-gray-800 print:border-transparent overflow-hidden shadow-sm print:shadow-none break-inside-avoid bg-white dark:bg-[#0f172a] print:bg-white mb-6 print:mb-6" style={{ pageBreakInside: 'avoid' }}>
+            <div className="bg-gray-100 dark:bg-slate-800 border-b border-gray-300 dark:border-slate-700 py-1.5 px-4 flex justify-between items-center font-bold text-sm uppercase print:bg-transparent print:border-transparent print:text-black">
+              <span><EditableText>{caracteristica}</EditableText> (PORTAS DE CORRER)</span>
+              <span className="text-xs text-gray-600 dark:text-gray-300 print:text-black font-semibold">Subtotal: {subtotalGrupo} kits</span>
+            </div>
+            <div className="print:mt-2">
+              <table className="min-w-full divide-y divide-gray-300 dark:divide-slate-800 print:divide-black text-[11px] sm:text-[13px] print:text-[14px] print:border-y print:border-black" style={{ pageBreakInside: 'avoid' }}>
+                <thead className="bg-[#f8fafc] dark:bg-[#0f172a] print:bg-transparent">
+                  <tr>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[15%]">
+                      Medida Folha
+                    </th>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[18%]">
+                      Acabamento / Extras
+                    </th>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[15%]">
+                      Tipologia / Cômodo
+                    </th>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[22%]">
+                      Aduela / Guia
+                    </th>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[18%]">
+                      Fechadura / Puxador
+                    </th>
+                    <th className="px-3 py-2.5 text-center font-bold uppercase whitespace-nowrap border-x border-gray-300 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-emerald-400 print:text-black w-[12%]">
+                      Qtd Kits
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-slate-800 print:divide-black">
+                  {items.map((k, idx2) => (
+                    <tr key={idx2} className="bg-white dark:bg-[#151f32] print:bg-transparent hover:bg-gray-50 print:hover:bg-transparent">
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-bold">
+                        <EditableText>{k.dimensao}</EditableText>
+                      </td>
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-semibold">
+                        <EditableText>
+                          {k.extrasStr ? `${k.acabamento} (${k.extrasStr})` : k.acabamento}
+                        </EditableText>
+                      </td>
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-gray-200 print:text-black font-medium">
+                        <EditableText>
+                          {k.tipologia}{k.comodos.length > 0 ? ` (${k.comodos.join(', ')})` : ''}
+                        </EditableText>
+                      </td>
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-gray-200 print:text-black">
+                        <EditableText>{k.aduelaInfo}</EditableText>
+                      </td>
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-800 dark:text-gray-200 print:text-black">
+                        <EditableText>{k.fechaduraInfo}</EditableText>
+                      </td>
+                      <td className="px-3 py-2.5 text-center border-x border-gray-200 dark:border-slate-800 print:border-transparent text-gray-900 dark:text-white print:text-black font-black text-sm">
+                        <EditableText>{k.qtdTotal}</EditableText>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="p-3 bg-gray-50 dark:bg-slate-800 border-2 border-black print:border-black rounded-lg flex items-center justify-between text-black font-black text-base print:text-lg">
+        <span className="uppercase">TOTAL GERAL - PORTAS DE CORRER:</span>
+        <span className="bg-black text-white print:bg-transparent print:text-black px-3 py-1 rounded">
+          {totalGeralCorrer} KITS
+        </span>
+      </div>
     </div>
   );
 }
