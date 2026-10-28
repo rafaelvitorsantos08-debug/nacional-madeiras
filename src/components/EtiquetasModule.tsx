@@ -685,7 +685,7 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-bold text-gray-700 uppercase">Pré-visualização da Etiqueta</span>
-                    <span className="text-[9.5px] text-green-700 font-bold bg-green-50 px-1.5 py-0.5 rounded border border-green-200">Cabeçalho -5%</span>
+                    <span className="text-[9.5px] text-gray-800 font-bold bg-gray-100 px-1.5 py-0.5 rounded border border-gray-300">P&B • 100% Monocromático</span>
                   </div>
                   <div className="flex items-center gap-1 text-gray-500 text-xs font-medium">
                     <span>{showPreview ? 'Recolher' : 'Expandir'}</span>
@@ -828,8 +828,8 @@ export function EtiquetasModule({ globalSearch = '' }: { globalSearch?: string }
             </div>
             
             {/* Aviso de Impressão */}
-            <div className="bg-yellow-50 text-yellow-800 text-[11px] leading-tight p-2.5 rounded-md border border-yellow-200">
-              <strong>Dica de impressão:</strong> Na tela do navegador, defina <strong>Margens: Nenhuma</strong> (ou 0), <strong>Escala: 100%</strong> e desmarque Cabeçalhos e Rodapés.
+            <div className="bg-gray-100 text-gray-800 text-[11px] leading-tight p-2.5 rounded-md border border-gray-300">
+              <strong>Economia de Tinta (Preto e Branco):</strong> Etiquetas configuradas em <strong>100% Preto e Branco</strong> para não gastar tinta colorida. Na impressora, selecione <strong>Margens: Nenhuma</strong> (ou 0), <strong>Escala: 100%</strong>.
             </div>
 
           </div>
@@ -1097,7 +1097,7 @@ function LabelInnerContent({
       <div className="w-full h-full p-1.5 flex flex-col justify-center text-black" style={{ color: '#000000' }}>
         <div className="flex justify-between items-start border-b-[1.5px] border-black pb-0.5 mb-0.5">
           <div className="flex flex-col flex-1 truncate pr-1">
-            <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '10.45px', fontWeight: 900, color: '#15803d' }}>
+            <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '10.45px', fontWeight: 900, color: '#000000' }}>
               Nacional Madeiras
             </div>
             <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '8.55px', fontWeight: 900, color: '#000000' }}>
@@ -1114,20 +1114,12 @@ function LabelInnerContent({
             <div className="mt-0.5 truncate uppercase" style={{ fontSize: '9.0px', fontWeight: 900, color: '#000000' }}>{kit.abertura}</div>
           </div>
           <div className="flex-shrink-0 pt-0.5 flex flex-col items-center">
-            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={24} level="M" includeMargin={false} />
+            <QRCodeSVG value="https://www.instagram.com/nacionalmadeirasltda/" size={24} level="M" fgColor="#000000" bgColor="#ffffff" includeMargin={false} />
             <div className="flex items-center gap-0.5 mt-0.5">
               <svg width="6" height="6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial_small)" />
-                <path d="M12 6.8c-2.87 0-5.2 2.33-5.2 5.2s2.33 5.2 5.2 5.2 5.2-2.33 5.2-5.2-2.33-5.2-5.2-5.2zm0 8.5c-1.82 0-3.3-1.48-3.3-3.3s1.48-3.3 3.3-3.3 3.3 1.48 3.3 3.3-1.48 3.3-3.3 3.3zm5.3-7.55c-.52 0-.95-.43-.95-.95s.43-.95.95-.95.95.43.95.95-.43.95-.95.95z" fill="#fff" />
-                <defs>
-                  <radialGradient id="paint0_radial_small" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0 24 -24 0 12 12)">
-                    <stop stopColor="#F58529" />
-                    <stop offset="0.25" stopColor="#FEDA77" />
-                    <stop offset="0.5" stopColor="#DD2A7B" />
-                    <stop offset="0.75" stopColor="#8134AF" />
-                    <stop offset="1" stopColor="#515BD4" />
-                  </radialGradient>
-                </defs>
+                <rect x="2" y="2" width="20" height="20" rx="5.5" fill="#000000" />
+                <path d="M12 7.2a4.8 4.8 0 100 9.6 4.8 4.8 0 000-9.6zm0 7.8a3 3 0 110-6 3 3 0 010 6z" fill="#ffffff" />
+                <circle cx="17.2" cy="6.8" r="1.1" fill="#ffffff" />
               </svg>
               <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '4.25px', fontWeight: 900, color: '#000000' }}>Visite nossa página no Instagram</span>
             </div>
@@ -1157,7 +1149,7 @@ function LabelInnerContent({
     >
       <div className="flex justify-between items-start border-b border-black pb-0.5 mb-0.5 shrink-0">
         <div className="flex flex-col flex-1 pl-0.5">
-          <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '13px', fontWeight: 900, color: '#15803d' }}>
+          <div className="uppercase leading-tight tracking-tight" style={{ fontSize: '13px', fontWeight: 900, color: '#000000' }}>
             Nacional Madeiras
           </div>
           <div className="uppercase leading-tight mb-0.5 tracking-tight" style={{ fontSize: '10.5px', fontWeight: 900, color: '#000000' }}>
@@ -1180,21 +1172,15 @@ function LabelInnerContent({
             value="https://www.instagram.com/nacionalmadeirasltda/" 
             size={33} 
             level="M" 
+            fgColor="#000000"
+            bgColor="#ffffff"
             includeMargin={false}
           />
           <div className="flex items-center gap-0.5 mt-0.5">
             <svg width="7" height="7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7.75 2h8.5c3.175 0 5.75 2.575 5.75 5.75v8.5c0 3.175-2.575 5.75-5.75 5.75h-8.5C4.575 22 2 19.425 2 16.25v-8.5C2 4.575 4.575 2 7.75 2z" fill="url(#paint0_radial)" />
-              <path d="M12 6.8c-2.87 0-5.2 2.33-5.2 5.2s2.33 5.2 5.2 5.2 5.2-2.33 5.2-5.2-2.33-5.2-5.2-5.2zm0 8.5c-1.82 0-3.3-1.48-3.3-3.3s1.48-3.3 3.3-3.3 3.3 1.48 3.3 3.3-1.48 3.3-3.3 3.3zm5.3-7.55c-.52 0-.95-.43-.95-.95s.43-.95.95-.95.95.43.95.95-.43.95-.95.95z" fill="#fff" />
-              <defs>
-                <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0 24 -24 0 12 12)">
-                  <stop stopColor="#F58529" />
-                  <stop offset="0.25" stopColor="#FEDA77" />
-                  <stop offset="0.5" stopColor="#DD2A7B" />
-                  <stop offset="0.75" stopColor="#8134AF" />
-                  <stop offset="1" stopColor="#515BD4" />
-                </radialGradient>
-              </defs>
+              <rect x="2" y="2" width="20" height="20" rx="5.5" fill="#000000" />
+              <path d="M12 7.2a4.8 4.8 0 100 9.6 4.8 4.8 0 000-9.6zm0 7.8a3 3 0 110-6 3 3 0 010 6z" fill="#ffffff" />
+              <circle cx="17.2" cy="6.8" r="1.1" fill="#ffffff" />
             </svg>
             <span className="uppercase whitespace-nowrap tracking-tighter" style={{ fontSize: '5px', fontWeight: 900, color: '#000000' }}>Visite nosso Instagram</span>
           </div>
