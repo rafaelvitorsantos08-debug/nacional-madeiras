@@ -6,7 +6,7 @@ import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_POR
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
   const [selectedObraId, setSelectedObraId] = useLocalStorage<string>('nm_selected_obra_id', '');
-  const [activeTab, setActiveTab] = useLocalStorage<'folhas' | 'aduelas' | 'alizares'>('nm_active_tab_obras', 'folhas');
+  const [activeTab, setActiveTab] = useLocalStorage<'folhas' | 'aduelas' | 'alizares' | 'correr'>('nm_active_tab_obras', 'folhas');
 
   // Migration from v4 to v6
   useEffect(() => {
@@ -68,9 +68,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
             cargasSaidaAduelas: [{ id: 'cs_ad_1', nome: '1ª Saída', data: today }],
             cargasEntradaAlizares: [{ id: 'ce_al_1', nome: '1ª Carga', data: today }],
             cargasSaidaAlizares: [{ id: 'cs_al_1', nome: '1ª Saída', data: today }],
+            cargasEntradaCorrer: [{ id: 'ce_c_1', nome: '1ª Carga', data: today }],
+            cargasSaidaCorrer: [{ id: 'cs_c_1', nome: '1ª Saída', data: today }],
             itensFolhas,
             itensAduelas,
-            itensAlizares
+            itensAlizares,
+            itensCorrer: []
           };
         }
         setObrasV6(migrated);
@@ -85,7 +88,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
        if (!globalSearch) return true;
        const searchLower = globalSearch.trim().toLowerCase();
        const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
-       const inItens = ['itensFolhas', 'itensAduelas', 'itensAlizares'].some(k => 
+       const inItens = ['itensFolhas', 'itensAduelas', 'itensAlizares', 'itensCorrer'].some(k => 
          (obra[k] || []).some((i: any) => 
            (i.dimensao || '').toLowerCase().includes(searchLower) ||
            (i.cor || '').toLowerCase().includes(searchLower) ||
@@ -123,13 +126,35 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
          cargasSaidaAduelas: [{ id: 'cs_ad_1', nome: '1ª Saída', data: today }],
          cargasEntradaAlizares: [{ id: 'ce_al_1', nome: '1ª Carga', data: today }],
          cargasSaidaAlizares: [{ id: 'cs_al_1', nome: '1ª Saída', data: today }],
+         cargasEntradaCorrer: [{ id: 'ce_c_1', nome: '1ª Carga', data: today }],
+         cargasSaidaCorrer: [{ id: 'cs_c_1', nome: '1ª Saída', data: today }],
          itensFolhas: [{ id: 'f_'+Date.now(), dimensao: '', cor: '', enchimento: '', modelo: '', entradas: {}, saidas: {} }],
          itensAduelas: [{ id: 'ad_'+Date.now(), medidaAduela: '', cor: '', entradas: {}, saidas: {} }],
-         itensAlizares: [{ id: 'al_'+Date.now(), medidaAlizar: '', cor: '', entradas: {}, saidas: {} }]
+         itensAlizares: [{ id: 'al_'+Date.now(), medidaAlizar: '', cor: '', entradas: {}, saidas: {} }],
+         itensCorrer: [{ id: 'c_'+Date.now(), dimensao: '', cor: '', enchimento: '', modelo: '', entradas: {}, saidas: {} }]
       }
     }));
     setSelectedObraId(id);
   };
+
+  useEffect(() => {
+    if (activeObra && !activeObra.cargasEntradaCorrer) {
+      const today = new Date().toISOString().split('T')[0];
+      setObrasV6(prev => {
+        const o = prev[activeObra.id];
+        if (!o || o.cargasEntradaCorrer) return prev;
+        return {
+          ...prev,
+          [activeObra.id]: {
+            ...o,
+            cargasEntradaCorrer: [{ id: `ce_c_1`, nome: '1ª Carga', data: today }],
+            cargasSaidaCorrer: [{ id: `cs_c_1`, nome: '1ª Saída', data: today }],
+            itensCorrer: o.itensCorrer || []
+          }
+        };
+      });
+    }
+  }, [activeObra?.id]);
 
   const deletarObra = (id: string) => {
     if(!window.confirm('Tem certeza que deseja excluir esta obra?')) return;
@@ -150,7 +175,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     });
   };
 
-  const adicionarColuna = (tipo: 'Entrada' | 'Saida', aba: 'Folhas' | 'Aduelas' | 'Alizares') => {
+  const adicionarColuna = (tipo: 'Entrada' | 'Saida', aba: 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr') => {
     const today = new Date().toISOString().split('T')[0];
     const targetField = `cargas${tipo}${aba}`;
     
@@ -166,7 +191,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     });
   };
 
-  const removerColuna = (tipo: 'Entrada' | 'Saida', aba: 'Folhas' | 'Aduelas' | 'Alizares', cargaId: string) => {
+  const removerColuna = (tipo: 'Entrada' | 'Saida', aba: 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr', cargaId: string) => {
     if(!window.confirm('Excluir esta coluna e todos os seus dados?')) return;
     
     const targetField = `cargas${tipo}${aba}`;
@@ -244,12 +269,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   };
 
   const adicionarLinha = () => {
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
     
     updateObra(obra => {
       let newItem: any = { id: Date.now().toString(), entradas: {}, saidas: {} };
-      if (activeTab === 'folhas') {
+      if (activeTab === 'folhas' || activeTab === 'correr') {
         newItem = { ...newItem, dimensao: '', cor: '', enchimento: '', modelo: '' };
       } else if (activeTab === 'aduelas') {
         newItem = { ...newItem, medidaAduela: '', cor: '' };
@@ -266,7 +291,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
   const deletarLinha = (itemId: string) => {
     if(!window.confirm('Excluir esta linha?')) return;
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
     
     updateObra(obra => ({
@@ -278,12 +303,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   const renderTable = () => {
     if (!activeObra) return null;
     
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1) as 'Folhas' | 'Aduelas' | 'Alizares';
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
     const currentItens = [...(activeObra[listField] || [])].sort((a, b) => {
       let valA = '';
       let valB = '';
-      if (activeTab === 'folhas') {
+      if (activeTab === 'folhas' || activeTab === 'correr') {
         valA = a.dimensao || '';
         valB = b.dimensao || '';
       } else if (activeTab === 'aduelas') {
@@ -306,11 +331,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
       return valA.localeCompare(valB);
     });
     
-    const cargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`] || [];
-    const cargasSaida = activeObra[`cargasSaida${abaCapitalized}`] || [];
+    const today = new Date().toISOString().split('T')[0];
+    const cargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`] || (activeTab === 'correr' ? [{ id: 'ce_c_1', nome: '1ª Carga', data: today }] : []);
+    const cargasSaida = activeObra[`cargasSaida${abaCapitalized}`] || (activeTab === 'correr' ? [{ id: 'cs_c_1', nome: '1ª Saída', data: today }] : []);
     
     let specHeaders = [];
-    if (activeTab === 'folhas') specHeaders = ['DIMENSÃO', 'COR', 'ENCHIMENTO', 'MODELO'];
+    if (activeTab === 'folhas' || activeTab === 'correr') specHeaders = ['DIMENSÃO', 'COR', 'ENCHIMENTO', 'MODELO'];
     else if (activeTab === 'aduelas') specHeaders = ['MEDIDA ADUELA', 'COR'];
     else specHeaders = ['FACE/MEDIDA ALIZAR', 'COR'];
 
@@ -337,7 +363,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                   rowSpan={2} 
                   className={cn(
                     "sticky left-0 top-0 z-30 p-2.5 border-r border-b border-gray-300 dark:border-gray-700 font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-xs shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] align-middle",
-                    activeTab === 'folhas' ? "w-[180px] min-w-[180px]" : "w-[240px] min-w-[240px]"
+                    (activeTab === 'folhas' || activeTab === 'correr') ? "w-[180px] min-w-[180px]" : "w-[240px] min-w-[240px]"
                   )}
                 >
                   <div className="flex flex-col items-center justify-center">
@@ -433,7 +459,7 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
 
                   return (
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group h-[48px]">
-                      {activeTab === 'folhas' && (
+                      {(activeTab === 'folhas' || activeTab === 'correr') && (
                         <>
                           <td className="p-0 border-r border-b border-gray-300 dark:border-gray-700 sticky left-0 z-10 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.12)] w-[180px] min-w-[180px]">
                             <input type="text" list="dimensoes_porta_list" value={item.dimensao || ''} onChange={e => handleChangeItemField(item.id, 'dimensao', e.target.value)} placeholder="Dimensão" className="w-full h-full min-h-[44px] p-2 text-center bg-transparent border-none outline-none focus:ring-2 focus:ring-inset focus:ring-brand-green font-bold text-gray-900 dark:text-gray-100 text-sm" />
@@ -621,24 +647,30 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
         {activeObra ? (
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Abas dos Materiais */}
-            <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex space-x-2 shrink-0">
+            <div className="px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex space-x-2 shrink-0 overflow-x-auto">
               <button 
                 onClick={() => setActiveTab('folhas')}
-                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors", activeTab === 'folhas' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
+                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer", activeTab === 'folhas' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
               >
                 Folhas de Porta
               </button>
               <button 
                 onClick={() => setActiveTab('aduelas')}
-                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors", activeTab === 'aduelas' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
+                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer", activeTab === 'aduelas' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
               >
                 Aduelas
               </button>
               <button 
                 onClick={() => setActiveTab('alizares')}
-                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors", activeTab === 'alizares' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
+                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer", activeTab === 'alizares' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
               >
                 Alizares
+              </button>
+              <button 
+                onClick={() => setActiveTab('correr')}
+                className={cn("px-5 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer", activeTab === 'correr' ? "bg-brand-green text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700")}
+              >
+                Correr
               </button>
             </div>
             
