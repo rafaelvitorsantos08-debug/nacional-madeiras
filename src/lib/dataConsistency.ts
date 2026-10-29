@@ -240,12 +240,23 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
       return merged;
     }
 
-    // Default shallow/deep object merge
+    if (incomingIsAuthoritative) {
+      // Cloud/server truth is authoritative: preserve incomingVal, only preserving local keys if completely absent in incoming
+      const mergedObj: Record<string, any> = { ...incomingVal };
+      for (const [k, v] of Object.entries(localVal)) {
+        if (mergedObj[k] === undefined && v !== undefined && v !== null) {
+          mergedObj[k] = v;
+        }
+      }
+      return mergedObj;
+    }
+
+    // Default shallow/deep object merge (for local vault backups)
     const mergedObj: Record<string, any> = { ...incomingVal };
     for (const [k, v] of Object.entries(localVal)) {
       if (v !== undefined && v !== null) {
         if (typeof v === 'object' && mergedObj[k] && typeof mergedObj[k] === 'object') {
-          mergedObj[k] = mergeDataSafely(k, v, mergedObj[k]);
+          mergedObj[k] = mergeDataSafely(k, v, mergedObj[k], false);
         } else {
           mergedObj[k] = v;
         }
@@ -254,7 +265,10 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
     return mergedObj;
   }
 
-  // Primitive: prefer local if defined
+  // Primitive
+  if (incomingIsAuthoritative) {
+    return incomingVal !== undefined ? incomingVal : localVal;
+  }
   return localVal !== undefined && localVal !== '' ? localVal : incomingVal;
 }
 

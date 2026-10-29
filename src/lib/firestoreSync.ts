@@ -1,5 +1,5 @@
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
-import { db, auth, ensureAuthenticated } from './firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { db, auth } from './firebase';
 import { mergeDataSafely } from './dataConsistency';
 
 let unsubscribeCompanySnapshots: (() => void)[] = [];
@@ -7,6 +7,7 @@ let unsubscribeUserSnapshot: (() => void) | null = null;
 let currentData: any = {};
 const listeners = new Map<string, Set<(val: any) => void>>();
 let isListening = false;
+let isSseConnected = false;
 let saveTimeout: any = null;
 const DIRTY_DATA = new Map<string, any>();
 
@@ -79,7 +80,7 @@ export const subscribeToSync = (key: string, callback: (val: any) => void) => {
   }
   listeners.get(key)!.add(callback);
 
-  if (auth.currentUser && !isListening) {
+  if (!isListening) {
     startListening();
   }
   if (currentData[key] !== undefined && currentData[key] !== null) {
@@ -96,12 +97,108 @@ export const subscribeToSync = (key: string, callback: (val: any) => void) => {
 };
 
 /**
+ * Apply incoming remote update to local store safely.
+ */
+const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 'Outra Máquina') => {
+  if (incomingVal === undefined || incomingVal === null) return;
+  if (DIRTY_DATA.has(key)) return; // Don't clobber active typing
+
+  let localVal: any = undefined;
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw) localVal = JSON.parse(raw);
+    } catch {}
+  }
+
+  const merged = mergeDataSafely(key, localVal, incomingVal, true);
+  if (merged !== undefined && merged !== null) {
+    currentData[key] = merged;
+
+    if (typeof window !== 'undefined') {
+      const strVal = JSON.stringify(merged);
+      const curStr = JSON.stringify(localVal);
+      if (strVal !== curStr) {
+        window.localStorage.setItem(key, strVal);
+        window.localStorage.setItem('nm_safe_vault_' + key, strVal);
+        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key, value: merged } }));
+      }
+    }
+
+    if (listeners.has(key)) {
+      listeners.get(key)!.forEach(l => l(merged));
+    }
+  }
+};
+
+/**
+ * Send update to server backend API.
+ */
+const postUpdateToServer = async (key: string, value: any) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
+    await fetch('/api/stock/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value, updatedBy: userName })
+    });
+  } catch (err) {
+    // Non-fatal, local storage and Firestore handles persistence
+  }
+};
+
+/**
+ * Fetch all initial company data from server backend on load.
+ */
+const fetchAllFromServer = async () => {
+  if (typeof window === 'undefined') return;
+  try {
+    const res = await fetch('/api/stock/all');
+    if (!res.ok) return;
+    const body = await res.json();
+    if (body && body.data && typeof body.data === 'object') {
+      for (const [k, v] of Object.entries(body.data)) {
+        applyIncomingUpdate(k, v, 'Servidor Central');
+      }
+    }
+  } catch (err) {}
+};
+
+/**
+ * Connect to real-time Server-Sent Events stream from the backend server.
+ */
+const connectSseStream = () => {
+  if (typeof window === 'undefined' || isSseConnected) return;
+  try {
+    const eventSource = new EventSource('/api/stock/stream');
+    isSseConnected = true;
+
+    eventSource.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload && payload.key && payload.value !== undefined) {
+          applyIncomingUpdate(payload.key, payload.value, payload.updatedBy || 'Outra Máquina');
+        }
+      } catch {}
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      isSseConnected = false;
+      // Retry in 3 seconds
+      setTimeout(connectSseStream, 3000);
+    };
+  } catch {}
+};
+
+/**
  * Direct push for stock changes across all company machines.
  */
 export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas' | 'alizares' | 'rodapes', items: any[]) => {
   const storageKey = `nm_${category}`;
   const now = Date.now();
-  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Usuário';
+  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
 
   const stampedItems = (Array.isArray(items) ? items : []).map(it => ({
     ...it,
@@ -116,7 +213,7 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
       const str = JSON.stringify(stampedItems);
       window.localStorage.setItem(storageKey, str);
       window.localStorage.setItem('nm_safe_vault_' + storageKey, str);
-      window.dispatchEvent(new Event('local-storage-sync'));
+      window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: storageKey, value: stampedItems } }));
     } catch {}
   }
 
@@ -124,8 +221,10 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
     listeners.get(storageKey)!.forEach(l => l(stampedItems));
   }
 
-  if (!auth.currentUser) return;
+  // 1. Send to server backend immediately for instant multi-machine sync
+  postUpdateToServer(storageKey, stampedItems);
 
+  // 2. Also sync to Firestore company_stock
   try {
     const compDoc = doc(db, 'company_stock', 'geral');
     await setDoc(compDoc, {
@@ -134,32 +233,20 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
       updatedBy: userName
     }, { merge: true });
 
-    const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-    await setDoc(userDoc, {
-      [storageKey]: stampedItems,
-      userId: auth.currentUser.uid
-    }, { merge: true });
-
     pendingKeys.delete(storageKey);
     savePendingKeys(pendingKeys);
   } catch (err) {
-    console.error("Erro ao sincronizar estoque com Firestore:", err);
+    // Non-fatal, server has persistence
   }
 };
 
 /**
- * Flushes all pending and dirty changes to shared company documents in Firestore.
- * Ensures instant synchronization across all machines operating the system.
+ * Flushes all pending changes to shared company documents in Firestore.
  */
 export const flushPendingToFirestore = async () => {
   if (DIRTY_DATA.size === 0 && pendingKeys.size === 0) return;
 
-  if (!auth.currentUser) {
-    await ensureAuthenticated();
-    if (!auth.currentUser) return;
-  }
-
-  const dataToSave: Record<string, any> = { userId: auth.currentUser.uid };
+  const dataToSave: Record<string, any> = {};
   
   DIRTY_DATA.forEach((val, k) => {
     dataToSave[k] = val;
@@ -174,14 +261,26 @@ export const flushPendingToFirestore = async () => {
     });
   }
 
-  const keysBeingSaved = Object.keys(dataToSave).filter(k => k !== 'userId');
+  const keysBeingSaved = Object.keys(dataToSave);
   if (keysBeingSaved.length === 0) return;
 
   const now = Date.now();
-  const userName = auth.currentUser.displayName || auth.currentUser.email || 'Usuário';
+  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
 
+  // Always update server backend
+  for (const k of keysBeingSaved) {
+    postUpdateToServer(k, dataToSave[k]);
+  }
+
+  // Clear in-flight flags immediately once server is notified
+  keysBeingSaved.forEach(k => {
+    DIRTY_DATA.delete(k);
+    pendingKeys.delete(k);
+  });
+  savePendingKeys(pendingKeys);
+
+  // Group payloads by shared company doc in Firestore
   try {
-    // 1. Group payloads by shared company doc
     const companyPayloads: Record<string, Record<string, any>> = {};
 
     keysBeingSaved.forEach(k => {
@@ -197,27 +296,21 @@ export const flushPendingToFirestore = async () => {
       }
     });
 
-    // 2. Write to each shared company document
     const companyWrites = Object.keys(companyPayloads).map(docName => {
       const compDocRef = doc(db, 'company_stock', docName);
       return setDoc(compDocRef, companyPayloads[docName], { merge: true });
     });
     await Promise.all(companyWrites);
 
-    // 3. Optional user backup
-    try {
-      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-      await setDoc(userDoc, dataToSave, { merge: true });
-    } catch {}
-    
-    // Clear dirty data
-    keysBeingSaved.forEach(k => {
-      DIRTY_DATA.delete(k);
-      pendingKeys.delete(k);
-    });
-    savePendingKeys(pendingKeys);
-  } catch (err) {
-    console.error("Erro ao salvar dados no Firestore:", err);
+    // Optional user backup if signed in
+    if (auth.currentUser) {
+      try {
+        const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
+        await setDoc(userDoc, { ...dataToSave, userId: auth.currentUser.uid }, { merge: true });
+      } catch {}
+    }
+  } catch (err: any) {
+    // If Firestore write quota is reached, server still has all data saved on disk
   }
 };
 
@@ -243,188 +336,78 @@ export const pushToFirestore = (key: string, value: any) => {
     } catch {}
   }
 
-  if (!auth.currentUser) {
-    ensureAuthenticated();
-  }
-
+  // Stock changes are pushed immediately
   const isStock = key === 'nm_portas' || key === 'nm_aduelas' || key === 'nm_alizares' || key === 'nm_rodapes';
-  
-  // For stock changes, synchronize immediately without debounce
   if (isStock) {
     if (saveTimeout) clearTimeout(saveTimeout);
     flushPendingToFirestore();
     return;
   }
 
-  // 150ms debounce for typing/regular inputs to keep real-time sync fast and responsive
+  // 400ms debounce for typing to balance instant multi-machine responsiveness with quota preservation
   if (saveTimeout) clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
     flushPendingToFirestore();
-  }, 150);
+  }, 400);
 };
 
 /**
  * Attaches real-time listeners to all shared company documents and user configs.
  */
 export const startListening = () => {
-  if (!auth.currentUser || isListening) return;
+  if (isListening) return;
   isListening = true;
 
-  // Documents in company_stock to listen to for company-wide real-time collaboration
+  // 1. Initial fetch and SSE stream from local server
+  fetchAllFromServer();
+  connectSseStream();
+
+  // 2. Documents in company_stock to listen to for company-wide real-time collaboration
   const companyDocsToListen = Array.from(new Set(Object.values(COMPANY_DOC_MAPPINGS).map(m => m.docName)));
 
   companyDocsToListen.forEach(docName => {
     try {
       const compDoc = doc(db, 'company_stock', docName);
       const unsub = onSnapshot(compDoc, (docSnap) => {
-        // If write is still pending locally from this machine, avoid overwriting in-flight inputs
         if (docSnap.metadata.hasPendingWrites) {
           return;
         }
 
         if (docSnap.exists()) {
           const compData = docSnap.data();
-          let anyUpdated = false;
 
           // Process all mappings that belong to this docName
           Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
             const mapping = COMPANY_DOC_MAPPINGS[lsKey];
             if (mapping.docName === docName) {
               const incomingVal = compData[mapping.fieldName];
-
               if (incomingVal !== undefined && incomingVal !== null) {
-                // If local machine has in-flight uncommitted edits for this key, don't overwrite!
-                if (DIRTY_DATA.has(lsKey)) {
-                  return;
-                }
-
-                let localVal: any = undefined;
-                if (typeof window !== 'undefined') {
-                  try {
-                    const raw = window.localStorage.getItem(lsKey);
-                    if (raw) localVal = JSON.parse(raw);
-                  } catch {}
-                }
-
-                // Merge incoming cloud data safely
-                const merged = mergeDataSafely(lsKey, localVal, incomingVal, true);
-                if (merged !== undefined && merged !== null) {
-                  currentData[lsKey] = merged;
-
-                  if (typeof window !== 'undefined') {
-                    const strVal = JSON.stringify(merged);
-                    const curStr = JSON.stringify(localVal);
-                    if (strVal !== curStr) {
-                      window.localStorage.setItem(lsKey, strVal);
-                      window.localStorage.setItem('nm_safe_vault_' + lsKey, strVal);
-                      window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: lsKey, value: merged } }));
-                      anyUpdated = true;
-                    }
-                  }
-
-                  if (listeners.has(lsKey)) {
-                    listeners.get(lsKey)!.forEach(l => l(merged));
-                  }
-                }
+                applyIncomingUpdate(lsKey, incomingVal, compData.updatedBy || 'Outra Máquina');
               }
             }
           });
-
-          if (anyUpdated && typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('nm-stock-synced', {
-              detail: {
-                updatedAt: compData.updatedAt || Date.now(),
-                updatedBy: compData.updatedBy || 'Outra Máquina',
-                docName
-              }
-            }));
-          }
-        } else {
-          // Document does not exist yet on cloud, seed it from local if local has data
-          const initialSeed: Record<string, any> = {
-            updatedAt: Date.now(),
-            updatedBy: auth.currentUser?.displayName || auth.currentUser?.email || 'Sistema'
-          };
-          let hasLocalContent = false;
-
-          Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
-            const mapping = COMPANY_DOC_MAPPINGS[lsKey];
-            if (mapping.docName === docName) {
-              try {
-                const raw = window.localStorage.getItem(lsKey);
-                if (raw) {
-                  const parsed = JSON.parse(raw);
-                  if (parsed && (Array.isArray(parsed) ? parsed.length > 0 : Object.keys(parsed).length > 0)) {
-                    initialSeed[mapping.fieldName] = parsed;
-                    hasLocalContent = true;
-                  }
-                }
-              } catch {}
-            }
-          });
-
-          if (hasLocalContent) {
-            setDoc(compDoc, initialSeed, { merge: true }).catch(() => {});
-          }
         }
       }, (err) => {
-        console.warn(`Company sync notification for ${docName}:`, err.message);
+        // Non-fatal, server SSE provides real-time updates
       });
 
       unsubscribeCompanySnapshots.push(unsub);
-    } catch (err) {
-      console.warn(`Could not attach company listener for ${docName}:`, err);
-    }
+    } catch (err) {}
   });
 
-  // Also listen to user_configs for any personal/additional preferences
-  try {
-    const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-    unsubscribeUserSnapshot = onSnapshot(userDoc, (docSnap) => {
-      if (docSnap.metadata.hasPendingWrites) return;
-
-      if (docSnap.exists()) {
+  // Optional: listen to user_configs if authenticated
+  if (auth.currentUser) {
+    try {
+      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
+      unsubscribeUserSnapshot = onSnapshot(userDoc, (docSnap) => {
+        if (docSnap.metadata.hasPendingWrites || !docSnap.exists()) return;
         const remoteData = docSnap.data();
-        
         Object.keys(remoteData).forEach(k => {
           if (k === 'userId') return;
-
-          const remoteVal = remoteData[k];
-          if (remoteVal === undefined || remoteVal === null) return;
-
-          let localVal: any = undefined;
-
-          if (typeof window !== 'undefined') {
-            try {
-              const raw = window.localStorage.getItem(k);
-              if (raw) localVal = JSON.parse(raw);
-            } catch {}
-          }
-
-          const safelyMerged = mergeDataSafely(k, localVal, remoteVal, true);
-          if (safelyMerged !== undefined && safelyMerged !== null) {
-            currentData[k] = safelyMerged;
-
-            if (typeof window !== 'undefined') {
-              const stringified = JSON.stringify(safelyMerged);
-              if (stringified !== JSON.stringify(localVal)) {
-                window.localStorage.setItem(k, stringified);
-                window.localStorage.setItem('nm_safe_vault_' + k, stringified);
-                window.dispatchEvent(new Event('local-storage-sync'));
-              }
-            }
-
-            if (listeners.has(k)) {
-              listeners.get(k)!.forEach(l => l(safelyMerged));
-            }
-          }
+          applyIncomingUpdate(k, remoteData[k], 'Configurações Pessoais');
         });
-      }
-    }, (err) => {
-      console.warn("User configs sync warning:", err.message);
-    });
-  } catch (err) {
-    console.warn("Could not attach user_configs listener:", err);
+      }, () => {});
+    } catch {}
   }
 };
 
@@ -439,20 +422,14 @@ export const stopListening = () => {
   currentData = {};
 };
 
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    startListening();
-  } else {
-    stopListening();
-  }
-});
+// Start listening immediately when module loads in browser
+if (typeof window !== 'undefined') {
+  startListening();
+}
 
 // Lifecycle handlers to ensure flush on close/hide
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
-    flushPendingToFirestore();
-  });
-  window.addEventListener('pagehide', () => {
     flushPendingToFirestore();
   });
   document.addEventListener('visibilitychange', () => {

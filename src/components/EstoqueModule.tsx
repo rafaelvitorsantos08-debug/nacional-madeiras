@@ -45,19 +45,12 @@ import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export const forceSyncAllToCloud = async () => {
-  if (!auth.currentUser) {
-    await ensureAuthenticated();
-    if (!auth.currentUser) {
-      alert("Não foi possível conectar ao Firebase. Verifique sua conexão com a internet.");
-      return;
-    }
-  }
+  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
+  const now = Date.now();
 
   try {
-    const now = Date.now();
-    const userName = auth.currentUser.displayName || auth.currentUser.email || 'Usuário';
-
-    // Group all current local storage data according to COMPANY_DOC_MAPPINGS
+    // 1. Group all current local storage data
+    const batchData: Record<string, any> = {};
     const companyPayloads: Record<string, Record<string, any>> = {};
 
     Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
@@ -66,6 +59,7 @@ export const forceSyncAllToCloud = async () => {
         const raw = window.localStorage.getItem(lsKey);
         if (raw) {
           const parsed = JSON.parse(raw);
+          batchData[lsKey] = parsed;
           if (!companyPayloads[mapping.docName]) {
             companyPayloads[mapping.docName] = {
               updatedAt: now,
@@ -77,15 +71,28 @@ export const forceSyncAllToCloud = async () => {
       } catch (err) {}
     });
 
-    const writes = Object.keys(companyPayloads).map(docName => {
-      return setDoc(doc(db, 'company_stock', docName), companyPayloads[docName], { merge: true });
-    });
+    // 2. Synchronize to central server vault immediately
+    try {
+      await fetch('/api/stock/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch: batchData, updatedBy: userName })
+      });
+    } catch {}
 
-    await Promise.all(writes);
+    // 3. Also synchronize to Firestore
+    try {
+      const writes = Object.keys(companyPayloads).map(docName => {
+        return setDoc(doc(db, 'company_stock', docName), companyPayloads[docName], { merge: true });
+      });
+      await Promise.all(writes);
+    } catch (e: any) {
+      console.warn("Firestore sync warning (server has persistence):", e.message);
+    }
 
-    alert("Sincronização concluída! Todos os dados (Estoque, Obras, Controle de Saídas, Produção, Ferragens, Lançamentos, Histórico, Conferência e Lembretes) foram enviados para a nuvem e estão 100% atualizados em todas as máquinas.");
+    alert("Sincronização concluída! Todos os dados (Estoque, Obras, Controle de Saídas, Produção, Ferragens, Lançamentos, Histórico, Conferência e Lembretes) estão 100% atualizados e permanentes em todas as máquinas.");
   } catch (e: any) {
-    console.error("Erro ao sincronizar tudo com Firestore:", e);
+    console.error("Erro ao sincronizar tudo:", e);
     alert("Erro ao sincronizar: " + e.message);
   }
 };

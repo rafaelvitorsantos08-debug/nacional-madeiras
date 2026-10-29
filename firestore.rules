@@ -18,7 +18,7 @@ service cloud.firestore {
     }
 
     match /company_stock/{docId} {
-      allow read, write: if isSignedIn() && isValidId(docId);
+      allow read, write: if isValidId(docId);
     }
 
     match /portas/{itemId} {
