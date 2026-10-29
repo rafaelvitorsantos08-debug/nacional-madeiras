@@ -129,32 +129,42 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
       const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
       const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
 
-      // Only copy valid day objects (ignoring meta keys like userId, updatedAt)
+      // Copy all valid day objects from incoming (ignoring meta keys)
       for (const [k, v] of Object.entries(safeInc)) {
         if (v && typeof v === 'object' && !Array.isArray(v)) {
           merged[k] = { ...v };
         }
       }
 
-      for (const [dateStr, localRow] of Object.entries(safeLoc)) {
-        if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
-
-        if (!merged[dateStr]) {
-          merged[dateStr] = { ...localRow };
-        } else {
-          // Both have this date, merge fields so non-empty fields win
-          const incRow = merged[dateStr] || {};
-          const locRow = (localRow as any) || {};
-          const combinedRow: Record<string, any> = { ...incRow, ...locRow };
-          
-          for (const f of Object.keys(locRow)) {
-            if (locRow[f] !== '' && locRow[f] !== undefined && locRow[f] !== null) {
-              combinedRow[f] = locRow[f];
-            } else if (incRow[f] !== '' && incRow[f] !== undefined && incRow[f] !== null) {
-              combinedRow[f] = incRow[f];
-            }
+      if (incomingIsAuthoritative) {
+        // Cloud snapshot is authoritative; keep local rows only for dates not in cloud
+        for (const [dateStr, localRow] of Object.entries(safeLoc)) {
+          if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
+          if (!merged[dateStr]) {
+            merged[dateStr] = { ...localRow };
           }
-          merged[dateStr] = combinedRow;
+        }
+      } else {
+        // Local vault/backup merge: merge day by day preserving non-empty values
+        for (const [dateStr, localRow] of Object.entries(safeLoc)) {
+          if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
+
+          if (!merged[dateStr]) {
+            merged[dateStr] = { ...localRow };
+          } else {
+            const incRow = merged[dateStr] || {};
+            const locRow = (localRow as any) || {};
+            const combinedRow: Record<string, any> = { ...incRow, ...locRow };
+            
+            for (const f of Object.keys(locRow)) {
+              if (locRow[f] !== '' && locRow[f] !== undefined && locRow[f] !== null) {
+                combinedRow[f] = locRow[f];
+              } else if (incRow[f] !== '' && incRow[f] !== undefined && incRow[f] !== null) {
+                combinedRow[f] = incRow[f];
+              }
+            }
+            merged[dateStr] = combinedRow;
+          }
         }
       }
       return merged;

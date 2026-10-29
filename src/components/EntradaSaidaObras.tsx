@@ -105,10 +105,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     .sort((a: any, b: any) => (a.nome || '').localeCompare(b.nome || ''));
 
   useEffect(() => {
-    if ((!selectedObraId || !safeObrasV6[selectedObraId]) && obrasList.length > 0) {
-      setSelectedObraId((obrasList[0] as any).id);
+    if (obrasList.length > 0) {
+      if (!selectedObraId || !safeObrasV6[selectedObraId]) {
+        setSelectedObraId((obrasList[0] as any).id);
+      }
     }
-  }, [obrasList.length, selectedObraId, safeObrasV6]);
+  }, [obrasList.length, selectedObraId]);
 
   const activeObra = (selectedObraId && safeObrasV6[selectedObraId]) ? safeObrasV6[selectedObraId] : null;
 

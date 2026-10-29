@@ -67,8 +67,13 @@ export const subscribeToSync = (key: string, callback: (val: any) => void) => {
 
   if (auth.currentUser && !isListening) {
     startListening();
-  } else if (currentData[key] !== undefined && currentData[key] !== null) {
-    callback(currentData[key]);
+  }
+  if (currentData[key] !== undefined && currentData[key] !== null) {
+    setTimeout(() => {
+      if (listeners.get(key)?.has(callback)) {
+        callback(currentData[key]);
+      }
+    }, 0);
   }
 
   return () => {
@@ -258,6 +263,11 @@ export const startListening = () => {
               const incomingVal = compData[mapping.fieldName];
 
               if (incomingVal !== undefined && incomingVal !== null) {
+                // If local machine has in-flight uncommitted edits for this key, don't overwrite!
+                if (DIRTY_DATA.has(lsKey)) {
+                  return;
+                }
+
                 let localVal: any = undefined;
                 if (typeof window !== 'undefined') {
                   try {
@@ -277,6 +287,7 @@ export const startListening = () => {
                     if (strVal !== curStr) {
                       window.localStorage.setItem(lsKey, strVal);
                       window.localStorage.setItem('nm_safe_vault_' + lsKey, strVal);
+                      window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: lsKey, value: merged } }));
                       anyUpdated = true;
                     }
                   }
@@ -290,7 +301,6 @@ export const startListening = () => {
           });
 
           if (anyUpdated && typeof window !== 'undefined') {
-            window.dispatchEvent(new Event('local-storage-sync'));
             window.dispatchEvent(new CustomEvent('nm-stock-synced', {
               detail: {
                 updatedAt: compData.updatedAt || Date.now(),

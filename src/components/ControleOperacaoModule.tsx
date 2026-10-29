@@ -247,40 +247,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   };
 
   useEffect(() => {
-    const hasMerged = localStorage.getItem('nm_merged_april_2026');
-    if (!hasMerged) {
-      const APRIL_DATA = {
-        "2026-04-01": { "e1_desc": "ISCOURI SOUL TIJUCA", "e1_alizares": "10", "e2_desc": "HSI ROCONTEC", "e2_alizares": "50" },
-        "2026-04-02": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "132" },
-        "2026-04-03": { "e1_desc": "SEXTA FEIRA SANTA", "e2_desc": "SEXTA FEIRA SANTA" },
-        "2026-04-06": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "139", "e2_desc": "RJZ CYRELA ICONYC", "e2_kits": "1", "e2_alizares": "1" },
-        "2026-04-07": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "44", "e1_alizares": "315", "e2_desc": "TEGRA CLARIS", "e2_kits": "3", "e2_alizares": "4", "e2_aduelas": "3" },
-        "2026-04-08": { "e1_desc": "ISCOURI DOMUM", "e1_kits": "57", "e1_alizares": "57" },
-        "2026-04-09": { "e1_desc": "ISCOURI BRICK", "e1_kits": "70", "e1_alizares": "70", "e2_desc": "FELIPE KUMSTAT", "e2_kits": "6", "e2_alizares": "6" },
-        "2026-04-13": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "123" },
-        "2026-04-14": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "124" },
-        "2026-04-15": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "109", "e1_alizares": "356", "e2_desc": "PATRIMAR ICON", "e2_kits": "10", "e2_alizares": "10" },
-        "2026-04-16": { "e1_desc": "CYRELA JASMIM", "e1_kits": "2", "e1_alizares": "2", "e2_desc": "BALASSIANO ALMA", "e2_kits": "3", "e2_alizares": "3" },
-        "2026-04-17": { "e1_desc": "EXAME PERIODICO DO JULINHO", "e2_desc": "EXAME PERIODICO DO JULINHO" },
-        "2026-04-21": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 4", "e1_kits": "125" },
-        "2026-04-22": { "e1_desc": "CYRELA LA ISLA", "e1_kits": "13", "e1_alizares": "13", "e2_desc": "TEGRA GAEA", "e2_kits": "30", "e2_alizares": "30" },
-        "2026-04-23": { "e1_desc": "FERIADO SÃO JORGE", "e2_desc": "FERIADO SÃO JORGE" },
-        "2026-04-24": { "e1_desc": "EMENDA DE FERIADO", "e2_desc": "EMENDA DE FERIADO" },
-        "2026-04-27": { "e1_desc": "ONLY BY LIVING", "e1_kits": "36", "e1_alizares": "36", "e2_desc": "SIG IPA", "e2_kits": "1", "e2_alizares": "1" },
-        "2026-04-28": { "e1_desc": "PATRIMAR GRAND QUARTIER", "e1_kits": "107", "e2_desc": "ONLY BY LIVING", "e2_alizares": "6", "e2_aduelas": "5" },
-        "2026-04-29": { "e1_desc": "PATRIMAR GRAND QUARTIER", "e1_kits": "84", "e1_alizares": "316", "e2_desc": "PREMIO CASA GABIZO", "e2_kits": "1", "e2_alizares": "1" },
-        "2026-04-30": { "e1_desc": "TEGRA CLARIS", "e1_kits": "18", "e1_alizares": "18", "e2_desc": "PREM. PAULO BARRETO / P. O. C.A.", "e2_kits": "1", "e2_alizares": "1", "e2_paineis": "98" }
-      };
-      
-      setMonthlyData(prev => ({
-        ...prev,
-        ...APRIL_DATA
-      }));
-      localStorage.setItem('nm_merged_april_2026', 'true');
-    }
+    const needsApril = !localStorage.getItem('nm_merged_april_2026');
+    const needsJan = !localStorage.getItem('nm_merged_jan_2026');
+    const needsFeb = !localStorage.getItem('nm_merged_feb_2026');
+    const needsMar = !localStorage.getItem('nm_merged_mar_2026');
 
-    const hasMergedJan = localStorage.getItem('nm_merged_jan_2026');
-    if (!hasMergedJan) {
+    if (needsApril || needsJan || needsFeb || needsMar) {
+      const mergedInitial: Record<string, any> = {};
+
       const JANUARY_DATA = {
         "2026-01-05": { "e1_desc": "ONLY BY LIVE", "e1_kits": "48" },
         "2026-01-06": { "e1_desc": "ISCOURI SOUL TIJUCA", "e1_kits": "23" },
@@ -302,16 +276,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         "2026-01-29": { "e1_desc": "PIMMO TAMAN", "e1_kits": "48" },
         "2026-01-30": { "e1_desc": "ONLY BY LIVE", "e1_kits": "73", "e2_desc": "MOZACK ESSENCIA APTO 701", "e2_kits": "1" }
       };
-      
-      setMonthlyData(prev => ({
-        ...prev,
-        ...JANUARY_DATA
-      }));
-      localStorage.setItem('nm_merged_jan_2026', 'true');
-    }
 
-    const hasMergedFeb = localStorage.getItem('nm_merged_feb_2026');
-    if (!hasMergedFeb) {
       const FEBRUARY_DATA = {
         "2026-02-02": { "e1_desc": "PIMO TAMAN", "e1_kits": "40" },
         "2026-02-03": { "e1_desc": "TEGRA CLARIS", "e1_kits": "16" },
@@ -336,15 +301,6 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         "2026-02-26": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "32" }
       };
 
-      setMonthlyData(prev => ({
-        ...prev,
-        ...FEBRUARY_DATA
-      }));
-      localStorage.setItem('nm_merged_feb_2026', 'true');
-    }
-
-    const hasMergedMar = localStorage.getItem('nm_merged_mar_2026');
-    if (!hasMergedMar) {
       const MARCH_DATA = {
         "2026-03-02": { "e1_desc": "JARDIM LIRIO", "e1_kits": "23" },
         "2026-03-03": { "e1_desc": "PORTUS BC396", "e1_kits": "83" },
@@ -370,11 +326,43 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
         "2026-03-31": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 2", "e1_kits": "149", "e2_desc": "PATRIMAR GRAND QUARTIER BL 2", "e2_kits": "16", "e2_alizares": "331" }
       };
 
+      const APRIL_DATA = {
+        "2026-04-01": { "e1_desc": "ISCOURI SOUL TIJUCA", "e1_alizares": "10", "e2_desc": "HSI ROCONTEC", "e2_alizares": "50" },
+        "2026-04-02": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "132" },
+        "2026-04-03": { "e1_desc": "SEXTA FEIRA SANTA", "e2_desc": "SEXTA FEIRA SANTA" },
+        "2026-04-06": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "139", "e2_desc": "RJZ CYRELA ICONYC", "e2_kits": "1", "e2_alizares": "1" },
+        "2026-04-07": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 1", "e1_kits": "44", "e1_alizares": "315", "e2_desc": "TEGRA CLARIS", "e2_kits": "3", "e2_alizares": "4", "e2_aduelas": "3" },
+        "2026-04-08": { "e1_desc": "ISCOURI DOMUM", "e1_kits": "57", "e1_alizares": "57" },
+        "2026-04-09": { "e1_desc": "ISCOURI BRICK", "e1_kits": "70", "e1_alizares": "70", "e2_desc": "FELIPE KUMSTAT", "e2_kits": "6", "e2_alizares": "6" },
+        "2026-04-13": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "123" },
+        "2026-04-14": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "124" },
+        "2026-04-15": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 3", "e1_kits": "109", "e1_alizares": "356", "e2_desc": "PATRIMAR ICON", "e2_kits": "10", "e2_alizares": "10" },
+        "2026-04-16": { "e1_desc": "CYRELA JASMIM", "e1_kits": "2", "e1_alizares": "2", "e2_desc": "BALASSIANO ALMA", "e2_kits": "3", "e2_alizares": "3" },
+        "2026-04-17": { "e1_desc": "EXAME PERIODICO DO JULINHO", "e2_desc": "EXAME PERIODICO DO JULINHO" },
+        "2026-04-21": { "e1_desc": "PATRIMAR GRAND QUARTIER BL 4", "e1_kits": "125" },
+        "2026-04-22": { "e1_desc": "CYRELA LA ISLA", "e1_kits": "13", "e1_alizares": "13", "e2_desc": "TEGRA GAEA", "e2_kits": "30", "e2_alizares": "30" },
+        "2026-04-23": { "e1_desc": "FERIADO SÃO JORGE", "e2_desc": "FERIADO SÃO JORGE" },
+        "2026-04-24": { "e1_desc": "EMENDA DE FERIADO", "e2_desc": "EMENDA DE FERIADO" },
+        "2026-04-27": { "e1_desc": "ONLY BY LIVING", "e1_kits": "36", "e1_alizares": "36", "e2_desc": "SIG IPA", "e2_kits": "1", "e2_alizares": "1" },
+        "2026-04-28": { "e1_desc": "PATRIMAR GRAND QUARTIER", "e1_kits": "107", "e2_desc": "ONLY BY LIVING", "e2_alizares": "6", "e2_aduelas": "5" },
+        "2026-04-29": { "e1_desc": "PATRIMAR GRAND QUARTIER", "e1_kits": "84", "e1_alizares": "316", "e2_desc": "PREMIO CASA GABIZO", "e2_kits": "1", "e2_alizares": "1" },
+        "2026-04-30": { "e1_desc": "TEGRA CLARIS", "e1_kits": "18", "e1_alizares": "18", "e2_desc": "PREM. PAULO BARRETO / P. O. C.A.", "e2_kits": "1", "e2_alizares": "1", "e2_paineis": "98" }
+      };
+
+      if (needsJan) Object.assign(mergedInitial, JANUARY_DATA);
+      if (needsFeb) Object.assign(mergedInitial, FEBRUARY_DATA);
+      if (needsMar) Object.assign(mergedInitial, MARCH_DATA);
+      if (needsApril) Object.assign(mergedInitial, APRIL_DATA);
+
       setMonthlyData(prev => ({
-        ...prev,
-        ...MARCH_DATA
+        ...mergedInitial,
+        ...(prev || {})
       }));
+
+      localStorage.setItem('nm_merged_jan_2026', 'true');
+      localStorage.setItem('nm_merged_feb_2026', 'true');
       localStorage.setItem('nm_merged_mar_2026', 'true');
+      localStorage.setItem('nm_merged_april_2026', 'true');
     }
 
   }, []);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, Plus, Filter, ArrowUpFromLine, ArrowDownToLine, Edit2, Trash2, X, RefreshCw, Wifi, CheckCircle2, ShieldCheck, Laptop } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -114,6 +114,9 @@ import { subscribeToSync, pushToFirestore, pushStockDirectlyToFirestore } from '
 import { mergeDataSafely } from '../lib/dataConsistency';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
+  const initialValueRef = useRef(initialValue);
+  initialValueRef.current = initialValue;
+
   const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") return initialValue;
     try {
@@ -137,93 +140,98 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       }
       return initialValue;
     } catch (error) {
-      console.error(error);
+      console.error("useLocalStorage init error:", error);
       return initialValue;
     }
   });
 
+  // Cross-tab and targeted intra-tab synchronization
   useEffect(() => {
-    const handleStorageChange = () => {
-      try {
-        const item = window.localStorage.getItem(key);
-        if (item) {
-          const parsed = JSON.parse(item);
+    const handleNativeStorage = (e: StorageEvent) => {
+      if (e.key === key && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
           if (parsed !== undefined && parsed !== null) {
             setStoredValue(prev => {
-              if (JSON.stringify(prev) === JSON.stringify(parsed)) {
-                return prev;
-              }
+              if (JSON.stringify(prev) === JSON.stringify(parsed)) return prev;
               return parsed;
             });
           }
-        }
-      } catch (err) {
-        console.error(err);
+        } catch {}
       }
     };
-    
-    const handleNativeStorage = (e: StorageEvent) => {
-      if (e.key === key) handleStorageChange();
+
+    const handleTargetedSync = (e: Event) => {
+      const ce = e as CustomEvent;
+      if (ce.detail && ce.detail.key === key) {
+        if (ce.detail.value !== undefined) {
+          setStoredValue(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(ce.detail.value)) return prev;
+            return ce.detail.value;
+          });
+        }
+      }
     };
 
-    window.addEventListener('local-storage-sync', handleStorageChange);
     window.addEventListener('storage', handleNativeStorage);
+    window.addEventListener('nm-local-storage-sync', handleTargetedSync);
     return () => {
-      window.removeEventListener('local-storage-sync', handleStorageChange);
       window.removeEventListener('storage', handleNativeStorage);
-    }
+      window.removeEventListener('nm-local-storage-sync', handleTargetedSync);
+    };
   }, [key]);
 
+  // Firestore cloud real-time subscription
   useEffect(() => {
+    let isMounted = true;
     const unsubscribeSync = subscribeToSync(key, (val) => {
-      if (val === undefined || val === null) return;
+      if (!isMounted || val === undefined || val === null) return;
       setStoredValue(prev => {
-        // Guard against mismatched data types (e.g. string/null received when expecting object/array)
-        if (initialValue !== null && typeof initialValue === 'object') {
-          if (typeof val !== 'object' || val === null) {
-            return prev;
-          }
-          if (Array.isArray(initialValue) && !Array.isArray(val)) {
-            return prev;
-          }
+        const initVal = initialValueRef.current;
+        if (initVal !== null && typeof initVal === 'object') {
+          if (typeof val !== 'object' || val === null) return prev;
+          if (Array.isArray(initVal) && !Array.isArray(val)) return prev;
         }
-        if (JSON.stringify(prev) === JSON.stringify(val)) {
-          return prev;
-        }
+        if (JSON.stringify(prev) === JSON.stringify(val)) return prev;
         return val;
       });
     });
 
     return () => {
+      isMounted = false;
       unsubscribeSync();
     };
-  }, [key, initialValue]);
+  }, [key]);
 
-  const setValue = (value: T | ((val: T) => T)) => {
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
     try {
       setStoredValue(prev => {
         const valueToStore = value instanceof Function ? value(prev) : value;
-        
-        if (typeof window !== "undefined") {
-          const stringified = JSON.stringify(valueToStore);
-          window.localStorage.setItem(key, stringified);
-          window.localStorage.setItem('nm_safe_vault_' + key, stringified);
-          
-          if (JSON.stringify(prev) !== stringified) {
-            window.dispatchEvent(new Event('local-storage-sync'));
+
+        // Perform side effects asynchronously outside React's render/updater phase
+        setTimeout(() => {
+          try {
+            if (typeof window !== "undefined") {
+              const stringified = JSON.stringify(valueToStore);
+              window.localStorage.setItem(key, stringified);
+              window.localStorage.setItem('nm_safe_vault_' + key, stringified);
+              window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key, value: valueToStore } }));
+            }
+          } catch (e) {
+            console.warn("Storage write error:", e);
           }
-        }
-        
-        if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && key !== 'nm_selected_obra_id') {
-          pushToFirestore(key, valueToStore);
-        }
+
+          if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && key !== 'nm_selected_obra_id' && !key.startsWith('nm_selected_')) {
+            pushToFirestore(key, valueToStore);
+          }
+        }, 0);
 
         return valueToStore;
       });
     } catch (error) {
-      console.error(error);
+      console.error("setValue error:", error);
     }
-  };
+  }, [key]);
 
   return [storedValue, setValue] as const;
 }
