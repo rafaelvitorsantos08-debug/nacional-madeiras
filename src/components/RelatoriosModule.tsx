@@ -239,7 +239,7 @@ const DrawingCanvas = ({ imageFile, onSave, onCancel }: { imageFile: File | null
   );
 };
 
-type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_correr" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares" | "auto_montagem" | "auto_entrega";
+type ReportType = "avarias" | "auto_aduelas" | "auto_usinagem_aduelas" | "auto_portas" | "auto_correr" | "auto_usinagem_portas" | "auto_vergas" | "auto_alizares" | "auto_montagem" | "auto_entrega" | "portas" | "aduelas" | "alizares";
 
 const REPORT_TABS: { id: ReportType; label: string; isCorrer?: boolean }[] = [
   { id: "auto_portas", label: "Folhas de Porta" },

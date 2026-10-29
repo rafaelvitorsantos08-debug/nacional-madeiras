@@ -137,41 +137,23 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     setSelectedObraId(id);
   };
 
-  useEffect(() => {
-    if (activeObra && !activeObra.cargasEntradaCorrer) {
-      const today = new Date().toISOString().split('T')[0];
-      setObrasV6(prev => {
-        const o = prev[activeObra.id];
-        if (!o || o.cargasEntradaCorrer) return prev;
-        return {
-          ...prev,
-          [activeObra.id]: {
-            ...o,
-            cargasEntradaCorrer: [{ id: `ce_c_1`, nome: '1ª Carga', data: today }],
-            cargasSaidaCorrer: [{ id: `cs_c_1`, nome: '1ª Saída', data: today }],
-            itensCorrer: o.itensCorrer || []
-          }
-        };
-      });
-    }
-  }, [activeObra?.id]);
-
   const deletarObra = (id: string) => {
     if(!window.confirm('Tem certeza que deseja excluir esta obra?')) return;
     setObrasV6(prev => {
-      const novas = { ...prev };
+      const novas = { ...(prev || {}) };
       delete novas[id];
       return novas;
     });
-    if (selectedObraId === id) setSelectedObraId(null);
+    if (selectedObraId === id) setSelectedObraId('');
   };
 
   const updateObra = (fn: (obra: any) => any) => {
     if (!selectedObraId) return;
     setObrasV6(prev => {
-      const obra = prev[selectedObraId];
-      if (!obra) return prev;
-      return { ...prev, [selectedObraId]: fn(obra) };
+      const safePrev = (prev && typeof prev === 'object') ? prev : {};
+      const obra = safePrev[selectedObraId];
+      if (!obra) return safePrev;
+      return { ...safePrev, [selectedObraId]: fn(obra) };
     });
   };
 
@@ -180,7 +162,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     const targetField = `cargas${tipo}${aba}`;
     
     updateObra(obra => {
-       const cargas = obra[targetField] || [];
+       const rawCargas = obra[targetField];
+       const cargas = (Array.isArray(rawCargas) && rawCargas.length > 0)
+         ? rawCargas
+         : [{ id: `c_${tipo.charAt(0).toLowerCase()}_${aba.charAt(0).toLowerCase()}_1`, nome: `1ª ${tipo === 'Entrada' ? 'Carga' : 'Saída'}`, data: today }];
        const count = cargas.length + 1;
        const nova = {
          id: `c_${tipo.charAt(0).toLowerCase()}_${aba.charAt(0).toLowerCase()}_${Date.now()}`,
@@ -199,10 +184,14 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     const listField = `itens${aba}`;
 
     updateObra(obra => {
-       const novasCargas = (obra[targetField] || []).filter((c:any) => c.id !== cargaId);
+       const rawCargas = Array.isArray(obra[targetField]) ? obra[targetField] : [];
+       const novasCargas = rawCargas.filter((c:any) => c && c.id !== cargaId);
        
-       const novosItens = (obra[listField] || []).map((it:any) => {
-          const newMap = { ...(it[propMap] || {}) };
+       const rawItens = Array.isArray(obra[listField]) ? obra[listField] : [];
+       const novosItens = rawItens.map((it:any) => {
+          if (!it) return it;
+          const currentMap = (it[propMap] && typeof it[propMap] === 'object') ? it[propMap] : {};
+          const newMap = { ...currentMap };
           delete newMap[cargaId];
           return { ...it, [propMap]: newMap };
        });
@@ -212,53 +201,60 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   };
 
   const handleChangeItemField = (itemId: string, field: string, value: string) => {
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
-    updateObra(obra => ({
-      ...obra,
-      [listField]: (obra[listField] || []).map((it: any) => it.id === itemId ? { ...it, [field]: value } : it)
-    }));
+    updateObra(obra => {
+      const items = Array.isArray(obra[listField]) ? obra[listField] : [];
+      return {
+        ...obra,
+        [listField]: items.map((it: any) => (!it || it.id !== itemId) ? it : { ...it, [field]: value })
+      };
+    });
   };
 
   const handleChangeQty = (itemId: string, propMap: string, cargaId: string, value: string) => {
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
-    updateObra(obra => ({
-      ...obra,
-      [listField]: (obra[listField] || []).map((it: any) => {
-        if (it.id === itemId) {
+    updateObra(obra => {
+      const items = Array.isArray(obra[listField]) ? obra[listField] : [];
+      return {
+        ...obra,
+        [listField]: items.map((it: any) => {
+          if (!it || it.id !== itemId) return it;
+          const currentMap = (it[propMap] && typeof it[propMap] === 'object') ? it[propMap] : {};
           return {
             ...it,
             [propMap]: {
-               ...(it[propMap] || {}),
+               ...currentMap,
                [cargaId]: value
             }
           };
-        }
-        return it;
-      })
-    }));
+        })
+      };
+    });
   };
 
   const handleChangeComment = (itemId: string, type: 'entradas'|'saidas', cargaId: string, comment: string) => {
-    const abaCapitalized = activeTab.charAt(0).toUpperCase() + activeTab.slice(1);
+    const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
-    updateObra(obra => ({
-      ...obra,
-      [listField]: (obra[listField] || []).map((it: any) => {
-        if (it.id === itemId) {
-           const commentKey = `${type}_${cargaId}`;
-           const newComentarios = { ...(it.comentarios || {}) };
-           if (comment) {
-             newComentarios[commentKey] = comment;
-           } else {
-             delete newComentarios[commentKey];
-           }
-           return { ...it, comentarios: newComentarios };
-        }
-        return it;
-      })
-    }));
+    updateObra(obra => {
+      const items = Array.isArray(obra[listField]) ? obra[listField] : [];
+      return {
+        ...obra,
+        [listField]: items.map((it: any) => {
+          if (!it || it.id !== itemId) return it;
+          const commentKey = `${type}_${cargaId}`;
+          const currentComentarios = (it.comentarios && typeof it.comentarios === 'object') ? it.comentarios : {};
+          const newComentarios = { ...currentComentarios };
+          if (comment) {
+            newComentarios[commentKey] = comment;
+          } else {
+            delete newComentarios[commentKey];
+          }
+          return { ...it, comentarios: newComentarios };
+        })
+      };
+    });
   };
 
   const handleCommentClick = (itemId: string, type: 'entradas'|'saidas', cargaId: string, currentComment: string) => {
@@ -271,9 +267,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
   const adicionarLinha = () => {
     const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
+    const uniqueId = `${activeTab.charAt(0)}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     
     updateObra(obra => {
-      let newItem: any = { id: Date.now().toString(), entradas: {}, saidas: {} };
+      let newItem: any = { id: uniqueId, entradas: {}, saidas: {} };
       if (activeTab === 'folhas' || activeTab === 'correr') {
         newItem = { ...newItem, dimensao: '', cor: '', enchimento: '', modelo: '' };
       } else if (activeTab === 'aduelas') {
@@ -282,9 +279,10 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
         newItem = { ...newItem, medidaAlizar: '', cor: '' };
       }
       
+      const existingList = Array.isArray(obra[listField]) ? obra[listField] : [];
       return {
         ...obra,
-        [listField]: [...(obra[listField] || []), newItem]
+        [listField]: [...existingList, newItem]
       };
     });
   };
@@ -294,10 +292,28 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
     
-    updateObra(obra => ({
-      ...obra,
-      [listField]: (obra[listField] || []).filter((it: any) => it.id !== itemId)
-    }));
+    updateObra(obra => {
+      const existingList = Array.isArray(obra[listField]) ? obra[listField] : [];
+      return {
+        ...obra,
+        [listField]: existingList.filter((it: any) => it && it.id !== itemId)
+      };
+    });
+  };
+
+  const formatCargaDate = (dStr: any) => {
+    if (!dStr) return '-';
+    try {
+      const s = String(dStr);
+      const parts = s.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? s : d.toLocaleDateString('pt-BR');
+    } catch {
+      return String(dStr || '-');
+    }
   };
 
   const renderTable = () => {
@@ -305,21 +321,28 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     
     const abaCapitalized = (activeTab.charAt(0).toUpperCase() + activeTab.slice(1)) as 'Folhas' | 'Aduelas' | 'Alizares' | 'Correr';
     const listField = `itens${abaCapitalized}`;
-    const currentItens = [...(activeObra[listField] || [])].sort((a, b) => {
+    const rawItens = Array.isArray(activeObra[listField]) ? activeObra[listField] : [];
+    const validItens = rawItens.filter((it: any) => it && typeof it === 'object');
+
+    const currentItens = [...validItens].sort((a, b) => {
       let valA = '';
       let valB = '';
       if (activeTab === 'folhas' || activeTab === 'correr') {
-        valA = a.dimensao || '';
-        valB = b.dimensao || '';
+        valA = a?.dimensao || '';
+        valB = b?.dimensao || '';
       } else if (activeTab === 'aduelas') {
-        valA = a.medidaAduela || '';
-        valB = b.medidaAduela || '';
+        valA = a?.medidaAduela || '';
+        valB = b?.medidaAduela || '';
       } else if (activeTab === 'alizares') {
-        valA = a.medidaAlizar || '';
-        valB = b.medidaAlizar || '';
+        valA = a?.medidaAlizar || '';
+        valB = b?.medidaAlizar || '';
       }
       
-      const parseDim = (str: string) => str.split(/[xX]/).map(n => parseInt(n) || 0);
+      if (!valA && valB) return 1;
+      if (valA && !valB) return -1;
+      if (!valA && !valB) return 0;
+
+      const parseDim = (str: string) => (str || '').split(/[xX]/).map(n => parseInt(n) || 0);
       const numsA = parseDim(valA);
       const numsB = parseDim(valB);
       
@@ -332,8 +355,15 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     });
     
     const today = new Date().toISOString().split('T')[0];
-    const cargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`] || (activeTab === 'correr' ? [{ id: 'ce_c_1', nome: '1ª Carga', data: today }] : []);
-    const cargasSaida = activeObra[`cargasSaida${abaCapitalized}`] || (activeTab === 'correr' ? [{ id: 'cs_c_1', nome: '1ª Saída', data: today }] : []);
+    const rawCargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`];
+    const cargasEntrada = (Array.isArray(rawCargasEntrada) && rawCargasEntrada.length > 0)
+      ? rawCargasEntrada
+      : [{ id: `ce_${activeTab.charAt(0)}_1`, nome: '1ª Carga', data: today }];
+
+    const rawCargasSaida = activeObra[`cargasSaida${abaCapitalized}`];
+    const cargasSaida = (Array.isArray(rawCargasSaida) && rawCargasSaida.length > 0)
+      ? rawCargasSaida
+      : [{ id: `cs_${activeTab.charAt(0)}_1`, nome: '1ª Saída', data: today }];
     
     let specHeaders = [];
     if (activeTab === 'folhas' || activeTab === 'correr') specHeaders = ['DIMENSÃO', 'COR', 'ENCHIMENTO', 'MODELO'];
@@ -341,13 +371,19 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     else specHeaders = ['FACE/MEDIDA ALIZAR', 'COR'];
 
     const getTotalForColumn = (items: any[], type: 'entradas' | 'saidas', cargaId: string) => {
-      return items.reduce((acc, item) => acc + (parseInt(item[type]?.[cargaId]) || 0), 0);
+      return (items || []).reduce((acc, item) => {
+        if (!item || !item[type]) return acc;
+        return acc + (parseInt(item[type][cargaId]) || 0);
+      }, 0);
     };
 
     const getTotalSaldo = (items: any[]) => {
-       return items.reduce((acc: number, item: any) => {
-         const totalEntradas = Object.values(item.entradas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
-         const totalSaidas = Object.values(item.saidas || {}).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
+       return (items || []).reduce((acc: number, item: any) => {
+         if (!item) return acc;
+         const mapEntradas = (item.entradas && typeof item.entradas === 'object') ? item.entradas : {};
+         const mapSaidas = (item.saidas && typeof item.saidas === 'object') ? item.saidas : {};
+         const totalEntradas = Object.values(mapEntradas).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
+         const totalSaidas = Object.values(mapSaidas).reduce((sum: number, v: any) => sum + (parseInt(v) || 0), 0) as number;
          return acc + (totalEntradas - totalSaidas);
        }, 0);
     };
@@ -404,8 +440,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                        <X className="w-3 h-3"/>
                     </button>
                     <div className="flex flex-col items-center justify-center">
-                      <span>{c.nome}</span>
-                      <span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                      <span>{c.nome || 'Carga'}</span>
+                      <span className="text-[10px] font-normal text-gray-500">{formatCargaDate(c.data)}</span>
                       <span className="mt-1 bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {total}</span>
                     </div>
                   </th>
@@ -426,8 +462,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                        <X className="w-3 h-3"/>
                     </button>
                     <div className="flex flex-col items-center justify-center">
-                      <span>{c.nome}</span>
-                      <span className="text-[10px] font-normal text-gray-500">{new Date(`${c.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                      <span>{c.nome || 'Saída'}</span>
+                      <span className="text-[10px] font-normal text-gray-500">{formatCargaDate(c.data)}</span>
                       <span className="mt-1 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Total: {total}</span>
                     </div>
                   </th>
@@ -450,8 +486,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
               ) : (
                 currentItens.map((item: any) => {
                   
-                  const mapEntradas = item.entradas || {};
-                  const mapSaidas = item.saidas || {};
+                  const mapEntradas = (item.entradas && typeof item.entradas === 'object') ? item.entradas : {};
+                  const mapSaidas = (item.saidas && typeof item.saidas === 'object') ? item.saidas : {};
                   
                   const totalEntradas = Object.values(mapEntradas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0) as number;
                   const totalSaidas = Object.values(mapSaidas).reduce((acc: number, v: any) => acc + (parseInt(v) || 0), 0) as number;
@@ -516,7 +552,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                       {/* Entradas */}
                       {cargasEntrada.map((c: any) => {
                         const commentKey = `entradas_${c.id}`;
-                        const comment = item.comentarios?.[commentKey] || '';
+                        const comentariosMap = (item.comentarios && typeof item.comentarios === 'object') ? item.comentarios : {};
+                        const comment = comentariosMap[commentKey] || '';
                         const hasComment = !!comment;
                         return (
                           <td key={c.id} className={cn("p-0 border-r border-b border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-blue-50/30 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/50")}>
@@ -543,7 +580,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
                       {/* Saídas */}
                       {cargasSaida.map((c: any) => {
                         const commentKey = `saidas_${c.id}`;
-                        const comment = item.comentarios?.[commentKey] || '';
+                        const comentariosMap = (item.comentarios && typeof item.comentarios === 'object') ? item.comentarios : {};
+                        const comment = comentariosMap[commentKey] || '';
                         const hasComment = !!comment;
                         return (
                           <td key={c.id} className={cn("p-0 border-r border-b border-gray-300 dark:border-gray-700 relative group", hasComment ? "bg-red-600 hover:bg-red-700" : "bg-purple-50/30 dark:bg-purple-900/20 hover:bg-purple-100/50 dark:hover:bg-purple-900/50")}>
@@ -627,12 +665,13 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
              <Target className="w-5 h-5 text-blue-500 shrink-0" />
              <input 
                 type="text" 
-                value={activeObra.nome}
+                value={activeObra.nome || ''}
                 onChange={(e) => {
                    setObrasV6(prev => {
-                      const o = prev[activeObra.id];
-                      if (!o) return prev;
-                      return { ...prev, [activeObra.id]: { ...o, nome: e.target.value } };
+                      const safePrev = (prev && typeof prev === 'object') ? prev : {};
+                      const o = safePrev[activeObra.id];
+                      if (!o) return safePrev;
+                      return { ...safePrev, [activeObra.id]: { ...o, nome: e.target.value } };
                    });
                 }}
                 className="text-xl font-bold text-gray-800 dark:text-gray-100 bg-transparent border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-blue-500 outline-none w-full px-1 py-1 transition-colors"

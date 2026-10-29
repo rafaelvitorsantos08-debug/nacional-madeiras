@@ -151,44 +151,45 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
 
     // Special handling for nm_entrada_obras_v6 (keys are obra IDs)
     if (key.includes('entrada_obras_v6')) {
-      const merged: Record<string, any> = { ...incomingVal };
-      for (const [obraId, localObra] of Object.entries(localVal as Record<string, any>)) {
+      const merged: Record<string, any> = { ...(incomingVal || {}) };
+      for (const [obraId, localObra] of Object.entries((localVal || {}) as Record<string, any>)) {
+        if (!localObra || typeof localObra !== 'object') continue;
         if (!merged[obraId]) {
           merged[obraId] = localObra;
         } else {
-          const incObra = merged[obraId];
-          const locObra = localObra;
+          const incObra = (merged[obraId] && typeof merged[obraId] === 'object') ? merged[obraId] : {};
+          const locObra = (localObra && typeof localObra === 'object') ? localObra : {};
 
           // Merge cargas lists by id
           const mergeCargas = (listA: any[] = [], listB: any[] = []) => {
             const cMap = new Map<string, any>();
-            [...listA, ...listB].forEach(c => {
-              if (c && c.id) cMap.set(c.id, { ...(cMap.get(c.id) || {}), ...c });
+            [...(Array.isArray(listA) ? listA : []), ...(Array.isArray(listB) ? listB : [])].forEach(c => {
+              if (c && c.id) cMap.set(String(c.id), { ...(cMap.get(String(c.id)) || {}), ...c });
             });
             return Array.from(cMap.values());
           };
 
-          // Merge item lists (itensFolhas, itensAduelas, itensAlizares)
+          // Merge item lists (itensFolhas, itensAduelas, itensAlizares, itensCorrer)
           const mergeItems = (itemsA: any[] = [], itemsB: any[] = []) => {
             const iMap = new Map<string, any>();
             // Add items from B
-            itemsB.forEach(it => {
-              if (it && it.id) iMap.set(it.id, { ...it });
+            (Array.isArray(itemsB) ? itemsB : []).forEach(it => {
+              if (it && it.id) iMap.set(String(it.id), { ...it });
             });
             // Merge with A
-            itemsA.forEach(it => {
+            (Array.isArray(itemsA) ? itemsA : []).forEach(it => {
               if (it && it.id) {
-                const ex = iMap.get(it.id);
+                const ex = iMap.get(String(it.id));
                 if (ex) {
-                  iMap.set(it.id, {
+                  iMap.set(String(it.id), {
                     ...ex,
                     ...it,
-                    entradas: { ...(ex.entradas || {}), ...(it.entradas || {}) },
-                    saidas: { ...(ex.saidas || {}), ...(it.saidas || {}) },
-                    comentarios: { ...(ex.comentarios || {}), ...(it.comentarios || {}) }
+                    entradas: { ...(typeof ex.entradas === 'object' ? ex.entradas : {}), ...(typeof it.entradas === 'object' ? it.entradas : {}) },
+                    saidas: { ...(typeof ex.saidas === 'object' ? ex.saidas : {}), ...(typeof it.saidas === 'object' ? it.saidas : {}) },
+                    comentarios: { ...(typeof ex.comentarios === 'object' ? ex.comentarios : {}), ...(typeof it.comentarios === 'object' ? it.comentarios : {}) }
                   });
                 } else {
-                  iMap.set(it.id, it);
+                  iMap.set(String(it.id), it);
                 }
               }
             });
@@ -196,6 +197,8 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
           };
 
           merged[obraId] = {
+            ...incObra,
+            ...locObra,
             id: obraId,
             nome: locObra.nome || incObra.nome || 'Sem Nome',
             cargasEntradaFolhas: mergeCargas(incObra.cargasEntradaFolhas, locObra.cargasEntradaFolhas),
@@ -204,9 +207,12 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
             cargasSaidaAduelas: mergeCargas(incObra.cargasSaidaAduelas, locObra.cargasSaidaAduelas),
             cargasEntradaAlizares: mergeCargas(incObra.cargasEntradaAlizares, locObra.cargasEntradaAlizares),
             cargasSaidaAlizares: mergeCargas(incObra.cargasSaidaAlizares, locObra.cargasSaidaAlizares),
+            cargasEntradaCorrer: mergeCargas(incObra.cargasEntradaCorrer, locObra.cargasEntradaCorrer),
+            cargasSaidaCorrer: mergeCargas(incObra.cargasSaidaCorrer, locObra.cargasSaidaCorrer),
             itensFolhas: mergeItems(locObra.itensFolhas, incObra.itensFolhas),
             itensAduelas: mergeItems(locObra.itensAduelas, incObra.itensAduelas),
             itensAlizares: mergeItems(locObra.itensAlizares, incObra.itensAlizares),
+            itensCorrer: mergeItems(locObra.itensCorrer, incObra.itensCorrer),
           };
         }
       }
@@ -341,9 +347,12 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
                 cargasSaidaAduelas: [{ id: 'cs_ad_1', nome: '1ª Saída', data: todayStr }],
                 cargasEntradaAlizares: [{ id: 'ce_al_1', nome: '1ª Carga', data: todayStr }],
                 cargasSaidaAlizares: [{ id: 'cs_al_1', nome: '1ª Saída', data: todayStr }],
+                cargasEntradaCorrer: [{ id: 'ce_c_1', nome: '1ª Carga', data: todayStr }],
+                cargasSaidaCorrer: [{ id: 'cs_c_1', nome: '1ª Saída', data: todayStr }],
                 itensFolhas,
                 itensAduelas,
-                itensAlizares
+                itensAlizares,
+                itensCorrer: []
               };
             }
             v6Candidates.push(converted);

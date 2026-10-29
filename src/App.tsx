@@ -19,6 +19,7 @@ import { ConferenciaModule } from './components/ConferenciaModule';
 import { LancamentosRelatoriosModule } from './components/LancamentosRelatoriosModule';
 import { HistoricoModule } from './components/HistoricoModule';
 import { EtiquetasModule } from './components/EtiquetasModule';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -1105,28 +1106,44 @@ export default function App() {
           )}
 
           {activeTab === 'estoque' && (
-            <EstoqueModule globalSearch={globalSearch} />
+            <ErrorBoundary moduleName="Estoque">
+              <EstoqueModule globalSearch={globalSearch} />
+            </ErrorBoundary>
           )}
           {activeTab === 'ferragens' && (
-            <FerragensModule globalSearch={globalSearch} />
+            <ErrorBoundary moduleName="Ferragens">
+              <FerragensModule globalSearch={globalSearch} />
+            </ErrorBoundary>
           )}
           {activeTab === 'controle_operacao' && (
-            <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} globalSearch={globalSearch} />
+            <ErrorBoundary moduleName="Controle x Operação">
+              <ControleOperacaoModule initialTab={activeControleTab} initialMonth={activeControleMonth} globalSearch={globalSearch} />
+            </ErrorBoundary>
           )}
           {activeTab === 'relatorios' && (
-            <RelatoriosModule />
+            <ErrorBoundary moduleName="Relatórios">
+              <RelatoriosModule />
+            </ErrorBoundary>
           )}
           {activeTab === 'historico' && (
-            <HistoricoModule />
+            <ErrorBoundary moduleName="Histórico">
+              <HistoricoModule />
+            </ErrorBoundary>
           )}
           {activeTab === 'calendario' && (
-            <CalendarioModule />
+            <ErrorBoundary moduleName="Calendário">
+              <CalendarioModule />
+            </ErrorBoundary>
           )}
           {activeTab === 'lancamentos' && (
-            <LancamentosRelatoriosModule />
+            <ErrorBoundary moduleName="Lançamentos">
+              <LancamentosRelatoriosModule />
+            </ErrorBoundary>
           )}
           {activeTab === 'etiquetas' && (
-            <EtiquetasModule globalSearch={globalSearch} />
+            <ErrorBoundary moduleName="Etiquetas">
+              <EtiquetasModule globalSearch={globalSearch} />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'configuracoes' && (
@@ -1305,7 +1322,7 @@ function NavItem({ icon, label, isOpen, active, className, onClick }: { icon: Re
         "flex-shrink-0 w-6 h-6 flex items-center justify-center",
         active ? "text-brand-green" : "text-gray-500 group-hover:text-gray-700"
       )}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'w-5 h-5' })}
+        {React.cloneElement(icon as React.ReactElement<any>, { className: 'w-5 h-5' })}
       </div>
       {isOpen && <span className="ml-3 font-medium text-sm whitespace-nowrap">{label}</span>}
     </button>

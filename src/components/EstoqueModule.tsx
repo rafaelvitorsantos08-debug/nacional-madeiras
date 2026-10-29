@@ -52,7 +52,7 @@ export const forceSyncAllToCloud = async () => {
   const keys = [];
   for (let i = 0; i < window.localStorage.length; i++) {
     const key = window.localStorage.key(i);
-    if (key && key.startsWith('nm_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+    if (key && key.startsWith('nm_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode' && key !== 'nm_selected_obra_id') {
       keys.push(key);
     }
   }
@@ -176,7 +176,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
           }
         }
         
-        if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode') {
+        if (!key.startsWith('nm_active_') && key !== 'nm_dark_mode' && key !== 'nm_selected_obra_id') {
           pushToFirestore(key, valueToStore);
         }
 

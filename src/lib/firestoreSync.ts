@@ -169,7 +169,7 @@ export const flushPendingToFirestore = async () => {
 };
 
 export const pushToFirestore = (key: string, value: any) => {
-  if (key.startsWith('nm_active_') || key === 'nm_dark_mode') return;
+  if (key.startsWith('nm_active_') || key === 'nm_dark_mode' || key === 'nm_selected_obra_id') return;
 
   DIRTY_DATA.set(key, value);
   currentData[key] = value;

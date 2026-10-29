@@ -50,9 +50,21 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
       </div>
 
       <div className="flex-1 min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
-        {activeTab === 'saidas' && <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />}
-        {activeTab === 'operacao' && <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />}
-        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && <EntradaSaidaObras globalSearch={globalSearch} />}
+        {activeTab === 'saidas' && (
+          <ErrorBoundary moduleName="Controle de Saídas">
+            <ControleSaidas initialMonth={initialMonth} globalSearch={globalSearch} />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'operacao' && (
+          <ErrorBoundary moduleName="Operação da Produção">
+            <OperacaoProducao initialMonth={initialMonth} globalSearch={globalSearch} />
+          </ErrorBoundary>
+        )}
+        {(activeTab === 'entradas' || activeTab === 'saidas_obras') && (
+          <ErrorBoundary moduleName="Entrada / Saída Obras">
+            <EntradaSaidaObras globalSearch={globalSearch} />
+          </ErrorBoundary>
+        )}
       </div>
     </div>
   );
@@ -60,6 +72,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 
 // --- SUBMODULES ---
 import { EntradaSaidaObras } from './EntradaSaidaObras';
+import { ErrorBoundary } from './ErrorBoundary';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR, ENCHIMENTOS_PORTA, ABA_ALIZAR } from './EstoqueModule';
 
 const MESES = [
