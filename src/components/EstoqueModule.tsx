@@ -64,20 +64,46 @@ export const forceSyncAllToCloud = async () => {
     } catch(e) {}
   }
   try {
+    const now = Date.now();
+    const userName = auth.currentUser.displayName || auth.currentUser.email || 'Usuário';
+
+    // 1. Per-user config backup
     await setDoc(doc(db, 'user_configs', auth.currentUser.uid), dataToSync, { merge: true });
     
-    // Also push company stock for all machines
-    const stockPayload: Record<string, any> = {
-      updatedAt: Date.now(),
-      updatedBy: auth.currentUser.displayName || auth.currentUser.email || 'Usuário'
-    };
+    // 2. Company Stock (Geral)
+    const stockPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
     if (dataToSync['nm_portas']) stockPayload.portas = dataToSync['nm_portas'];
     if (dataToSync['nm_aduelas']) stockPayload.aduelas = dataToSync['nm_aduelas'];
     if (dataToSync['nm_alizares']) stockPayload.alizares = dataToSync['nm_alizares'];
     if (dataToSync['nm_rodapes']) stockPayload.rodapes = dataToSync['nm_rodapes'];
     await setDoc(doc(db, 'company_stock', 'geral'), stockPayload, { merge: true });
 
-    alert("Sincronização concluída! Seus dados desta máquina agora estão na nuvem e aparecerão em tempo real em todas as outras máquinas.");
+    // 3. Company Obras (Entrada / Saída Obras)
+    const obrasPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
+    if (dataToSync['nm_entrada_obras_v6']) obrasPayload.entrada_obras_v6 = dataToSync['nm_entrada_obras_v6'];
+    if (dataToSync['nm_obras_v4']) obrasPayload.obras_v4 = dataToSync['nm_obras_v4'];
+    await setDoc(doc(db, 'company_stock', 'obras'), obrasPayload, { merge: true });
+
+    // 4. Company Operação (Controle de Saídas e Produção)
+    const operacaoPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
+    if (dataToSync['nm_controle_saidas']) operacaoPayload.controle_saidas = dataToSync['nm_controle_saidas'];
+    if (dataToSync['nm_operacao_producao']) operacaoPayload.operacao_producao = dataToSync['nm_operacao_producao'];
+    if (dataToSync['nm_operacao_colaboradores']) operacaoPayload.operacao_colaboradores = dataToSync['nm_operacao_colaboradores'];
+    if (dataToSync['nm_operacao_efetivo_total_cols']) operacaoPayload.operacao_efetivo_total_cols = dataToSync['nm_operacao_efetivo_total_cols'];
+    await setDoc(doc(db, 'company_stock', 'operacao'), operacaoPayload, { merge: true });
+
+    // 5. Company Ferragens
+    const ferragensPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
+    if (dataToSync['nm_ferragens_obras']) ferragensPayload.ferragens_obras = dataToSync['nm_ferragens_obras'];
+    if (dataToSync['nm_ferragens_history']) ferragensPayload.ferragens_history = dataToSync['nm_ferragens_history'];
+    await setDoc(doc(db, 'company_stock', 'ferragens'), ferragensPayload, { merge: true });
+
+    // 6. Company Histórico
+    const historicoPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
+    if (dataToSync['nm_historico_lancamentos']) historicoPayload.historico_lancamentos = dataToSync['nm_historico_lancamentos'];
+    await setDoc(doc(db, 'company_stock', 'historico'), historicoPayload, { merge: true });
+
+    alert("Sincronização concluída! Todos os dados (Estoque, Obras, Controle de Saídas, Produção e Ferragens) agora estão na nuvem compartilhados em tempo real com todas as máquinas.");
   } catch (e: any) {
     console.error(e);
     alert("Erro ao sincronizar: " + e.message);
@@ -122,12 +148,14 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
         const item = window.localStorage.getItem(key);
         if (item) {
           const parsed = JSON.parse(item);
-          setStoredValue(prev => {
-            if (JSON.stringify(prev) === JSON.stringify(parsed)) {
-              return prev;
-            }
-            return parsed;
-          });
+          if (parsed !== undefined && parsed !== null) {
+            setStoredValue(prev => {
+              if (JSON.stringify(prev) === JSON.stringify(parsed)) {
+                return prev;
+              }
+              return parsed;
+            });
+          }
         }
       } catch (err) {
         console.error(err);
@@ -148,7 +176,17 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   useEffect(() => {
     const unsubscribeSync = subscribeToSync(key, (val) => {
+      if (val === undefined || val === null) return;
       setStoredValue(prev => {
+        // Guard against mismatched data types (e.g. string/null received when expecting object/array)
+        if (initialValue !== null && typeof initialValue === 'object') {
+          if (typeof val !== 'object' || val === null) {
+            return prev;
+          }
+          if (Array.isArray(initialValue) && !Array.isArray(val)) {
+            return prev;
+          }
+        }
         if (JSON.stringify(prev) === JSON.stringify(val)) {
           return prev;
         }
@@ -159,7 +197,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     return () => {
       unsubscribeSync();
     };
-  }, [key]);
+  }, [key, initialValue]);
 
   const setValue = (value: T | ((val: T) => T)) => {
     try {

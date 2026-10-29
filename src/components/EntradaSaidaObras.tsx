@@ -83,8 +83,11 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     }
   }, []);
 
-  const obrasList = Object.values(obrasV6 || {})
+  const safeObrasV6 = (obrasV6 && typeof obrasV6 === 'object' && !Array.isArray(obrasV6)) ? obrasV6 : {};
+
+  const obrasList = Object.values(safeObrasV6)
     .filter((obra: any) => {
+       if (!obra || typeof obra !== 'object') return false;
        if (!globalSearch) return true;
        const searchLower = globalSearch.trim().toLowerCase();
        const inNome = (obra.nome || '').toLowerCase().includes(searchLower);
@@ -102,12 +105,12 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     .sort((a: any, b: any) => (a.nome || '').localeCompare(b.nome || ''));
 
   useEffect(() => {
-    if ((!selectedObraId || !obrasV6[selectedObraId]) && obrasList.length > 0) {
+    if ((!selectedObraId || !safeObrasV6[selectedObraId]) && obrasList.length > 0) {
       setSelectedObraId((obrasList[0] as any).id);
     }
-  }, [obrasList.length, selectedObraId, obrasV6]);
+  }, [obrasList.length, selectedObraId, safeObrasV6]);
 
-  const activeObra = selectedObraId ? obrasV6[selectedObraId] : null;
+  const activeObra = (selectedObraId && safeObrasV6[selectedObraId]) ? safeObrasV6[selectedObraId] : null;
 
   const adicionarObra = () => {
     const nome = window.prompt('Digite o nome da nova obra:');

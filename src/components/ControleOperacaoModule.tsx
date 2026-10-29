@@ -158,12 +158,15 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   
   // Data structure: { 'YYYY-MM-DD': { entrega1: '', kits1: '', ... } }
   const [monthlyData, setMonthlyData] = useLocalStorage<Record<string, any>>('nm_controle_saidas', {});
+  const safeMonthlyData = (monthlyData && typeof monthlyData === 'object' && !Array.isArray(monthlyData)) ? monthlyData : {};
   
   useEffect(() => {
     const descriptions = new Set<string>();
-    Object.values(monthlyData).forEach((row: any) => {
-      if (row.e1_desc) descriptions.add(row.e1_desc);
-      if (row.e2_desc) descriptions.add(row.e2_desc);
+    Object.values(safeMonthlyData).forEach((row: any) => {
+      if (row && typeof row === 'object') {
+        if (row.e1_desc) descriptions.add(String(row.e1_desc));
+        if (row.e2_desc) descriptions.add(String(row.e2_desc));
+      }
     });
     setHistoricoDescricoes(Array.from(descriptions).sort());
   }, [monthlyData]);
@@ -196,8 +199,9 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   const [commentDraft, setCommentDraft] = useState('');
 
   const handleOpenComment = (row: any, field: string) => {
-    const comm = monthlyData[row.dateStrKey]?.[`comm_${field}`] || '';
-    const currentVal = monthlyData[row.dateStrKey]?.[field] || '';
+    const rowObj = (safeMonthlyData[row.dateStrKey] && typeof safeMonthlyData[row.dateStrKey] === 'object') ? safeMonthlyData[row.dateStrKey] : {};
+    const comm = rowObj[`comm_${field}`] || '';
+    const currentVal = rowObj[field] || '';
     setActiveComment({
       dateStrKey: row.dateStrKey,
       dateStrDisplay: row.dateStrDisplay,
@@ -213,14 +217,15 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     if (!activeComment) return;
     const trimmed = commentDraft.trim();
     setMonthlyData(prev => {
-      const dayData = { ...(prev[activeComment.dateStrKey] || {}) };
+      const safePrev = (prev && typeof prev === 'object' && !Array.isArray(prev)) ? prev : {};
+      const dayData = { ...((safePrev[activeComment.dateStrKey] && typeof safePrev[activeComment.dateStrKey] === 'object') ? safePrev[activeComment.dateStrKey] : {}) };
       if (trimmed) {
         dayData[`comm_${activeComment.field}`] = trimmed;
       } else {
         delete dayData[`comm_${activeComment.field}`];
       }
       return {
-        ...prev,
+        ...safePrev,
         [activeComment.dateStrKey]: dayData
       };
     });
@@ -230,10 +235,11 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   const handleDeleteComment = () => {
     if (!activeComment) return;
     setMonthlyData(prev => {
-      const dayData = { ...(prev[activeComment.dateStrKey] || {}) };
+      const safePrev = (prev && typeof prev === 'object' && !Array.isArray(prev)) ? prev : {};
+      const dayData = { ...((safePrev[activeComment.dateStrKey] && typeof safePrev[activeComment.dateStrKey] === 'object') ? safePrev[activeComment.dateStrKey] : {}) };
       delete dayData[`comm_${activeComment.field}`];
       return {
-        ...prev,
+        ...safePrev,
         [activeComment.dateStrKey]: dayData
       };
     });
@@ -373,7 +379,7 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
   }, []);
 
-    const sumCol = (field: string) => {
+  const sumCol = (field: string) => {
     const isE1 = field.startsWith('e1_');
     const isE2 = field.startsWith('e2_');
     const descField = isE1 ? 'e1_desc' : (isE2 ? 'e2_desc' : null);
@@ -385,8 +391,9 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
       const maxDateStr = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
       
       let total = 0;
-      for (const [dateStr, rowData] of Object.entries(monthlyData)) {
+      for (const [dateStr, rowData] of Object.entries(safeMonthlyData)) {
         if (dateStr > maxDateStr) continue;
+        if (!rowData || typeof rowData !== 'object') continue;
         
         const descVal = (rowData as any)?.[descField] || '';
         if (descVal.toString().toLowerCase().includes(searchLower)) {
@@ -399,7 +406,8 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
     return rows.reduce((acc, row) => {
       if (row.isWeekend) return acc;
-      const val = parseInt(monthlyData[row.dateStrKey]?.[field] || '0', 10);
+      const rowObj = (safeMonthlyData[row.dateStrKey] && typeof safeMonthlyData[row.dateStrKey] === 'object') ? safeMonthlyData[row.dateStrKey] : null;
+      const val = parseInt(rowObj?.[field] || '0', 10);
       return acc + (isNaN(val) ? 0 : val);
     }, 0);
   };
@@ -430,22 +438,27 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
   });
 
   const handleInputChange = (dateStrKey: string, field: string, value: string) => {
-    setMonthlyData(prev => ({
-      ...prev,
-      [dateStrKey]: {
-        ...(prev[dateStrKey] || {}),
-        [field]: value
-      }
-    }));
+    setMonthlyData(prev => {
+      const safePrev = (prev && typeof prev === 'object' && !Array.isArray(prev)) ? prev : {};
+      const dayData = (safePrev[dateStrKey] && typeof safePrev[dateStrKey] === 'object') ? safePrev[dateStrKey] : {};
+      return {
+        ...safePrev,
+        [dateStrKey]: {
+          ...dayData,
+          [field]: value
+        }
+      };
+    });
   };
 
   const renderInput = (row: any, field: string, colIdx: number, className: string = "") => {
-    const val = monthlyData[row.dateStrKey]?.[field] || '';
+    const rowObj = (safeMonthlyData[row.dateStrKey] && typeof safeMonthlyData[row.dateStrKey] === 'object') ? safeMonthlyData[row.dateStrKey] : null;
+    const val = rowObj?.[field] || '';
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
     // Highlight if search matches description
     const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.trim().toLowerCase());
-    const comment = monthlyData[row.dateStrKey]?.[`comm_${field}`] || '';
+    const comment = rowObj?.[`comm_${field}`] || '';
     const hasComment = !!comment;
 
     return (
@@ -801,6 +814,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
 
   // Storage
   const [operacaoData, setOperacaoData] = useLocalStorage<Record<string, any>>('nm_operacao_producao', {});
+  const safeOperacaoData = (operacaoData && typeof operacaoData === 'object' && !Array.isArray(operacaoData)) ? operacaoData : {};
   const [efetivoTotalTracker, setEfetivoTotalTracker] = useLocalStorage<Record<string, string>>('nm_operacao_efetivo_total_cols', {});
   const [modalEfetivoOpen, setModalEfetivoOpen] = useState<any>(null);
   const [isEditColaboradoresOpen, setIsEditColaboradoresOpen] = useState(false);
@@ -832,7 +846,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
   const COLABORADORES = [...colaboradoresState].sort((a, b) => a.localeCompare(b));
 
   const getDayEfetivoTotal = (dateStrKey: string) => {
-    const dayData = operacaoData[dateStrKey] || {};
+    const dayData = (safeOperacaoData[dateStrKey] && typeof safeOperacaoData[dateStrKey] === 'object') ? safeOperacaoData[dateStrKey] : {};
     let sum = 0;
     let hasSector = false;
     let colabCount = 0;
@@ -877,17 +891,22 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
   const daysThisMonth = getDaysArray(selecionadoAno, selecionadoMes);
 
   const handleInputChange = (dateStrKey: string, field: string, value: string) => {
-    setOperacaoData(prev => ({
-      ...prev,
-      [dateStrKey]: {
-        ...(prev[dateStrKey] || {}),
-        [field]: value
-      }
-    }));
+    setOperacaoData(prev => {
+      const safePrev = (prev && typeof prev === 'object' && !Array.isArray(prev)) ? prev : {};
+      const dayData = (safePrev[dateStrKey] && typeof safePrev[dateStrKey] === 'object') ? safePrev[dateStrKey] : {};
+      return {
+        ...safePrev,
+        [dateStrKey]: {
+          ...dayData,
+          [field]: value
+        }
+      };
+    });
   };
 
   const renderInput = (day: any, field: string, colIdx: number, className: string = "") => {
-    const val = operacaoData[day.dateStrKey]?.[field] || '';
+    const rowObj = (safeOperacaoData[day.dateStrKey] && typeof safeOperacaoData[day.dateStrKey] === 'object') ? safeOperacaoData[day.dateStrKey] : null;
+    const val = rowObj?.[field] || '';
     if (day.isWeekend) return null;
     return (
       <input
@@ -922,7 +941,8 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
     // calculate total
     const totalMes = days.reduce((acc, day) => {
        if (!day) return acc;
-       const qty = parseInt(operacaoData[day.dateStrKey]?.quantidade || '0', 10);
+       const rowObj = (safeOperacaoData[day.dateStrKey] && typeof safeOperacaoData[day.dateStrKey] === 'object') ? safeOperacaoData[day.dateStrKey] : null;
+       const qty = parseInt(rowObj?.quantidade || '0', 10);
        return acc + (isNaN(qty) ? 0 : qty);
     }, 0);
 

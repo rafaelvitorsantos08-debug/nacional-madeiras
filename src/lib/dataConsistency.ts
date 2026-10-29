@@ -122,20 +122,31 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
   }
 
   // Case 2: Objects
-  if (typeof localVal === 'object' && typeof incomingVal === 'object') {
+  if (localVal && typeof localVal === 'object' && incomingVal && typeof incomingVal === 'object') {
     // Special handling for nm_controle_saidas (keys are date strings YYYY-MM-DD)
     if (key.includes('controle_saidas')) {
-      const merged: Record<string, any> = { ...incomingVal };
-      for (const [dateStr, localRow] of Object.entries(localVal)) {
+      const merged: Record<string, any> = {};
+      const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
+      const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+
+      // Only copy valid day objects (ignoring meta keys like userId, updatedAt)
+      for (const [k, v] of Object.entries(safeInc)) {
+        if (v && typeof v === 'object' && !Array.isArray(v)) {
+          merged[k] = { ...v };
+        }
+      }
+
+      for (const [dateStr, localRow] of Object.entries(safeLoc)) {
+        if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
+
         if (!merged[dateStr]) {
-          merged[dateStr] = localRow;
+          merged[dateStr] = { ...localRow };
         } else {
           // Both have this date, merge fields so non-empty fields win
           const incRow = merged[dateStr] || {};
           const locRow = (localRow as any) || {};
           const combinedRow: Record<string, any> = { ...incRow, ...locRow };
           
-          // For every field, if local has a non-empty string or number, use it; otherwise use incoming
           for (const f of Object.keys(locRow)) {
             if (locRow[f] !== '' && locRow[f] !== undefined && locRow[f] !== null) {
               combinedRow[f] = locRow[f];
