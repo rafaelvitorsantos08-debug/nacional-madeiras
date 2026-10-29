@@ -1,5 +1,5 @@
 import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
-import { db, auth } from './firebase';
+import { db, auth, ensureAuthenticated } from './firebase';
 import { mergeDataSafely } from './dataConsistency';
 
 let unsubscribeCompanySnapshots: (() => void)[] = [];
@@ -33,7 +33,7 @@ const pendingKeys = getPendingKeys();
 
 // Mapping of localStorage keys to company shared documents in Firestore (/company_stock/{docId})
 export const COMPANY_DOC_MAPPINGS: Record<string, { docName: string, fieldName: string }> = {
-  // Stock
+  // Stock (Estoque)
   'nm_portas': { docName: 'geral', fieldName: 'portas' },
   'nm_aduelas': { docName: 'geral', fieldName: 'aduelas' },
   'nm_alizares': { docName: 'geral', fieldName: 'alizares' },
@@ -50,11 +50,25 @@ export const COMPANY_DOC_MAPPINGS: Record<string, { docName: string, fieldName: 
   'nm_operacao_efetivo_total_cols': { docName: 'operacao', fieldName: 'operacao_efetivo_total_cols' },
 
   // Ferragens
-  'nm_ferragens_obras': { docName: 'ferragens', fieldName: 'ferragens_obras' },
-  'nm_ferragens_history': { docName: 'ferragens', fieldName: 'ferragens_history' },
+  'nm_ferragens_obras_list_v5': { docName: 'ferragens', fieldName: 'ferragens_obras_list_v5' },
+  'nm_ferragens_obras_data_v5': { docName: 'ferragens', fieldName: 'ferragens_obras_data_v5' },
+  'nm_ferragens_history_v5': { docName: 'ferragens', fieldName: 'ferragens_history_v5' },
 
-  // Histórico e Lançamentos
-  'nm_historico_lancamentos': { docName: 'historico', fieldName: 'historico_lancamentos' },
+  // Lançamentos de Kits
+  'nacional_madeiras_kits_v6': { docName: 'lancamentos', fieldName: 'kits_v6' },
+
+  // Histórico de Entregas
+  'nm_historico_entregas_v1': { docName: 'historico', fieldName: 'historico_entregas_v1' },
+
+  // Conferência
+  'nm_conferencia_items': { docName: 'conferencia', fieldName: 'conferencia_items' },
+
+  // Calendário / Lembretes
+  'nm_lembretes': { docName: 'lembretes', fieldName: 'lembretes' },
+
+  // Relatórios
+  'nm_active_relatorio_header': { docName: 'relatorios', fieldName: 'relatorio_header' },
+  'nm_active_relatorio_items': { docName: 'relatorios', fieldName: 'relatorio_items' },
 };
 
 export const getFirestoreData = (key: string) => currentData[key];
@@ -138,7 +152,12 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
  * Ensures instant synchronization across all machines operating the system.
  */
 export const flushPendingToFirestore = async () => {
-  if (!auth.currentUser || (DIRTY_DATA.size === 0 && pendingKeys.size === 0)) return;
+  if (DIRTY_DATA.size === 0 && pendingKeys.size === 0) return;
+
+  if (!auth.currentUser) {
+    await ensureAuthenticated();
+    if (!auth.currentUser) return;
+  }
 
   const dataToSave: Record<string, any> = { userId: auth.currentUser.uid };
   
@@ -185,9 +204,11 @@ export const flushPendingToFirestore = async () => {
     });
     await Promise.all(companyWrites);
 
-    // 3. Also write to user_configs for per-user backup
-    const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-    await setDoc(userDoc, dataToSave, { merge: true });
+    // 3. Optional user backup
+    try {
+      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
+      await setDoc(userDoc, dataToSave, { merge: true });
+    } catch {}
     
     // Clear dirty data
     keysBeingSaved.forEach(k => {
@@ -201,7 +222,14 @@ export const flushPendingToFirestore = async () => {
 };
 
 export const pushToFirestore = (key: string, value: any) => {
-  if (key.startsWith('nm_active_') || key === 'nm_dark_mode' || key === 'nm_selected_obra_id') return;
+  // Only ignore pure local UI navigation/view preferences
+  const localUiKeys = [
+    'nm_active_tab', 'nm_active_sub_tab', 'nm_active_controle_tab',
+    'nm_active_tab_obras', 'nm_active_log_tab', 'nm_dark_mode',
+    'nm_selected_obra_id', 'nm_selected_saidas_year', 'nm_selected_saidas_month',
+    'nm_selected_obra_ferragens', 'nm_active_relatorio_tipo'
+  ];
+  if (localUiKeys.includes(key)) return;
 
   DIRTY_DATA.set(key, value);
   currentData[key] = value;
@@ -215,7 +243,9 @@ export const pushToFirestore = (key: string, value: any) => {
     } catch {}
   }
 
-  if (!auth.currentUser) return;
+  if (!auth.currentUser) {
+    ensureAuthenticated();
+  }
 
   const isStock = key === 'nm_portas' || key === 'nm_aduelas' || key === 'nm_alizares' || key === 'nm_rodapes';
   
@@ -226,11 +256,11 @@ export const pushToFirestore = (key: string, value: any) => {
     return;
   }
 
-  // 250ms debounce for typing/regular inputs to keep real-time sync fast and responsive
+  // 150ms debounce for typing/regular inputs to keep real-time sync fast and responsive
   if (saveTimeout) clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
     flushPendingToFirestore();
-  }, 250);
+  }, 150);
 };
 
 /**
@@ -241,7 +271,7 @@ export const startListening = () => {
   isListening = true;
 
   // Documents in company_stock to listen to for company-wide real-time collaboration
-  const companyDocsToListen = ['geral', 'obras', 'operacao', 'ferragens', 'historico'];
+  const companyDocsToListen = Array.from(new Set(Object.values(COMPANY_DOC_MAPPINGS).map(m => m.docName)));
 
   companyDocsToListen.forEach(docName => {
     try {

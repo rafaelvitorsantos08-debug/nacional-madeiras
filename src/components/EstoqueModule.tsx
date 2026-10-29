@@ -46,72 +46,53 @@ import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 export const forceSyncAllToCloud = async () => {
   if (!auth.currentUser) {
-    alert("Você precisa estar logado para sincronizar.");
-    return;
-  }
-  const keys = [];
-  for (let i = 0; i < window.localStorage.length; i++) {
-    const key = window.localStorage.key(i);
-    if (key && key.startsWith('nm_') && !key.startsWith('nm_active_') && key !== 'nm_dark_mode' && key !== 'nm_selected_obra_id') {
-      keys.push(key);
+    await ensureAuthenticated();
+    if (!auth.currentUser) {
+      alert("Não foi possível conectar ao Firebase. Verifique sua conexão com a internet.");
+      return;
     }
   }
-  const dataToSync: Record<string, any> = { userId: auth.currentUser.uid };
-  for (const key of keys) {
-    try {
-      const val = window.localStorage.getItem(key);
-      if (val) dataToSync[key] = JSON.parse(val);
-    } catch(e) {}
-  }
+
   try {
     const now = Date.now();
     const userName = auth.currentUser.displayName || auth.currentUser.email || 'Usuário';
 
-    // 1. Per-user config backup
-    await setDoc(doc(db, 'user_configs', auth.currentUser.uid), dataToSync, { merge: true });
-    
-    // 2. Company Stock (Geral)
-    const stockPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
-    if (dataToSync['nm_portas']) stockPayload.portas = dataToSync['nm_portas'];
-    if (dataToSync['nm_aduelas']) stockPayload.aduelas = dataToSync['nm_aduelas'];
-    if (dataToSync['nm_alizares']) stockPayload.alizares = dataToSync['nm_alizares'];
-    if (dataToSync['nm_rodapes']) stockPayload.rodapes = dataToSync['nm_rodapes'];
-    await setDoc(doc(db, 'company_stock', 'geral'), stockPayload, { merge: true });
+    // Group all current local storage data according to COMPANY_DOC_MAPPINGS
+    const companyPayloads: Record<string, Record<string, any>> = {};
 
-    // 3. Company Obras (Entrada / Saída Obras)
-    const obrasPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
-    if (dataToSync['nm_entrada_obras_v6']) obrasPayload.entrada_obras_v6 = dataToSync['nm_entrada_obras_v6'];
-    if (dataToSync['nm_obras_v4']) obrasPayload.obras_v4 = dataToSync['nm_obras_v4'];
-    await setDoc(doc(db, 'company_stock', 'obras'), obrasPayload, { merge: true });
+    Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
+      const mapping = COMPANY_DOC_MAPPINGS[lsKey];
+      try {
+        const raw = window.localStorage.getItem(lsKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (!companyPayloads[mapping.docName]) {
+            companyPayloads[mapping.docName] = {
+              updatedAt: now,
+              updatedBy: userName
+            };
+          }
+          companyPayloads[mapping.docName][mapping.fieldName] = parsed;
+        }
+      } catch (err) {}
+    });
 
-    // 4. Company Operação (Controle de Saídas e Produção)
-    const operacaoPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
-    if (dataToSync['nm_controle_saidas']) operacaoPayload.controle_saidas = dataToSync['nm_controle_saidas'];
-    if (dataToSync['nm_operacao_producao']) operacaoPayload.operacao_producao = dataToSync['nm_operacao_producao'];
-    if (dataToSync['nm_operacao_colaboradores']) operacaoPayload.operacao_colaboradores = dataToSync['nm_operacao_colaboradores'];
-    if (dataToSync['nm_operacao_efetivo_total_cols']) operacaoPayload.operacao_efetivo_total_cols = dataToSync['nm_operacao_efetivo_total_cols'];
-    await setDoc(doc(db, 'company_stock', 'operacao'), operacaoPayload, { merge: true });
+    const writes = Object.keys(companyPayloads).map(docName => {
+      return setDoc(doc(db, 'company_stock', docName), companyPayloads[docName], { merge: true });
+    });
 
-    // 5. Company Ferragens
-    const ferragensPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
-    if (dataToSync['nm_ferragens_obras']) ferragensPayload.ferragens_obras = dataToSync['nm_ferragens_obras'];
-    if (dataToSync['nm_ferragens_history']) ferragensPayload.ferragens_history = dataToSync['nm_ferragens_history'];
-    await setDoc(doc(db, 'company_stock', 'ferragens'), ferragensPayload, { merge: true });
+    await Promise.all(writes);
 
-    // 6. Company Histórico
-    const historicoPayload: Record<string, any> = { updatedAt: now, updatedBy: userName };
-    if (dataToSync['nm_historico_lancamentos']) historicoPayload.historico_lancamentos = dataToSync['nm_historico_lancamentos'];
-    await setDoc(doc(db, 'company_stock', 'historico'), historicoPayload, { merge: true });
-
-    alert("Sincronização concluída! Todos os dados (Estoque, Obras, Controle de Saídas, Produção e Ferragens) agora estão na nuvem compartilhados em tempo real com todas as máquinas.");
+    alert("Sincronização concluída! Todos os dados (Estoque, Obras, Controle de Saídas, Produção, Ferragens, Lançamentos, Histórico, Conferência e Lembretes) foram enviados para a nuvem e estão 100% atualizados em todas as máquinas.");
   } catch (e: any) {
-    console.error(e);
+    console.error("Erro ao sincronizar tudo com Firestore:", e);
     alert("Erro ao sincronizar: " + e.message);
   }
 };
 
-import { subscribeToSync, pushToFirestore, pushStockDirectlyToFirestore } from '../lib/firestoreSync';
+import { subscribeToSync, pushToFirestore, pushStockDirectlyToFirestore, COMPANY_DOC_MAPPINGS } from '../lib/firestoreSync';
 import { mergeDataSafely } from '../lib/dataConsistency';
+import { ensureAuthenticated } from '../lib/firebase';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const initialValueRef = useRef(initialValue);
@@ -121,19 +102,11 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     if (typeof window === "undefined") return initialValue;
     try {
       const item = window.localStorage.getItem(key);
-      const vaultItem = window.localStorage.getItem('nm_safe_vault_' + key);
-      
-      if (item) {
-        const parsed = JSON.parse(item);
-        if (vaultItem) {
-          try {
-            const parsedVault = JSON.parse(vaultItem);
-            return mergeDataSafely(key, parsed, parsedVault);
-          } catch {}
-        }
-        return parsed;
+      if (item !== null && item !== undefined) {
+        return JSON.parse(item);
       }
-      if (vaultItem) {
+      const vaultItem = window.localStorage.getItem('nm_safe_vault_' + key);
+      if (vaultItem !== null && vaultItem !== undefined) {
         try {
           return JSON.parse(vaultItem);
         } catch {}

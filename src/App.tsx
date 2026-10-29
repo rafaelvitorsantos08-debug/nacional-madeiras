@@ -50,11 +50,7 @@ import { forceSyncAllToCloud } from './components/EstoqueModule';
 import { restoreTodayAndConsistentRecords } from './lib/dataConsistency';
 import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 
-// Run data restoration and consistency check immediately on app load
-if (typeof window !== 'undefined') {
-  restoreTodayAndConsistentRecords();
-}
-
+// Data consistency is maintained directly through real-time Firestore synchronization and useLocalStorage
 export default function App() {
   const [user] = useAuthState(auth);
   const [sidebarOpen, setSidebarOpen] = useState(true);

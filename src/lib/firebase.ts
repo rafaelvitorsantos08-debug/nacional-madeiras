@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, signInAnonymously } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json'; // using the JSON
 
@@ -11,6 +11,27 @@ export const provider = new GoogleAuthProvider();
 provider.setCustomParameters({
   prompt: 'select_account'
 });
+
+export const ensureAuthenticated = async () => {
+  if (!auth.currentUser) {
+    try {
+      await signInAnonymously(auth);
+    } catch (err) {
+      console.warn("Auto anonymous auth error:", err);
+    }
+  }
+};
+
+// Automatically authenticate anonymously so all machines connect to Firestore in real-time
+if (typeof window !== 'undefined') {
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      signInAnonymously(auth).catch((err) => {
+        console.warn("Could not sign in anonymously:", err);
+      });
+    }
+  });
+}
 
 export const loginWithGoogle = async () => {
   try {
@@ -40,3 +61,4 @@ export const resetPassword = async (email: string) => {
 };
 
 export const logout = () => signOut(auth);
+
