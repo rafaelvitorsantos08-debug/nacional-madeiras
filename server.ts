@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-import { mergeDataSafely } from './src/lib/dataConsistency.ts';
+import { mergeDataSafely, compressDataSafely, purgeOldData } from './src/lib/dataConsistency.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -121,6 +121,62 @@ app.post('/api/stock/update', (req, res) => {
     return res.json({ success: true, key, value: merged });
   } catch (err: any) {
     console.error('API update error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Compress all stored collections to eliminate empty keys and reduce payload
+app.post('/api/stock/compress', (_req, res) => {
+  try {
+    const updatedKeys: string[] = [];
+    for (const [k, v] of Object.entries(companyData)) {
+      const compressed = compressDataSafely(k, v);
+      companyData[k] = compressed;
+      updatedKeys.push(k);
+      broadcastUpdate(k, compressed, 'Otimização de Armazenamento');
+    }
+    persistToDisk();
+    return res.json({ success: true, updatedKeys, count: updatedKeys.length });
+  } catch (err: any) {
+    console.error('Compress error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// API: Purge old historical records prior to a cutoff date
+app.post('/api/stock/purge-old', (req, res) => {
+  try {
+    const { module, cutoffDate, updatedBy } = req.body;
+    if (!module || !cutoffDate) {
+      return res.status(400).json({ error: 'Missing module or cutoffDate' });
+    }
+
+    let targetKey = '';
+    let modType: 'saidas' | 'operacao' | 'historico' = 'saidas';
+
+    if (module === 'saidas') {
+      targetKey = 'nm_controle_saidas';
+      modType = 'saidas';
+    } else if (module === 'operacao') {
+      targetKey = 'nm_operacao_producao';
+      modType = 'operacao';
+    } else if (module === 'historico') {
+      targetKey = 'nm_historico_entregas_v1';
+      modType = 'historico';
+    } else {
+      return res.status(400).json({ error: 'Invalid module' });
+    }
+
+    const currentVal = companyData[targetKey];
+    const { cleanedData, removedCount, keptCount } = purgeOldData(modType, cutoffDate, currentVal);
+
+    companyData[targetKey] = cleanedData;
+    persistToDisk();
+    broadcastUpdate(targetKey, cleanedData, updatedBy || 'Limpeza de Dados Antigos');
+
+    return res.json({ success: true, module, targetKey, removedCount, keptCount });
+  } catch (err: any) {
+    console.error('Purge error:', err);
     return res.status(500).json({ error: err.message });
   }
 });

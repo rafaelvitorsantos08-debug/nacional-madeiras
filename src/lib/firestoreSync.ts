@@ -1,6 +1,6 @@
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db, auth } from './firebase';
-import { mergeDataSafely } from './dataConsistency';
+import { mergeDataSafely, compressDataSafely } from './dataConsistency';
 
 let unsubscribeCompanySnapshots: (() => void)[] = [];
 let currentData: Record<string, any> = {};
@@ -242,7 +242,8 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
 };
 
 /**
- * Queues a debounced Firestore background sync (5s) to avoid consuming free-tier write quotas.
+ * Queues a debounced Firestore background sync (45s) to avoid consuming free-tier write quotas,
+ * compressing payloads by stripping empty fields.
  */
 const queueFirestoreSync = (key: string, value: any) => {
   PENDING_FIRESTORE_UPDATES.set(key, value);
@@ -272,7 +273,8 @@ const queueFirestoreSync = (key: string, value: any) => {
               updatedBy: userName
             };
           }
-          companyPayloads[mapping.docName][mapping.fieldName] = dataToSave[k];
+          // Compress payload before sending to Firestore
+          companyPayloads[mapping.docName][mapping.fieldName] = compressDataSafely(k, dataToSave[k]);
         }
       });
 
@@ -284,7 +286,7 @@ const queueFirestoreSync = (key: string, value: any) => {
     } catch (err: any) {
       // Non-fatal, local storage and central server provide 100% permanent persistence
     }
-  }, 5000);
+  }, 45000);
 };
 
 export const pushToFirestore = (key: string, value: any) => {

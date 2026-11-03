@@ -581,3 +581,209 @@ if (typeof window !== 'undefined') {
     });
   });
 }
+
+/**
+ * Strips empty strings, nulls, and empty records to minimize payload size and Firestore quota consumption.
+ */
+export function compressDataSafely(key: string, data: any): any {
+  if (!data || typeof data !== 'object') return data;
+
+  // Case 1: nm_controle_saidas
+  if (key.includes('controle_saidas')) {
+    const compressed: Record<string, any> = {};
+    for (const [dateStr, row] of Object.entries(data)) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) continue;
+      const cleanRow: Record<string, any> = {};
+      let hasVal = false;
+      for (const [f, v] of Object.entries(row as Record<string, any>)) {
+        if (v !== '' && v !== null && v !== undefined) {
+          cleanRow[f] = v;
+          hasVal = true;
+        }
+      }
+      if (hasVal) {
+        compressed[dateStr] = cleanRow;
+      }
+    }
+    return compressed;
+  }
+
+  // Case 2: nm_operacao_producao
+  if (key.includes('operacao_producao')) {
+    const compressed: Record<string, any> = {};
+    for (const [dateStr, row] of Object.entries(data)) {
+      if (!row || typeof row !== 'object' || Array.isArray(row)) continue;
+      const cleanRow: Record<string, any> = {};
+      let hasVal = false;
+      for (const [f, v] of Object.entries(row as Record<string, any>)) {
+        if (v !== '' && v !== null && v !== undefined) {
+          cleanRow[f] = v;
+          hasVal = true;
+        }
+      }
+      if (hasVal) {
+        compressed[dateStr] = cleanRow;
+      }
+    }
+    return compressed;
+  }
+
+  // Case 3: nm_entrada_obras_v6
+  if (key.includes('entrada_obras_v6')) {
+    const compressed: Record<string, any> = {};
+    for (const [obraId, obra] of Object.entries(data)) {
+      if (!obra || typeof obra !== 'object') continue;
+      const ob = obra as any;
+
+      const cleanItemList = (list: any[]) => {
+        if (!Array.isArray(list)) return [];
+        return list.map(item => {
+          if (!item || typeof item !== 'object') return item;
+          const cleanEntradas: Record<string, any> = {};
+          for (const [cid, val] of Object.entries(item.entradas || {})) {
+            if (val !== '' && val !== null && val !== undefined && val !== '0' && val !== 0) {
+              cleanEntradas[cid] = val;
+            }
+          }
+          const cleanSaidas: Record<string, any> = {};
+          for (const [cid, val] of Object.entries(item.saidas || {})) {
+            if (val !== '' && val !== null && val !== undefined && val !== '0' && val !== 0) {
+              cleanSaidas[cid] = val;
+            }
+          }
+          const cleanComentarios: Record<string, any> = {};
+          for (const [cid, val] of Object.entries(item.comentarios || {})) {
+            if (val && String(val).trim() !== '') {
+              cleanComentarios[cid] = String(val).trim();
+            }
+          }
+          return {
+            ...item,
+            entradas: cleanEntradas,
+            saidas: cleanSaidas,
+            comentarios: cleanComentarios
+          };
+        });
+      };
+
+      compressed[obraId] = {
+        ...ob,
+        itensFolhas: cleanItemList(ob.itensFolhas),
+        itensAduelas: cleanItemList(ob.itensAduelas),
+        itensAlizares: cleanItemList(ob.itensAlizares),
+        itensCorrer: cleanItemList(ob.itensCorrer),
+      };
+    }
+    return compressed;
+  }
+
+  return data;
+}
+
+/**
+ * Safely removes records older than a cutoff date to free storage and save Firestore quota.
+ */
+export function purgeOldData(
+  moduleName: 'saidas' | 'operacao' | 'historico',
+  cutoffDateStr: string,
+  currentData: any
+): { cleanedData: any; removedCount: number; keptCount: number } {
+  if (!currentData || typeof currentData !== 'object') {
+    return { cleanedData: currentData, removedCount: 0, keptCount: 0 };
+  }
+
+  let removedCount = 0;
+  let keptCount = 0;
+
+  if (moduleName === 'saidas' || moduleName === 'operacao') {
+    const cleaned: Record<string, any> = {};
+    for (const [dt, row] of Object.entries(currentData)) {
+      if (dt < cutoffDateStr) {
+        removedCount++;
+      } else {
+        cleaned[dt] = row;
+        keptCount++;
+      }
+    }
+    return { cleanedData: cleaned, removedCount, keptCount };
+  }
+
+  if (moduleName === 'historico') {
+    if (!Array.isArray(currentData)) {
+      return { cleanedData: currentData, removedCount: 0, keptCount: 0 };
+    }
+    const cleaned = currentData.filter((item: any) => {
+      const d = item?.data || item?.date;
+      if (d && String(d) < cutoffDateStr) {
+        removedCount++;
+        return false;
+      }
+      keptCount++;
+      return true;
+    });
+    return { cleanedData: cleaned, removedCount, keptCount };
+  }
+
+  return { cleanedData: currentData, removedCount: 0, keptCount: 0 };
+}
+
+/**
+ * Exports a 100% complete JSON backup of the entire company system (Server + Local).
+ */
+export async function downloadCompleteSystemBackup(): Promise<boolean> {
+  try {
+    let fullVaultData: Record<string, any> = {};
+
+    // 1. Fetch from central server
+    try {
+      const res = await fetch('/api/stock/all');
+      if (res.ok) {
+        const body = await res.json();
+        if (body && body.data) {
+          fullVaultData = { ...body.data };
+        }
+      }
+    } catch {}
+
+    // 2. Also capture any localStorage keys
+    if (typeof window !== 'undefined') {
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const k = window.localStorage.key(i);
+        if (k && (k.startsWith('nm_') || k.startsWith('nacional_madeiras_'))) {
+          try {
+            const raw = window.localStorage.getItem(k);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (!fullVaultData[k]) {
+                fullVaultData[k] = parsed;
+              }
+            }
+          } catch {}
+        }
+      }
+    }
+
+    const payload = {
+      backupTimestamp: new Date().toISOString(),
+      backupDateDisplay: new Date().toLocaleString('pt-BR'),
+      system: 'Nacional Madeiras - Kit Porta',
+      version: '6.0',
+      totalCollections: Object.keys(fullVaultData).length,
+      data: fullVaultData
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nacional_madeiras_backup_completo_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return true;
+  } catch (err) {
+    console.error("Erro ao gerar backup completo:", err);
+    return false;
+  }
+}

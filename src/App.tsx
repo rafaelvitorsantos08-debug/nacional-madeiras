@@ -20,6 +20,7 @@ import { LancamentosRelatoriosModule } from './components/LancamentosRelatoriosM
 import { HistoricoModule } from './components/HistoricoModule';
 import { EtiquetasModule } from './components/EtiquetasModule';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { GerenciamentoDados } from './components/GerenciamentoDados';
 
 // --- MOCK DATA ---
 const CHART_DATA = [
@@ -47,7 +48,7 @@ const ULTIMAS_SAIDAS = [
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, loginWithGoogle, logout } from './lib/firebase';
 import { forceSyncAllToCloud } from './components/EstoqueModule';
-import { restoreTodayAndConsistentRecords } from './lib/dataConsistency';
+import { restoreTodayAndConsistentRecords, downloadCompleteSystemBackup } from './lib/dataConsistency';
 import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 // Data consistency is maintained directly through real-time Firestore synchronization and useLocalStorage
@@ -568,24 +569,7 @@ export default function App() {
 
 
   const exportToJSON = () => {
-    const data: Record<string, any> = {};
-    for (let i = 0; i < window.localStorage.length; i++) {
-       const key = window.localStorage.key(i);
-       if (key && key.startsWith('nm_')) {
-          try {
-             data[key] = JSON.parse(window.localStorage.getItem(key) || 'null');
-          } catch (e) {
-             data[key] = window.localStorage.getItem(key);
-          }
-       }
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `nacional_madeiras_backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCompleteSystemBackup();
   };
 
   const importFromJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1143,11 +1127,13 @@ export default function App() {
           )}
 
           {activeTab === 'configuracoes' && (
-            <div className="animate-in fade-in duration-300 max-w-4xl mx-auto">
+            <div className="animate-in fade-in duration-300 max-w-4xl mx-auto space-y-6">
               <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
-                <p className="text-sm text-gray-500 mt-1">Gerencie preferências e configurações do sistema.</p>
+                <p className="text-sm text-gray-500 mt-1">Gerencie preferências, armazenamento, backups e proteção de cota.</p>
               </div>
+
+              <GerenciamentoDados />
 
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                  <div className="p-6 border-b border-gray-100">
