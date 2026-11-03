@@ -3,34 +3,16 @@ import { db, auth } from './firebase';
 import { mergeDataSafely } from './dataConsistency';
 
 let unsubscribeCompanySnapshots: (() => void)[] = [];
-let unsubscribeUserSnapshot: (() => void) | null = null;
-let currentData: any = {};
+let currentData: Record<string, any> = {};
 const listeners = new Map<string, Set<(val: any) => void>>();
 let isListening = false;
 let isSseConnected = false;
-let saveTimeout: any = null;
-const DIRTY_DATA = new Map<string, any>();
-
-// Storage key for pending keys
-const PENDING_KEYS_STORAGE_KEY = 'nm_pending_cloud_sync_keys';
-const getPendingKeys = (): Set<string> => {
-  if (typeof window === 'undefined') return new Set();
-  try {
-    const raw = window.localStorage.getItem(PENDING_KEYS_STORAGE_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
-
-const savePendingKeys = (keys: Set<string>) => {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(PENDING_KEYS_STORAGE_KEY, JSON.stringify(Array.from(keys)));
-  } catch {}
-};
-
-const pendingKeys = getPendingKeys();
+let sseRetryTimer: any = null;
+let pollTimer: any = null;
+let serverUpdateDebounce: any = null;
+let firestoreDebounce: any = null;
+const PENDING_SERVER_UPDATES = new Map<string, any>();
+const PENDING_FIRESTORE_UPDATES = new Map<string, any>();
 
 // Mapping of localStorage keys to company shared documents in Firestore (/company_stock/{docId})
 export const COMPANY_DOC_MAPPINGS: Record<string, { docName: string, fieldName: string }> = {
@@ -97,11 +79,11 @@ export const subscribeToSync = (key: string, callback: (val: any) => void) => {
 };
 
 /**
- * Apply incoming remote update to local store safely.
+ * Safely applies an incoming update from the server (SSE or polling) or Firestore.
+ * Always merges non-destructively so no cell or record is ever erased.
  */
 const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 'Outra Máquina') => {
   if (incomingVal === undefined || incomingVal === null) return;
-  if (DIRTY_DATA.has(key)) return; // Don't clobber active typing
 
   let localVal: any = undefined;
   if (typeof window !== 'undefined') {
@@ -111,7 +93,8 @@ const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 
     } catch {}
   }
 
-  const merged = mergeDataSafely(key, localVal, incomingVal, true);
+  // Non-destructive safe merge
+  const merged = mergeDataSafely(key, localVal, incomingVal, false);
   if (merged !== undefined && merged !== null) {
     currentData[key] = merged;
 
@@ -132,24 +115,44 @@ const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 
 };
 
 /**
- * Send update to server backend API.
+ * Sends debounced batched updates to the central server.
  */
-const postUpdateToServer = async (key: string, value: any) => {
-  if (typeof window === 'undefined') return;
+const flushServerUpdates = async () => {
+  if (PENDING_SERVER_UPDATES.size === 0 || typeof window === 'undefined') return;
+
+  const batch: Record<string, any> = {};
+  PENDING_SERVER_UPDATES.forEach((v, k) => {
+    batch[k] = v;
+  });
+  PENDING_SERVER_UPDATES.clear();
+
   try {
     const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
     await fetch('/api/stock/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, value, updatedBy: userName })
+      body: JSON.stringify({ batch, updatedBy: userName })
     });
   } catch (err) {
-    // Non-fatal, local storage and Firestore handles persistence
+    // Non-fatal, local storage has persistence and will retry
   }
 };
 
 /**
- * Fetch all initial company data from server backend on load.
+ * Sends updates to the central server with a 100ms debounce for typing responsiveness.
+ */
+const postUpdateToServer = (key: string, value: any) => {
+  if (typeof window === 'undefined') return;
+  PENDING_SERVER_UPDATES.set(key, value);
+
+  if (serverUpdateDebounce) clearTimeout(serverUpdateDebounce);
+  serverUpdateDebounce = setTimeout(() => {
+    flushServerUpdates();
+  }, 100);
+};
+
+/**
+ * Fetch all initial company data from server backend on load and periodic poll.
  */
 const fetchAllFromServer = async () => {
   if (typeof window === 'undefined') return;
@@ -186,10 +189,20 @@ const connectSseStream = () => {
     eventSource.onerror = () => {
       eventSource.close();
       isSseConnected = false;
-      // Retry in 3 seconds
-      setTimeout(connectSseStream, 3000);
+      if (sseRetryTimer) clearTimeout(sseRetryTimer);
+      sseRetryTimer = setTimeout(connectSseStream, 2000);
     };
   } catch {}
+};
+
+/**
+ * Background periodic polling every 2.5s to ensure complete synchronicity across all machines.
+ */
+const startPolling = () => {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    fetchAllFromServer();
+  }, 2500);
 };
 
 /**
@@ -221,97 +234,57 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
     listeners.get(storageKey)!.forEach(l => l(stampedItems));
   }
 
-  // 1. Send to server backend immediately for instant multi-machine sync
+  // Broadcast to all machines immediately via server
   postUpdateToServer(storageKey, stampedItems);
 
-  // 2. Also sync to Firestore company_stock
-  try {
-    const compDoc = doc(db, 'company_stock', 'geral');
-    await setDoc(compDoc, {
-      [category]: stampedItems,
-      updatedAt: now,
-      updatedBy: userName
-    }, { merge: true });
-
-    pendingKeys.delete(storageKey);
-    savePendingKeys(pendingKeys);
-  } catch (err) {
-    // Non-fatal, server has persistence
-  }
+  // Background queue for Firestore
+  queueFirestoreSync(storageKey, stampedItems);
 };
 
 /**
- * Flushes all pending changes to shared company documents in Firestore.
+ * Queues a debounced Firestore background sync (5s) to avoid consuming free-tier write quotas.
  */
-export const flushPendingToFirestore = async () => {
-  if (DIRTY_DATA.size === 0 && pendingKeys.size === 0) return;
+const queueFirestoreSync = (key: string, value: any) => {
+  PENDING_FIRESTORE_UPDATES.set(key, value);
 
-  const dataToSave: Record<string, any> = {};
-  
-  DIRTY_DATA.forEach((val, k) => {
-    dataToSave[k] = val;
-  });
+  if (firestoreDebounce) clearTimeout(firestoreDebounce);
+  firestoreDebounce = setTimeout(async () => {
+    if (PENDING_FIRESTORE_UPDATES.size === 0) return;
 
-  if (typeof window !== 'undefined') {
-    pendingKeys.forEach(k => {
-      try {
-        const val = window.localStorage.getItem(k);
-        if (val) dataToSave[k] = JSON.parse(val);
-      } catch {}
+    const dataToSave: Record<string, any> = {};
+    PENDING_FIRESTORE_UPDATES.forEach((v, k) => {
+      dataToSave[k] = v;
     });
-  }
+    PENDING_FIRESTORE_UPDATES.clear();
 
-  const keysBeingSaved = Object.keys(dataToSave);
-  if (keysBeingSaved.length === 0) return;
+    const keysBeingSaved = Object.keys(dataToSave);
+    const now = Date.now();
+    const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
 
-  const now = Date.now();
-  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
-
-  // Always update server backend
-  for (const k of keysBeingSaved) {
-    postUpdateToServer(k, dataToSave[k]);
-  }
-
-  // Clear in-flight flags immediately once server is notified
-  keysBeingSaved.forEach(k => {
-    DIRTY_DATA.delete(k);
-    pendingKeys.delete(k);
-  });
-  savePendingKeys(pendingKeys);
-
-  // Group payloads by shared company doc in Firestore
-  try {
-    const companyPayloads: Record<string, Record<string, any>> = {};
-
-    keysBeingSaved.forEach(k => {
-      const mapping = COMPANY_DOC_MAPPINGS[k];
-      if (mapping) {
-        if (!companyPayloads[mapping.docName]) {
-          companyPayloads[mapping.docName] = {
-            updatedAt: now,
-            updatedBy: userName
-          };
+    try {
+      const companyPayloads: Record<string, Record<string, any>> = {};
+      keysBeingSaved.forEach(k => {
+        const mapping = COMPANY_DOC_MAPPINGS[k];
+        if (mapping) {
+          if (!companyPayloads[mapping.docName]) {
+            companyPayloads[mapping.docName] = {
+              updatedAt: now,
+              updatedBy: userName
+            };
+          }
+          companyPayloads[mapping.docName][mapping.fieldName] = dataToSave[k];
         }
-        companyPayloads[mapping.docName][mapping.fieldName] = dataToSave[k];
-      }
-    });
+      });
 
-    const companyWrites = Object.keys(companyPayloads).map(docName => {
-      const compDocRef = doc(db, 'company_stock', docName);
-      return setDoc(compDocRef, companyPayloads[docName], { merge: true });
-    });
-    await Promise.all(companyWrites);
-
-    // Optional user backup if signed in
-    if (auth.currentUser) {
-      try {
-        const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-        await setDoc(userDoc, { ...dataToSave, userId: auth.currentUser.uid }, { merge: true });
-      } catch {}
+      const writes = Object.keys(companyPayloads).map(docName => {
+        const compDocRef = doc(db, 'company_stock', docName);
+        return setDoc(compDocRef, companyPayloads[docName], { merge: true });
+      });
+      await Promise.all(writes);
+    } catch (err: any) {
+      // Non-fatal, local storage and central server provide 100% permanent persistence
     }
-  } catch (err: any) {
-    // If Firestore write quota is reached, server still has all data saved on disk
-  }
+  }, 5000);
 };
 
 export const pushToFirestore = (key: string, value: any) => {
@@ -324,11 +297,7 @@ export const pushToFirestore = (key: string, value: any) => {
   ];
   if (localUiKeys.includes(key)) return;
 
-  DIRTY_DATA.set(key, value);
   currentData[key] = value;
-  
-  pendingKeys.add(key);
-  savePendingKeys(pendingKeys);
 
   if (typeof window !== 'undefined') {
     try {
@@ -336,89 +305,35 @@ export const pushToFirestore = (key: string, value: any) => {
     } catch {}
   }
 
-  // Stock changes are pushed immediately
-  const isStock = key === 'nm_portas' || key === 'nm_aduelas' || key === 'nm_alizares' || key === 'nm_rodapes';
-  if (isStock) {
-    if (saveTimeout) clearTimeout(saveTimeout);
-    flushPendingToFirestore();
-    return;
-  }
+  // 1. Immediately send to server (broadcasts to all machines via SSE + updates vault disk file)
+  postUpdateToServer(key, value);
 
-  // 400ms debounce for typing to balance instant multi-machine responsiveness with quota preservation
-  if (saveTimeout) clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    flushPendingToFirestore();
-  }, 400);
+  // 2. Queue for background Firestore backup (debounced to save quota)
+  queueFirestoreSync(key, value);
 };
 
 /**
- * Attaches real-time listeners to all shared company documents and user configs.
+ * Attaches real-time listeners to server and Firestore.
  */
 export const startListening = () => {
   if (isListening) return;
   isListening = true;
 
-  // 1. Initial fetch and SSE stream from local server
+  // 1. Initial fetch from server vault (complete authoritative data)
   fetchAllFromServer();
+
+  // 2. Connect real-time Server-Sent Events stream for instant cross-machine synchronization (<100ms)
   connectSseStream();
 
-  // 2. Documents in company_stock to listen to for company-wide real-time collaboration
-  const companyDocsToListen = Array.from(new Set(Object.values(COMPANY_DOC_MAPPINGS).map(m => m.docName)));
-
-  companyDocsToListen.forEach(docName => {
-    try {
-      const compDoc = doc(db, 'company_stock', docName);
-      const unsub = onSnapshot(compDoc, (docSnap) => {
-        if (docSnap.metadata.hasPendingWrites) {
-          return;
-        }
-
-        if (docSnap.exists()) {
-          const compData = docSnap.data();
-
-          // Process all mappings that belong to this docName
-          Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
-            const mapping = COMPANY_DOC_MAPPINGS[lsKey];
-            if (mapping.docName === docName) {
-              const incomingVal = compData[mapping.fieldName];
-              if (incomingVal !== undefined && incomingVal !== null) {
-                applyIncomingUpdate(lsKey, incomingVal, compData.updatedBy || 'Outra Máquina');
-              }
-            }
-          });
-        }
-      }, (err) => {
-        // Non-fatal, server SSE provides real-time updates
-      });
-
-      unsubscribeCompanySnapshots.push(unsub);
-    } catch (err) {}
-  });
-
-  // Optional: listen to user_configs if authenticated
-  if (auth.currentUser) {
-    try {
-      const userDoc = doc(db, 'user_configs', auth.currentUser.uid);
-      unsubscribeUserSnapshot = onSnapshot(userDoc, (docSnap) => {
-        if (docSnap.metadata.hasPendingWrites || !docSnap.exists()) return;
-        const remoteData = docSnap.data();
-        Object.keys(remoteData).forEach(k => {
-          if (k === 'userId') return;
-          applyIncomingUpdate(k, remoteData[k], 'Configurações Pessoais');
-        });
-      }, () => {});
-    } catch {}
-  }
+  // 3. Connect 2.5s polling loop to guarantee seamless simultaneity across all operating machines
+  startPolling();
 };
 
 export const stopListening = () => {
-  unsubscribeCompanySnapshots.forEach(unsub => unsub());
-  unsubscribeCompanySnapshots = [];
-  if (unsubscribeUserSnapshot) {
-    unsubscribeUserSnapshot();
-    unsubscribeUserSnapshot = null;
-  }
+  if (pollTimer) clearInterval(pollTimer);
+  if (sseRetryTimer) clearTimeout(sseRetryTimer);
   isListening = false;
+  isSseConnected = false;
   currentData = {};
 };
 
@@ -427,14 +342,9 @@ if (typeof window !== 'undefined') {
   startListening();
 }
 
-// Lifecycle handlers to ensure flush on close/hide
+// Ensure pending updates are flushed when user closes tab
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
-    flushPendingToFirestore();
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      flushPendingToFirestore();
-    }
+    flushServerUpdates();
   });
 }

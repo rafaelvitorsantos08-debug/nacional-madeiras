@@ -125,46 +125,60 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
   if (localVal && typeof localVal === 'object' && incomingVal && typeof incomingVal === 'object') {
     // Special handling for nm_controle_saidas (keys are date strings YYYY-MM-DD)
     if (key.includes('controle_saidas')) {
-      const merged: Record<string, any> = {};
       const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
       const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+      const merged: Record<string, any> = {};
 
-      // Copy all valid day objects from incoming (ignoring meta keys)
-      for (const [k, v] of Object.entries(safeInc)) {
-        if (v && typeof v === 'object' && !Array.isArray(v)) {
-          merged[k] = { ...v };
+      // 1. Copy all existing dates from localVal first to guarantee no date is ever lost
+      for (const [dt, row] of Object.entries(safeLoc)) {
+        if (row && typeof row === 'object' && !Array.isArray(row)) {
+          merged[dt] = { ...row };
         }
       }
 
-      if (incomingIsAuthoritative) {
-        // Cloud snapshot is authoritative; keep local rows only for dates not in cloud
-        for (const [dateStr, localRow] of Object.entries(safeLoc)) {
-          if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
-          if (!merged[dateStr]) {
-            merged[dateStr] = { ...localRow };
-          }
-        }
-      } else {
-        // Local vault/backup merge: merge day by day preserving non-empty values
-        for (const [dateStr, localRow] of Object.entries(safeLoc)) {
-          if (!localRow || typeof localRow !== 'object' || Array.isArray(localRow)) continue;
+      // 2. Apply incoming dates (incoming has user edits / newest entries)
+      for (const [dt, incRow] of Object.entries(safeInc)) {
+        if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
 
-          if (!merged[dateStr]) {
-            merged[dateStr] = { ...localRow };
-          } else {
-            const incRow = merged[dateStr] || {};
-            const locRow = (localRow as any) || {};
-            const combinedRow: Record<string, any> = { ...incRow, ...locRow };
-            
-            for (const f of Object.keys(locRow)) {
-              if (locRow[f] !== '' && locRow[f] !== undefined && locRow[f] !== null) {
-                combinedRow[f] = locRow[f];
-              } else if (incRow[f] !== '' && incRow[f] !== undefined && incRow[f] !== null) {
-                combinedRow[f] = incRow[f];
-              }
-            }
-            merged[dateStr] = combinedRow;
-          }
+        if (!merged[dt]) {
+          merged[dt] = { ...incRow };
+        } else {
+          // Merge field by field: incoming values update the cell, while existing untouched fields/comments are kept
+          const existingRow = merged[dt];
+          merged[dt] = {
+            ...existingRow,
+            ...incRow
+          };
+        }
+      }
+      return merged;
+    }
+
+    // Special handling for nm_operacao_producao (keys are date strings YYYY-MM-DD)
+    if (key.includes('operacao_producao')) {
+      const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
+      const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+      const merged: Record<string, any> = {};
+
+      // 1. Copy all existing dates from localVal first
+      for (const [dt, row] of Object.entries(safeLoc)) {
+        if (row && typeof row === 'object' && !Array.isArray(row)) {
+          merged[dt] = { ...row };
+        }
+      }
+
+      // 2. Apply incoming dates (incoming has user edits / newest entries)
+      for (const [dt, incRow] of Object.entries(safeInc)) {
+        if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
+
+        if (!merged[dt]) {
+          merged[dt] = { ...incRow };
+        } else {
+          const existingRow = merged[dt];
+          merged[dt] = {
+            ...existingRow,
+            ...incRow
+          };
         }
       }
       return merged;
@@ -172,68 +186,105 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
 
     // Special handling for nm_entrada_obras_v6 (keys are obra IDs)
     if (key.includes('entrada_obras_v6')) {
-      const merged: Record<string, any> = { ...(incomingVal || {}) };
-      for (const [obraId, localObra] of Object.entries((localVal || {}) as Record<string, any>)) {
-        if (!localObra || typeof localObra !== 'object') continue;
-        if (!merged[obraId]) {
-          merged[obraId] = localObra;
-        } else {
-          const incObra = (merged[obraId] && typeof merged[obraId] === 'object') ? merged[obraId] : {};
-          const locObra = (localObra && typeof localObra === 'object') ? localObra : {};
+      const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+      const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
+      const merged: Record<string, any> = {};
 
-          // Merge cargas lists by id
+      // 1. Copy all existing obras
+      for (const [obraId, locObra] of Object.entries(safeLoc)) {
+        if (locObra && typeof locObra === 'object') {
+          merged[obraId] = { ...locObra };
+        }
+      }
+
+      // 2. Merge incoming obras
+      for (const [obraId, incObra] of Object.entries(safeInc)) {
+        if (!incObra || typeof incObra !== 'object') continue;
+
+        if (!merged[obraId]) {
+          merged[obraId] = { ...incObra };
+        } else {
+          const exObra = (merged[obraId] || {}) as any;
+          const inc = incObra as any;
+
+          // Merge cargas lists by id (never delete existing cargas)
           const mergeCargas = (listA: any[] = [], listB: any[] = []) => {
             const cMap = new Map<string, any>();
             [...(Array.isArray(listA) ? listA : []), ...(Array.isArray(listB) ? listB : [])].forEach(c => {
-              if (c && c.id) cMap.set(String(c.id), { ...(cMap.get(String(c.id)) || {}), ...c });
+              if (c && c.id) {
+                const ex = cMap.get(String(c.id)) || {};
+                cMap.set(String(c.id), {
+                  ...ex,
+                  ...c,
+                  nome: c.nome || ex.nome || '',
+                  data: c.data || ex.data || ''
+                });
+              }
             });
             return Array.from(cMap.values());
           };
 
-          // Merge item lists (itensFolhas, itensAduelas, itensAlizares, itensCorrer)
-          const mergeItems = (itemsA: any[] = [], itemsB: any[] = []) => {
-            const iMap = new Map<string, any>();
-            // Add items from B
-            (Array.isArray(itemsB) ? itemsB : []).forEach(it => {
-              if (it && it.id) iMap.set(String(it.id), { ...it });
+          // Merge item lists: apply incoming changes while preserving all entries and existing non-empty items
+          const mergeItems = (existingItems: any[] = [], incomingItems: any[] = []) => {
+            const exMap = new Map<string, any>();
+            (Array.isArray(existingItems) ? existingItems : []).forEach(it => {
+              if (it && it.id) exMap.set(String(it.id), { ...it });
             });
-            // Merge with A
-            (Array.isArray(itemsA) ? itemsA : []).forEach(it => {
+
+            const mergedList: any[] = [];
+            const seenIds = new Set<string>();
+
+            // Process incoming items first (preserves user ordering and new items)
+            (Array.isArray(incomingItems) ? incomingItems : []).forEach(it => {
               if (it && it.id) {
-                const ex = iMap.get(String(it.id));
+                const idStr = String(it.id);
+                seenIds.add(idStr);
+                const ex = exMap.get(idStr);
                 if (ex) {
-                  iMap.set(String(it.id), {
+                  mergedList.push({
                     ...ex,
                     ...it,
-                    entradas: { ...(typeof ex.entradas === 'object' ? ex.entradas : {}), ...(typeof it.entradas === 'object' ? it.entradas : {}) },
-                    saidas: { ...(typeof ex.saidas === 'object' ? ex.saidas : {}), ...(typeof it.saidas === 'object' ? it.saidas : {}) },
-                    comentarios: { ...(typeof ex.comentarios === 'object' ? ex.comentarios : {}), ...(typeof it.comentarios === 'object' ? it.comentarios : {}) }
+                    entradas: { ...(ex.entradas || {}), ...(it.entradas || {}) },
+                    saidas: { ...(ex.saidas || {}), ...(it.saidas || {}) },
+                    comentarios: { ...(ex.comentarios || {}), ...(it.comentarios || {}) }
                   });
                 } else {
-                  iMap.set(String(it.id), it);
+                  mergedList.push({ ...it });
                 }
               }
             });
-            return Array.from(iMap.values());
+
+            // Protect existing items with data if omitted in incoming
+            for (const [idStr, exItem] of exMap.entries()) {
+              if (!seenIds.has(idStr)) {
+                const hasEntries = Object.values(exItem.entradas || {}).some(v => v !== '' && v !== undefined && v !== null);
+                const hasSaidas = Object.values(exItem.saidas || {}).some(v => v !== '' && v !== undefined && v !== null);
+                if (hasEntries || hasSaidas) {
+                  mergedList.push(exItem);
+                }
+              }
+            }
+
+            return mergedList;
           };
 
           merged[obraId] = {
-            ...incObra,
-            ...locObra,
+            ...exObra,
+            ...inc,
             id: obraId,
-            nome: locObra.nome || incObra.nome || 'Sem Nome',
-            cargasEntradaFolhas: mergeCargas(incObra.cargasEntradaFolhas, locObra.cargasEntradaFolhas),
-            cargasSaidaFolhas: mergeCargas(incObra.cargasSaidaFolhas, locObra.cargasSaidaFolhas),
-            cargasEntradaAduelas: mergeCargas(incObra.cargasEntradaAduelas, locObra.cargasEntradaAduelas),
-            cargasSaidaAduelas: mergeCargas(incObra.cargasSaidaAduelas, locObra.cargasSaidaAduelas),
-            cargasEntradaAlizares: mergeCargas(incObra.cargasEntradaAlizares, locObra.cargasEntradaAlizares),
-            cargasSaidaAlizares: mergeCargas(incObra.cargasSaidaAlizares, locObra.cargasSaidaAlizares),
-            cargasEntradaCorrer: mergeCargas(incObra.cargasEntradaCorrer, locObra.cargasEntradaCorrer),
-            cargasSaidaCorrer: mergeCargas(incObra.cargasSaidaCorrer, locObra.cargasSaidaCorrer),
-            itensFolhas: mergeItems(locObra.itensFolhas, incObra.itensFolhas),
-            itensAduelas: mergeItems(locObra.itensAduelas, incObra.itensAduelas),
-            itensAlizares: mergeItems(locObra.itensAlizares, incObra.itensAlizares),
-            itensCorrer: mergeItems(locObra.itensCorrer, incObra.itensCorrer),
+            nome: inc.nome || exObra.nome || 'Sem Nome',
+            cargasEntradaFolhas: mergeCargas(exObra.cargasEntradaFolhas, inc.cargasEntradaFolhas),
+            cargasSaidaFolhas: mergeCargas(exObra.cargasSaidaFolhas, inc.cargasSaidaFolhas),
+            cargasEntradaAduelas: mergeCargas(exObra.cargasEntradaAduelas, inc.cargasEntradaAduelas),
+            cargasSaidaAduelas: mergeCargas(exObra.cargasSaidaAduelas, inc.cargasSaidaAduelas),
+            cargasEntradaAlizares: mergeCargas(exObra.cargasEntradaAlizares, inc.cargasEntradaAlizares),
+            cargasSaidaAlizares: mergeCargas(exObra.cargasSaidaAlizares, inc.cargasSaidaAlizares),
+            cargasEntradaCorrer: mergeCargas(exObra.cargasEntradaCorrer, inc.cargasEntradaCorrer),
+            cargasSaidaCorrer: mergeCargas(exObra.cargasSaidaCorrer, inc.cargasSaidaCorrer),
+            itensFolhas: mergeItems(exObra.itensFolhas, inc.itensFolhas),
+            itensAduelas: mergeItems(exObra.itensAduelas, inc.itensAduelas),
+            itensAlizares: mergeItems(exObra.itensAlizares, inc.itensAlizares),
+            itensCorrer: mergeItems(exObra.itensCorrer, inc.itensCorrer),
           };
         }
       }

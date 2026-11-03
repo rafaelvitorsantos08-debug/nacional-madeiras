@@ -256,35 +256,8 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
     const rawItens = Array.isArray(activeObra[listField]) ? activeObra[listField] : [];
     const validItens = rawItens.filter((it: any) => it && typeof it === 'object');
 
-    const currentItens = [...validItens].sort((a, b) => {
-      let valA = '';
-      let valB = '';
-      if (activeTab === 'folhas' || activeTab === 'correr') {
-        valA = a?.dimensao || '';
-        valB = b?.dimensao || '';
-      } else if (activeTab === 'aduelas') {
-        valA = a?.medidaAduela || '';
-        valB = b?.medidaAduela || '';
-      } else if (activeTab === 'alizares') {
-        valA = a?.medidaAlizar || '';
-        valB = b?.medidaAlizar || '';
-      }
-      
-      if (!valA && valB) return 1;
-      if (valA && !valB) return -1;
-      if (!valA && !valB) return 0;
-
-      const parseDim = (str: string) => (str || '').split(/[xX]/).map(n => parseInt(n) || 0);
-      const numsA = parseDim(valA);
-      const numsB = parseDim(valB);
-      
-      for (let i = 0; i < Math.max(numsA.length, numsB.length); i++) {
-        const nA = numsA[i] || 0;
-        const nB = numsB[i] || 0;
-        if (nA !== nB) return nA - nB;
-      }
-      return valA.localeCompare(valB);
-    });
+    // Keep items in stable order so typing or adding a row does not jump or disappear from cursor
+    const currentItens = validItens;
     
     const today = new Date().toISOString().split('T')[0];
     const rawCargasEntrada = activeObra[`cargasEntrada${abaCapitalized}`];

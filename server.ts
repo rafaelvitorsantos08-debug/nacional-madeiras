@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
+import { mergeDataSafely } from './src/lib/dataConsistency.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,7 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const vaultPath = path.join(dataDir, 'company_stock_vault.json');
+const backupPath = path.join(dataDir, 'company_stock_vault.bak.json');
 
 // In-memory cache of company data
 let companyData: Record<string, any> = {};
@@ -27,7 +29,12 @@ if (fs.existsSync(vaultPath)) {
   try {
     companyData = JSON.parse(fs.readFileSync(vaultPath, 'utf8'));
   } catch (e) {
-    console.warn('Failed to parse existing vault, starting fresh', e);
+    console.warn('Failed to parse existing vault, attempting backup', e);
+    if (fs.existsSync(backupPath)) {
+      try {
+        companyData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+      } catch {}
+    }
   }
 }
 
@@ -37,11 +44,13 @@ const persistToDisk = () => {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try {
-      fs.writeFileSync(vaultPath, JSON.stringify(companyData, null, 2), 'utf8');
+      const content = JSON.stringify(companyData, null, 2);
+      fs.writeFileSync(vaultPath, content, 'utf8');
+      fs.writeFileSync(backupPath, content, 'utf8');
     } catch (e) {
       console.error('Error writing vault to disk:', e);
     }
-  }, 200);
+  }, 100);
 };
 
 // SSE Connected Clients
@@ -76,6 +85,15 @@ app.get('/api/stock/all', (_req, res) => {
   });
 });
 
+// API: Poll company stock data
+app.get('/api/stock/poll', (_req, res) => {
+  res.json({
+    success: true,
+    data: companyData,
+    timestamp: Date.now()
+  });
+});
+
 // API: Update a specific key or batch
 app.post('/api/stock/update', (req, res) => {
   try {
@@ -83,8 +101,9 @@ app.post('/api/stock/update', (req, res) => {
 
     if (batch && typeof batch === 'object') {
       for (const [k, v] of Object.entries(batch)) {
-        companyData[k] = v;
-        broadcastUpdate(k, v, updatedBy || 'Outra Máquina');
+        const merged = mergeDataSafely(k, companyData[k], v, false);
+        companyData[k] = merged;
+        broadcastUpdate(k, merged, updatedBy || 'Outra Máquina');
       }
       persistToDisk();
       return res.json({ success: true, count: Object.keys(batch).length });
@@ -94,22 +113,24 @@ app.post('/api/stock/update', (req, res) => {
       return res.status(400).json({ error: 'Missing key' });
     }
 
-    companyData[key] = value;
+    const merged = mergeDataSafely(key, companyData[key], value, false);
+    companyData[key] = merged;
     persistToDisk();
-    broadcastUpdate(key, value, updatedBy || 'Outra Máquina');
+    broadcastUpdate(key, merged, updatedBy || 'Outra Máquina');
 
-    return res.json({ success: true, key });
+    return res.json({ success: true, key, value: merged });
   } catch (err: any) {
     console.error('API update error:', err);
     return res.status(500).json({ error: err.message });
   }
 });
 
-// API: Real-time SSE stream
+// API: Real-time SSE stream with immediate flush
 app.get('/api/stock/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders?.();
 
   const clientId = nextClientId++;
@@ -124,14 +145,14 @@ app.get('/api/stock/stream', (req, res) => {
   });
 });
 
-// Keep-alive heartbeat every 20 seconds
+// Keep-alive heartbeat every 15 seconds
 setInterval(() => {
   clients.forEach(c => {
     try {
       c.res.write(`: heartbeat\n\n`);
     } catch {}
   });
-}, 20000);
+}, 15000);
 
 // Setup Vite middlewares in development
 async function startServer() {

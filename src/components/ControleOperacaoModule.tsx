@@ -89,8 +89,18 @@ const handleTableKeyDown = (
   maxCol: number
 ) => {
   const target = e.currentTarget;
-  const isAtStart = target.selectionStart === 0;
-  const isAtEnd = target.selectionEnd === target.value.length;
+  let isAtStart = true;
+  let isAtEnd = true;
+  try {
+    if (typeof target.selectionStart === 'number') {
+      isAtStart = target.selectionStart === 0;
+      isAtEnd = target.selectionEnd === target.value.length;
+    }
+  } catch {
+    // Some input types do not support selectionStart/selectionEnd (e.g. type="number")
+    isAtStart = true;
+    isAtEnd = true;
+  }
 
   let nextRow = rowIdx;
   let nextCol = colIdx;
@@ -795,8 +805,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 }
 
 function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: number, globalSearch?: string }) {
-  const [selecionadoAno, setSelecionadoAno] = useState(new Date().getFullYear());
-  const [selecionadoMes, setSelecionadoMes] = useState(initialMonth ?? new Date().getMonth()); // 0-indexed
+  const [selecionadoAno, setSelecionadoAno] = useLocalStorage('nm_selected_operacao_year', new Date().getFullYear());
+  const [selecionadoMes, setSelecionadoMes] = useLocalStorage('nm_selected_operacao_month', initialMonth ?? new Date().getMonth()); // 0-indexed
+  
+  useEffect(() => {
+    if (initialMonth !== undefined) {
+      setSelecionadoMes(initialMonth);
+    }
+  }, [initialMonth]);
   
   const anos = Array.from({ length: 50 }, (_, i) => 2026 + i);
 
