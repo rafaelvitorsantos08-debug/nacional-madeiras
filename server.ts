@@ -61,12 +61,13 @@ type Client = {
 let clients: Client[] = [];
 let nextClientId = 1;
 
-const broadcastUpdate = (key: string, value: any, updatedBy: string = 'Sistema') => {
+const broadcastUpdate = (key: string, value: any, updatedBy: string = 'Sistema', isAuthoritative: boolean = false) => {
   const payload = JSON.stringify({
     key,
     value,
     updatedAt: Date.now(),
     updatedBy,
+    isAuthoritative
   });
 
   clients.forEach(c => {
@@ -172,7 +173,7 @@ app.post('/api/stock/purge-old', (req, res) => {
 
     companyData[targetKey] = cleanedData;
     persistToDisk();
-    broadcastUpdate(targetKey, cleanedData, updatedBy || 'Limpeza de Dados Antigos');
+    broadcastUpdate(targetKey, cleanedData, updatedBy || 'Limpeza de Dados Antigos', true);
 
     return res.json({ success: true, module, targetKey, removedCount, keptCount });
   } catch (err: any) {

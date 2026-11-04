@@ -127,23 +127,30 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
     if (key.includes('controle_saidas')) {
       const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
       const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+
+      if (incomingIsAuthoritative) {
+        return { ...safeInc };
+      }
+
+      const cutoff = typeof window !== 'undefined' ? window.localStorage.getItem('nm_purged_cutoff_' + key) : null;
       const merged: Record<string, any> = {};
 
-      // 1. Copy all existing dates from localVal first to guarantee no date is ever lost
+      // 1. Copy local dates (skipping any dates prior to an intentional purge cutoff)
       for (const [dt, row] of Object.entries(safeLoc)) {
+        if (cutoff && dt < cutoff) continue;
         if (row && typeof row === 'object' && !Array.isArray(row)) {
           merged[dt] = { ...row };
         }
       }
 
-      // 2. Apply incoming dates (incoming has user edits / newest entries)
+      // 2. Apply incoming dates (skipping any dates prior to cutoff)
       for (const [dt, incRow] of Object.entries(safeInc)) {
+        if (cutoff && dt < cutoff) continue;
         if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
 
         if (!merged[dt]) {
           merged[dt] = { ...incRow };
         } else {
-          // Merge field by field: incoming values update the cell, while existing untouched fields/comments are kept
           const existingRow = merged[dt];
           merged[dt] = {
             ...existingRow,
@@ -158,17 +165,25 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
     if (key.includes('operacao_producao')) {
       const safeInc = (typeof incomingVal === 'object' && incomingVal !== null) ? incomingVal : {};
       const safeLoc = (typeof localVal === 'object' && localVal !== null) ? localVal : {};
+
+      if (incomingIsAuthoritative) {
+        return { ...safeInc };
+      }
+
+      const cutoff = typeof window !== 'undefined' ? window.localStorage.getItem('nm_purged_cutoff_' + key) : null;
       const merged: Record<string, any> = {};
 
-      // 1. Copy all existing dates from localVal first
+      // 1. Copy local dates (skipping any dates prior to an intentional purge cutoff)
       for (const [dt, row] of Object.entries(safeLoc)) {
+        if (cutoff && dt < cutoff) continue;
         if (row && typeof row === 'object' && !Array.isArray(row)) {
           merged[dt] = { ...row };
         }
       }
 
-      // 2. Apply incoming dates (incoming has user edits / newest entries)
+      // 2. Apply incoming dates (skipping any dates prior to cutoff)
       for (const [dt, incRow] of Object.entries(safeInc)) {
+        if (cutoff && dt < cutoff) continue;
         if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
 
         if (!merged[dt]) {
@@ -462,11 +477,18 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
     }
 
     // 2. Recover nm_controle_saidas (Controle de Saídas diárias)
+    const saidasCutoff = window.localStorage.getItem('nm_purged_cutoff_nm_controle_saidas');
     let currentSaidas: Record<string, any> = {};
     try {
       const raw = window.localStorage.getItem('nm_controle_saidas');
       if (raw) currentSaidas = JSON.parse(raw);
     } catch(e) {}
+
+    if (saidasCutoff) {
+      for (const dt in currentSaidas) {
+        if (dt < saidasCutoff) delete currentSaidas[dt];
+      }
+    }
 
     const saidasCandidates: any[] = [];
     ['nm_backup_nm_controle_saidas', 'nm_safe_vault_nm_controle_saidas'].forEach(bk => {
@@ -474,7 +496,14 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
         const raw = window.localStorage.getItem(bk);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') saidasCandidates.push(parsed);
+          if (parsed && typeof parsed === 'object') {
+            if (saidasCutoff) {
+              for (const dt in parsed) {
+                if (dt < saidasCutoff) delete parsed[dt];
+              }
+            }
+            saidasCandidates.push(parsed);
+          }
         }
       } catch(e) {}
     });
@@ -484,11 +513,57 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
       mergedSaidas = mergeDataSafely('nm_controle_saidas', mergedSaidas, cand);
     }
 
-    if (JSON.stringify(mergedSaidas) !== JSON.stringify(currentSaidas)) {
+    if (JSON.stringify(mergedSaidas) !== JSON.stringify(currentSaidas) || saidasCutoff) {
       window.localStorage.setItem('nm_controle_saidas', JSON.stringify(mergedSaidas));
       window.localStorage.setItem('nm_safe_vault_nm_controle_saidas', JSON.stringify(mergedSaidas));
+      window.localStorage.setItem('nm_backup_nm_controle_saidas', JSON.stringify(mergedSaidas));
       result.restoredKeys.push('nm_controle_saidas');
       result.details.push(`Controle de Saídas: ${Object.keys(mergedSaidas).length} dias consolidados`);
+    }
+
+    // 2.1 Recover nm_operacao_producao (Operação da Produção diária)
+    const operacaoCutoff = window.localStorage.getItem('nm_purged_cutoff_nm_operacao_producao');
+    let currentOp: Record<string, any> = {};
+    try {
+      const raw = window.localStorage.getItem('nm_operacao_producao');
+      if (raw) currentOp = JSON.parse(raw);
+    } catch(e) {}
+
+    if (operacaoCutoff) {
+      for (const dt in currentOp) {
+        if (dt < operacaoCutoff) delete currentOp[dt];
+      }
+    }
+
+    const opCandidates: any[] = [];
+    ['nm_backup_nm_operacao_producao', 'nm_safe_vault_nm_operacao_producao'].forEach(bk => {
+      try {
+        const raw = window.localStorage.getItem(bk);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            if (operacaoCutoff) {
+              for (const dt in parsed) {
+                if (dt < operacaoCutoff) delete parsed[dt];
+              }
+            }
+            opCandidates.push(parsed);
+          }
+        }
+      } catch(e) {}
+    });
+
+    let mergedOp = currentOp;
+    for (const cand of opCandidates) {
+      mergedOp = mergeDataSafely('nm_operacao_producao', mergedOp, cand);
+    }
+
+    if (JSON.stringify(mergedOp) !== JSON.stringify(currentOp) || operacaoCutoff) {
+      window.localStorage.setItem('nm_operacao_producao', JSON.stringify(mergedOp));
+      window.localStorage.setItem('nm_safe_vault_nm_operacao_producao', JSON.stringify(mergedOp));
+      window.localStorage.setItem('nm_backup_nm_operacao_producao', JSON.stringify(mergedOp));
+      result.restoredKeys.push('nm_operacao_producao');
+      result.details.push(`Operação da Produção: ${Object.keys(mergedOp).length} dias consolidados`);
     }
 
     // 3. Recover nm_ferragens_history_v5 (Entradas e Saídas de Ferragens)
@@ -696,6 +771,10 @@ export function purgeOldData(
   let keptCount = 0;
 
   if (moduleName === 'saidas' || moduleName === 'operacao') {
+    const key = moduleName === 'saidas' ? 'nm_controle_saidas' : 'nm_operacao_producao';
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('nm_purged_cutoff_' + key, cutoffDateStr);
+    }
     const cleaned: Record<string, any> = {};
     for (const [dt, row] of Object.entries(currentData)) {
       if (dt < cutoffDateStr) {
@@ -704,6 +783,14 @@ export function purgeOldData(
         cleaned[dt] = row;
         keptCount++;
       }
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const cleanedStr = JSON.stringify(cleaned);
+        window.localStorage.setItem(key, cleanedStr);
+        window.localStorage.setItem('nm_safe_vault_' + key, cleanedStr);
+        window.localStorage.setItem('nm_backup_' + key, cleanedStr);
+      } catch {}
     }
     return { cleanedData: cleaned, removedCount, keptCount };
   }

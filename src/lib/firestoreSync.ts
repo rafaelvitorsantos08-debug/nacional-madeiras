@@ -78,11 +78,12 @@ export const subscribeToSync = (key: string, callback: (val: any) => void) => {
   };
 };
 
-/**
- * Safely applies an incoming update from the server (SSE or polling) or Firestore.
- * Always merges non-destructively so no cell or record is ever erased.
- */
-const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 'Outra Máquina') => {
+const applyIncomingUpdate = (
+  key: string,
+  incomingVal: any,
+  updatedBy: string = 'Outra Máquina',
+  isAuthoritative: boolean = false
+) => {
   if (incomingVal === undefined || incomingVal === null) return;
 
   let localVal: any = undefined;
@@ -93,17 +94,18 @@ const applyIncomingUpdate = (key: string, incomingVal: any, updatedBy: string = 
     } catch {}
   }
 
-  // Non-destructive safe merge
-  const merged = mergeDataSafely(key, localVal, incomingVal, false);
+  // Authoritative replacement (e.g. Purge/Exclusion) or non-destructive safe merge
+  const merged = isAuthoritative ? incomingVal : mergeDataSafely(key, localVal, incomingVal, false);
   if (merged !== undefined && merged !== null) {
     currentData[key] = merged;
 
     if (typeof window !== 'undefined') {
       const strVal = JSON.stringify(merged);
       const curStr = JSON.stringify(localVal);
-      if (strVal !== curStr) {
+      if (strVal !== curStr || isAuthoritative) {
         window.localStorage.setItem(key, strVal);
         window.localStorage.setItem('nm_safe_vault_' + key, strVal);
+        window.localStorage.setItem('nm_backup_' + key, strVal);
         window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key, value: merged } }));
       }
     }
@@ -181,7 +183,7 @@ const connectSseStream = () => {
       try {
         const payload = JSON.parse(event.data);
         if (payload && payload.key && payload.value !== undefined) {
-          applyIncomingUpdate(payload.key, payload.value, payload.updatedBy || 'Outra Máquina');
+          applyIncomingUpdate(payload.key, payload.value, payload.updatedBy || 'Outra Máquina', !!payload.isAuthoritative);
         }
       } catch {}
     };

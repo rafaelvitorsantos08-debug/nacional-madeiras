@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
-import { Target, Plus, Trash2, X, Info, MessageSquare } from 'lucide-react';
+import { Target, Plus, Trash2, X, Info, MessageSquare, FileText, Download } from 'lucide-react';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, ENCHIMENTOS_PORTA, LARGURAS_ADUELA, COMPRIMENTOS_ADUELA, FACE_ALIZAR, ESPESSURA_ALIZAR, COMPRIMENTOS_ALIZAR, ABA_ALIZAR } from './EstoqueModule';
+import { exportEntradaSaidaObrasPdf } from '../lib/pdfBackupService';
 
 export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string }) {
   const [obrasV6, setObrasV6] = useLocalStorage<Record<string, any>>('nm_entrada_obras_v6', {});
@@ -556,6 +557,22 @@ export function EntradaSaidaObras({ globalSearch = '' }: { globalSearch?: string
             </div>
             <button onClick={adicionarObra} className="mt-5 flex justify-center items-center px-4 py-2 text-sm font-bold text-white bg-brand-green rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap">
               <Plus className="w-4 h-4 mr-1"/> Nova Obra
+            </button>
+            {activeObra && (
+              <button 
+                onClick={() => exportEntradaSaidaObrasPdf(safeObrasV6, { obraId: activeObra.id })}
+                className="mt-5 flex justify-center items-center px-3.5 py-2 text-sm font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors shadow-xs whitespace-nowrap"
+                title="Baixar Backup em PDF desta Obra"
+              >
+                <FileText className="w-4 h-4 mr-1.5 text-emerald-700"/> PDF Desta Obra
+              </button>
+            )}
+            <button 
+              onClick={() => exportEntradaSaidaObrasPdf(safeObrasV6)}
+              className="mt-5 flex justify-center items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-xs whitespace-nowrap"
+              title="Baixar Backup em PDF com Todas as Obras"
+            >
+              <Download className="w-4 h-4 mr-1 text-gray-500"/> PDF Todas as Obras
             </button>
           </div>
           {activeObra && (

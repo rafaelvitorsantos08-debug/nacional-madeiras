@@ -669,7 +669,15 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => setActiveTab('configuracoes')}
+              className="flex items-center space-x-1.5 text-xs text-emerald-800 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors font-bold shadow-xs cursor-pointer"
+              title="Abrir central de backups em PDF separados por aba e gerenciamento de exclusão"
+            >
+              <FileText className="w-4 h-4 text-emerald-700" />
+              <span className="hidden sm:inline-block">Backups PDF</span>
+            </button>
             <button 
               onClick={() => {
                 const res = restoreTodayAndConsistentRecords();

@@ -74,6 +74,7 @@ export function ControleOperacaoModule({ initialTab = 'saidas', initialMonth, gl
 import { EntradaSaidaObras } from './EntradaSaidaObras';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useLocalStorage, DIMENSOES_PORTA, CORES, MODELOS_PORTA, LARGURAS_ADUELA, FACE_ALIZAR, COMPRIMENTOS_ADUELA, COMPRIMENTOS_ALIZAR, ESPESSURA_ALIZAR, ENCHIMENTOS_PORTA, ABA_ALIZAR } from './EstoqueModule';
+import { exportControleSaidasPdf, exportOperacaoProducaoPdf } from '../lib/pdfBackupService';
 
 const MESES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -377,6 +378,9 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
   }, []);
 
+  const numAno = typeof selecionadoAno === 'number' && !isNaN(selecionadoAno) && selecionadoAno >= 2020 ? selecionadoAno : (parseInt(String(selecionadoAno), 10) || 2026);
+  const numMes = typeof selecionadoMes === 'number' && !isNaN(selecionadoMes) && selecionadoMes >= 0 && selecionadoMes <= 11 ? selecionadoMes : (parseInt(String(selecionadoMes), 10) || new Date().getMonth());
+
   const sumCol = (field: string) => {
     const isE1 = field.startsWith('e1_');
     const isE2 = field.startsWith('e2_');
@@ -385,8 +389,8 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     if (globalSearch && descField) {
       const searchLower = globalSearch.trim().toLowerCase();
       // When searching globally, sum everything up to the selected month's end date
-      const maxDate = new Date(selecionadoAno, selecionadoMes + 1, 0);
-      const maxDateStr = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
+      const maxDate = new Date(numAno, numMes + 1, 0);
+      const maxDateStr = `${numAno}-${String(numMes + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
       
       let total = 0;
       for (const [dateStr, rowData] of Object.entries(safeMonthlyData)) {
@@ -416,12 +420,12 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
     return new Date(year, month + 1, 0).getDate();
   };
 
-  const daysCount = getDaysInMonth(selecionadoAno, selecionadoMes);
+  const daysCount = getDaysInMonth(numAno, numMes);
   const rows = Array.from({ length: daysCount }, (_, i) => {
     const day = i + 1;
-    const date = new Date(selecionadoAno, selecionadoMes, day);
-    const dateStrKey = `${selecionadoAno}-${String(selecionadoMes + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const dateStrDisplay = `${String(day).padStart(2, '0')}/${String(selecionadoMes + 1).padStart(2, '0')}/${selecionadoAno}`;
+    const date = new Date(numAno, numMes, day);
+    const dateStrKey = `${numAno}-${String(numMes + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStrDisplay = `${String(day).padStart(2, '0')}/${String(numMes + 1).padStart(2, '0')}/${numAno}`;
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
     
     return {
@@ -451,12 +455,14 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
 
   const renderInput = (row: any, field: string, colIdx: number, className: string = "") => {
     const rowObj = (safeMonthlyData[row.dateStrKey] && typeof safeMonthlyData[row.dateStrKey] === 'object') ? safeMonthlyData[row.dateStrKey] : null;
-    const val = rowObj?.[field] || '';
+    const rawVal = rowObj?.[field];
+    const val = (rawVal !== null && rawVal !== undefined && typeof rawVal !== 'object') ? String(rawVal) : '';
     if (row.isWeekend) return null; // weekends handled separately in JSX
     
     // Highlight if search matches description
-    const isMatched = globalSearch && val && val.toString().toLowerCase().includes(globalSearch.trim().toLowerCase());
-    const comment = rowObj?.[`comm_${field}`] || '';
+    const isMatched = globalSearch && val && val.toLowerCase().includes(globalSearch.trim().toLowerCase());
+    const rawComment = rowObj?.[`comm_${field}`];
+    const comment = (rawComment !== null && rawComment !== undefined && typeof rawComment !== 'object') ? String(rawComment) : '';
     const hasComment = !!comment;
 
     return (
@@ -558,8 +564,22 @@ function ControleSaidas({ initialMonth, globalSearch = '' }: { initialMonth?: nu
              >
                {anos.map(a => <option key={a} value={a}>{a}</option>)}
              </select>
-             <button onClick={handleExport} className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm print:hidden">
-               <Download className="w-4 h-4 mr-2 text-gray-500"/> Exportar
+             <button 
+               onClick={() => exportControleSaidasPdf(monthlyData, { filterMonth: numMes, filterYear: numAno })} 
+               className="flex items-center px-3.5 py-2 text-sm font-bold text-white bg-brand-green hover:bg-green-700 rounded-lg transition-colors shadow-xs print:hidden"
+               title="Baixar Backup em PDF formatado deste mês"
+             >
+               <FileText className="w-4 h-4 mr-1.5" /> Baixar PDF do Mês
+             </button>
+             <button 
+               onClick={() => exportControleSaidasPdf(monthlyData)} 
+               className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-xs print:hidden"
+               title="Baixar Backup em PDF completo de todos os meses"
+             >
+               <Download className="w-4 h-4 mr-1.5 text-gray-500" /> PDF Completo
+             </button>
+             <button onClick={handleExport} className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors print:hidden" title="Exportar planilha CSV">
+               CSV
              </button>
            </div>
         </div>
@@ -876,6 +896,9 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
     return isNaN(old) || old === 0 ? '' : old;
   };
 
+  const numAno = typeof selecionadoAno === 'number' && !isNaN(selecionadoAno) && selecionadoAno >= 2020 ? selecionadoAno : (parseInt(String(selecionadoAno), 10) || 2026);
+  const numMes = typeof selecionadoMes === 'number' && !isNaN(selecionadoMes) && selecionadoMes >= 0 && selecionadoMes <= 11 ? selecionadoMes : (parseInt(String(selecionadoMes), 10) || new Date().getMonth());
+
   const getDaysArray = (year: number, month: number) => {
     const numDays = new Date(year, month + 1, 0).getDate();
     return Array.from({length: numDays}, (_, i) => {
@@ -892,7 +915,7 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
     });
   };
 
-  const daysThisMonth = getDaysArray(selecionadoAno, selecionadoMes);
+  const daysThisMonth = getDaysArray(numAno, numMes);
 
   const handleInputChange = (dateStrKey: string, field: string, value: string) => {
     setOperacaoData(prev => {
@@ -910,7 +933,8 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
 
   const renderInput = (day: any, field: string, colIdx: number, className: string = "") => {
     const rowObj = (safeOperacaoData[day.dateStrKey] && typeof safeOperacaoData[day.dateStrKey] === 'object') ? safeOperacaoData[day.dateStrKey] : null;
-    const val = rowObj?.[field] || '';
+    const rawVal = rowObj?.[field];
+    const val = (rawVal !== null && rawVal !== undefined && typeof rawVal !== 'object') ? String(rawVal) : '';
     if (day.isWeekend) return null;
     return (
       <input
@@ -1045,6 +1069,20 @@ function OperacaoProducao({ initialMonth, globalSearch = '' }: { initialMonth?: 
              >
                {anos.map(a => <option key={a} value={a}>{a}</option>)}
              </select>
+             <button 
+               onClick={() => exportOperacaoProducaoPdf(operacaoData, COLABORADORES, { filterMonth: numMes, filterYear: numAno })} 
+               className="flex items-center px-3.5 py-2 text-sm font-bold text-white bg-brand-green hover:bg-green-700 rounded-lg transition-colors shadow-xs print:hidden"
+               title="Baixar Backup em PDF formatado da produção deste mês"
+             >
+               <FileText className="w-4 h-4 mr-1.5" /> Baixar PDF do Mês
+             </button>
+             <button 
+               onClick={() => exportOperacaoProducaoPdf(operacaoData, COLABORADORES)} 
+               className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-xs print:hidden"
+               title="Baixar Backup em PDF completo da produção de todos os meses"
+             >
+               <Download className="w-4 h-4 mr-1.5 text-gray-500" /> PDF Completo
+             </button>
            </div>
         </div>
 
