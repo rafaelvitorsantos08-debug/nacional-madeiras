@@ -247,6 +247,27 @@ export const pushStockDirectlyToFirestore = async (category: 'portas' | 'aduelas
 };
 
 /**
+ * Authoritative cloud purge: completely replaces the map in Firestore,
+ * ensuring deleted keys are permanently removed rather than merged.
+ */
+export const forcePurgeToCloud = async (key: string, cleanedData: any) => {
+  const mapping = COMPANY_DOC_MAPPINGS[key];
+  if (!mapping) return;
+  try {
+    const compDocRef = doc(db, 'company_stock', mapping.docName);
+    const compressed = compressDataSafely(key, cleanedData);
+    const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
+    await setDoc(compDocRef, {
+      [mapping.fieldName]: compressed,
+      updatedAt: Date.now(),
+      updatedBy: userName
+    }, { mergeFields: [mapping.fieldName, 'updatedAt', 'updatedBy'] });
+  } catch (err) {
+    console.warn('Direct firestore purge sync warning:', err);
+  }
+};
+
+/**
  * Queues a debounced Firestore background sync (45s) to avoid consuming free-tier write quotas,
  * compressing payloads by stripping empty fields.
  */

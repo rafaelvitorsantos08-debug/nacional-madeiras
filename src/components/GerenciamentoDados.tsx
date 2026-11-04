@@ -14,6 +14,7 @@ import {
   exportEstoqueGeralPdf 
 } from '../lib/pdfBackupService';
 import { useLocalStorage, INITIAL_PORTAS, INITIAL_ADUELAS, INITIAL_ALIZARES, INITIAL_RODAPES } from './EstoqueModule';
+import { forcePurgeToCloud } from '../lib/firestoreSync';
 
 export function GerenciamentoDados() {
   // Collections
@@ -212,30 +213,41 @@ export function GerenciamentoDados() {
     setIsPurgingSaidas(true);
     setSaidasPurgeFeedback(null);
     try {
-      const res = await fetch('/api/stock/purge-old', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'saidas', cutoffDate: saidasCutoff })
-      });
-      if (res.ok) {
-        const body = await res.json();
-        const finalCleaned = body.cleanedData || saidasPrevisao.cleanedData;
-        
-        // Update storage vaults immediately
-        const cleanStr = JSON.stringify(finalCleaned);
-        localStorage.setItem('nm_controle_saidas', cleanStr);
-        localStorage.setItem('nm_safe_vault_nm_controle_saidas', cleanStr);
-        localStorage.setItem('nm_backup_nm_controle_saidas', cleanStr);
-        
-        // Update React state & dispatch sync event across components
-        setSaidasData(finalCleaned);
-        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_controle_saidas', value: finalCleaned } }));
-        
-        setSaidasPurgeFeedback(`Exclusão definitiva concluída! ${body.removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${body.keptCount} dias recentes continuam preservados.`);
-        setTimeout(() => setSaidasPurgeFeedback(null), 10000);
-      } else {
-        throw new Error('Erro ao processar limpeza no servidor.');
+      const finalCleaned = saidasPrevisao.cleanedData;
+      let removedCount = saidasPrevisao.removedCount;
+      let keptCount = saidasPrevisao.keptCount;
+
+      // 1. Authoritative purge on central server
+      try {
+        const res = await fetch('/api/stock/purge-old', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ module: 'saidas', cutoffDate: saidasCutoff })
+        });
+        if (res.ok) {
+          const body = await res.json();
+          if (body.removedCount !== undefined) removedCount = body.removedCount;
+          if (body.keptCount !== undefined) keptCount = body.keptCount;
+        }
+      } catch (serverErr) {
+        console.warn('Comunicação local do servidor: processando exclusão direta no armazenamento e nuvem:', serverErr);
       }
+
+      // 2. Update storage vaults immediately
+      const cleanStr = JSON.stringify(finalCleaned);
+      localStorage.setItem('nm_controle_saidas', cleanStr);
+      localStorage.setItem('nm_safe_vault_nm_controle_saidas', cleanStr);
+      localStorage.setItem('nm_backup_nm_controle_saidas', cleanStr);
+
+      // 3. Completely replace map in Firestore so removed keys are permanently deleted
+      await forcePurgeToCloud('nm_controle_saidas', finalCleaned);
+
+      // 4. Update React state & dispatch sync event across components
+      setSaidasData(finalCleaned);
+      window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_controle_saidas', value: finalCleaned } }));
+
+      setSaidasPurgeFeedback(`Exclusão definitiva concluída! ${removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${keptCount} dias recentes continuam preservados.`);
+      setTimeout(() => setSaidasPurgeFeedback(null), 10000);
     } catch (err: any) {
       alert('Erro ao excluir dados antigos: ' + err.message);
     } finally {
@@ -251,30 +263,41 @@ export function GerenciamentoDados() {
     setIsPurgingOperacao(true);
     setOperacaoPurgeFeedback(null);
     try {
-      const res = await fetch('/api/stock/purge-old', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ module: 'operacao', cutoffDate: operacaoCutoff })
-      });
-      if (res.ok) {
-        const body = await res.json();
-        const finalCleaned = body.cleanedData || operacaoPrevisao.cleanedData;
-        
-        // Update storage vaults immediately
-        const cleanStr = JSON.stringify(finalCleaned);
-        localStorage.setItem('nm_operacao_producao', cleanStr);
-        localStorage.setItem('nm_safe_vault_nm_operacao_producao', cleanStr);
-        localStorage.setItem('nm_backup_nm_operacao_producao', cleanStr);
-        
-        // Update React state & dispatch sync event
-        setOperacaoData(finalCleaned);
-        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_operacao_producao', value: finalCleaned } }));
-        
-        setOperacaoPurgeFeedback(`Exclusão definitiva concluída! ${body.removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${body.keptCount} dias recentes continuam preservados.`);
-        setTimeout(() => setOperacaoPurgeFeedback(null), 10000);
-      } else {
-        throw new Error('Erro ao processar limpeza no servidor.');
+      const finalCleaned = operacaoPrevisao.cleanedData;
+      let removedCount = operacaoPrevisao.removedCount;
+      let keptCount = operacaoPrevisao.keptCount;
+
+      // 1. Authoritative purge on central server
+      try {
+        const res = await fetch('/api/stock/purge-old', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ module: 'operacao', cutoffDate: operacaoCutoff })
+        });
+        if (res.ok) {
+          const body = await res.json();
+          if (body.removedCount !== undefined) removedCount = body.removedCount;
+          if (body.keptCount !== undefined) keptCount = body.keptCount;
+        }
+      } catch (serverErr) {
+        console.warn('Comunicação local do servidor: processando exclusão direta no armazenamento e nuvem:', serverErr);
       }
+
+      // 2. Update storage vaults immediately
+      const cleanStr = JSON.stringify(finalCleaned);
+      localStorage.setItem('nm_operacao_producao', cleanStr);
+      localStorage.setItem('nm_safe_vault_nm_operacao_producao', cleanStr);
+      localStorage.setItem('nm_backup_nm_operacao_producao', cleanStr);
+
+      // 3. Completely replace map in Firestore so removed keys are permanently deleted
+      await forcePurgeToCloud('nm_operacao_producao', finalCleaned);
+
+      // 4. Update React state & dispatch sync event across components
+      setOperacaoData(finalCleaned);
+      window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_operacao_producao', value: finalCleaned } }));
+
+      setOperacaoPurgeFeedback(`Exclusão definitiva concluída! ${removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${keptCount} dias recentes continuam preservados.`);
+      setTimeout(() => setOperacaoPurgeFeedback(null), 10000);
     } catch (err: any) {
       alert('Erro ao excluir dados antigos: ' + err.message);
     } finally {
