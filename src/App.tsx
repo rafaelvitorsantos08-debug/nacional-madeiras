@@ -1135,13 +1135,14 @@ export default function App() {
           )}
 
           {activeTab === 'configuracoes' && (
-            <div className="animate-in fade-in duration-300 max-w-4xl mx-auto space-y-6">
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
-                <p className="text-sm text-gray-500 mt-1">Gerencie preferências, armazenamento, backups e proteção de cota.</p>
-              </div>
+            <ErrorBoundary moduleName="Configurações">
+              <div className="animate-in fade-in duration-300 max-w-4xl mx-auto space-y-6">
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Configurações</h1>
+                  <p className="text-sm text-gray-500 mt-1">Gerencie preferências, armazenamento, backups e proteção de cota.</p>
+                </div>
 
-              <GerenciamentoDados />
+                <GerenciamentoDados />
 
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                  <div className="p-6 border-b border-gray-100">
@@ -1267,6 +1268,7 @@ export default function App() {
                </div>
 
             </div>
+          </ErrorBoundary>
           )}
           
           

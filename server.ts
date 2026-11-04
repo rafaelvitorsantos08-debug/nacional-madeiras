@@ -79,6 +79,9 @@ const broadcastUpdate = (key: string, value: any, updatedBy: string = 'Sistema',
 
 // API: Get all company stock data
 app.get('/api/stock/all', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.json({
     success: true,
     data: companyData,
@@ -88,6 +91,9 @@ app.get('/api/stock/all', (_req, res) => {
 
 // API: Poll company stock data
 app.get('/api/stock/poll', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.json({
     success: true,
     data: companyData,
@@ -175,7 +181,7 @@ app.post('/api/stock/purge-old', (req, res) => {
     persistToDisk();
     broadcastUpdate(targetKey, cleanedData, updatedBy || 'Limpeza de Dados Antigos', true);
 
-    return res.json({ success: true, module, targetKey, removedCount, keptCount });
+    return res.json({ success: true, module, targetKey, removedCount, keptCount, cleanedData });
   } catch (err: any) {
     console.error('Purge error:', err);
     return res.status(500).json({ error: err.message });
@@ -185,10 +191,14 @@ app.post('/api/stock/purge-old', (req, res) => {
 // API: Real-time SSE stream with immediate flush
 app.get('/api/stock/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Cache-Control', 'no-cache, no-transform, no-store');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no');
+  res.setHeader('Pragma', 'no-cache');
   res.flushHeaders?.();
+
+  // 2KB padding comment to defeat Windows 10 proxy/SmartScreen network stream buffering
+  res.write(`:${' '.repeat(2048)}\n\n`);
 
   const clientId = nextClientId++;
   const client: Client = { id: clientId, res };

@@ -53,10 +53,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <RefreshCw className="w-4 h-4" /> Recarregar Módulo
             </button>
             <button
-              onClick={() => window.location.reload()}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg transition-all text-sm cursor-pointer"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.localStorage.setItem('nm_active_tab', JSON.stringify('dashboard'));
+                  window.location.reload();
+                }
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all text-sm cursor-pointer"
             >
-              Atualizar Página
+              Ir para o Dashboard
             </button>
           </div>
         </div>

@@ -159,7 +159,10 @@ const postUpdateToServer = (key: string, value: any) => {
 const fetchAllFromServer = async () => {
   if (typeof window === 'undefined') return;
   try {
-    const res = await fetch('/api/stock/all');
+    const res = await fetch(`/api/stock/all?_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+    });
     if (!res.ok) return;
     const body = await res.json();
     if (body && body.data && typeof body.data === 'object') {
@@ -176,7 +179,7 @@ const fetchAllFromServer = async () => {
 const connectSseStream = () => {
   if (typeof window === 'undefined' || isSseConnected) return;
   try {
-    const eventSource = new EventSource('/api/stock/stream');
+    const eventSource = new EventSource(`/api/stock/stream?_t=${Date.now()}`);
     isSseConnected = true;
 
     eventSource.onmessage = (event) => {
@@ -192,19 +195,19 @@ const connectSseStream = () => {
       eventSource.close();
       isSseConnected = false;
       if (sseRetryTimer) clearTimeout(sseRetryTimer);
-      sseRetryTimer = setTimeout(connectSseStream, 2000);
+      sseRetryTimer = setTimeout(connectSseStream, 1500);
     };
   } catch {}
 };
 
 /**
- * Background periodic polling every 2.5s to ensure complete synchronicity across all machines.
+ * Background periodic polling every 1.5s to ensure complete synchronicity across all machines.
  */
 const startPolling = () => {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(() => {
     fetchAllFromServer();
-  }, 2500);
+  }, 1500);
 };
 
 /**

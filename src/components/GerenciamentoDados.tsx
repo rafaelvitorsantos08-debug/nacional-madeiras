@@ -61,8 +61,21 @@ export function GerenciamentoDados() {
   const totalDiasOperacao = Object.keys(operacaoData || {}).length;
   const totalObras = Object.keys(obrasData || {}).length;
 
-  const saidasPrevisao = purgeOldData('saidas', saidasCutoff, saidasData);
-  const operacaoPrevisao = purgeOldData('operacao', operacaoCutoff, operacaoData);
+  const saidasPrevisao = React.useMemo(() => {
+    try {
+      return purgeOldData('saidas', saidasCutoff, saidasData || {});
+    } catch {
+      return { cleanedData: saidasData || {}, removedCount: 0, keptCount: totalDiasSaidas };
+    }
+  }, [saidasCutoff, saidasData, totalDiasSaidas]);
+
+  const operacaoPrevisao = React.useMemo(() => {
+    try {
+      return purgeOldData('operacao', operacaoCutoff, operacaoData || {});
+    } catch {
+      return { cleanedData: operacaoData || {}, removedCount: 0, keptCount: totalDiasOperacao };
+    }
+  }, [operacaoCutoff, operacaoData, totalDiasOperacao]);
 
   // PDF Handlers
   const handleExportSaidasPdf = () => {
@@ -206,19 +219,17 @@ export function GerenciamentoDados() {
       });
       if (res.ok) {
         const body = await res.json();
+        const finalCleaned = body.cleanedData || saidasPrevisao.cleanedData;
         
-        // 1. Mark persistent cutoff in localStorage to prevent resurrection on reload
-        localStorage.setItem('nm_purged_cutoff_nm_controle_saidas', saidasCutoff);
-        
-        // 2. Set cleaned data in storage vaults immediately
-        const cleanStr = JSON.stringify(saidasPrevisao.cleanedData);
+        // Update storage vaults immediately
+        const cleanStr = JSON.stringify(finalCleaned);
         localStorage.setItem('nm_controle_saidas', cleanStr);
         localStorage.setItem('nm_safe_vault_nm_controle_saidas', cleanStr);
         localStorage.setItem('nm_backup_nm_controle_saidas', cleanStr);
         
-        // 3. Update React state & dispatch sync event across components
-        setSaidasData(saidasPrevisao.cleanedData);
-        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_controle_saidas', value: saidasPrevisao.cleanedData } }));
+        // Update React state & dispatch sync event across components
+        setSaidasData(finalCleaned);
+        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_controle_saidas', value: finalCleaned } }));
         
         setSaidasPurgeFeedback(`Exclusão definitiva concluída! ${body.removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${body.keptCount} dias recentes continuam preservados.`);
         setTimeout(() => setSaidasPurgeFeedback(null), 10000);
@@ -247,19 +258,17 @@ export function GerenciamentoDados() {
       });
       if (res.ok) {
         const body = await res.json();
+        const finalCleaned = body.cleanedData || operacaoPrevisao.cleanedData;
         
-        // 1. Mark persistent cutoff in localStorage
-        localStorage.setItem('nm_purged_cutoff_nm_operacao_producao', operacaoCutoff);
-        
-        // 2. Set cleaned data in storage vaults immediately
-        const cleanStr = JSON.stringify(operacaoPrevisao.cleanedData);
+        // Update storage vaults immediately
+        const cleanStr = JSON.stringify(finalCleaned);
         localStorage.setItem('nm_operacao_producao', cleanStr);
         localStorage.setItem('nm_safe_vault_nm_operacao_producao', cleanStr);
         localStorage.setItem('nm_backup_nm_operacao_producao', cleanStr);
         
-        // 3. Update React state & dispatch sync event
-        setOperacaoData(operacaoPrevisao.cleanedData);
-        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_operacao_producao', value: operacaoPrevisao.cleanedData } }));
+        // Update React state & dispatch sync event
+        setOperacaoData(finalCleaned);
+        window.dispatchEvent(new CustomEvent('nm-local-storage-sync', { detail: { key: 'nm_operacao_producao', value: finalCleaned } }));
         
         setOperacaoPurgeFeedback(`Exclusão definitiva concluída! ${body.removedCount} dias antigos foram excluídos com sucesso do banco e não reaparecerão ao atualizar. ${body.keptCount} dias recentes continuam preservados.`);
         setTimeout(() => setOperacaoPurgeFeedback(null), 10000);

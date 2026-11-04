@@ -132,20 +132,17 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
         return { ...safeInc };
       }
 
-      const cutoff = typeof window !== 'undefined' ? window.localStorage.getItem('nm_purged_cutoff_' + key) : null;
       const merged: Record<string, any> = {};
 
-      // 1. Copy local dates (skipping any dates prior to an intentional purge cutoff)
+      // 1. Copy local dates
       for (const [dt, row] of Object.entries(safeLoc)) {
-        if (cutoff && dt < cutoff) continue;
         if (row && typeof row === 'object' && !Array.isArray(row)) {
           merged[dt] = { ...row };
         }
       }
 
-      // 2. Apply incoming dates (skipping any dates prior to cutoff)
+      // 2. Apply incoming dates
       for (const [dt, incRow] of Object.entries(safeInc)) {
-        if (cutoff && dt < cutoff) continue;
         if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
 
         if (!merged[dt]) {
@@ -170,20 +167,17 @@ export function mergeDataSafely(key: string, localVal: any, incomingVal: any, in
         return { ...safeInc };
       }
 
-      const cutoff = typeof window !== 'undefined' ? window.localStorage.getItem('nm_purged_cutoff_' + key) : null;
       const merged: Record<string, any> = {};
 
-      // 1. Copy local dates (skipping any dates prior to an intentional purge cutoff)
+      // 1. Copy local dates
       for (const [dt, row] of Object.entries(safeLoc)) {
-        if (cutoff && dt < cutoff) continue;
         if (row && typeof row === 'object' && !Array.isArray(row)) {
           merged[dt] = { ...row };
         }
       }
 
-      // 2. Apply incoming dates (skipping any dates prior to cutoff)
+      // 2. Apply incoming dates
       for (const [dt, incRow] of Object.entries(safeInc)) {
-        if (cutoff && dt < cutoff) continue;
         if (!incRow || typeof incRow !== 'object' || Array.isArray(incRow)) continue;
 
         if (!merged[dt]) {
@@ -476,19 +470,18 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
       result.details.push(`Entrada/Saída Obras: ${Object.keys(mergedV6).length} obras consolidadas com histórico completo`);
     }
 
+    // Self-healing: clear any unintentional cutoff filters so no dates are hidden
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem('nm_purged_cutoff_nm_controle_saidas');
+      window.localStorage.removeItem('nm_purged_cutoff_nm_operacao_producao');
+    }
+
     // 2. Recover nm_controle_saidas (Controle de Saídas diárias)
-    const saidasCutoff = window.localStorage.getItem('nm_purged_cutoff_nm_controle_saidas');
     let currentSaidas: Record<string, any> = {};
     try {
       const raw = window.localStorage.getItem('nm_controle_saidas');
       if (raw) currentSaidas = JSON.parse(raw);
     } catch(e) {}
-
-    if (saidasCutoff) {
-      for (const dt in currentSaidas) {
-        if (dt < saidasCutoff) delete currentSaidas[dt];
-      }
-    }
 
     const saidasCandidates: any[] = [];
     ['nm_backup_nm_controle_saidas', 'nm_safe_vault_nm_controle_saidas'].forEach(bk => {
@@ -497,11 +490,6 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object') {
-            if (saidasCutoff) {
-              for (const dt in parsed) {
-                if (dt < saidasCutoff) delete parsed[dt];
-              }
-            }
             saidasCandidates.push(parsed);
           }
         }
@@ -513,7 +501,7 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
       mergedSaidas = mergeDataSafely('nm_controle_saidas', mergedSaidas, cand);
     }
 
-    if (JSON.stringify(mergedSaidas) !== JSON.stringify(currentSaidas) || saidasCutoff) {
+    if (JSON.stringify(mergedSaidas) !== JSON.stringify(currentSaidas)) {
       window.localStorage.setItem('nm_controle_saidas', JSON.stringify(mergedSaidas));
       window.localStorage.setItem('nm_safe_vault_nm_controle_saidas', JSON.stringify(mergedSaidas));
       window.localStorage.setItem('nm_backup_nm_controle_saidas', JSON.stringify(mergedSaidas));
@@ -522,18 +510,11 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
     }
 
     // 2.1 Recover nm_operacao_producao (Operação da Produção diária)
-    const operacaoCutoff = window.localStorage.getItem('nm_purged_cutoff_nm_operacao_producao');
     let currentOp: Record<string, any> = {};
     try {
       const raw = window.localStorage.getItem('nm_operacao_producao');
       if (raw) currentOp = JSON.parse(raw);
     } catch(e) {}
-
-    if (operacaoCutoff) {
-      for (const dt in currentOp) {
-        if (dt < operacaoCutoff) delete currentOp[dt];
-      }
-    }
 
     const opCandidates: any[] = [];
     ['nm_backup_nm_operacao_producao', 'nm_safe_vault_nm_operacao_producao'].forEach(bk => {
@@ -542,11 +523,6 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && typeof parsed === 'object') {
-            if (operacaoCutoff) {
-              for (const dt in parsed) {
-                if (dt < operacaoCutoff) delete parsed[dt];
-              }
-            }
             opCandidates.push(parsed);
           }
         }
@@ -558,7 +534,7 @@ export function restoreTodayAndConsistentRecords(): RecoveryResult {
       mergedOp = mergeDataSafely('nm_operacao_producao', mergedOp, cand);
     }
 
-    if (JSON.stringify(mergedOp) !== JSON.stringify(currentOp) || operacaoCutoff) {
+    if (JSON.stringify(mergedOp) !== JSON.stringify(currentOp)) {
       window.localStorage.setItem('nm_operacao_producao', JSON.stringify(mergedOp));
       window.localStorage.setItem('nm_safe_vault_nm_operacao_producao', JSON.stringify(mergedOp));
       window.localStorage.setItem('nm_backup_nm_operacao_producao', JSON.stringify(mergedOp));
@@ -771,10 +747,6 @@ export function purgeOldData(
   let keptCount = 0;
 
   if (moduleName === 'saidas' || moduleName === 'operacao') {
-    const key = moduleName === 'saidas' ? 'nm_controle_saidas' : 'nm_operacao_producao';
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('nm_purged_cutoff_' + key, cutoffDateStr);
-    }
     const cleaned: Record<string, any> = {};
     for (const [dt, row] of Object.entries(currentData)) {
       if (dt < cutoffDateStr) {
@@ -783,14 +755,6 @@ export function purgeOldData(
         cleaned[dt] = row;
         keptCount++;
       }
-    }
-    if (typeof window !== 'undefined') {
-      try {
-        const cleanedStr = JSON.stringify(cleaned);
-        window.localStorage.setItem(key, cleanedStr);
-        window.localStorage.setItem('nm_safe_vault_' + key, cleanedStr);
-        window.localStorage.setItem('nm_backup_' + key, cleanedStr);
-      } catch {}
     }
     return { cleanedData: cleaned, removedCount, keptCount };
   }
