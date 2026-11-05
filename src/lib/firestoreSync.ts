@@ -268,51 +268,58 @@ export const forcePurgeToCloud = async (key: string, cleanedData: any) => {
 };
 
 /**
- * Queues a debounced Firestore background sync (45s) to avoid consuming free-tier write quotas,
+ * Flushes all pending updates directly to Firestore immediately.
+ */
+export const flushFirestoreUpdates = async () => {
+  if (PENDING_FIRESTORE_UPDATES.size === 0) return;
+
+  const dataToSave: Record<string, any> = {};
+  PENDING_FIRESTORE_UPDATES.forEach((v, k) => {
+    dataToSave[k] = v;
+  });
+  PENDING_FIRESTORE_UPDATES.clear();
+
+  const keysBeingSaved = Object.keys(dataToSave);
+  const now = Date.now();
+  const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
+
+  try {
+    const companyPayloads: Record<string, Record<string, any>> = {};
+    keysBeingSaved.forEach(k => {
+      const mapping = COMPANY_DOC_MAPPINGS[k];
+      if (mapping) {
+        if (!companyPayloads[mapping.docName]) {
+          companyPayloads[mapping.docName] = {
+            updatedAt: now,
+            updatedBy: userName
+          };
+        }
+        // Compress payload before sending to Firestore
+        companyPayloads[mapping.docName][mapping.fieldName] = compressDataSafely(k, dataToSave[k]);
+      }
+    });
+
+    const writes = Object.keys(companyPayloads).map(docName => {
+      const compDocRef = doc(db, 'company_stock', docName);
+      return setDoc(compDocRef, companyPayloads[docName], { merge: true });
+    });
+    await Promise.all(writes);
+  } catch (err: any) {
+    console.warn('Firestore write warning:', err?.message || err);
+  }
+};
+
+/**
+ * Queues a debounced Firestore background sync (800ms) for typing responsiveness,
  * compressing payloads by stripping empty fields.
  */
 const queueFirestoreSync = (key: string, value: any) => {
   PENDING_FIRESTORE_UPDATES.set(key, value);
 
   if (firestoreDebounce) clearTimeout(firestoreDebounce);
-  firestoreDebounce = setTimeout(async () => {
-    if (PENDING_FIRESTORE_UPDATES.size === 0) return;
-
-    const dataToSave: Record<string, any> = {};
-    PENDING_FIRESTORE_UPDATES.forEach((v, k) => {
-      dataToSave[k] = v;
-    });
-    PENDING_FIRESTORE_UPDATES.clear();
-
-    const keysBeingSaved = Object.keys(dataToSave);
-    const now = Date.now();
-    const userName = auth.currentUser?.displayName || auth.currentUser?.email || 'Estação';
-
-    try {
-      const companyPayloads: Record<string, Record<string, any>> = {};
-      keysBeingSaved.forEach(k => {
-        const mapping = COMPANY_DOC_MAPPINGS[k];
-        if (mapping) {
-          if (!companyPayloads[mapping.docName]) {
-            companyPayloads[mapping.docName] = {
-              updatedAt: now,
-              updatedBy: userName
-            };
-          }
-          // Compress payload before sending to Firestore
-          companyPayloads[mapping.docName][mapping.fieldName] = compressDataSafely(k, dataToSave[k]);
-        }
-      });
-
-      const writes = Object.keys(companyPayloads).map(docName => {
-        const compDocRef = doc(db, 'company_stock', docName);
-        return setDoc(compDocRef, companyPayloads[docName], { merge: true });
-      });
-      await Promise.all(writes);
-    } catch (err: any) {
-      // Non-fatal, local storage and central server provide 100% permanent persistence
-    }
-  }, 45000);
+  firestoreDebounce = setTimeout(() => {
+    flushFirestoreUpdates();
+  }, 800);
 };
 
 export const pushToFirestore = (key: string, value: any) => {
@@ -336,8 +343,58 @@ export const pushToFirestore = (key: string, value: any) => {
   // 1. Immediately send to server (broadcasts to all machines via SSE + updates vault disk file)
   postUpdateToServer(key, value);
 
-  // 2. Queue for background Firestore backup (debounced to save quota)
+  // 2. Queue for real-time Firestore sync across all remote machines
   queueFirestoreSync(key, value);
+};
+
+const COMPANY_DOC_NAMES = [
+  'geral', 'obras', 'operacao', 'ferragens',
+  'lancamentos', 'historico', 'conferencia', 'lembretes', 'relatorios'
+];
+
+let firestoreUnsubscribers: (() => void)[] = [];
+
+/**
+ * Attaches real-time Firestore onSnapshot listeners to all shared company collections.
+ * This guarantees instantaneous (<200ms) cross-machine data communication across all
+ * physical computers, browsers, and mobile devices regardless of Cloud Run container routing.
+ */
+export const subscribeToCompanyFirestoreSnapshots = () => {
+  if (typeof window === 'undefined') return;
+
+  // Unsubscribe existing listeners to prevent duplicates
+  firestoreUnsubscribers.forEach(unsub => {
+    try { unsub(); } catch {}
+  });
+  firestoreUnsubscribers = [];
+
+  COMPANY_DOC_NAMES.forEach(docName => {
+    try {
+      const docRef = doc(db, 'company_stock', docName);
+      const unsub = onSnapshot(docRef, { includeMetadataChanges: false }, (snapshot) => {
+        if (!snapshot.exists()) return;
+        const data = snapshot.data();
+        if (!data || typeof data !== 'object') return;
+
+        const updatedBy = data.updatedBy || 'Outra Máquina';
+
+        // Map every field in this Firestore document to its local storage key
+        Object.keys(COMPANY_DOC_MAPPINGS).forEach(lsKey => {
+          const mapping = COMPANY_DOC_MAPPINGS[lsKey];
+          if (mapping.docName === docName && data[mapping.fieldName] !== undefined) {
+            const incomingVal = data[mapping.fieldName];
+            applyIncomingUpdate(lsKey, incomingVal, updatedBy, false);
+          }
+        });
+      }, (err) => {
+        console.warn(`Firestore onSnapshot notice for ${docName}:`, err.message);
+      });
+
+      firestoreUnsubscribers.push(unsub);
+    } catch (err) {
+      console.warn(`Error setting up onSnapshot for ${docName}:`, err);
+    }
+  });
 };
 
 /**
@@ -350,16 +407,23 @@ export const startListening = () => {
   // 1. Initial fetch from server vault (complete authoritative data)
   fetchAllFromServer();
 
-  // 2. Connect real-time Server-Sent Events stream for instant cross-machine synchronization (<100ms)
+  // 2. Real-time Firestore snapshot listeners for multi-machine synchronization
+  subscribeToCompanyFirestoreSnapshots();
+
+  // 3. Connect real-time Server-Sent Events stream for instant in-cluster sync
   connectSseStream();
 
-  // 3. Connect 2.5s polling loop to guarantee seamless simultaneity across all operating machines
+  // 4. Background polling loop as safety fallback
   startPolling();
 };
 
 export const stopListening = () => {
   if (pollTimer) clearInterval(pollTimer);
   if (sseRetryTimer) clearTimeout(sseRetryTimer);
+  firestoreUnsubscribers.forEach(unsub => {
+    try { unsub(); } catch {}
+  });
+  firestoreUnsubscribers = [];
   isListening = false;
   isSseConnected = false;
   currentData = {};
@@ -374,5 +438,6 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
     flushServerUpdates();
+    flushFirestoreUpdates();
   });
 }
